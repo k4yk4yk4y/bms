@@ -1,0 +1,284 @@
+<% case bonus.bonus_type %>
+<% when 'deposit' %>
+  <% if bonus.deposit_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Required Deposit:</dt>
+          <dd class="col-sm-6">
+            <%= number_to_currency(bonus.deposit_bonus.deposit_amount_required, unit: bonus.currency + ' ') %>
+          </dd>
+          
+          <dt class="col-sm-6">Bonus Percentage:</dt>
+          <dd class="col-sm-6"><%= bonus.deposit_bonus.percentage_display %></dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Max Bonus:</dt>
+          <dd class="col-sm-6">
+            <% if bonus.deposit_bonus.max_bonus_amount %>
+              <%= number_to_currency(bonus.deposit_bonus.max_bonus_amount, unit: bonus.currency + ' ') %>
+            <% else %>
+              <span class="text-muted">Unlimited</span>
+            <% end %>
+          </dd>
+          
+          <dt class="col-sm-6">First Deposit Only:</dt>
+          <dd class="col-sm-6">
+            <span class="badge <%= bonus.deposit_bonus.first_deposit_only? ? 'bg-warning' : 'bg-success' %>">
+              <%= bonus.deposit_bonus.first_deposit_only? ? 'Yes' : 'No' %>
+            </span>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <dl class="row">
+      <dt class="col-sm-2">Recurring Eligible:</dt>
+      <dd class="col-sm-10">
+        <span class="badge <%= bonus.deposit_bonus.recurring_eligible? ? 'bg-success' : 'bg-secondary' %>">
+          <%= bonus.deposit_bonus.recurring_eligible? ? 'Yes' : 'No' %>
+        </span>
+      </dd>
+    </dl>
+  <% end %>
+
+<% when 'input_coupon' %>
+  <% if bonus.input_coupon_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Coupon Code:</dt>
+          <dd class="col-sm-6"><code><%= bonus.input_coupon_bonus.coupon_code %></code></dd>
+          
+          <dt class="col-sm-6">Usage Limit:</dt>
+          <dd class="col-sm-6"><%= bonus.input_coupon_bonus.usage_limit %></dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Used:</dt>
+          <dd class="col-sm-6">
+            <%= bonus.input_coupon_bonus.usage_count %> 
+            (<%= bonus.input_coupon_bonus.usage_percentage %>%)
+          </dd>
+          
+          <dt class="col-sm-6">Expires At:</dt>
+          <dd class="col-sm-6"><%= bonus.input_coupon_bonus.expires_at.strftime("%Y-%m-%d %H:%M") %></dd>
+        </dl>
+      </div>
+    </div>
+    
+    <dl class="row">
+      <dt class="col-sm-2">Status:</dt>
+      <dd class="col-sm-10">
+        <% if bonus.input_coupon_bonus.available? %>
+          <span class="badge bg-success">Available</span>
+          <small class="text-muted">(<%= bonus.input_coupon_bonus.remaining_uses %> uses remaining)</small>
+        <% elsif bonus.input_coupon_bonus.expired? %>
+          <span class="badge bg-danger">Expired</span>
+        <% else %>
+          <span class="badge bg-warning">Usage Limit Reached</span>
+        <% end %>
+      </dd>
+    </dl>
+  <% end %>
+
+<% when 'manual' %>
+  <% if bonus.manual_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Approval Required:</dt>
+          <dd class="col-sm-6">
+            <span class="badge <%= bonus.manual_bonus.approval_required? ? 'bg-warning' : 'bg-success' %>">
+              <%= bonus.manual_bonus.approval_required? ? 'Yes' : 'No' %>
+            </span>
+          </dd>
+          
+          <dt class="col-sm-6">Auto Apply:</dt>
+          <dd class="col-sm-6">
+            <span class="badge <%= bonus.manual_bonus.auto_apply? ? 'bg-success' : 'bg-secondary' %>">
+              <%= bonus.manual_bonus.auto_apply? ? 'Yes' : 'No' %>
+            </span>
+          </dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Conditions:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-info"><%= bonus.manual_bonus.conditions_array.size %> conditions</span>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <% if bonus.manual_bonus.admin_notes.present? %>
+      <dl class="row">
+        <dt class="col-sm-2">Admin Notes:</dt>
+        <dd class="col-sm-10"><%= simple_format(bonus.manual_bonus.admin_notes) %></dd>
+      </dl>
+    <% end %>
+  <% end %>
+
+<% when 'collection' %>
+  <% if bonus.collect_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Collection Type:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-info"><%= bonus.collect_bonus.collection_type.humanize %></span>
+          </dd>
+          
+          <dt class="col-sm-6">Amount:</dt>
+          <dd class="col-sm-6">
+            <%= number_to_currency(bonus.collect_bonus.collection_amount, unit: bonus.currency + ' ') %>
+          </dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Frequency:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-secondary"><%= bonus.collect_bonus.collection_frequency.humanize %></span>
+          </dd>
+          
+          <dt class="col-sm-6">Progress:</dt>
+          <dd class="col-sm-6">
+            <%= bonus.collect_bonus.collected_count %>/<%= bonus.collect_bonus.collection_limit %>
+            (<%= bonus.collect_bonus.collection_percentage %>%)
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <div class="progress mb-2">
+      <div class="progress-bar" style="width: <%= bonus.collect_bonus.collection_percentage %>%"></div>
+    </div>
+    
+    <dl class="row">
+      <dt class="col-sm-2">Can Collect Today:</dt>
+      <dd class="col-sm-10">
+        <span class="badge <%= bonus.collect_bonus.can_collect_today? ? 'bg-success' : 'bg-secondary' %>">
+          <%= bonus.collect_bonus.can_collect_today? ? 'Yes' : 'No' %>
+        </span>
+      </dd>
+    </dl>
+  <% end %>
+
+<% when 'groups_update' %>
+  <% if bonus.groups_update_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Update Type:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-info"><%= bonus.groups_update_bonus.update_type.humanize %></span>
+          </dd>
+          
+          <dt class="col-sm-6">Target Groups:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-secondary"><%= bonus.groups_update_bonus.target_groups_array.size %> groups</span>
+          </dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Batch Size:</dt>
+          <dd class="col-sm-6"><%= bonus.groups_update_bonus.batch_size %></dd>
+          
+          <dt class="col-sm-6">Status:</dt>
+          <dd class="col-sm-6">
+            <span class="badge <%= processing_status_badge_class(bonus.groups_update_bonus.processing_status) %>">
+              <%= bonus.groups_update_bonus.processing_status.humanize %>
+            </span>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <% if bonus.groups_update_bonus.processing? || bonus.groups_update_bonus.completed? %>
+      <div class="progress mb-2">
+        <div class="progress-bar" style="width: <%= bonus.groups_update_bonus.progress_percentage %>%"></div>
+      </div>
+    <% end %>
+    
+    <dl class="row">
+      <dt class="col-sm-2">Est. Time:</dt>
+      <dd class="col-sm-10">
+        <%= pluralize(bonus.groups_update_bonus.estimated_processing_time, 'second') %>
+      </dd>
+    </dl>
+  <% end %>
+
+<% when 'scheduler' %>
+  <% if bonus.scheduler_bonus %>
+    <div class="row">
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Schedule Type:</dt>
+          <dd class="col-sm-6">
+            <span class="badge bg-info"><%= bonus.scheduler_bonus.schedule_type.humanize %></span>
+          </dd>
+          
+          <dt class="col-sm-6">Executions:</dt>
+          <dd class="col-sm-6">
+            <%= bonus.scheduler_bonus.execution_count %>
+            <% if bonus.scheduler_bonus.max_executions %>
+              / <%= bonus.scheduler_bonus.max_executions %>
+            <% end %>
+          </dd>
+        </dl>
+      </div>
+      <div class="col-md-6">
+        <dl class="row">
+          <dt class="col-sm-6">Next Run:</dt>
+          <dd class="col-sm-6">
+            <% if bonus.scheduler_bonus.next_run_at %>
+              <%= bonus.scheduler_bonus.next_execution_formatted %>
+            <% else %>
+              <span class="text-muted">Not scheduled</span>
+            <% end %>
+          </dd>
+          
+          <dt class="col-sm-6">Last Run:</dt>
+          <dd class="col-sm-6">
+            <% if bonus.scheduler_bonus.last_run_at %>
+              <%= bonus.scheduler_bonus.last_run_at.strftime("%Y-%m-%d %H:%M") %>
+            <% else %>
+              <span class="text-muted">Never</span>
+            <% end %>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <% if bonus.scheduler_bonus.cron_expression.present? %>
+      <dl class="row">
+        <dt class="col-sm-2">Cron Expression:</dt>
+        <dd class="col-sm-10"><code><%= bonus.scheduler_bonus.cron_expression %></code></dd>
+      </dl>
+    <% end %>
+    
+    <% if bonus.scheduler_bonus.max_executions %>
+      <div class="progress mb-2">
+        <div class="progress-bar" style="width: <%= bonus.scheduler_bonus.execution_percentage %>%"></div>
+      </div>
+    <% end %>
+    
+    <dl class="row">
+      <dt class="col-sm-2">Status:</dt>
+      <dd class="col-sm-10">
+        <span class="badge <%= bonus.scheduler_bonus.is_active? ? 'bg-success' : 'bg-secondary' %>">
+          <%= bonus.scheduler_bonus.is_active? ? 'Active' : 'Inactive' %>
+        </span>
+      </dd>
+    </dl>
+  <% end %>
+
+<% else %>
+  <p class="text-muted">No specific details available for this bonus type.</p>
+<% end %>

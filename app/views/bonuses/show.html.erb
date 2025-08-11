@@ -1,0 +1,245 @@
+<% content_for :title, @bonus.name %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h2"><%= @bonus.name %></h1>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+            <span class="badge <%= status_badge_class(@bonus.status) %>">
+              <%= @bonus.status.humanize %>
+            </span>
+            <code><%= @bonus.code %></code>
+          </div>
+        </div>
+        <div class="btn-group" role="group">
+          <%= link_to "Edit", edit_bonus_path(@bonus), class: "btn btn-primary" %>
+          <% if @bonus.active? %>
+            <%= link_to "Deactivate", deactivate_bonus_path(@bonus), 
+                class: "btn btn-warning", data: { "turbo-method": :patch, confirm: "Are you sure?" } %>
+          <% else %>
+            <%= link_to "Activate", activate_bonus_path(@bonus), 
+                class: "btn btn-success", data: { "turbo-method": :patch } %>
+          <% end %>
+          <%= link_to "Delete", bonus_path(@bonus), 
+              class: "btn btn-danger", data: { "turbo-method": :delete, confirm: "Are you sure?" } %>
+          <%= link_to "Back to List", bonuses_path, class: "btn btn-outline-secondary" %>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Basic Information -->
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Basic Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8"><%= @bonus.name %></dd>
+                    
+                    <dt class="col-sm-4">Code:</dt>
+                    <dd class="col-sm-8"><code><%= @bonus.code %></code></dd>
+                    
+                    <dt class="col-sm-4">Type:</dt>
+                    <dd class="col-sm-8">
+                      <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                      <span class="badge <%= status_badge_class(@bonus.status) %>">
+                        <%= @bonus.status.humanize %>
+                      </span>
+                    </dd>
+                  </dl>
+                </div>
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">Currency:</dt>
+                    <dd class="col-sm-8"><%= @bonus.currency %></dd>
+                    
+                    <dt class="col-sm-4">Country:</dt>
+                    <dd class="col-sm-8"><%= @bonus.country || 'All' %></dd>
+                    
+                    <dt class="col-sm-4">User Group:</dt>
+                    <dd class="col-sm-8"><%= @bonus.user_group || 'All' %></dd>
+                    
+                    <dt class="col-sm-4">Tags:</dt>
+                    <dd class="col-sm-8">
+                      <% if @bonus.tags_array.any? %>
+                        <% @bonus.tags_array.each do |tag| %>
+                          <span class="badge bg-secondary me-1"><%= tag %></span>
+                        <% end %>
+                      <% else %>
+                        <span class="text-muted">None</span>
+                      <% end %>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Information -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Financial Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <% 
+                  non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
+                  should_show_minimum_deposit = !non_deposit_types.include?(@bonus.bonus_type) && @bonus.bonus_type != 'deposit' && @bonus.minimum_deposit.present?
+                %>
+                <% if should_show_minimum_deposit %>
+                <div class="col-md-4">
+                  <dl class="row">
+                    <dt class="col-sm-6">Min Deposit:</dt>
+                    <dd class="col-sm-6">
+                      <%= number_to_currency(@bonus.minimum_deposit, unit: @bonus.currency + ' ') %>
+                    </dd>
+                  </dl>
+                </div>
+                <% end %>
+                <div class="col-md-4">
+                  <dl class="row">
+                    <dt class="col-sm-6">Wager:</dt>
+                    <dd class="col-sm-6">
+                      <%= number_to_currency(@bonus.wager, unit: @bonus.currency + ' ') if @bonus.wager %>
+                    </dd>
+                  </dl>
+                </div>
+                <div class="col-md-4">
+                  <dl class="row">
+                    <dt class="col-sm-6">Max Winnings:</dt>
+                    <dd class="col-sm-6">
+                      <%= number_to_currency(@bonus.maximum_winnings, unit: @bonus.currency + ' ') if @bonus.maximum_winnings %>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+              <% if @bonus.wagering_strategy.present? %>
+                <dl class="row">
+                  <dt class="col-sm-2">Strategy:</dt>
+                  <dd class="col-sm-10"><%= @bonus.wagering_strategy %></dd>
+                </dl>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Type-Specific Information -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0"><%= @bonus.bonus_type.humanize %> Details</h5>
+            </div>
+            <div class="card-body">
+              <%= render "type_specific_details", bonus: @bonus %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+          <!-- Availability -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Availability</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row">
+                <dt class="col-sm-5">Start Date:</dt>
+                <dd class="col-sm-7"><%= @bonus.availability_start_date.strftime("%Y-%m-%d %H:%M") %></dd>
+                
+                <dt class="col-sm-5">End Date:</dt>
+                <dd class="col-sm-7"><%= @bonus.availability_end_date.strftime("%Y-%m-%d %H:%M") %></dd>
+                
+                <dt class="col-sm-5">Available Now:</dt>
+                <dd class="col-sm-7">
+                  <% if @bonus.available_now? %>
+                    <span class="badge bg-success">Yes</span>
+                  <% else %>
+                    <span class="badge bg-danger">No</span>
+                  <% end %>
+                </dd>
+                
+                <dt class="col-sm-5">Expired:</dt>
+                <dd class="col-sm-7">
+                  <% if @bonus.expired? %>
+                    <span class="badge bg-danger">Yes</span>
+                  <% else %>
+                    <span class="badge bg-success">No</span>
+                  <% end %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Metadata</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row">
+                <dt class="col-sm-5">Created:</dt>
+                <dd class="col-sm-7"><%= @bonus.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
+                
+                <dt class="col-sm-5">Updated:</dt>
+                <dd class="col-sm-7"><%= @bonus.updated_at.strftime("%Y-%m-%d %H:%M") %></dd>
+                
+                <% if @bonus.created_by %>
+                  <dt class="col-sm-5">Created By:</dt>
+                  <dd class="col-sm-7">User #<%= @bonus.created_by %></dd>
+                <% end %>
+                
+                <% if @bonus.updated_by %>
+                  <dt class="col-sm-5">Updated By:</dt>
+                  <dd class="col-sm-7">User #<%= @bonus.updated_by %></dd>
+                <% end %>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <%= link_to "Preview", preview_bonus_path(@bonus), 
+                    class: "btn btn-outline-info", 
+                    data: { remote: true, toggle: "modal", target: "#previewModal" } %>
+                <%= link_to "Duplicate", new_bonus_path(duplicate: @bonus.id), 
+                    class: "btn btn-outline-secondary" %>
+                <%= link_to "Export JSON", bonus_path(@bonus, format: :json), 
+                    class: "btn btn-outline-primary", target: "_blank" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bonus Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="previewContent">
+        <!-- Preview content will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
