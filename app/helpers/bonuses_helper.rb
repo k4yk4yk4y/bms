@@ -61,6 +61,30 @@ module BonusesHelper
     ]
   end
 
+  def project_options
+    [
+      ['VOLNA', 'VOLNA'],
+      ['ROX', 'ROX'],
+      ['FRESH', 'FRESH'],
+      ['SOL', 'SOL'],
+      ['JET', 'JET'],
+      ['IZZI', 'IZZI'],
+      ['LEGZO', 'LEGZO'],
+      ['STARDA', 'STARDA'],
+      ['DRIP', 'DRIP'],
+      ['MONRO', 'MONRO'],
+      ['1GO', '1GO'],
+      ['LEX', 'LEX'],
+      ['GIZBO', 'GIZBO'],
+      ['IRWIN', 'IRWIN'],
+      ['FLAGMAN', 'FLAGMAN'],
+      ['MARTIN', 'MARTIN'],
+      ['P17', 'P17'],
+      ['ANJUAN', 'ANJUAN'],
+      ['NAMASTE', 'NAMASTE']
+    ]
+  end
+
   def wagering_strategy_options
     [
       ['Standard', 'standard'],

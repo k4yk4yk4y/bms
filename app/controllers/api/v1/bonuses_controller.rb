@@ -1,5 +1,5 @@
 class Api::V1::BonusesController < ApplicationController
-  before_action :set_bonus, only: [:show, :update, :destroy, :activate, :deactivate]
+  before_action :set_bonus, only: [:show, :update, :destroy]
   
   # Skip CSRF protection for API endpoints
   skip_before_action :verify_authenticity_token
@@ -21,7 +21,7 @@ class Api::V1::BonusesController < ApplicationController
     @bonuses = @bonuses.limit(per_page).offset(offset)
     
     render json: {
-      bonuses: @bonuses.as_json(include: bonus_type_associations),
+      bonuses: @bonuses.as_json(include: bonus_type_associations, except: [:currency]),
       pagination: {
         current_page: page,
         per_page: per_page,
@@ -33,7 +33,7 @@ class Api::V1::BonusesController < ApplicationController
 
   # GET /api/v1/bonuses/1
   def show
-    render json: @bonus.as_json(include: bonus_includes)
+    render json: @bonus.as_json(include: bonus_includes, except: [:currency])
   end
 
   # POST /api/v1/bonuses
@@ -43,7 +43,7 @@ class Api::V1::BonusesController < ApplicationController
     
     if @bonus.save
       update_type_specific_attributes
-      render json: @bonus.as_json(include: bonus_includes), status: :created
+      render json: @bonus.as_json(include: bonus_includes, except: [:currency]), status: :created
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
     end
@@ -56,7 +56,7 @@ class Api::V1::BonusesController < ApplicationController
     
     if @bonus.save
       update_type_specific_attributes
-      render json: @bonus.as_json(include: bonus_includes)
+      render json: @bonus.as_json(include: bonus_includes, except: [:currency])
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
     end
@@ -68,30 +68,14 @@ class Api::V1::BonusesController < ApplicationController
     head :no_content
   end
 
-  # PATCH /api/v1/bonuses/1/activate
-  def activate
-    if @bonus.activate!
-      render json: { message: 'Bonus activated successfully', bonus: @bonus }
-    else
-      render json: { errors: @bonus.errors }, status: :unprocessable_entity
-    end
-  end
 
-  # PATCH /api/v1/bonuses/1/deactivate
-  def deactivate
-    if @bonus.deactivate!
-      render json: { message: 'Bonus deactivated successfully', bonus: @bonus }
-    else
-      render json: { errors: @bonus.errors }, status: :unprocessable_entity
-    end
-  end
 
   # GET /api/v1/bonuses/by_type
   def by_type
     @bonuses = Bonus.by_type(params[:type]) if params[:type].present?
     @bonuses ||= Bonus.none
     
-    render json: @bonuses.as_json(include: bonus_type_associations)
+    render json: @bonuses.as_json(include: bonus_type_associations, except: [:currency])
   end
 
   # GET /api/v1/bonuses/active
@@ -100,7 +84,7 @@ class Api::V1::BonusesController < ApplicationController
                     .includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus, 
                              :collect_bonus, :groups_update_bonus, :scheduler_bonus)
     
-    render json: @bonuses.as_json(include: bonus_type_associations)
+    render json: @bonuses.as_json(include: bonus_type_associations, except: [:currency])
   end
 
   # GET /api/v1/bonuses/expired
@@ -109,7 +93,7 @@ class Api::V1::BonusesController < ApplicationController
                     .includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus, 
                              :collect_bonus, :groups_update_bonus, :scheduler_bonus)
     
-    render json: @bonuses.as_json(include: bonus_type_associations)
+    render json: @bonuses.as_json(include: bonus_type_associations, except: [:currency])
   end
 
   private

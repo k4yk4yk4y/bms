@@ -1,5 +1,5 @@
 class BonusesController < ApplicationController
-  before_action :set_bonus, only: [:show, :edit, :update, :destroy, :activate, :deactivate, :preview]
+  before_action :set_bonus, only: [:show, :edit, :update, :destroy, :preview]
 
   # GET /bonuses
   def index
@@ -49,7 +49,7 @@ class BonusesController < ApplicationController
     
     respond_to do |format|
       format.html
-      format.json { render json: @bonuses }
+      format.json { render json: @bonuses.as_json(except: [:currency]) }
     end
   end
 
@@ -57,7 +57,7 @@ class BonusesController < ApplicationController
   def show
     respond_to do |format|
       format.html
-      format.json { render json: @bonus.as_json(include: bonus_includes) }
+      format.json { render json: @bonus.as_json(include: bonus_includes, except: [:currency]) }
     end
   end
 
@@ -117,28 +117,12 @@ class BonusesController < ApplicationController
     end
   end
 
-  # PATCH /bonuses/1/activate
-  def activate
-    if @bonus.activate!
-      redirect_to @bonus, notice: 'Bonus was successfully activated.'
-    else
-      redirect_to @bonus, alert: 'Failed to activate bonus.'
-    end
-  end
 
-  # PATCH /bonuses/1/deactivate
-  def deactivate
-    if @bonus.deactivate!
-      redirect_to @bonus, notice: 'Bonus was successfully deactivated.'
-    else
-      redirect_to @bonus, alert: 'Failed to deactivate bonus.'
-    end
-  end
 
   # GET /bonuses/1/preview
   def preview
     render json: {
-      bonus: @bonus.as_json(include: bonus_includes),
+      bonus: @bonus.as_json(include: bonus_includes, except: [:currency]),
       preview_data: generate_preview_data
     }
   end
@@ -148,7 +132,7 @@ class BonusesController < ApplicationController
     @bonuses = Bonus.by_type(params[:type]) if params[:type].present?
     @bonuses ||= Bonus.none
     
-    render json: @bonuses
+    render json: @bonuses.as_json(except: [:currency])
   end
 
   # POST /bonuses/bulk_update
@@ -159,12 +143,6 @@ class BonusesController < ApplicationController
     bonuses = Bonus.where(id: bonus_ids)
     
     case action
-    when 'activate'
-      bonuses.update_all(status: 'active')
-      message = 'Bonuses were successfully activated.'
-    when 'deactivate'
-      bonuses.update_all(status: 'inactive')
-      message = 'Bonuses were successfully deactivated.'
     when 'delete'
       bonuses.destroy_all
       message = 'Bonuses were successfully deleted.'

@@ -6,7 +6,7 @@
         <dl class="row">
           <dt class="col-sm-6">Required Deposit:</dt>
           <dd class="col-sm-6">
-            <%= number_to_currency(bonus.deposit_bonus.deposit_amount_required, unit: bonus.currency + ' ') %>
+            <%= number_to_currency(bonus.deposit_bonus.deposit_amount_required) %>
           </dd>
           
           <dt class="col-sm-6">Bonus Percentage:</dt>
@@ -18,7 +18,7 @@
           <dt class="col-sm-6">Max Bonus:</dt>
           <dd class="col-sm-6">
             <% if bonus.deposit_bonus.max_bonus_amount %>
-              <%= number_to_currency(bonus.deposit_bonus.max_bonus_amount, unit: bonus.currency + ' ') %>
+              <%= number_to_currency(bonus.deposit_bonus.max_bonus_amount) %>
             <% else %>
               <span class="text-muted">Unlimited</span>
             <% end %>
@@ -135,7 +135,7 @@
           
           <dt class="col-sm-6">Amount:</dt>
           <dd class="col-sm-6">
-            <%= number_to_currency(bonus.collect_bonus.collection_amount, unit: bonus.currency + ' ') %>
+            <%= number_to_currency(bonus.collect_bonus.collection_amount) %>
           </dd>
         </dl>
       </div>

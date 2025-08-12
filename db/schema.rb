@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_210559) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_193953) do
   create_table "bonuses", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
@@ -30,12 +30,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_210559) do
     t.integer "updated_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "project"
+    t.string "dsl_tag"
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["bonus_type"], name: "index_bonuses_on_bonus_type"
     t.index ["code"], name: "index_bonuses_on_code", unique: true
     t.index ["country"], name: "index_bonuses_on_country"
     t.index ["currency"], name: "index_bonuses_on_currency"
+    t.index ["dsl_tag"], name: "index_bonuses_on_dsl_tag"
+    t.index ["project"], name: "index_bonuses_on_project"
     t.index ["status"], name: "index_bonuses_on_status"
     t.index ["user_group"], name: "index_bonuses_on_user_group"
   end
@@ -123,10 +127,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_210559) do
     t.index ["schedule_type"], name: "index_scheduler_bonuses_on_schedule_type"
   end
 
-  add_foreign_key "collect_bonuses", "bonuses", column: "bonus_id"
-  add_foreign_key "deposit_bonuses", "bonuses", column: "bonus_id"
-  add_foreign_key "groups_update_bonuses", "bonuses", column: "bonus_id"
-  add_foreign_key "input_coupon_bonuses", "bonuses", column: "bonus_id"
-  add_foreign_key "manual_bonuses", "bonuses", column: "bonus_id"
-  add_foreign_key "scheduler_bonuses", "bonuses", column: "bonus_id"
+  add_foreign_key "collect_bonuses", "bonuses"
+  add_foreign_key "deposit_bonuses", "bonuses"
+  add_foreign_key "groups_update_bonuses", "bonuses"
+  add_foreign_key "input_coupon_bonuses", "bonuses"
+  add_foreign_key "manual_bonuses", "bonuses"
+  add_foreign_key "scheduler_bonuses", "bonuses"
 end

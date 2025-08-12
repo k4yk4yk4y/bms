@@ -104,6 +104,24 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :project, class: "form-label" %>
+                      <%= form.select :project, project_options, 
+                          { include_blank: "Select project" }, 
+                          { class: "form-select" } %>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :dsl_tag, class: "form-label" %>
+                      <%= form.text_field :dsl_tag, class: "form-control", 
+                          placeholder: "DSL tag for bonus identification" %>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -202,14 +220,6 @@
                 <div class="d-grid gap-2">
                   <%= form.submit "Update Bonus", class: "btn btn-primary" %>
                   <%= link_to "Cancel", bonus_path(@bonus), class: "btn btn-outline-secondary" %>
-                  <hr>
-                  <% if @bonus.active? %>
-                    <%= link_to "Deactivate", deactivate_bonus_path(@bonus), 
-                        class: "btn btn-warning", data: { "turbo-method": :patch, confirm: "Are you sure?" } %>
-                  <% else %>
-                    <%= link_to "Activate", activate_bonus_path(@bonus), 
-                        class: "btn btn-success", data: { "turbo-method": :patch } %>
-                  <% end %>
                 </div>
               </div>
             </div>

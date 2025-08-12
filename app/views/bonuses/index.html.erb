@@ -39,10 +39,43 @@
                   {}, 
                   { class: "form-select" } %>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <%= form.text_field :search, 
                   placeholder: "Search by name or code", 
                   value: params[:search], 
+                  class: "form-control" %>
+            </div>
+            <div class="col-md-2">
+              <%= form.select :project, 
+                  options_for_select([
+                    ['All Projects', ''],
+                    ['VOLNA', 'VOLNA'],
+                    ['ROX', 'ROX'],
+                    ['FRESH', 'FRESH'],
+                    ['SOL', 'SOL'],
+                    ['JET', 'JET'],
+                    ['IZZI', 'IZZI'],
+                    ['LEGZO', 'LEGZO'],
+                    ['STARDA', 'STARDA'],
+                    ['DRIP', 'DRIP'],
+                    ['MONRO', 'MONRO'],
+                    ['1GO', '1GO'],
+                    ['LEX', 'LEX'],
+                    ['GIZBO', 'GIZBO'],
+                    ['IRWIN', 'IRWIN'],
+                    ['FLAGMAN', 'FLAGMAN'],
+                    ['MARTIN', 'MARTIN'],
+                    ['P17', 'P17'],
+                    ['ANJUAN', 'ANJUAN'],
+                    ['NAMASTE', 'NAMASTE']
+                  ], params[:project]), 
+                  {}, 
+                  { class: "form-select" } %>
+            </div>
+            <div class="col-md-2">
+              <%= form.text_field :dsl_tag, 
+                  placeholder: "DSL tag", 
+                  value: params[:dsl_tag], 
                   class: "form-control" %>
             </div>
             <div class="col-md-3">
@@ -66,7 +99,8 @@
                     <th>Code</th>
                     <th>Type</th>
                     <th>Status</th>
-                    <th>Currency</th>
+                    <th>Project</th>
+                    <th>DSL Tag</th>
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Actions</th>
@@ -94,7 +128,20 @@
                           <%= bonus.status.humanize %>
                         </span>
                       </td>
-                      <td><%= bonus.currency %></td>
+                      <td>
+                        <% if bonus.project.present? %>
+                          <span class="badge bg-primary"><%= bonus.project %></span>
+                        <% else %>
+                          <span class="text-muted">-</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if bonus.dsl_tag.present? %>
+                          <code><%= bonus.dsl_tag %></code>
+                        <% else %>
+                          <span class="text-muted">-</span>
+                        <% end %>
+                      </td>
                       <td><%= bonus.availability_start_date.strftime("%Y-%m-%d") %></td>
                       <td><%= bonus.availability_end_date.strftime("%Y-%m-%d") %></td>
                       <td>
@@ -104,19 +151,6 @@
                           <% end %>
                           <%= link_to edit_bonus_path(bonus), class: "btn btn-outline-primary" do %>
                             <i class="fas fa-edit"></i>
-                          <% end %>
-                          <% if bonus.active? %>
-                            <%= link_to deactivate_bonus_path(bonus), 
-                                class: "btn btn-outline-warning", 
-                                data: { "turbo-method": :patch, confirm: "Are you sure?" } do %>
-                              <i class="fas fa-pause"></i>
-                            <% end %>
-                          <% else %>
-                            <%= link_to activate_bonus_path(bonus), 
-                                class: "btn btn-outline-success",
-                                data: { "turbo-method": :patch } do %>
-                              <i class="fas fa-play"></i>
-                            <% end %>
                           <% end %>
                           <%= link_to bonus_path(bonus), 
                               class: "btn btn-outline-danger", 
@@ -139,8 +173,6 @@
                   <%= form.select :bulk_action, 
                       options_for_select([
                         ['Select Action', ''],
-                        ['Activate', 'activate'],
-                        ['Deactivate', 'deactivate'],
                         ['Delete', 'delete']
                       ]), 
                       {}, 
@@ -154,11 +186,11 @@
               <div>
                 <% current_page = (params[:page] || 1).to_i %>
                 <% if current_page > 1 %>
-                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :currency, :country).merge(page: current_page - 1)), 
+                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :country).merge(page: current_page - 1)), 
                       class: "btn btn-outline-secondary me-2" %>
                 <% end %>
                 <span class="me-2">Page <%= current_page %></span>
-                <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :currency, :country).merge(page: current_page + 1)), 
+                <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :country).merge(page: current_page + 1)), 
                     class: "btn btn-outline-secondary" %>
               </div>
             </div>

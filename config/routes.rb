@@ -13,8 +13,6 @@ Rails.application.routes.draw do
   # Bonus management routes
   resources :bonuses do
     member do
-      patch :activate
-      patch :deactivate
       get :preview
     end
     collection do
@@ -27,10 +25,6 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :bonuses, only: [:index, :show, :create, :update, :destroy] do
-        member do
-          patch :activate
-          patch :deactivate
-        end
         collection do
           get :by_type
           get :active
