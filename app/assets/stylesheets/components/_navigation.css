@@ -1,0 +1,47 @@
+/* Navigation Link Styles */
+.nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.4s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(74, 64, 179, 0.6) 0%, transparent 100%);
+  transition: width 0.4s ease;
+  z-index: -1;
+}
+
+.nav-link:hover {
+  color: white;
+  transform: translateY(-2px);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.nav-link:hover::before {
+  width: 100%;
+}
+
+.nav-link:active {
+  transform: translateY(0);
+}
+
+/* Active link styles */
+.nav-link.active {
+  background: rgba(74, 64, 179, 0.3);
+  color: white;
+  box-shadow: 0 0 15px rgba(74, 64, 179, 0.5);
+}
