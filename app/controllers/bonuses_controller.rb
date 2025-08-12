@@ -39,12 +39,17 @@ class BonusesController < ApplicationController
       )
     end
     
-    @bonuses = @bonuses.order(created_at: :desc)
+    @bonuses = @bonuses.order(id: :desc)
     
-    # Simple pagination without Kaminari
+    # Pagination with 50 bonuses per page
     page = (params[:page] || 1).to_i
-    per_page = 20
+    per_page = 25
     offset = (page - 1) * per_page
+    
+    # Get total count for pagination info
+    @total_bonuses = @bonuses.count
+    @total_pages = (@total_bonuses.to_f / per_page).ceil
+    
     @bonuses = @bonuses.limit(per_page).offset(offset)
     
     respond_to do |format|

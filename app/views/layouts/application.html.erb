@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) ? "#{content_for(:title)} - Casino Bonus Management" : "Casino Bonus Management" %></title>
+    <title><%= content_for(:title) ? "#{content_for(:title)} - BMS" : "Bonus Management System" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -31,7 +31,7 @@
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <%= link_to "Casino Bonus Management", root_path, class: "navbar-brand" %>
+      <%= link_to "BMS", root_path, class: "navbar-brand" %>
       
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
@@ -48,6 +48,33 @@
             <%= link_to heatmap_path, class: "nav-link #{'active' if controller_name == 'heatmap'}" do %>
               <i class="fas fa-fire"></i> Heatmap
             <% end %>
+          </li>
+          <li class="nav-item dropdown" data-controller="projects-dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
+              <i class="fas fa-project-diagram"></i> Projects
+              <% if params[:project].present? %>
+                <span class="badge bg-primary ms-1"><%= params[:project] %></span>
+              <% end %>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="projectsDropdown" data-projects-dropdown-target="menu">
+              <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
+              <li><hr class="dropdown-divider"></li>
+              <% Bonus::PROJECTS.each do |project| %>
+                <li>
+                  <%= link_to bonuses_path(project: project), class: "dropdown-item #{'active' if params[:project] == project}" do %>
+                    <%= project %>
+                  <% end %>
+                </li>
+              <% end %>
+              <% if params[:project].present? %>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <%= link_to bonuses_path, class: "dropdown-item text-danger" do %>
+                    <i class="fas fa-times"></i> Clear Project Filter
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
           </li>
         </ul>
         
@@ -87,7 +114,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-12 text-center">
-          <p class="mb-0">&copy; <%= Date.current.year %> Casino Bonus Management System</p>
+          <p class="mb-0">&copy; <%= Date.current.year %> Bonus Management System</p>
         </div>
       </div>
     </div>
