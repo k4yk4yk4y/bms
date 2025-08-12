@@ -1,0 +1,232 @@
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <%= bonus.bonus_type&.humanize || 'Bonus Type' %> Specific Settings
+    </h5>
+  </div>
+  <div class="card-body">
+    <% case bonus.bonus_type %>
+    <% when 'deposit' %>
+      <%= fields_for :deposit_bonus, bonus.deposit_bonus || bonus.build_deposit_bonus do |deposit_form| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= deposit_form.label :deposit_amount_required, "Required Deposit Amount", class: "form-label" %>
+              <%= deposit_form.number_field :deposit_amount_required, step: 0.01, 
+                  class: "form-control", min: 0, required: true %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= deposit_form.label :bonus_percentage, "Bonus Percentage (%)", class: "form-label" %>
+              <%= deposit_form.number_field :bonus_percentage, step: 0.01, 
+                  class: "form-control", min: 0, max: 1000, required: true %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= deposit_form.label :max_bonus_amount, "Maximum Bonus Amount", class: "form-label" %>
+          <%= deposit_form.number_field :max_bonus_amount, step: 0.01, 
+              class: "form-control", min: 0 %>
+          <div class="form-text">Leave empty for unlimited bonus amount</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-check mb-3">
+              <%= deposit_form.check_box :first_deposit_only, class: "form-check-input" %>
+              <%= deposit_form.label :first_deposit_only, "First Deposit Only", class: "form-check-label" %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check mb-3">
+              <%= deposit_form.check_box :recurring_eligible, class: "form-check-input" %>
+              <%= deposit_form.label :recurring_eligible, "Recurring Eligible", class: "form-check-label" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+    <% when 'input_coupon' %>
+      <%= fields_for :input_coupon_bonus, bonus.input_coupon_bonus || bonus.build_input_coupon_bonus do |coupon_form| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= coupon_form.label :coupon_code, "Coupon Code", class: "form-label" %>
+              <%= coupon_form.text_field :coupon_code, class: "form-control", required: true %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= coupon_form.label :usage_limit, "Usage Limit", class: "form-label" %>
+              <%= coupon_form.number_field :usage_limit, class: "form-control", 
+                  min: 1, required: true, value: 1 %>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= coupon_form.label :expires_at, "Expires At", class: "form-label" %>
+              <%= coupon_form.datetime_local_field :expires_at, class: "form-control", 
+                  required: true, value: (bonus.input_coupon_bonus&.expires_at || 30.days.from_now).strftime("%Y-%m-%dT%H:%M") %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check mt-4">
+              <%= coupon_form.check_box :single_use, class: "form-check-input", checked: true %>
+              <%= coupon_form.label :single_use, "Single Use Only", class: "form-check-label" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+    <% when 'manual' %>
+      <%= fields_for :manual_bonus, bonus.manual_bonus || bonus.build_manual_bonus do |manual_form| %>
+        <div class="mb-3">
+          <%= manual_form.label :admin_notes, "Admin Notes", class: "form-label" %>
+          <%= manual_form.text_area :admin_notes, class: "form-control", rows: 3 %>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-check mb-3">
+              <%= manual_form.check_box :approval_required, class: "form-check-input", checked: true %>
+              <%= manual_form.label :approval_required, "Approval Required", class: "form-check-label" %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check mb-3">
+              <%= manual_form.check_box :auto_apply, class: "form-check-input" %>
+              <%= manual_form.label :auto_apply, "Auto Apply", class: "form-check-label" %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= manual_form.label :conditions, "Conditions (JSON)", class: "form-label" %>
+          <%= manual_form.text_area :conditions, class: "form-control", rows: 4, 
+              placeholder: '[]' %>
+          <div class="form-text">Enter conditions as JSON array</div>
+        </div>
+      <% end %>
+
+    <% when 'collection' %>
+      <%= fields_for :collect_bonus, bonus.collect_bonus || bonus.build_collect_bonus do |collect_form| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= collect_form.label :collection_type, "Collection Type", class: "form-label" %>
+              <%= collect_form.select :collection_type, collection_type_options, 
+                  { selected: 'daily' }, { class: "form-select", required: true } %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= collect_form.label :collection_amount, "Collection Amount", class: "form-label" %>
+              <%= collect_form.number_field :collection_amount, step: 0.01, 
+                  class: "form-control", min: 0, required: true %>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= collect_form.label :collection_frequency, "Collection Frequency", class: "form-label" %>
+              <%= collect_form.select :collection_frequency, collection_frequency_options, 
+                  { selected: 'daily' }, { class: "form-select", required: true } %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= collect_form.label :collection_limit, "Collection Limit", class: "form-label" %>
+              <%= collect_form.number_field :collection_limit, class: "form-control", 
+                  min: 1, required: true, value: 1 %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+    <% when 'groups_update' %>
+      <%= fields_for :groups_update_bonus, bonus.groups_update_bonus || bonus.build_groups_update_bonus do |groups_form| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= groups_form.label :update_type, "Update Type", class: "form-label" %>
+              <%= groups_form.select :update_type, update_type_options, 
+                  { selected: 'add_bonus' }, { class: "form-select", required: true } %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= groups_form.label :batch_size, "Batch Size", class: "form-label" %>
+              <%= groups_form.number_field :batch_size, class: "form-control", 
+                  min: 1, max: 1000, required: true, value: 100 %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= groups_form.label :target_groups, "Target Groups (JSON)", class: "form-label" %>
+          <%= groups_form.text_area :target_groups, class: "form-control", rows: 3, 
+              required: true, placeholder: '["group1", "group2"]' %>
+          <div class="form-text">Enter target groups as JSON array</div>
+        </div>
+
+        <div class="mb-3">
+          <%= groups_form.label :update_parameters, "Update Parameters (JSON)", class: "form-label" %>
+          <%= groups_form.text_area :update_parameters, class: "form-control", rows: 4, 
+              placeholder: '{}' %>
+          <div class="form-text">Enter update parameters as JSON object</div>
+        </div>
+      <% end %>
+
+    <% when 'scheduler' %>
+      <%= fields_for :scheduler_bonus, bonus.scheduler_bonus || bonus.build_scheduler_bonus do |scheduler_form| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= scheduler_form.label :schedule_type, "Schedule Type", class: "form-label" %>
+              <%= scheduler_form.select :schedule_type, schedule_type_options, 
+                  { selected: 'one_time' }, { class: "form-select", required: true } %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= scheduler_form.label :max_executions, "Max Executions", class: "form-label" %>
+              <%= scheduler_form.number_field :max_executions, class: "form-control", min: 1 %>
+              <div class="form-text">Leave empty for unlimited executions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= scheduler_form.label :next_run_at, "Next Run At", class: "form-label" %>
+              <%= scheduler_form.datetime_local_field :next_run_at, class: "form-control",
+                  value: (bonus.scheduler_bonus&.next_run_at || 1.hour.from_now).strftime("%Y-%m-%dT%H:%M") %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= scheduler_form.label :cron_expression, "Cron Expression", class: "form-label" %>
+              <%= scheduler_form.text_field :cron_expression, class: "form-control", 
+                  placeholder: "0 0 * * *" %>
+              <div class="form-text">For cron-based schedules only</div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+    <% else %>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Please select a bonus type to see specific configuration options.
+      </div>
+    <% end %>
+  </div>
+</div>

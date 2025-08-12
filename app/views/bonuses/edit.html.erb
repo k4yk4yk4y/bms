@@ -1,0 +1,221 @@
+<% content_for :title, "Edit #{@bonus.name}" %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h2">Edit Bonus</h1>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+            <code><%= @bonus.code %></code>
+          </div>
+        </div>
+        <div class="btn-group" role="group">
+          <%= link_to "View", bonus_path(@bonus), class: "btn btn-outline-info" %>
+          <%= link_to "Back to List", bonuses_path, class: "btn btn-outline-secondary" %>
+        </div>
+      </div>
+
+      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true do |form| %>
+        <% if @bonus.errors.any? %>
+          <div class="alert alert-danger">
+            <h4><%= pluralize(@bonus.errors.count, "error") %> prohibited this bonus from being saved:</h4>
+            <ul class="mb-0">
+              <% @bonus.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="row">
+          <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Basic Information</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :name, class: "form-label" %>
+                      <%= form.text_field :name, class: "form-control", required: true %>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :code, class: "form-label" %>
+                      <%= form.text_field :code, class: "form-control", readonly: true %>
+                      <div class="form-text">Bonus code cannot be changed after creation</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :bonus_type, class: "form-label" %>
+                      <%= form.select :bonus_type, bonus_type_options, {}, 
+                          { class: "form-select", required: true, disabled: true } %>
+                      <div class="form-text">Bonus type cannot be changed after creation</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :status, class: "form-label" %>
+                      <%= form.select :status, status_options, {}, 
+                          { class: "form-select", required: true } %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :currency, class: "form-label" %>
+                      <%= form.select :currency, currency_options, {}, 
+                          { class: "form-select", required: true } %>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :country, class: "form-label" %>
+                      <%= form.text_field :country, class: "form-control", 
+                          placeholder: "Leave empty for all countries" %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :user_group, class: "form-label" %>
+                      <%= form.text_field :user_group, class: "form-control", 
+                          placeholder: "Leave empty for all users" %>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <%= form.label :tags, class: "form-label" %>
+                      <%= form.text_field :tags, class: "form-control", 
+                          placeholder: "Comma-separated tags" %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Financial Information -->
+            <div class="card mb-4" id="financial-information-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Financial Information</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <% 
+                    non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
+                    should_hide_minimum_deposit = non_deposit_types.include?(@bonus.bonus_type) || @bonus.bonus_type == 'deposit'
+                  %>
+                  <div class="col-md-4" id="minimum-deposit-field" style="<%= 'display: none;' if should_hide_minimum_deposit %>">
+                    <div class="mb-3">
+                      <%= form.label :minimum_deposit, class: "form-label" %>
+                      <%= form.number_field :minimum_deposit, step: 0.01, 
+                          class: "form-control", min: 0 %>
+                      <div class="form-text">Не используется для данного типа бонуса</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <%= form.label :wager, class: "form-label" %>
+                      <%= form.number_field :wager, step: 0.01, 
+                          class: "form-control", min: 0 %>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <%= form.label :maximum_winnings, class: "form-label" %>
+                      <%= form.number_field :maximum_winnings, step: 0.01, 
+                          class: "form-control", min: 0 %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :wagering_strategy, class: "form-label" %>
+                  <%= form.select :wagering_strategy, wagering_strategy_options, 
+                      { include_blank: "Select strategy" }, 
+                      { class: "form-select" } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Type-Specific Fields -->
+            <div id="type-specific-fields">
+              <%= render "type_specific_form", form: form, bonus: @bonus %>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <!-- Availability -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Availability</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <%= form.label :availability_start_date, class: "form-label" %>
+                  <%= form.datetime_local_field :availability_start_date, 
+                      class: "form-control", required: true,
+                      value: @bonus.availability_start_date&.strftime("%Y-%m-%dT%H:%M") %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :availability_end_date, class: "form-label" %>
+                  <%= form.datetime_local_field :availability_end_date, 
+                      class: "form-control", required: true,
+                      value: @bonus.availability_end_date&.strftime("%Y-%m-%dT%H:%M") %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Information</h5>
+              </div>
+              <div class="card-body">
+                <dl class="row">
+                  <dt class="col-sm-5">Created:</dt>
+                  <dd class="col-sm-7"><%= @bonus.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
+                  
+                  <dt class="col-sm-5">Updated:</dt>
+                  <dd class="col-sm-7"><%= @bonus.updated_at.strftime("%Y-%m-%d %H:%M") %></dd>
+                </dl>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+              <div class="card-body">
+                <div class="d-grid gap-2">
+                  <%= form.submit "Update Bonus", class: "btn btn-primary" %>
+                  <%= link_to "Cancel", bonus_path(@bonus), class: "btn btn-outline-secondary" %>
+                  <hr>
+                  <% if @bonus.active? %>
+                    <%= link_to "Deactivate", deactivate_bonus_path(@bonus), 
+                        class: "btn btn-warning", data: { "turbo-method": :patch, confirm: "Are you sure?" } %>
+                  <% else %>
+                    <%= link_to "Activate", activate_bonus_path(@bonus), 
+                        class: "btn btn-success", data: { "turbo-method": :patch } %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

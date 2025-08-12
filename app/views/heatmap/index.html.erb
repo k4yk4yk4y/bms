@@ -1,0 +1,354 @@
+<% content_for :title, "Bonus Heatmap" %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">
+          <i class="fas fa-fire text-danger"></i> Bonus Heatmap
+        </h1>
+        <div class="d-flex align-items-center gap-3">
+          <!-- Навигация по месяцам -->
+          <div class="btn-group" role="group">
+            <%= link_to heatmap_path(year: @prev_month.year, month: @prev_month.month, bonus_type: @bonus_type), 
+                class: "btn btn-outline-secondary" do %>
+              <i class="fas fa-chevron-left"></i> <%= @prev_month.strftime("%B %Y") %>
+            <% end %>
+            <button class="btn btn-secondary" disabled>
+              <%= @start_date.strftime("%B %Y") %>
+            </button>
+            <%= link_to heatmap_path(year: @next_month.year, month: @next_month.month, bonus_type: @bonus_type), 
+                class: "btn btn-outline-secondary" do %>
+              <%= @next_month.strftime("%B %Y") %> <i class="fas fa-chevron-right"></i>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <%= form_with url: heatmap_path, method: :get, local: true, class: "row g-3 align-items-end" do |form| %>
+            <div class="col-md-4">
+              <%= form.label :bonus_type, "Bonus Type", class: "form-label" %>
+              <%= form.select :bonus_type, 
+                  options_for_select([
+                    ['All Types', 'all'],
+                    *@bonus_types.map { |type| [type.humanize, type] }
+                  ], @bonus_type), 
+                  {}, 
+                  { class: "form-select" } %>
+            </div>
+            <div class="col-md-3">
+              <%= form.label :month, "Month", class: "form-label" %>
+              <%= form.select :month, 
+                  options_for_select((1..12).map { |m| [Date::MONTHNAMES[m], m] }, @month), 
+                  {}, 
+                  { class: "form-select" } %>
+            </div>
+            <div class="col-md-3">
+              <%= form.label :year, "Year", class: "form-label" %>
+              <%= form.select :year, 
+                  options_for_select(((Date.current.year - 2)..(Date.current.year + 1)).map { |y| [y, y] }, @year), 
+                  {}, 
+                  { class: "form-select" } %>
+            </div>
+            <div class="col-md-2">
+              <%= form.submit "Apply Filter", class: "btn btn-primary w-100" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Heatmap Calendar -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            Calendar Heatmap 
+            <% if @bonus_type != 'all' %>
+              <span class="badge bg-info"><%= @bonus_type.humanize %></span>
+            <% end %>
+          </h5>
+          <div class="heatmap-legend">
+            <small class="text-muted me-2">0</small>
+            <div class="legend-scale">
+              <div class="legend-item" style="background-color: #ffffff; border: 1px solid #ddd;" title="0 bonuses"></div>
+              <div class="legend-item" style="background-color: #c6e48b;" title="1-2 bonuses"></div>
+              <div class="legend-item" style="background-color: #7bc96f;" title="3-4 bonuses"></div>
+              <div class="legend-item" style="background-color: #239a3b;" title="5-6 bonuses"></div>
+              <div class="legend-item" style="background-color: #d73027;" title="7-8 bonuses"></div>
+              <div class="legend-item" style="background-color: #a50026;" title="9-10+ bonuses"></div>
+            </div>
+            <small class="text-muted ms-2">10+</small>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="calendar-container">
+            <div class="heatmap-calendar">
+            <!-- Days of week header -->
+            <div class="calendar-header">
+              <div class="day-header"></div> <!-- Empty cell for week number -->
+              <div class="day-header">Mon</div>
+              <div class="day-header">Tue</div>
+              <div class="day-header">Wed</div>
+              <div class="day-header">Thu</div>
+              <div class="day-header">Fri</div>
+              <div class="day-header">Sat</div>
+              <div class="day-header">Sun</div>
+            </div>
+            
+            <!-- Calendar grid -->
+            <div class="calendar-grid">
+              <% 
+                # Начинаем с понедельника первой недели месяца
+                start_of_calendar = @start_date.beginning_of_week(:monday)
+                end_of_calendar = @end_date.end_of_week(:sunday)
+                current_week_start = start_of_calendar
+              %>
+              
+              <% while current_week_start <= end_of_calendar %>
+                <div class="calendar-week">
+                  <!-- Week number -->
+                  <div class="week-number">
+                    <%= current_week_start.cweek %>
+                  </div>
+                  
+                  <!-- Days of the week -->
+                  <% (0..6).each do |day_offset| %>
+                    <% 
+                      current_date = current_week_start + day_offset.days
+                      date_key = current_date.strftime("%Y-%m-%d")
+                      day_data = @heatmap_data[date_key]
+                      is_current_month = current_date.month == @month
+                      is_today = current_date == Date.current
+                    %>
+                    
+                    <div class="calendar-day <%= 'other-month' unless is_current_month %> <%= 'today' if is_today %>"
+                         data-date="<%= date_key %>"
+                         data-count="<%= day_data&.dig(:count) || 0 %>"
+                         style="<%= heatmap_color(day_data&.dig(:intensity) || 0, is_current_month) %>"
+                         title="<%= current_date.strftime('%B %d, %Y') %>: <%= day_data&.dig(:count) || 0 %> bonuses">
+                      <span class="day-number"><%= current_date.day %></span>
+                    </div>
+                  <% end %>
+                </div>
+                <% current_week_start += 1.week %>
+              <% end %>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="row mt-4">
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title text-primary">
+                <%= @heatmap_data.values.sum { |data| data[:count] } %>
+              </h5>
+              <p class="card-text">Total Bonuses</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title text-success">
+                <%= @heatmap_data.values.count { |data| data[:count] > 0 } %>
+              </h5>
+              <p class="card-text">Active Days</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title text-warning">
+                <%= @heatmap_data.values.map { |data| data[:count] }.max || 0 %>
+              </h5>
+              <p class="card-text">Max per Day</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title text-info">
+                <%= (@heatmap_data.values.sum { |data| data[:count] }.to_f / @heatmap_data.size).round(1) %>
+              </h5>
+              <p class="card-text">Average per Day</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+  }
+  
+  .legend-scale {
+    display: flex;
+    gap: 2px;
+  }
+  
+  .legend-item {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+  
+  .calendar-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .heatmap-calendar {
+    font-size: 12px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .calendar-header {
+    display: grid;
+    grid-template-columns: 25px repeat(7, minmax(0, 1fr));
+    gap: 1px;
+    margin-bottom: 1px;
+  }
+  
+  .day-header {
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    padding: 3px 2px;
+    font-size: 10px;
+  }
+  
+  .calendar-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  
+  .calendar-week {
+    display: grid;
+    grid-template-columns: 25px repeat(7, minmax(0, 1fr));
+    gap: 1px;
+  }
+  
+  .week-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #999;
+    font-weight: 500;
+    width: 25px;
+  }
+  
+  .calendar-day {
+    aspect-ratio: 1;
+    border: 1px solid #e1e4e8;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    min-height: 24px;
+    max-height: 32px;
+    display: block;
+    padding: 2px;
+  }
+  
+  .calendar-day:hover {
+    border-color: #333;
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .calendar-day.other-month {
+    opacity: 0.3;
+  }
+  
+  .calendar-day.today {
+    border: 2px solid #0366d6;
+    font-weight: bold;
+  }
+  
+  .day-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    line-height: 1;
+  }
+  
+  .calendar-day.other-month .day-number {
+    color: #999;
+  }
+  
+  @media (max-width: 768px) {
+    .calendar-header,
+    .calendar-week {
+      grid-template-columns: 20px repeat(7, minmax(0, 1fr));
+    }
+    
+    .calendar-day {
+      min-height: 20px;
+      max-height: 26px;
+      padding: 1px;
+    }
+    
+    .day-number {
+      font-size: 11px;
+      top: 1px;
+      left: 2px;
+    }
+    
+    .week-number {
+      width: 20px;
+      font-size: 8px;
+    }
+    
+    .day-header {
+      font-size: 9px;
+      padding: 2px 1px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .calendar-day {
+      min-height: 18px;
+      max-height: 22px;
+    }
+    
+    .day-number {
+      font-size: 10px;
+    }
+  }
+</style>
+
+<script>
+  // Добавляем интерактивность для календаря
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendarDays = document.querySelectorAll('.calendar-day');
+    
+    calendarDays.forEach(day => {
+      day.addEventListener('click', function() {
+        const date = this.dataset.date;
+        const count = this.dataset.count;
+        
+        // Здесь можно добавить модальное окно с деталями дня
+        alert(`Date: ${date}\nBonuses: ${count}`);
+      });
+    });
+  });
+</script>
