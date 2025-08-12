@@ -125,7 +125,7 @@ class Api::V1::BonusesController < ApplicationController
       :name, :code, :bonus_type, :status, :minimum_deposit, :wager, 
       :maximum_winnings, :wagering_strategy, :availability_start_date, 
       :availability_end_date, :user_group, :tags, :country, :currency,
-      :created_by, :updated_by
+      :project, :dsl_tag, :created_by, :updated_by
     )
   end
 
@@ -217,6 +217,12 @@ class Api::V1::BonusesController < ApplicationController
     when 'expired'
       scope = scope.expired
     end
+    
+    # Filter by project
+    scope = scope.by_project(params[:project]) if params[:project].present?
+    
+    # Filter by dsl_tag
+    scope = scope.by_dsl_tag(params[:dsl_tag]) if params[:dsl_tag].present?
     
     # Filter by currency
     scope = scope.by_currency(params[:currency]) if params[:currency].present?
