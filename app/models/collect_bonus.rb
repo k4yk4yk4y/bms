@@ -1,17 +1,17 @@
 class CollectBonus < ApplicationRecord
   # Explicitly set table name
-  self.table_name = 'collect_bonuses'
-  
+  self.table_name = "collect_bonuses"
+
   # Associations
   belongs_to :bonus
 
   # Validations
-  validates :collection_type, presence: true, inclusion: { 
-    in: %w[daily weekly monthly fixed_amount percentage] 
+  validates :collection_type, presence: true, inclusion: {
+    in: %w[daily weekly monthly fixed_amount percentage]
   }
   validates :collection_amount, presence: true, numericality: { greater_than: 0 }
-  validates :collection_frequency, presence: true, inclusion: { 
-    in: %w[daily weekly monthly once] 
+  validates :collection_frequency, presence: true, inclusion: {
+    in: %w[daily weekly monthly once]
   }
   validates :collection_limit, presence: true, numericality: { greater_than: 0 }
   validates :collected_count, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -21,8 +21,8 @@ class CollectBonus < ApplicationRecord
   # Scopes
   scope :by_type, ->(type) { where(collection_type: type) }
   scope :by_frequency, ->(frequency) { where(collection_frequency: frequency) }
-  scope :available, -> { where('collected_count < collection_limit') }
-  scope :completed, -> { where('collected_count >= collection_limit') }
+  scope :available, -> { where("collected_count < collection_limit") }
+  scope :completed, -> { where("collected_count >= collection_limit") }
 
   # Callbacks
   after_initialize :set_defaults
@@ -37,7 +37,7 @@ class CollectBonus < ApplicationRecord
   end
 
   def remaining_collections
-    [collection_limit - collected_count, 0].max
+    [ collection_limit - collected_count, 0 ].max
   end
 
   def collection_percentage
@@ -47,15 +47,15 @@ class CollectBonus < ApplicationRecord
 
   def can_collect_today?
     return false unless available?
-    
+
     case collection_frequency
-    when 'daily'
+    when "daily"
       true # Can collect every day
-    when 'weekly'
+    when "weekly"
       last_collection_more_than_week_ago?
-    when 'monthly'
+    when "monthly"
       last_collection_more_than_month_ago?
-    when 'once'
+    when "once"
       collected_count.zero?
     else
       false
@@ -64,19 +64,19 @@ class CollectBonus < ApplicationRecord
 
   def collect!
     return false unless can_collect_today?
-    
+
     increment!(:collected_count)
     true
   end
 
   def calculate_collection_amount(base_amount = nil)
     case collection_type
-    when 'fixed_amount'
+    when "fixed_amount"
       collection_amount
-    when 'percentage'
+    when "percentage"
       return 0 unless base_amount
       base_amount * (collection_amount / 100)
-    when 'daily', 'weekly', 'monthly'
+    when "daily", "weekly", "monthly"
       collection_amount
     else
       collection_amount
@@ -85,15 +85,15 @@ class CollectBonus < ApplicationRecord
 
   def next_collection_available_at
     return nil unless available?
-    
+
     case collection_frequency
-    when 'daily'
+    when "daily"
       Date.current + 1.day
-    when 'weekly'
+    when "weekly"
       Date.current + 1.week
-    when 'monthly'
+    when "monthly"
       Date.current + 1.month
-    when 'once'
+    when "once"
       nil # One-time collection
     end
   end
@@ -101,16 +101,16 @@ class CollectBonus < ApplicationRecord
   private
 
   def set_defaults
-    self.collection_frequency ||= 'daily'
+    self.collection_frequency ||= "daily"
     self.collection_limit ||= 1
     self.collected_count ||= 0
   end
 
   def collected_count_not_exceeds_limit
     return unless collected_count && collection_limit
-    
+
     if collected_count > collection_limit
-      errors.add(:collected_count, 'cannot exceed collection limit')
+      errors.add(:collected_count, "cannot exceed collection limit")
     end
   end
 

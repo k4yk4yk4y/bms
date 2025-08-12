@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   # API routes for bonus management
   namespace :api do
     namespace :v1 do
-      resources :bonuses, only: [:index, :show, :create, :update, :destroy] do
+      resources :bonuses, only: [ :index, :show, :create, :update, :destroy ] do
         collection do
           get :by_type
           get :active

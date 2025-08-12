@@ -1,11 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  name: "Test Bonus 1"
+  code: "TEST001"
+  bonus_type: "deposit"
+  status: "active"
+  availability_start_date: <%= 1.day.ago %>
+  availability_end_date: <%= 1.month.from_now %>
+  currency: "USD"
+
+two:
+  name: "Test Bonus 2"
+  code: "TEST002"
+  bonus_type: "manual"
+  status: "active"
+  availability_start_date: <%= 1.day.ago %>
+  availability_end_date: <%= 1.month.from_now %>
+  currency: "EUR"

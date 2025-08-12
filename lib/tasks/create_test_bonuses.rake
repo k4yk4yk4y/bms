@@ -2,7 +2,7 @@ namespace :bonuses do
   desc "Create test deposit bonuses"
   task create_test_deposit_bonuses: :environment do
     puts "Creating test deposit bonuses..."
-    
+
     # Создаем 5 депозитных бонусов
     bonuses_data = [
       {
@@ -106,12 +106,12 @@ namespace :bonuses do
         dsl_tag: "first_deposit_bonus"
       }
     ]
-    
+
     created_bonuses = []
-    
+
     bonuses_data.each do |bonus_attrs|
       bonus = Bonus.create!(bonus_attrs)
-      
+
       # Создаем связанную запись deposit_bonus
       case bonus.name
       when "Welcome Bonus 100%"
@@ -155,11 +155,11 @@ namespace :bonuses do
           recurring_eligible: false
         )
       end
-      
+
       created_bonuses << bonus
       puts "Created bonus: #{bonus.name} (ID: #{bonus.id}) with deposit bonus settings"
     end
-    
+
     puts "\nSuccessfully created #{created_bonuses.count} deposit bonuses!"
     puts "Bonus IDs: #{created_bonuses.map(&:id).join(', ')}"
   end
@@ -167,26 +167,26 @@ namespace :bonuses do
   desc "Create 52 test bonuses of different types for pagination testing"
   task create_52_test_bonuses: :environment do
     puts "Creating 52 test bonuses of different types..."
-    
+
     # Clear existing test bonuses to avoid duplicates
     Bonus.where("name LIKE ?", "Test Bonus%").destroy_all
     puts "Cleared existing test bonuses"
-    
+
     bonus_types = %w[deposit input_coupon manual collection groups_update scheduler]
     projects = %w[VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE]
     statuses = %w[active inactive draft]
     currencies = %w[USD EUR RUB]
     countries = %w[US RU DE FR IT ES]
-    
+
     created_bonuses = []
-    
+
     52.times do |i|
       bonus_type = bonus_types[i % bonus_types.length]
       project = projects[i % projects.length]
       status = statuses[i % statuses.length]
       currency = currencies[i % currencies.length]
       country = countries[i % countries.length]
-      
+
       bonus_attrs = {
         name: "Test Bonus #{i + 1} - #{bonus_type.humanize}",
         code: "TEST#{bonus_type.upcase}#{i + 1}",
@@ -206,51 +206,51 @@ namespace :bonuses do
         project: project,
         dsl_tag: "test_#{bonus_type}_#{i + 1}"
       }
-      
+
       bonus = Bonus.create!(bonus_attrs)
-      
+
       # Create type-specific bonus records
       case bonus_type
-      when 'deposit'
+      when "deposit"
         bonus.create_deposit_bonus!(
           deposit_amount_required: rand(10..200).to_f,
           bonus_percentage: rand(25..200).to_f,
           max_bonus_amount: rand(100..1000).to_f,
-          first_deposit_only: [true, false].sample,
-          recurring_eligible: [true, false].sample
+          first_deposit_only: [ true, false ].sample,
+          recurring_eligible: [ true, false ].sample
         )
-      when 'input_coupon'
+      when "input_coupon"
         bonus.create_input_coupon_bonus!(
           coupon_code: "COUPON#{i + 1}",
           usage_limit: rand(10..1000),
           expires_at: Date.current + rand(30..365).days,
-          single_use: [true, false].sample
+          single_use: [ true, false ].sample
         )
-      when 'manual'
-        approval_required = [true, false].sample
-        auto_apply = approval_required ? false : [true, false].sample
-        
+      when "manual"
+        approval_required = [ true, false ].sample
+        auto_apply = approval_required ? false : [ true, false ].sample
+
         bonus.create_manual_bonus!(
           admin_notes: "Test manual bonus #{i + 1}",
           approval_required: approval_required,
           auto_apply: auto_apply,
           conditions: "Test conditions for bonus #{i + 1}"
         )
-      when 'collection'
+      when "collection"
         bonus.create_collect_bonus!(
           collection_type: %w[daily weekly monthly fixed_amount percentage].sample,
           collection_amount: rand(5..100).to_f,
           collection_frequency: %w[daily weekly monthly once].sample,
           collection_limit: rand(5..50)
         )
-      when 'groups_update'
+      when "groups_update"
         bonus.create_groups_update_bonus!(
           target_groups: "[\"group_#{i + 1}\", \"group_#{i + 2}\"]",
           update_type: %w[add_bonus remove_bonus modify_bonus bulk_apply].sample,
           update_parameters: "{\"param_#{i + 1}\": \"value_#{i + 1}\"}",
           batch_size: rand(100..1000)
         )
-      when 'scheduler'
+      when "scheduler"
         bonus.create_scheduler_bonus!(
           schedule_type: %w[recurring one_time cron_based interval_based].sample,
           cron_expression: "0 #{rand(0..23)} * * *",
@@ -258,11 +258,11 @@ namespace :bonuses do
           max_executions: rand(10..1000)
         )
       end
-      
+
       created_bonuses << bonus
       puts "Created bonus #{i + 1}/52: #{bonus.name} (ID: #{bonus.id}, Type: #{bonus_type})"
     end
-    
+
     puts "\nSuccessfully created #{created_bonuses.count} test bonuses!"
     puts "Bonus IDs: #{created_bonuses.map(&:id).join(', ')}"
     puts "\nDistribution by type:"

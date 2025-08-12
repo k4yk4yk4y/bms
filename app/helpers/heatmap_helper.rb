@@ -1,7 +1,7 @@
 module HeatmapHelper
   def heatmap_color(intensity, is_current_month = true)
     return "background-color: #f8f9fa;" unless is_current_month
-    
+
     # Цветовая схема: белый → зеленый → красный
     # intensity от 0 до 1, где 1 соответствует 10+ бонусам
     case intensity
@@ -24,27 +24,27 @@ module HeatmapHelper
       "background-color: #a50026;"
     end
   end
-  
+
   def format_month_year(date)
     date.strftime("%B %Y")
   end
-  
+
   def bonus_type_badge_class(bonus_type)
     case bonus_type
-    when 'deposit'
-      'bg-success'
-    when 'input_coupon'
-      'bg-primary'
-    when 'manual'
-      'bg-warning'
-    when 'collection'
-      'bg-info'
-    when 'groups_update'
-      'bg-secondary'
-    when 'scheduler'
-      'bg-dark'
+    when "deposit"
+      "bg-success"
+    when "input_coupon"
+      "bg-primary"
+    when "manual"
+      "bg-warning"
+    when "collection"
+      "bg-info"
+    when "groups_update"
+      "bg-secondary"
+    when "scheduler"
+      "bg-dark"
     else
-      'bg-light text-dark'
+      "bg-light text-dark"
     end
   end
 end

@@ -1,7 +1,7 @@
 class InputCouponBonus < ApplicationRecord
   # Explicitly set table name
-  self.table_name = 'input_coupon_bonuses'
-  
+  self.table_name = "input_coupon_bonuses"
+
   # Associations
   belongs_to :bonus
 
@@ -15,9 +15,9 @@ class InputCouponBonus < ApplicationRecord
   validate :expires_at_in_future
 
   # Scopes
-  scope :active, -> { where('expires_at > ?', Time.current) }
-  scope :expired, -> { where('expires_at <= ?', Time.current) }
-  scope :available, -> { active.where('usage_count < usage_limit') }
+  scope :active, -> { where("expires_at > ?", Time.current) }
+  scope :expired, -> { where("expires_at <= ?", Time.current) }
+  scope :available, -> { active.where("usage_count < usage_limit") }
 
   # Callbacks
   after_initialize :set_defaults
@@ -41,7 +41,7 @@ class InputCouponBonus < ApplicationRecord
 
   def use_coupon!
     return false unless available?
-    
+
     increment!(:usage_count)
     true
   end
@@ -67,17 +67,17 @@ class InputCouponBonus < ApplicationRecord
 
   def usage_count_not_exceeds_limit
     return unless usage_count && usage_limit
-    
+
     if usage_count > usage_limit
-      errors.add(:usage_count, 'cannot exceed usage limit')
+      errors.add(:usage_count, "cannot exceed usage limit")
     end
   end
 
   def expires_at_in_future
     return unless expires_at
-    
+
     if expires_at <= Time.current
-      errors.add(:expires_at, 'must be in the future')
+      errors.add(:expires_at, "must be in the future")
     end
   end
 end

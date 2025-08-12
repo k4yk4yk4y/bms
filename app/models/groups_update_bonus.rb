@@ -1,25 +1,25 @@
 class GroupsUpdateBonus < ApplicationRecord
   # Explicitly set table name
-  self.table_name = 'groups_update_bonuses'
-  
+  self.table_name = "groups_update_bonuses"
+
   # Associations
   belongs_to :bonus
 
   # Validations
   validates :target_groups, presence: true
-  validates :update_type, presence: true, inclusion: { 
-    in: %w[add_bonus remove_bonus modify_bonus bulk_apply] 
+  validates :update_type, presence: true, inclusion: {
+    in: %w[add_bonus remove_bonus modify_bonus bulk_apply]
   }
   validates :batch_size, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 1000 }
-  validates :processing_status, presence: true, inclusion: { 
-    in: %w[pending processing completed failed paused] 
+  validates :processing_status, presence: true, inclusion: {
+    in: %w[pending processing completed failed paused]
   }
 
   # Scopes
-  scope :pending, -> { where(processing_status: 'pending') }
-  scope :processing, -> { where(processing_status: 'processing') }
-  scope :completed, -> { where(processing_status: 'completed') }
-  scope :failed, -> { where(processing_status: 'failed') }
+  scope :pending, -> { where(processing_status: "pending") }
+  scope :processing, -> { where(processing_status: "processing") }
+  scope :completed, -> { where(processing_status: "completed") }
+  scope :failed, -> { where(processing_status: "failed") }
   scope :by_update_type, ->(type) { where(update_type: type) }
 
   # Callbacks
@@ -49,23 +49,23 @@ class GroupsUpdateBonus < ApplicationRecord
   end
 
   def pending?
-    processing_status == 'pending'
+    processing_status == "pending"
   end
 
   def processing?
-    processing_status == 'processing'
+    processing_status == "processing"
   end
 
   def completed?
-    processing_status == 'completed'
+    processing_status == "completed"
   end
 
   def failed?
-    processing_status == 'failed'
+    processing_status == "failed"
   end
 
   def paused?
-    processing_status == 'paused'
+    processing_status == "paused"
   end
 
   def can_start_processing?
@@ -74,35 +74,35 @@ class GroupsUpdateBonus < ApplicationRecord
 
   def start_processing!
     return false unless can_start_processing?
-    update!(processing_status: 'processing')
+    update!(processing_status: "processing")
   end
 
   def complete_processing!
-    update!(processing_status: 'completed')
+    update!(processing_status: "completed")
   end
 
   def fail_processing!(error_message = nil)
     params = update_parameters_hash
-    params['error_message'] = error_message if error_message
+    params["error_message"] = error_message if error_message
     self.update_parameters_hash = params
-    update!(processing_status: 'failed')
+    update!(processing_status: "failed")
   end
 
   def pause_processing!
     return false unless processing?
-    update!(processing_status: 'paused')
+    update!(processing_status: "paused")
   end
 
   def resume_processing!
     return false unless paused?
-    update!(processing_status: 'processing')
+    update!(processing_status: "processing")
   end
 
   def estimated_processing_time
     # Simple estimation based on target groups and batch size
     total_targets = target_groups_array.size
     return 0 if total_targets.zero?
-    
+
     batches = (total_targets.to_f / batch_size).ceil
     batches * 30 # 30 seconds per batch (rough estimate)
   end
@@ -110,7 +110,7 @@ class GroupsUpdateBonus < ApplicationRecord
   def progress_percentage
     return 0 unless processing? || completed?
     return 100 if completed?
-    
+
     # This would need to be implemented with actual progress tracking
     # For now, return a placeholder
     50
@@ -120,8 +120,8 @@ class GroupsUpdateBonus < ApplicationRecord
 
   def set_defaults
     self.batch_size ||= 100
-    self.processing_status ||= 'pending'
-    self.target_groups ||= '[]'
-    self.update_parameters ||= '{}'
+    self.processing_status ||= "pending"
+    self.target_groups ||= "[]"
+    self.update_parameters ||= "{}"
   end
 end

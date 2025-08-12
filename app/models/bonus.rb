@@ -1,7 +1,7 @@
 class Bonus < ApplicationRecord
   # Explicitly set table name
-  self.table_name = 'bonuses'
-  
+  self.table_name = "bonuses"
+
   # Status and type constants
   STATUSES = %w[draft active inactive expired].freeze
   BONUS_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
@@ -31,30 +31,30 @@ class Bonus < ApplicationRecord
   validate :minimum_deposit_for_appropriate_types
 
   # Scopes
-  scope :draft, -> { where(status: 'draft') }
-  scope :active, -> { where(status: 'active') }
-  scope :inactive, -> { where(status: 'inactive') }
-  scope :expired, -> { where(status: 'expired') }
+  scope :draft, -> { where(status: "draft") }
+  scope :active, -> { where(status: "active") }
+  scope :inactive, -> { where(status: "inactive") }
+  scope :expired, -> { where(status: "expired") }
   scope :by_type, ->(type) { where(bonus_type: type) }
   scope :by_currency, ->(currency) { where(currency: currency) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
-  scope :by_dsl_tag, ->(dsl_tag) { where('dsl_tag LIKE ?', "%#{dsl_tag}%") }
-  scope :available_now, -> { where('availability_start_date <= ? AND availability_end_date >= ?', Time.current, Time.current) }
+  scope :by_dsl_tag, ->(dsl_tag) { where("dsl_tag LIKE ?", "%#{dsl_tag}%") }
+  scope :available_now, -> { where("availability_start_date <= ? AND availability_end_date >= ?", Time.current, Time.current) }
 
-  scope :deposit_type, -> { where(bonus_type: 'deposit') }
-  scope :input_coupon_type, -> { where(bonus_type: 'input_coupon') }
-  scope :manual_type, -> { where(bonus_type: 'manual') }
-  scope :collection_type, -> { where(bonus_type: 'collection') }
-  scope :groups_update_type, -> { where(bonus_type: 'groups_update') }
-  scope :scheduler_type, -> { where(bonus_type: 'scheduler') }
+  scope :deposit_type, -> { where(bonus_type: "deposit") }
+  scope :input_coupon_type, -> { where(bonus_type: "input_coupon") }
+  scope :manual_type, -> { where(bonus_type: "manual") }
+  scope :collection_type, -> { where(bonus_type: "collection") }
+  scope :groups_update_type, -> { where(bonus_type: "groups_update") }
+  scope :scheduler_type, -> { where(bonus_type: "scheduler") }
 
   # Callbacks
   before_validation :generate_code, if: -> { code.blank? }
 
   # Instance methods
   def active?
-    status == 'active' && available_now?
+    status == "active" && available_now?
   end
 
   def available_now?
@@ -67,49 +67,49 @@ class Bonus < ApplicationRecord
 
   def type_specific_record
     case bonus_type
-    when 'deposit'
+    when "deposit"
       deposit_bonus
-    when 'input_coupon'
+    when "input_coupon"
       input_coupon_bonus
-    when 'manual'
+    when "manual"
       manual_bonus
-    when 'collection'
+    when "collection"
       collect_bonus
-    when 'groups_update'
+    when "groups_update"
       groups_update_bonus
-    when 'scheduler'
+    when "scheduler"
       scheduler_bonus
     end
   end
 
   def tags_array
     return [] if tags.blank?
-    tags.split(',').map(&:strip)
+    tags.split(",").map(&:strip)
   end
 
   def tags_array=(array)
-    self.tags = array.join(', ')
+    self.tags = array.join(", ")
   end
 
   def activate!
-    update!(status: 'active')
+    update!(status: "active")
   end
 
   def deactivate!
-    update!(status: 'inactive')
+    update!(status: "inactive")
   end
 
   def mark_as_expired!
-    update!(status: 'expired')
+    update!(status: "expired")
   end
 
   private
 
   def end_date_after_start_date
     return unless availability_start_date && availability_end_date
-    
+
     if availability_end_date <= availability_start_date
-      errors.add(:availability_end_date, 'must be after start date')
+      errors.add(:availability_end_date, "must be after start date")
     end
   end
 
@@ -122,9 +122,9 @@ class Bonus < ApplicationRecord
   def validate_decimal_field(field)
     value = send(field)
     return if value.nil?
-    
+
     if value < 0
-      errors.add(field, 'must be greater than or equal to 0')
+      errors.add(field, "must be greater than or equal to 0")
     end
   end
 
@@ -138,15 +138,14 @@ class Bonus < ApplicationRecord
   def minimum_deposit_for_appropriate_types
     # minimum_deposit не должно быть установлено для типов бонусов, которые не требуют депозита
     non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
-    
+
     if non_deposit_types.include?(bonus_type) && minimum_deposit.present?
       errors.add(:minimum_deposit, "не должно быть установлено для типа бонуса #{bonus_type}")
     end
-    
+
     # Для депозитных бонусов minimum_deposit не должно дублироваться с deposit_amount_required
-    if bonus_type == 'deposit' && minimum_deposit.present?
+    if bonus_type == "deposit" && minimum_deposit.present?
       errors.add(:minimum_deposit, "не должно использоваться для депозитных бонусов. Используйте настройки депозитного бонуса")
     end
   end
-
 end
