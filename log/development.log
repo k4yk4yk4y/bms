@@ -7467,3 +7467,29 @@ Processing by BonusesController#index as HTML
 Completed 200 OK in 61ms (Views: 47.3ms | ActiveRecord: 1.7ms (8 queries, 0 cached) | GC: 5.0ms)
 
 
+Started GET "/" for ::1 at 2025-08-12 22:33:36 +0300
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='MbsPromoRetention'*/[0m
+Processing by BonusesController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  [1m[36mBonus Exists? (2.9ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:59
+  [1m[36mBonus Load (2.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."created_at" DESC LIMIT 20 OFFSET 0 /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mDepositBonus Load (0.1ms)[0m  [1m[34mSELECT "deposit_bonuses".* FROM "deposit_bonuses" WHERE "deposit_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mInputCouponBonus Load (0.2ms)[0m  [1m[34mSELECT "input_coupon_bonuses".* FROM "input_coupon_bonuses" WHERE "input_coupon_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mManualBonus Load (0.2ms)[0m  [1m[34mSELECT "manual_bonuses".* FROM "manual_bonuses" WHERE "manual_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mCollectBonus Load (0.2ms)[0m  [1m[34mSELECT "collect_bonuses".* FROM "collect_bonuses" WHERE "collect_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mGroupsUpdateBonus Load (0.2ms)[0m  [1m[34mSELECT "groups_update_bonuses".* FROM "groups_update_bonuses" WHERE "groups_update_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  [1m[36mSchedulerBonus Load (0.1ms)[0m  [1m[34mSELECT "scheduler_bonuses".* FROM "scheduler_bonuses" WHERE "scheduler_bonuses"."bonus_id" IN (200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181) /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:76
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 142.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 153.6ms | GC: 0.0ms)
+Completed 200 OK in 221ms (Views: 144.5ms | ActiveRecord: 13.7ms (8 queries, 0 cached) | GC: 0.4ms)
+
+

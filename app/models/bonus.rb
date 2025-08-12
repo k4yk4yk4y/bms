@@ -5,6 +5,7 @@ class Bonus < ApplicationRecord
   # Status and type constants
   STATUSES = %w[draft active inactive expired].freeze
   BONUS_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
+  PROJECTS = %w[VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
 
   # Associations
   has_one :deposit_bonus, dependent: :destroy
@@ -22,6 +23,8 @@ class Bonus < ApplicationRecord
   validates :availability_start_date, presence: true
   validates :availability_end_date, presence: true
   validates :currency, presence: true, length: { maximum: 3 }
+  validates :project, inclusion: { in: PROJECTS }, allow_blank: true
+  validates :dsl_tag, length: { maximum: 255 }
 
   validate :end_date_after_start_date
   validate :valid_decimal_fields
@@ -35,6 +38,8 @@ class Bonus < ApplicationRecord
   scope :by_type, ->(type) { where(bonus_type: type) }
   scope :by_currency, ->(currency) { where(currency: currency) }
   scope :by_country, ->(country) { where(country: country) }
+  scope :by_project, ->(project) { where(project: project) }
+  scope :by_dsl_tag, ->(dsl_tag) { where('dsl_tag LIKE ?', "%#{dsl_tag}%") }
   scope :available_now, -> { where('availability_start_date <= ? AND availability_end_date >= ?', Time.current, Time.current) }
 
   scope :deposit_type, -> { where(bonus_type: 'deposit') }

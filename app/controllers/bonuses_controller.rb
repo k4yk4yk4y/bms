@@ -25,6 +25,12 @@ class BonusesController < ApplicationController
     # Filter by country if specified
     @bonuses = @bonuses.by_country(params[:country]) if params[:country].present?
     
+    # Filter by project if specified
+    @bonuses = @bonuses.by_project(params[:project]) if params[:project].present?
+    
+    # Filter by dsl_tag if specified
+    @bonuses = @bonuses.by_dsl_tag(params[:dsl_tag]) if params[:dsl_tag].present?
+    
     # Search by name or code
     if params[:search].present?
       @bonuses = @bonuses.where(
@@ -180,7 +186,7 @@ class BonusesController < ApplicationController
       :name, :code, :bonus_type, :status, :minimum_deposit, :wager, 
       :maximum_winnings, :wagering_strategy, :availability_start_date, 
       :availability_end_date, :user_group, :tags, :country, :currency,
-      :created_by, :updated_by
+      :project, :dsl_tag, :created_by, :updated_by
     )
   end
 

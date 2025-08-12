@@ -1,9 +1,9 @@
 class HeatmapController < ApplicationController
   def index
-    # Получаем параметры из запроса
-    @year = params[:year]&.to_i || Date.current.year
-    @month = params[:month]&.to_i || Date.current.month
-    @bonus_type = params[:bonus_type] || 'all'
+    # Получаем валидированные параметры
+    @year = heatmap_params[:year]&.to_i || Date.current.year
+    @month = heatmap_params[:month]&.to_i || Date.current.month
+    @bonus_type = heatmap_params[:bonus_type] || 'all'
     
     # Создаем дату начала и конца месяца
     @start_date = Date.new(@year, @month, 1)
@@ -22,6 +22,10 @@ class HeatmapController < ApplicationController
   
   private
   
+  def heatmap_params
+    params.permit(:year, :month, :bonus_type)
+  end
+
   def generate_heatmap_data
     # Базовый запрос бонусов
     bonuses_query = Bonus.where(
