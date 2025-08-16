@@ -3,11 +3,11 @@ class BonusesController < ApplicationController
 
   # GET /bonuses
   def index
-    @bonuses = Bonus.includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus,
-                             :collect_bonus, :groups_update_bonus, :scheduler_bonus)
+    @bonuses = Bonus.includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
 
-    # Filter by type if specified
-    @bonuses = @bonuses.by_type(params[:type]) if params[:type].present?
+    # Filter by event if specified
+    @bonuses = @bonuses.by_event(params[:type] || params[:event]) if (params[:type] || params[:event]).present?
 
     # Filter by status if specified
     case params[:status]
@@ -69,9 +69,8 @@ class BonusesController < ApplicationController
   # GET /bonuses/new
   def new
     @bonus = Bonus.new
-    @bonus_type = params[:type] || "deposit"
-    @bonus.bonus_type = @bonus_type
-    build_type_specific_bonus
+    @event_type = params[:event] || params[:type] || "deposit"
+    @bonus.event = @event_type
   end
 
   # GET /bonuses/1/edit
@@ -81,15 +80,23 @@ class BonusesController < ApplicationController
   # POST /bonuses
   def create
     @bonus = Bonus.new(bonus_params)
-    clean_inappropriate_fields
 
     respond_to do |format|
       if @bonus.save
-        update_type_specific_attributes
+        # Create multiple bonus rewards if provided
+        create_multiple_bonus_rewards_if_provided
+        # Create multiple freespin rewards if provided
+        create_multiple_freespin_rewards_if_provided
+        # Create multiple bonus_buy rewards if provided
+        create_multiple_bonus_buy_rewards_if_provided
+        # Create multiple comp_point rewards if provided
+        create_multiple_comp_point_rewards_if_provided
+        # Create multiple bonus_code rewards if provided
+        create_multiple_bonus_code_rewards_if_provided
         format.html { redirect_to @bonus, notice: "Bonus was successfully created." }
         format.json { render json: @bonus, status: :created, location: @bonus }
       else
-        build_type_specific_bonus
+        @event_type = @bonus.event
         format.html { render :new }
         format.json { render json: @bonus.errors, status: :unprocessable_entity }
       end
@@ -98,12 +105,18 @@ class BonusesController < ApplicationController
 
   # PATCH/PUT /bonuses/1
   def update
-    @bonus.assign_attributes(bonus_params)
-    clean_inappropriate_fields
-
     respond_to do |format|
-      if @bonus.save
-        update_type_specific_attributes
+      if @bonus.update(bonus_params)
+        # Update or create multiple bonus rewards if provided
+        update_multiple_bonus_rewards_if_provided
+        # Update or create multiple freespin rewards if provided
+        update_multiple_freespin_rewards_if_provided
+        # Update or create multiple bonus_buy rewards if provided
+        update_multiple_bonus_buy_rewards_if_provided
+        # Update or create multiple comp_point rewards if provided
+        update_multiple_comp_point_rewards_if_provided
+        # Update or create multiple bonus_code rewards if provided
+        update_multiple_bonus_code_rewards_if_provided
         format.html { redirect_to @bonus, notice: "Bonus was successfully updated." }
         format.json { render json: @bonus }
       else
@@ -134,7 +147,8 @@ class BonusesController < ApplicationController
 
   # GET /bonuses/by_type
   def by_type
-    @bonuses = Bonus.by_type(params[:type]) if params[:type].present?
+    event_param = params[:type] || params[:event]
+    @bonuses = Bonus.by_event(event_param) if event_param.present?
     @bonuses ||= Bonus.none
 
     render json: @bonuses.as_json(except: [ :currency ])
@@ -166,220 +180,751 @@ class BonusesController < ApplicationController
 
   def bonus_params
     params.require(:bonus).permit(
-      :name, :code, :bonus_type, :status, :minimum_deposit, :wager,
+      :name, :code, :event, :status, :minimum_deposit, :wager,
       :maximum_winnings, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country, :currency,
-      :project, :dsl_tag, :created_by, :updated_by
+      :project, :dsl_tag, :created_by, :updated_by, :groups, :no_more, :totally_no_more,
+      currencies: []
     )
   end
 
-  def type_specific_params
-    case @bonus.bonus_type
-    when "deposit"
-      params.require(:deposit_bonus).permit(
-        :deposit_amount_required, :bonus_percentage, :max_bonus_amount,
-        :first_deposit_only, :recurring_eligible
-      ) if params[:deposit_bonus]
-    when "input_coupon"
-      params.require(:input_coupon_bonus).permit(
-        :coupon_code, :usage_limit, :expires_at, :single_use
-      ) if params[:input_coupon_bonus]
-    when "manual"
-      params.require(:manual_bonus).permit(
-        :admin_notes, :approval_required, :auto_apply, :conditions
-      ) if params[:manual_bonus]
-    when "collection"
-      params.require(:collect_bonus).permit(
-        :collection_type, :collection_amount, :collection_frequency,
-        :collection_limit
-      ) if params[:collect_bonus]
-    when "groups_update"
-      params.require(:groups_update_bonus).permit(
-        :target_groups, :update_type, :update_parameters, :batch_size
-      ) if params[:groups_update_bonus]
-    when "scheduler"
-      params.require(:scheduler_bonus).permit(
-        :schedule_type, :cron_expression, :next_run_at, :max_executions
-      ) if params[:scheduler_bonus]
+  def bonus_reward_params
+    return {} unless params[:bonus_reward].present?
+    
+    permitted = params.require(:bonus_reward).permit(
+      :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+      :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
+      # Advanced parameters
+      :range, :last_login_country, :profile_country, :current_ip_country, :emails,
+      :stag, :deposit_payment_systems, :cashout_payment_systems, 
+      :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+      :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+      :affiliates_user, :balance, :cashout, :chargeable_comp_points,
+      :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
+      :registered, :social_networks, :hold_min, :hold_max,
+      currencies: []
+    )
+
+    # Process max_win logic
+    if params[:max_win_type] == 'multiplier' && permitted[:max_win_multiplier].present?
+      permitted[:max_win] = "x#{permitted[:max_win_multiplier]}"
+    elsif permitted[:max_win_fixed].present?
+      permitted[:max_win] = permitted[:max_win_fixed]
+    end
+
+    # Clean up temporary fields
+    permitted.delete(:max_win_fixed)
+    permitted.delete(:max_win_multiplier)
+    permitted.delete(:bonus_type)
+
+    permitted
+  end
+
+  def create_bonus_reward_if_provided
+    reward_params = bonus_reward_params
+    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
+
+    reward = @bonus.bonus_rewards.build(
+      reward_type: 'bonus',
+      amount: reward_params[:amount],
+      percentage: reward_params[:percentage]
+    )
+
+    # Set all additional parameters through the config field
+    config = {}
+    reward_params.except(:amount, :percentage).each do |key, value|
+      next if value.blank?
+      config[key.to_s] = value
+    end
+    
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_bonus_reward_if_provided
+    reward_params = bonus_reward_params
+    return if reward_params.empty?
+
+    # Find existing bonus reward or create new one
+    reward = @bonus.bonus_rewards.find_by(reward_type: 'bonus') || 
+             @bonus.bonus_rewards.build(reward_type: 'bonus')
+
+    # Update amount/percentage
+    reward.amount = reward_params[:amount] if reward_params[:amount].present?
+    reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:amount, :percentage).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+    
+    reward.config = config
+    reward.save
+  end
+
+  def freespin_reward_params
+    return {} unless params[:freespin_reward].present?
+    
+    permitted = params.require(:freespin_reward).permit(
+      :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+      :min, :groups, :tags, :stag, :wagering_strategy,
+      # Advanced parameters
+      :auto_activate, :duration, :activation_duration, :email_template, :range,
+      :last_login_country, :profile_country, :current_ip_country, :emails,
+      :deposit_payment_systems, :cashout_payment_systems, :user_can_have_duplicates,
+      :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+      :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+      :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
+      :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
+      :wager_done, :hold_min, :hold_max, :currencies, currencies: []
+    )
+    
+    # Handle array fields properly
+    permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
+    permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+    
+    permitted
+  end
+
+  def create_freespin_reward_if_provided
+    reward_params = freespin_reward_params
+    return if reward_params.empty? || reward_params[:spins_count].blank?
+
+    reward = @bonus.freespin_rewards.build(
+      spins_count: reward_params[:spins_count]
+    )
+
+    # Set common parameters
+    reward.games = reward_params[:games] if reward_params[:games].present?
+    reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+    reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+    reward.available = reward_params[:available] if reward_params[:available].present?
+    reward.code = reward_params[:code] if reward_params[:code].present?
+    reward.min_deposit = reward_params[:min] if reward_params[:min].present?
+    reward.groups = reward_params[:groups] if reward_params[:groups].present?
+    reward.tags = reward_params[:tags] if reward_params[:tags].present?
+    reward.stag = reward_params[:stag] if reward_params[:stag].present?
+    reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
+    reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+
+    # Set advanced parameters
+    config = {}
+    reward.advanced_params.each do |param|
+      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
+    end
+    
+    reward.config = config
+    reward.save
+  end
+
+  def update_freespin_reward_if_provided
+    reward_params = freespin_reward_params
+    return if reward_params.empty?
+
+    # Find existing freespin reward or create new one
+    reward = @bonus.freespin_rewards.first || @bonus.freespin_rewards.build
+
+    # Update spins count if provided
+    reward.spins_count = reward_params[:spins_count] if reward_params[:spins_count].present?
+
+    # Update common parameters
+    reward.games = reward_params[:games] if reward_params[:games].present?
+    reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+    reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+    reward.available = reward_params[:available] if reward_params[:available].present?
+    reward.code = reward_params[:code] if reward_params[:code].present?
+    reward.min_deposit = reward_params[:min] if reward_params[:min].present?
+    reward.groups = reward_params[:groups] if reward_params[:groups].present?
+    reward.tags = reward_params[:tags] if reward_params[:tags].present?
+    reward.stag = reward_params[:stag] if reward_params[:stag].present?
+    reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
+    reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+
+    # Update advanced parameters
+    config = reward.config || {}
+    reward.advanced_params.each do |param|
+      if reward_params[param.to_sym].present?
+        config[param] = reward_params[param.to_sym]
+      end
+    end
+    
+    reward.config = config
+    reward.save
+  end
+
+  def multiple_bonus_rewards_params
+    return [] unless params[:bonus_rewards].present?
+    
+    params[:bonus_rewards].values.map do |reward_params|
+      next if reward_params.blank?
+      
+      permitted = reward_params.permit(
+        :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+        :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
+        # Advanced parameters
+        :range, :last_login_country, :profile_country, :current_ip_country, :emails,
+        :stag, :deposit_payment_systems, :cashout_payment_systems, 
+        :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+        :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+        :affiliates_user, :balance, :cashout, :chargeable_comp_points,
+        :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
+        :registered, :social_networks, :hold_min, :hold_max,
+        :currencies, currencies: []
+      )
+      
+      # Handle array fields properly
+      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:currencies] = permitted[:currencies].compact.reject(&:blank?) if permitted[:currencies].is_a?(Array)
+      
+      permitted
+    end.compact
+  end
+
+  def multiple_freespin_rewards_params
+    return [] unless params[:freespin_rewards].present?
+    
+    params[:freespin_rewards].values.map do |reward_params|
+      next if reward_params.blank? || reward_params[:spins_count].blank?
+      
+      permitted = reward_params.permit(
+        :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+        :tags, :stag,
+        # Advanced parameters
+        :auto_activate, :duration, :activation_duration, :email_template, :range,
+        :last_login_country, :profile_country, :current_ip_country, :emails,
+        :deposit_payment_systems, :cashout_payment_systems, :user_can_have_duplicates,
+        :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+        :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+        :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
+        :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
+        :wager_done, :hold_min, :hold_max,
+        # Currency bet levels
+        currency_bet_levels: {}
+      )
+      
+      # Handle array fields properly
+      permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
+      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:currencies] = permitted[:currencies].split(',').map(&:strip) if permitted[:currencies].is_a?(String)
+      
+      permitted
+    end.compact
+  end
+
+  def create_multiple_bonus_rewards_if_provided
+    rewards_params = multiple_bonus_rewards_params
+    return if rewards_params.empty?
+
+    rewards_params.each do |reward_params|
+      next if reward_params[:amount].blank? && reward_params[:percentage].blank?
+
+      reward = @bonus.bonus_rewards.build(
+        reward_type: 'bonus',
+        amount: reward_params[:amount],
+        percentage: reward_params[:percentage]
+      )
+
+      # Set all additional parameters through the config field
+      config = {}
+      reward_params.except(:amount, :percentage).each do |key, value|
+        next if value.blank?
+        config[key.to_s] = value
+      end
+      
+      # Add common parameters from bonus
+      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
+      config['groups'] = @bonus.groups if @bonus.groups.present?
+      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
+      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      
+      reward.config = config unless config.empty?
+      reward.save
     end
   end
 
-  def build_type_specific_bonus
-    case @bonus.bonus_type
-    when "deposit"
-      @bonus.build_deposit_bonus unless @bonus.deposit_bonus
-    when "input_coupon"
-      @bonus.build_input_coupon_bonus unless @bonus.input_coupon_bonus
-    when "manual"
-      @bonus.build_manual_bonus unless @bonus.manual_bonus
-    when "collection"
-      @bonus.build_collect_bonus unless @bonus.collect_bonus
-    when "groups_update"
-      @bonus.build_groups_update_bonus unless @bonus.groups_update_bonus
-    when "scheduler"
-      @bonus.build_scheduler_bonus unless @bonus.scheduler_bonus
+  def create_multiple_freespin_rewards_if_provided
+    rewards_params = multiple_freespin_rewards_params
+    return if rewards_params.empty?
+
+    rewards_params.each do |reward_params|
+      reward = @bonus.freespin_rewards.build(
+        spins_count: reward_params[:spins_count]
+      )
+
+      # Set common parameters
+      reward.games = reward_params[:games] if reward_params[:games].present?
+      reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+      reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+      reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+      reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+      reward.available = reward_params[:available] if reward_params[:available].present?
+      reward.code = reward_params[:code] if reward_params[:code].present?
+      reward.tags = reward_params[:tags] if reward_params[:tags].present?
+      reward.stag = reward_params[:stag] if reward_params[:stag].present?
+      
+      # Use common parameters from bonus
+      reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      reward.groups = @bonus.groups if @bonus.groups.present?
+      reward.wagering_strategy = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      reward.currencies = @bonus.currencies if @bonus.currencies.present?
+      reward.no_more = @bonus.no_more if @bonus.no_more.present?
+      reward.totally_no_more = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      # Set currency bet levels
+      if reward_params[:currency_bet_levels].present?
+        reward.currency_bet_levels = reward_params[:currency_bet_levels]
+      end
+
+      # Set advanced parameters
+      config = {}
+      reward.advanced_params.each do |param|
+        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
+      end
+      
+      reward.config = config
+      reward.save
     end
   end
 
-  def update_type_specific_attributes
-    type_params = type_specific_params
-    return unless type_params
+  def update_multiple_bonus_rewards_if_provided
+    # For updates, we need to handle existing rewards and new ones
+    # This is a complex topic that would need careful design
+    # For now, fall back to legacy method
+    update_bonus_reward_if_provided
+  end
 
-    case @bonus.bonus_type
-    when "deposit"
-      if @bonus.deposit_bonus
-        @bonus.deposit_bonus.update(type_params)
-      else
-        @bonus.create_deposit_bonus(type_params)
+  def update_multiple_freespin_rewards_if_provided
+    # For updates, we need to handle existing rewards and new ones
+    # This is a complex topic that would need careful design
+    # For now, fall back to legacy method
+    update_freespin_reward_if_provided
+  end
+
+  def bonus_buy_reward_params
+    return {} unless params[:bonus_buy_reward].present?
+    
+    permitted = params.require(:bonus_buy_reward).permit(
+      :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+      :min, :groups, :tags, :stag, :wagering_strategy,
+      # Advanced parameters
+      :auto_activate, :duration, :activation_duration, :email_template, :range,
+      :last_login_country, :profile_country, :current_ip_country, :emails,
+      :deposit_payment_systems, :cashout_payment_systems, :user_can_have_duplicates,
+      :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+      :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+      :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
+      :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
+      :wager_done, :hold_min, :hold_max, :currencies, currencies: [],
+      # Currency bet levels
+      currency_bet_levels: {}
+    )
+
+    # Handle array fields properly
+    permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
+    permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+    
+    permitted
+  end
+
+  def multiple_bonus_buy_rewards_params
+    return [] unless params[:bonus_buy_rewards].present?
+    
+    params[:bonus_buy_rewards].values.map do |reward_params|
+      next if reward_params.blank? || reward_params[:buy_amount].blank?
+      
+      permitted = reward_params.permit(
+        :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+        :min, :groups, :tags, :stag, :wagering_strategy,
+        # Advanced parameters
+        :auto_activate, :duration, :activation_duration, :email_template, :range,
+        :last_login_country, :profile_country, :current_ip_country, :emails,
+        :deposit_payment_systems, :cashout_payment_systems, :user_can_have_duplicates,
+        :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+        :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+        :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
+        :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
+        :wager_done, :hold_min, :hold_max, :currencies, currencies: [],
+        # Currency bet levels
+        currency_bet_levels: {}
+      )
+      
+      # Handle array fields properly
+      permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
+      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:currencies] = permitted[:currencies].split(',').map(&:strip) if permitted[:currencies].is_a?(String)
+      
+      permitted
+    end.compact
+  end
+
+  def create_multiple_bonus_buy_rewards_if_provided
+    rewards_params = multiple_bonus_buy_rewards_params
+    return if rewards_params.empty?
+
+    rewards_params.each do |reward_params|
+      reward = @bonus.bonus_buy_rewards.build(
+        buy_amount: reward_params[:buy_amount],
+        multiplier: reward_params[:multiplier]
+      )
+
+      # Set common parameters
+      reward.games = reward_params[:games] if reward_params[:games].present?
+      reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+      reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+      reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+      reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+      reward.available = reward_params[:available] if reward_params[:available].present?
+      reward.code = reward_params[:code] if reward_params[:code].present?
+      reward.tags = reward_params[:tags] if reward_params[:tags].present?
+      reward.stag = reward_params[:stag] if reward_params[:stag].present?
+      
+      # Use common parameters from bonus
+      reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      reward.groups = @bonus.groups if @bonus.groups.present?
+      reward.wagering_strategy = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      reward.currencies = @bonus.currencies if @bonus.currencies.present?
+      reward.no_more = @bonus.no_more if @bonus.no_more.present?
+      reward.totally_no_more = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      # Set currency bet levels
+      if reward_params[:currency_bet_levels].present?
+        reward.currency_bet_levels = reward_params[:currency_bet_levels]
       end
-    when "input_coupon"
-      if @bonus.input_coupon_bonus
-        @bonus.input_coupon_bonus.update(type_params)
-      else
-        @bonus.create_input_coupon_bonus(type_params)
+
+      # Set advanced parameters
+      config = {}
+      reward.advanced_params.each do |param|
+        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
       end
-    when "manual"
-      if @bonus.manual_bonus
-        @bonus.manual_bonus.update(type_params)
-      else
-        @bonus.create_manual_bonus(type_params)
-      end
-    when "collection"
-      if @bonus.collect_bonus
-        @bonus.collect_bonus.update(type_params)
-      else
-        @bonus.create_collect_bonus(type_params)
-      end
-    when "groups_update"
-      if @bonus.groups_update_bonus
-        @bonus.groups_update_bonus.update(type_params)
-      else
-        @bonus.create_groups_update_bonus(type_params)
-      end
-    when "scheduler"
-      if @bonus.scheduler_bonus
-        @bonus.scheduler_bonus.update(type_params)
-      else
-        @bonus.create_scheduler_bonus(type_params)
+      
+      reward.config = config
+      reward.save
+    end
+  end
+
+  def update_multiple_bonus_buy_rewards_if_provided
+    # For updates, we need to handle existing rewards and new ones
+    # This is a complex topic that would need careful design
+    # For now, fall back to legacy method
+    update_bonus_buy_reward_if_provided
+  end
+
+  def create_bonus_buy_reward_if_provided
+    reward_params = bonus_buy_reward_params
+    return if reward_params.empty? || reward_params[:buy_amount].blank?
+
+    reward = @bonus.bonus_buy_rewards.build(
+      buy_amount: reward_params[:buy_amount],
+      multiplier: reward_params[:multiplier]
+    )
+
+    # Set common parameters
+    reward.games = reward_params[:games] if reward_params[:games].present?
+    reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+    reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+    reward.available = reward_params[:available] if reward_params[:available].present?
+    reward.code = reward_params[:code] if reward_params[:code].present?
+    reward.min_deposit = reward_params[:min] if reward_params[:min].present?
+    reward.groups = reward_params[:groups] if reward_params[:groups].present?
+    reward.tags = reward_params[:tags] if reward_params[:tags].present?
+    reward.stag = reward_params[:stag] if reward_params[:stag].present?
+    reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
+    reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+
+    # Set currency bet levels
+    if reward_params[:currency_bet_levels].present?
+      reward.currency_bet_levels = reward_params[:currency_bet_levels]
+    end
+
+    # Set advanced parameters
+    config = {}
+    reward.advanced_params.each do |param|
+      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
+    end
+    
+    reward.config = config
+    reward.save
+  end
+
+  def update_bonus_buy_reward_if_provided
+    reward_params = bonus_buy_reward_params
+    return if reward_params.empty?
+
+    # Find existing bonus_buy reward or create new one
+    reward = @bonus.bonus_buy_rewards.first || @bonus.bonus_buy_rewards.build
+
+    # Update buy amount and multiplier if provided
+    reward.buy_amount = reward_params[:buy_amount] if reward_params[:buy_amount].present?
+    reward.multiplier = reward_params[:multiplier] if reward_params[:multiplier].present?
+
+    # Update common parameters
+    reward.games = reward_params[:games] if reward_params[:games].present?
+    reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
+    reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+    reward.available = reward_params[:available] if reward_params[:available].present?
+    reward.code = reward_params[:code] if reward_params[:code].present?
+    reward.min_deposit = reward_params[:min] if reward_params[:min].present?
+    reward.groups = reward_params[:groups] if reward_params[:groups].present?
+    reward.tags = reward_params[:tags] if reward_params[:tags].present?
+    reward.stag = reward_params[:stag] if reward_params[:stag].present?
+    reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
+    reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+
+    # Update currency bet levels
+    if reward_params[:currency_bet_levels].present?
+      reward.currency_bet_levels = reward_params[:currency_bet_levels]
+    end
+
+    # Update advanced parameters
+    config = reward.config || {}
+    reward.advanced_params.each do |param|
+      if reward_params[param.to_sym].present?
+        config[param] = reward_params[param.to_sym]
       end
     end
+    
+    reward.config = config
+    reward.save
   end
 
   def bonus_includes
-    case @bonus.bonus_type
-    when "deposit"
-      :deposit_bonus
-    when "input_coupon"
-      :input_coupon_bonus
-    when "manual"
-      :manual_bonus
-    when "collection"
-      :collect_bonus
-    when "groups_update"
-      :groups_update_bonus
-    when "scheduler"
-      :scheduler_bonus
-    else
-      []
-    end
+    [
+      :bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+      :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards
+    ]
   end
 
   def generate_preview_data
-    case @bonus.bonus_type
-    when "deposit"
-      generate_deposit_preview
-    when "input_coupon"
-      generate_coupon_preview
-    when "manual"
-      generate_manual_preview
-    when "collection"
-      generate_collect_preview
-    when "groups_update"
-      generate_groups_update_preview
-    when "scheduler"
-      generate_scheduler_preview
-    else
-      {}
+    {
+      event: @bonus.event,
+      rewards_count: @bonus.all_rewards.count,
+      reward_types: @bonus.reward_types,
+      has_rewards: @bonus.has_rewards?
+    }
+  end
+
+  # Comp Point Rewards Parameters
+  def comp_point_reward_params
+    return {} unless params[:comp_point_reward].present?
+    
+    permitted = params.require(:comp_point_reward).permit(
+      :issue_chargeable_award, :issue_persistent_award, :title, :config_json
+    )
+    
+    permitted
+  end
+
+  def multiple_comp_point_rewards_params
+    return [] unless params[:comp_point_rewards].present?
+    
+    params[:comp_point_rewards].values.map do |reward_params|
+      next if reward_params.blank? || (reward_params[:issue_chargeable_award].blank? && reward_params[:issue_persistent_award].blank?)
+      
+      permitted = reward_params.permit(
+        :issue_chargeable_award, :issue_persistent_award, :title, :config_json
+      )
+      
+      permitted
+    end.compact
+  end
+
+  # Bonus Code Rewards Parameters
+  def bonus_code_reward_params
+    return {} unless params[:bonus_code_reward].present?
+    
+    permitted = params.require(:bonus_code_reward).permit(
+      :set_bonus_code, :title, :config_json
+    )
+    
+    permitted
+  end
+
+  def multiple_bonus_code_rewards_params
+    return [] unless params[:bonus_code_rewards].present?
+    
+    params[:bonus_code_rewards].values.map do |reward_params|
+      next if reward_params.blank? || reward_params[:set_bonus_code].blank?
+      
+      permitted = reward_params.permit(
+        :set_bonus_code, :title, :config_json
+      )
+      
+      permitted
+    end.compact
+  end
+
+  # Create multiple comp_point rewards if provided
+  def create_multiple_comp_point_rewards_if_provided
+    return unless params[:comp_point_rewards].present?
+
+    multiple_comp_point_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+      
+      reward = @bonus.comp_point_rewards.build
+      
+      # Set main attributes
+      reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
+      reward.issue_persistent_award = reward_params[:issue_persistent_award]
+      reward.title = reward_params[:title]
+      
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+      
+      # Add common parameters from bonus
+      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
+      config['groups'] = @bonus.groups if @bonus.groups.present?
+      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
+      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      
+      reward.config = config unless config.empty?
+      reward.save
     end
   end
 
-  def generate_deposit_preview
-    return {} unless @bonus.deposit_bonus
+  # Update multiple comp_point rewards if provided
+  def update_multiple_comp_point_rewards_if_provided
+    return unless params[:comp_point_rewards].present?
 
-    sample_deposits = [ 100, 250, 500, 1000 ]
-    previews = sample_deposits.map do |amount|
-      bonus_amount = @bonus.deposit_bonus.calculate_bonus_amount(amount)
-      {
-        deposit_amount: amount,
-        bonus_amount: bonus_amount,
-        total_amount: amount + bonus_amount,
-        eligible: @bonus.deposit_bonus.eligible_for_deposit?(amount)
-      }
-    end
+    # Remove existing comp_point rewards to replace them
+    @bonus.comp_point_rewards.destroy_all
 
-    { deposit_previews: previews }
-  end
-
-  def generate_coupon_preview
-    return {} unless @bonus.input_coupon_bonus
-
-    {
-      coupon_code: @bonus.input_coupon_bonus.coupon_code,
-      remaining_uses: @bonus.input_coupon_bonus.remaining_uses,
-      expires_in_days: @bonus.input_coupon_bonus.days_until_expiry,
-      available: @bonus.input_coupon_bonus.available?
-    }
-  end
-
-  def generate_manual_preview
-    return {} unless @bonus.manual_bonus
-
-    {
-      requires_approval: @bonus.manual_bonus.approval_required,
-      auto_apply: @bonus.manual_bonus.auto_apply,
-      conditions_count: @bonus.manual_bonus.conditions_array.size
-    }
-  end
-
-  def generate_collect_preview
-    return {} unless @bonus.collect_bonus
-
-    {
-      collection_type: @bonus.collect_bonus.collection_type,
-      amount_per_collection: @bonus.collect_bonus.collection_amount,
-      remaining_collections: @bonus.collect_bonus.remaining_collections,
-      can_collect_today: @bonus.collect_bonus.can_collect_today?
-    }
-  end
-
-  def generate_groups_update_preview
-    return {} unless @bonus.groups_update_bonus
-
-    {
-      target_groups_count: @bonus.groups_update_bonus.target_groups_array.size,
-      update_type: @bonus.groups_update_bonus.update_type,
-      batch_size: @bonus.groups_update_bonus.batch_size,
-      estimated_time: @bonus.groups_update_bonus.estimated_processing_time
-    }
-  end
-
-  def generate_scheduler_preview
-    return {} unless @bonus.scheduler_bonus
-
-    {
-      schedule_type: @bonus.scheduler_bonus.schedule_type,
-      next_execution: @bonus.scheduler_bonus.next_execution_formatted,
-      remaining_executions: @bonus.scheduler_bonus.remaining_executions,
-      is_active: @bonus.scheduler_bonus.is_active?
-    }
-  end
-
-  def clean_inappropriate_fields
-    # Очищаем minimum_deposit для типов бонусов, которые его не используют
-    non_deposit_types = %w[input_coupon manual collection groups_update scheduler deposit]
-
-    if non_deposit_types.include?(@bonus.bonus_type)
-      @bonus.minimum_deposit = nil
+    multiple_comp_point_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+      
+      reward = @bonus.comp_point_rewards.build
+      
+      # Set main attributes
+      reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
+      reward.issue_persistent_award = reward_params[:issue_persistent_award]
+      reward.title = reward_params[:title]
+      
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+      
+      # Add common parameters from bonus
+      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
+      config['groups'] = @bonus.groups if @bonus.groups.present?
+      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
+      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      
+      reward.config = config unless config.empty?
+      reward.save
     end
   end
+
+  # Create multiple bonus_code rewards if provided
+  def create_multiple_bonus_code_rewards_if_provided
+    return unless params[:bonus_code_rewards].present?
+
+    multiple_bonus_code_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+      
+      reward = @bonus.bonus_code_rewards.build
+      
+      # Set main attributes
+      reward.set_bonus_code = reward_params[:set_bonus_code]
+      reward.title = reward_params[:title]
+      
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+      
+      # Add common parameters from bonus
+      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
+      config['groups'] = @bonus.groups if @bonus.groups.present?
+      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
+      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  # Update multiple bonus_code rewards if provided
+  def update_multiple_bonus_code_rewards_if_provided
+    return unless params[:bonus_code_rewards].present?
+
+    # Remove existing bonus_code rewards to replace them
+    @bonus.bonus_code_rewards.destroy_all
+
+    multiple_bonus_code_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+      
+      reward = @bonus.bonus_code_rewards.build
+      
+      # Set main attributes
+      reward.set_bonus_code = reward_params[:set_bonus_code]
+      reward.title = reward_params[:title]
+      
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+      
+      # Add common parameters from bonus
+      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
+      config['groups'] = @bonus.groups if @bonus.groups.present?
+      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
+      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
 end

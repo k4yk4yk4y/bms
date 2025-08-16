@@ -31,15 +31,20 @@ module BonusesHelper
     end
   end
 
-  def bonus_type_options
+  def event_type_options
     [
-      [ "Deposit Bonus", "deposit" ],
-      [ "Input Coupon Bonus", "input_coupon" ],
-      [ "Manual Bonus", "manual" ],
-      [ "Collection Bonus", "collection" ],
-      [ "Groups Update Bonus", "groups_update" ],
-      [ "Scheduler Bonus", "scheduler" ]
+      [ "Deposit Event", "deposit" ],
+      [ "Input Coupon Event", "input_coupon" ],
+      [ "Manual Event", "manual" ],
+      [ "Collection Event", "collection" ],
+      [ "Groups Update Event", "groups_update" ],
+      [ "Scheduler Event", "scheduler" ]
     ]
+  end
+  
+  # Deprecated - use event_type_options instead
+  def bonus_type_options
+    event_type_options
   end
 
   def status_options

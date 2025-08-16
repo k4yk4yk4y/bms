@@ -1,232 +1,1311 @@
 <div class="card mb-4">
   <div class="card-header">
     <h5 class="card-title mb-0">
-      <%= bonus.bonus_type&.humanize || 'Bonus Type' %> Specific Settings
+      <%= bonus.event&.humanize || 'Event Type' %> Configuration
     </h5>
   </div>
   <div class="card-body">
-    <% case bonus.bonus_type %>
-    <% when 'deposit' %>
-      <%= fields_for :deposit_bonus, bonus.deposit_bonus || bonus.build_deposit_bonus do |deposit_form| %>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= deposit_form.label :deposit_amount_required, "Required Deposit Amount", class: "form-label" %>
-              <%= deposit_form.number_field :deposit_amount_required, step: 0.01, 
-                  class: "form-control", min: 0, required: true %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= deposit_form.label :bonus_percentage, "Bonus Percentage (%)", class: "form-label" %>
-              <%= deposit_form.number_field :bonus_percentage, step: 0.01, 
-                  class: "form-control", min: 0, max: 1000, required: true %>
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <%= deposit_form.label :max_bonus_amount, "Maximum Bonus Amount", class: "form-label" %>
-          <%= deposit_form.number_field :max_bonus_amount, step: 0.01, 
-              class: "form-control", min: 0 %>
-          <div class="form-text">Leave empty for unlimited bonus amount</div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-check mb-3">
-              <%= deposit_form.check_box :first_deposit_only, class: "form-check-input" %>
-              <%= deposit_form.label :first_deposit_only, "First Deposit Only", class: "form-check-label" %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-check mb-3">
-              <%= deposit_form.check_box :recurring_eligible, class: "form-check-input" %>
-              <%= deposit_form.label :recurring_eligible, "Recurring Eligible", class: "form-check-label" %>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-    <% when 'input_coupon' %>
-      <%= fields_for :input_coupon_bonus, bonus.input_coupon_bonus || bonus.build_input_coupon_bonus do |coupon_form| %>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= coupon_form.label :coupon_code, "Coupon Code", class: "form-label" %>
-              <%= coupon_form.text_field :coupon_code, class: "form-control", required: true %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= coupon_form.label :usage_limit, "Usage Limit", class: "form-label" %>
-              <%= coupon_form.number_field :usage_limit, class: "form-control", 
-                  min: 1, required: true, value: 1 %>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= coupon_form.label :expires_at, "Expires At", class: "form-label" %>
-              <%= coupon_form.datetime_local_field :expires_at, class: "form-control", 
-                  required: true, value: (bonus.input_coupon_bonus&.expires_at || 30.days.from_now).strftime("%Y-%m-%dT%H:%M") %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-check mt-4">
-              <%= coupon_form.check_box :single_use, class: "form-check-input", checked: true %>
-              <%= coupon_form.label :single_use, "Single Use Only", class: "form-check-label" %>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-    <% when 'manual' %>
-      <%= fields_for :manual_bonus, bonus.manual_bonus || bonus.build_manual_bonus do |manual_form| %>
-        <div class="mb-3">
-          <%= manual_form.label :admin_notes, "Admin Notes", class: "form-label" %>
-          <%= manual_form.text_area :admin_notes, class: "form-control", rows: 3 %>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-check mb-3">
-              <%= manual_form.check_box :approval_required, class: "form-check-input", checked: true %>
-              <%= manual_form.label :approval_required, "Approval Required", class: "form-check-label" %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-check mb-3">
-              <%= manual_form.check_box :auto_apply, class: "form-check-input" %>
-              <%= manual_form.label :auto_apply, "Auto Apply", class: "form-check-label" %>
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <%= manual_form.label :conditions, "Conditions (JSON)", class: "form-label" %>
-          <%= manual_form.text_area :conditions, class: "form-control", rows: 4, 
-              placeholder: '[]' %>
-          <div class="form-text">Enter conditions as JSON array</div>
-        </div>
-      <% end %>
-
-    <% when 'collection' %>
-      <%= fields_for :collect_bonus, bonus.collect_bonus || bonus.build_collect_bonus do |collect_form| %>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= collect_form.label :collection_type, "Collection Type", class: "form-label" %>
-              <%= collect_form.select :collection_type, collection_type_options, 
-                  { selected: 'daily' }, { class: "form-select", required: true } %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= collect_form.label :collection_amount, "Collection Amount", class: "form-label" %>
-              <%= collect_form.number_field :collection_amount, step: 0.01, 
-                  class: "form-control", min: 0, required: true %>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= collect_form.label :collection_frequency, "Collection Frequency", class: "form-label" %>
-              <%= collect_form.select :collection_frequency, collection_frequency_options, 
-                  { selected: 'daily' }, { class: "form-select", required: true } %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= collect_form.label :collection_limit, "Collection Limit", class: "form-label" %>
-              <%= collect_form.number_field :collection_limit, class: "form-control", 
-                  min: 1, required: true, value: 1 %>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-    <% when 'groups_update' %>
-      <%= fields_for :groups_update_bonus, bonus.groups_update_bonus || bonus.build_groups_update_bonus do |groups_form| %>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= groups_form.label :update_type, "Update Type", class: "form-label" %>
-              <%= groups_form.select :update_type, update_type_options, 
-                  { selected: 'add_bonus' }, { class: "form-select", required: true } %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= groups_form.label :batch_size, "Batch Size", class: "form-label" %>
-              <%= groups_form.number_field :batch_size, class: "form-control", 
-                  min: 1, max: 1000, required: true, value: 100 %>
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <%= groups_form.label :target_groups, "Target Groups (JSON)", class: "form-label" %>
-          <%= groups_form.text_area :target_groups, class: "form-control", rows: 3, 
-              required: true, placeholder: '["group1", "group2"]' %>
-          <div class="form-text">Enter target groups as JSON array</div>
-        </div>
-
-        <div class="mb-3">
-          <%= groups_form.label :update_parameters, "Update Parameters (JSON)", class: "form-label" %>
-          <%= groups_form.text_area :update_parameters, class: "form-control", rows: 4, 
-              placeholder: '{}' %>
-          <div class="form-text">Enter update parameters as JSON object</div>
-        </div>
-      <% end %>
-
-    <% when 'scheduler' %>
-      <%= fields_for :scheduler_bonus, bonus.scheduler_bonus || bonus.build_scheduler_bonus do |scheduler_form| %>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= scheduler_form.label :schedule_type, "Schedule Type", class: "form-label" %>
-              <%= scheduler_form.select :schedule_type, schedule_type_options, 
-                  { selected: 'one_time' }, { class: "form-select", required: true } %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= scheduler_form.label :max_executions, "Max Executions", class: "form-label" %>
-              <%= scheduler_form.number_field :max_executions, class: "form-control", min: 1 %>
-              <div class="form-text">Leave empty for unlimited executions</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= scheduler_form.label :next_run_at, "Next Run At", class: "form-label" %>
-              <%= scheduler_form.datetime_local_field :next_run_at, class: "form-control",
-                  value: (bonus.scheduler_bonus&.next_run_at || 1.hour.from_now).strftime("%Y-%m-%dT%H:%M") %>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="mb-3">
-              <%= scheduler_form.label :cron_expression, "Cron Expression", class: "form-label" %>
-              <%= scheduler_form.text_field :cron_expression, class: "form-control", 
-                  placeholder: "0 0 * * *" %>
-              <div class="form-text">For cron-based schedules only</div>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-    <% else %>
-      <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i>
-        Please select a bonus type to see specific configuration options.
+    <!-- Unified Reward Configuration -->
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title mb-0">
+          <i class="bi bi-gift"></i> Reward Configuration
+        </h6>
       </div>
+      <div class="card-body">
+        <!-- Add Bonus Rewards Menu -->
+        <div class="mb-4">
+          <h6 class="mb-3">Add Bonus Rewards</h6>
+          <p class="text-muted mb-3">Choose the type of reward you want to add to this bonus.</p>
+          
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-success me-2" onclick="addBonusReward()">
+              <i class="bi bi-plus-circle"></i> Add Cash Bonus
+            </button>
+            <button type="button" class="btn btn-primary me-2" onclick="addFreespinReward()">
+              <i class="bi bi-gift"></i> Add Freespins
+            </button>
+            <button type="button" class="btn btn-info me-2" onclick="addBonusBuyReward()">
+              <i class="bi bi-bag"></i> Add Bonus Buy
+            </button>
+            <button type="button" class="btn btn-warning me-2" onclick="addCompPointReward()">
+              <i class="bi bi-star"></i> Add Comp Points
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="addBonusCodeReward()">
+              <i class="bi bi-key"></i> Add Bonus Code
+            </button>
+          </div>
+        </div>
+
+        <!-- Container for all rewards -->
+        <div id="all-rewards-container">
+          <!-- Existing rewards will be loaded here -->
+          <% if bonus.persisted? %>
+            <!-- Load existing bonus rewards -->
+            <% if bonus.bonus_rewards.any? %>
+              <div id="bonus-rewards-section">
+                <% bonus.bonus_rewards.each_with_index do |reward, index| %>
+                  <%= render "bonus_reward_form", form: form, bonus: bonus, reward: reward, index: index %>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <!-- Load existing freespin rewards -->
+            <% if bonus.freespin_rewards.any? %>
+              <div id="freespin-rewards-section">
+                <% bonus.freespin_rewards.each_with_index do |reward, index| %>
+                  <%= render "freespin_reward_form", form: form, bonus: bonus, reward: reward, index: index %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <!-- Load existing bonus buy rewards -->
+            <% if bonus.bonus_buy_rewards.any? %>
+              <div id="bonus-buy-rewards-section">
+                <% bonus.bonus_buy_rewards.each_with_index do |reward, index| %>
+                  <%= render "bonus_buy_reward_form", form: form, bonus: bonus, reward: reward, index: index %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <!-- Load existing comp point rewards -->
+            <% if bonus.comp_point_rewards.any? %>
+              <div id="comp-point-rewards-section">
+                <% bonus.comp_point_rewards.each_with_index do |reward, index| %>
+                  <%= render "comp_point_reward_form", form: form, bonus: bonus, reward: reward, index: index %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <!-- Load existing bonus code rewards -->
+            <% if bonus.bonus_code_rewards.any? %>
+              <div id="bonus-code-rewards-section">
+                <% bonus.bonus_code_rewards.each_with_index do |reward, index| %>
+                  <%= render "bonus_code_reward_form", form: form, bonus: bonus, reward: reward, index: index %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+
+          <!-- Hidden sections for dynamic content -->
+          <div id="bonus-rewards-section" style="<%= 'display: none;' unless bonus.persisted? && bonus.bonus_rewards.any? %>"></div>
+          <div id="freespin-rewards-section" style="<%= 'display: none;' unless bonus.persisted? && bonus.freespin_rewards.any? %>"></div>
+          <div id="bonus-buy-rewards-section" style="<%= 'display: none;' unless bonus.persisted? && bonus.bonus_buy_rewards.any? %>"></div>
+          <div id="comp-point-rewards-section" style="<%= 'display: none;' unless bonus.persisted? && bonus.comp_point_rewards.any? %>"></div>
+          <div id="bonus-code-rewards-section" style="<%= 'display: none;' unless bonus.persisted? && bonus.bonus_code_rewards.any? %>"></div>
+        </div>
+
+        <!-- No rewards message -->
+        <div id="no-rewards-message" class="text-center py-5" style="<%= 'display: none;' if bonus.persisted? && (bonus.bonus_rewards.any? || bonus.freespin_rewards.any? || bonus.bonus_buy_rewards.any? || bonus.comp_point_rewards.any? || bonus.bonus_code_rewards.any?) %>">
+          <i class="bi bi-info-circle text-muted fs-1"></i>
+          <h6 class="text-muted mt-2">No rewards configured yet</h6>
+          <p class="text-muted">Click one of the buttons above to add your first reward.</p>
+        </div>
+      </div>
+    </div>
+    
+    <% if bonus.persisted? && bonus.has_rewards? %>
+      <div class="mt-3">
+        <h6>Current Rewards:</h6>
+        <ul class="list-unstyled">
+          <% bonus.reward_types.each do |type| %>
+            <li><span class="badge bg-success me-1"><%= type.humanize %></span></li>
+          <% end %>
+        </ul>
+      </div>
+    <% elsif bonus.persisted? %>
+      <p class="text-muted mt-3">No rewards configured yet.</p>
     <% end %>
+    
+    <div class="mt-3">
+      <small class="text-muted">
+        Event Type: <strong><%= bonus.event&.humanize || 'Not specified' %></strong><br>
+        This determines when the bonus will be triggered (e.g., on deposit, coupon input, etc.)
+      </small>
+    </div>
   </div>
 </div>
+
+<script>
+  let bonusRewardIndex = <%= bonus.persisted? ? bonus.bonus_rewards.count : 0 %>;
+  let freespinRewardIndex = <%= bonus.persisted? ? bonus.freespin_rewards.count : 0 %>;
+  let bonusBuyRewardIndex = <%= bonus.persisted? ? bonus.bonus_buy_rewards.count : 0 %>;
+  let compPointRewardIndex = <%= bonus.persisted? ? bonus.comp_point_rewards.count : 0 %>;
+  let bonusCodeRewardIndex = <%= bonus.persisted? ? bonus.bonus_code_rewards.count : 0 %>;
+
+  // Helper functions for managing no rewards message
+  function hideNoRewardsMessage() {
+    const noRewardsMessage = document.getElementById('no-rewards-message');
+    if (noRewardsMessage) {
+      noRewardsMessage.style.display = 'none';
+    }
+  }
+
+  function checkAndShowNoRewardsMessage() {
+    const container = document.getElementById('all-rewards-container');
+    const sections = [
+      'bonus-rewards-section',
+      'freespin-rewards-section', 
+      'bonus-buy-rewards-section',
+      'comp-point-rewards-section',
+      'bonus-code-rewards-section'
+    ];
+    
+    let hasRewards = false;
+    sections.forEach(sectionId => {
+      const section = document.getElementById(sectionId);
+      if (section && section.children.length > 0) {
+        hasRewards = true;
+      }
+    });
+    
+    const noRewardsMessage = document.getElementById('no-rewards-message');
+    if (noRewardsMessage) {
+      noRewardsMessage.style.display = hasRewards ? 'none' : 'block';
+    }
+  }
+
+  function addBonusReward() {
+    const container = document.getElementById('bonus-rewards-section');
+    container.style.display = 'block';
+    
+    // Create basic form structure
+    const formHtml = createBonusRewardFormHtml(bonusRewardIndex);
+    container.insertAdjacentHTML('beforeend', formHtml);
+    bonusRewardIndex++;
+    
+    hideNoRewardsMessage();
+  }
+
+  function addFreespinReward() {
+    const container = document.getElementById('freespin-rewards-section');
+    container.style.display = 'block';
+    
+    // Create basic form structure
+    const formHtml = createFreespinRewardFormHtml(freespinRewardIndex);
+    container.insertAdjacentHTML('beforeend', formHtml);
+    freespinRewardIndex++;
+    
+    hideNoRewardsMessage();
+    
+    // Инициализируем поля ставок для новой формы
+    initializeCurrencyBetLevels();
+  }
+
+  function addBonusBuyReward() {
+    const container = document.getElementById('bonus-buy-rewards-section');
+    container.style.display = 'block';
+    
+    // Create basic form structure
+    const formHtml = createBonusBuyRewardFormHtml(bonusBuyRewardIndex);
+    container.insertAdjacentHTML('beforeend', formHtml);
+    bonusBuyRewardIndex++;
+    
+    hideNoRewardsMessage();
+  }
+
+  function removeBonusReward(index) {
+    const rewardForm = document.getElementById('bonus-reward-' + index);
+    if (rewardForm) {
+      rewardForm.remove();
+      checkAndShowNoRewardsMessage();
+    }
+  }
+
+  function removeFreespinReward(index) {
+    const rewardForm = document.getElementById('freespin-reward-' + index);
+    if (rewardForm) {
+      rewardForm.remove();
+      checkAndShowNoRewardsMessage();
+    }
+  }
+
+  function removeBonusBuyReward(index) {
+    const rewardForm = document.getElementById('bonus-buy-reward-' + index);
+    if (rewardForm) {
+      rewardForm.remove();
+      checkAndShowNoRewardsMessage();
+    }
+  }
+
+  // Fallback form creation functions (complete HTML templates)
+  function createBonusRewardFormHtml(index) {
+    return `
+      <div class="card mb-3" id="bonus-reward-${index}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Cash Bonus #${index + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBonusReward(${index})">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Основные часто используемые параметры -->
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-primary mb-3">Основные параметры</h6>
+              
+              <!-- Тип бонуса -->
+              <div class="mb-3">
+                <label class="form-label">Тип бонуса (bonus_type)</label>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_fixed_${index}" value="fixed" checked onchange="toggleBonusType('fixed', ${index})">
+                  <label class="btn btn-outline-primary" for="bonus_type_fixed_${index}">Фиксированная сумма</label>
+                  <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_percentage_${index}" value="percentage" onchange="toggleBonusType('percentage', ${index})">
+                  <label class="btn btn-outline-primary" for="bonus_type_percentage_${index}">Процент</label>
+                </div>
+              </div>
+
+              <!-- Amount -->
+              <div class="mb-3" id="amount_field_${index}">
+                <label class="form-label">Сумма бонуса (amount)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][amount]" step="0.01" min="0">
+                  <span class="input-group-text">USD</span>
+                </div>
+              </div>
+
+              <!-- Percentage -->
+              <div class="mb-3" id="percentage_field_${index}" style="display: none;">
+                <label class="form-label">Процент от депозита (percentage)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
+                  <span class="input-group-text">%</span>
+                </div>
+              </div>
+
+              <!-- Wager -->
+              <div class="mb-3">
+                <label class="form-label">Вагер (wager)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][wager]" step="0.01" min="0">
+                  <span class="input-group-text">x</span>
+                </div>
+
+              </div>
+
+              <!-- Max Win -->
+              <div class="mb-3">
+                <label class="form-label">Максимальный выигрыш (max_win)</label>
+                <div class="btn-group w-100 mb-2" role="group">
+                  <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_fixed_${index}" value="fixed" checked onchange="toggleMaxWinType('fixed', ${index})">
+                  <label class="btn btn-outline-secondary" for="max_win_fixed_${index}">Фиксированная сумма</label>
+                  <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_multiplier_${index}" value="multiplier" onchange="toggleMaxWinType('multiplier', ${index})">
+                  <label class="btn btn-outline-secondary" for="max_win_multiplier_${index}">Множитель (x5)</label>
+                </div>
+                <div id="max_win_fixed_field_${index}">
+                  <div class="input-group">
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_fixed]" step="0.01" min="0">
+                    <span class="input-group-text">USD</span>
+                  </div>
+                </div>
+                <div id="max_win_multiplier_field_${index}" style="display: none;">
+                  <div class="input-group">
+                    <span class="input-group-text">x</span>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_multiplier]" step="0.01" min="0">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Available -->
+              <div class="mb-3">
+                <label class="form-label">Доступно (available)</label>
+                <input type="number" class="form-control" name="bonus_rewards[${index}][available]" min="0" >
+
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Code -->
+              <div class="mb-3">
+                <label class="form-label">Код активации (code)</label>
+                <input type="text" class="form-control" name="bonus_rewards[${index}][code]" >
+
+              </div>
+
+              <!-- Currencies -->
+              <div class="mb-3">
+                <label class="form-label">Валюты (currencies)</label>
+                <select class="form-select" name="bonus_rewards[${index}][currencies][]" multiple>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="BTC">BTC</option>
+                  <option value="ETH">ETH</option>
+                </select>
+
+              </div>
+
+              <!-- Min -->
+              <div class="mb-3">
+                <label class="form-label">Минимальный депозит (min)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][min]" step="0.01" min="0">
+                  <span class="input-group-text">USD</span>
+                </div>
+              </div>
+
+              <!-- Groups -->
+              <div class="mb-3">
+                <label class="form-label">Группы пользователей (groups)</label>
+                <input type="text" class="form-control" name="bonus_rewards[${index}][groups]" >
+
+              </div>
+
+              <!-- Tags -->
+              <div class="mb-3">
+                <label class="form-label">Теги (tags)</label>
+                <input type="text" class="form-control" name="bonus_rewards[${index}][tags]" >
+
+              </div>
+
+              <!-- User can have duplicates -->
+              <div class="mb-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_${index}" value="true">
+                  <label class="form-check-label" for="user_can_have_duplicates_${index}">
+                    Пользователь может получить дубликаты (user_can_have_duplicates)
+                  </label>
+                </div>
+              </div>
+
+              <!-- No More -->
+              <div class="mb-3">
+                <label class="form-label">Ограничение (no_more)</label>
+                <input type="text" class="form-control" name="bonus_rewards[${index}][no_more]" >
+
+              </div>
+
+              <!-- Totally No More -->
+              <div class="mb-3">
+                <label class="form-label">Общий лимит (totally_no_more)</label>
+                <input type="number" class="form-control" name="bonus_rewards[${index}][totally_no_more]" min="1" >
+
+              </div>
+
+              <!-- Stag -->
+              <div class="mb-3">
+                <label class="form-label">Stag (stag)</label>
+                <input type="text" class="form-control" name="bonus_rewards[${index}][stag]" >
+                <!--Специальный тег</div>
+              </div>
+
+              <!-- Wagering Strategy -->
+              <div class="mb-3">
+                <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
+                <select class="form-select" name="bonus_rewards[${index}][wagering_strategy]">
+                  <option value="">Выберите стратегию</option>
+                  <option value="bonus_only">Только бонус</option>
+                  <option value="bonus_and_deposit">Бонус + депозит</option>
+                  <option value="winnings_only">Только выигрыши</option>
+                </select>
+                <!--Метод расчета отыгрыша</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Дополнительные параметры -->
+          <div class="mt-4">
+            <h6 class="text-secondary mb-3">Дополнительные параметры</h6>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'bonus')">
+              <span id="advanced-params-toggle-text-${index}">Показать дополнительные</span>
+            </button>
+            <div id="advanced-params-section-${index}" style="display: none;" class="mt-3">
+              <div class="row">
+                <div class="col-md-6">
+                  <!-- Range -->
+                  <div class="mb-3">
+                    <label class="form-label">Range</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][range]">
+                  </div>
+                  <!-- Last Login Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Last Login Country</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][last_login_country]">
+                  </div>
+                  <!-- Profile Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Profile Country</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][profile_country]">
+                  </div>
+                  <!-- Current IP Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Current IP Country</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][current_ip_country]">
+                  </div>
+                  <!-- Emails -->
+                  <div class="mb-3">
+                    <label class="form-label">Emails</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][emails]">
+                  </div>
+                  <!-- Deposit Payment Systems -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposit Payment Systems</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][deposit_payment_systems]">
+                  </div>
+                  <!-- Cashout Payment Systems -->
+                  <div class="mb-3">
+                    <label class="form-label">Cashout Payment Systems</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][cashout_payment_systems]">
+                  </div>
+                  <!-- User Can Have Disposable Email -->
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_disposable_email]" id="user_can_have_disposable_email_${index}" value="true">
+                      <label class="form-check-label" for="user_can_have_disposable_email_${index}">
+                        User Can Have Disposable Email
+                      </label>
+                    </div>
+                  </div>
+                  <!-- Total Deposits -->
+                  <div class="mb-3">
+                    <label class="form-label">Total Deposits</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][total_deposits]" step="0.01" min="0">
+                  </div>
+                  <!-- Deposits Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposits Sum</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_sum]" step="0.01" min="0">
+                  </div>
+                  <!-- Loss Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Loss Sum</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][loss_sum]" step="0.01" min="0">
+                  </div>
+                  <!-- Deposits Count -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposits Count</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_count]" min="0">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <!-- Spend Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Spend Sum</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][spend_sum]" step="0.01" min="0">
+                  </div>
+                  <!-- Category Loss Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Category Loss Sum</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][category_loss_sum]" step="0.01" min="0">
+                  </div>
+                  <!-- Wager Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Wager Sum</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][wager_sum]" step="0.01" min="0">
+                  </div>
+                  <!-- Bets Count -->
+                  <div class="mb-3">
+                    <label class="form-label">Bets Count</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][bets_count]" min="0">
+                  </div>
+                  <!-- Affiliates User -->
+                  <div class="mb-3">
+                    <label class="form-label">Affiliates User</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][affiliates_user]">
+                  </div>
+                  <!-- Balance -->
+                  <div class="mb-3">
+                    <label class="form-label">Balance</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][balance]" step="0.01" min="0">
+                  </div>
+                  <!-- Cashout -->
+                  <div class="mb-3">
+                    <label class="form-label">Cashout</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][cashout]" step="0.01" min="0">
+                  </div>
+                  <!-- Chargeable Comp Points -->
+                  <div class="mb-3">
+                    <label class="form-label">Chargeable Comp Points</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][chargeable_comp_points]" step="0.01" min="0">
+                  </div>
+                  <!-- Persistent Comp Points -->
+                  <div class="mb-3">
+                    <label class="form-label">Persistent Comp Points</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][persistent_comp_points]" step="0.01" min="0">
+                  </div>
+                  <!-- Date of Birth -->
+                  <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="bonus_rewards[${index}][date_of_birth]">
+                  </div>
+                  <!-- Deposit -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposit</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][deposit]" step="0.01" min="0">
+                  </div>
+                  <!-- Gender -->
+                  <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" name="bonus_rewards[${index}][gender]">
+                      <option value="">Не задано</option>
+                      <option value="male">Мужской</option>
+                      <option value="female">Женский</option>
+                    </select>
+                  </div>
+                  <!-- Issued Bonus -->
+                  <div class="mb-3">
+                    <label class="form-label">Issued Bonus</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][issued_bonus]">
+                  </div>
+                  <!-- Registered -->
+                  <div class="mb-3">
+                    <label class="form-label">Registered</label>
+                    <input type="date" class="form-control" name="bonus_rewards[${index}][registered]">
+                  </div>
+                  <!-- Social Networks -->
+                  <div class="mb-3">
+                    <label class="form-label">Social Networks</label>
+                    <input type="text" class="form-control" name="bonus_rewards[${index}][social_networks]" >
+                  </div>
+                  <!-- Hold min -->
+                  <div class="mb-3">
+                    <label class="form-label">Hold min</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][hold_min]" step="0.01" min="0">
+                  </div>
+                  <!-- Hold max -->
+                  <div class="mb-3">
+                    <label class="form-label">Hold max</label>
+                    <input type="number" class="form-control" name="bonus_rewards[${index}][hold_max]" step="0.01" min="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function createFreespinRewardFormHtml(index) {
+    return `
+      <div class="card mb-3" id="freespin-reward-${index}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Freespin Reward #${index + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFreespinReward(${index})">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Основные часто используемые параметры -->
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-success mb-3">Основные параметры</h6>
+              
+              <!-- Games -->
+              <div class="mb-3">
+                <label class="form-label">Игры (games)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][games]" >
+                <!--Список доступных игр через запятую</div>
+              </div>
+
+              <!-- Freespins Count -->
+              <div class="mb-3">
+                <label class="form-label">Количество фриспинов (spins_count) *</label>
+                <input type="number" class="form-control" name="freespin_rewards[${index}][spins_count]" min="1" required >
+
+              </div>
+
+                                      <!-- Currencies -->
+                        <div class="mb-3">
+                          <label class="form-label">Валюты (currencies)</label>
+                          <select class="form-select" name="freespin_rewards[${index}][currencies][]" multiple onchange="updateCurrencyBetLevels(${index})">
+                            <option value="USD" selected>USD</option>
+                            <option value="EUR" selected>EUR</option>
+                            <option value="GBP" selected>GBP</option>
+                            <option value="RUB" selected>RUB</option>
+                            <option value="UAH" selected>UAH</option>
+                            <option value="KZT" selected>KZT</option>
+                            <option value="BTC" selected>BTC</option>
+                            <option value="ETH" selected>ETH</option>
+                          </select>
+
+                        </div>
+
+                        <!-- Currency Bet Levels -->
+                        <div class="mb-3">
+                          <label class="form-label">Ставки по валютам (currency_bet_levels)</label>
+                          <div id="currency-bet-levels-${index}">
+
+                          </div>
+
+                        </div>
+
+              <!-- Max Win -->
+              <div class="mb-3">
+                <label class="form-label">Максимальный выигрыш (max_win)</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" name="freespin_rewards[${index}][max_win]" >
+                  <span class="input-group-text">€ или x</span>
+                </div>
+                <!--Фиксированная сумма (500) или множитель (x10)</div>
+              </div>
+
+              <!-- No More -->
+              <div class="mb-3">
+                <label class="form-label">Ограничение (no_more)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][no_more]" >
+
+              </div>
+
+              <!-- Totally No More -->
+              <div class="mb-3">
+                <label class="form-label">Общий лимит (totally_no_more)</label>
+                <input type="number" class="form-control" name="freespin_rewards[${index}][totally_no_more]" min="1" >
+
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Available -->
+              <div class="mb-3">
+                <label class="form-label">Доступно (available)</label>
+                <input type="number" class="form-control" name="freespin_rewards[${index}][available]" min="0" >
+                <!--Количество доступных фриспинов (пустое = неограниченно)</div>
+              </div>
+
+              <!-- Code -->
+              <div class="mb-3">
+                <label class="form-label">Код активации (code)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][code]" >
+                <!--Специальный код для активации фриспинов</div>
+              </div>
+
+
+
+              <!-- Min -->
+              <div class="mb-3">
+                <label class="form-label">Минимальный депозит (min)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="freespin_rewards[${index}][min]" step="0.01" min="0">
+                  <span class="input-group-text">€</span>
+                </div>
+                <!--Минимальная сумма депозита для активации</div>
+              </div>
+
+              <!-- Groups -->
+              <div class="mb-3">
+                <label class="form-label">Группы (groups)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][groups]" >
+                <!--Целевые группы пользователей через запятую</div>
+              </div>
+
+              <!-- Tags -->
+              <div class="mb-3">
+                <label class="form-label">Теги (tags)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][tags]" >
+                <!--Теги для классификации через запятую</div>
+              </div>
+
+              <!-- Stag -->
+              <div class="mb-3">
+                <label class="form-label">Stag (stag)</label>
+                <input type="text" class="form-control" name="freespin_rewards[${index}][stag]" >
+                <!--Специальный тег</div>
+              </div>
+
+              <!-- Wagering Strategy -->
+              <div class="mb-3">
+                <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
+                <select class="form-select" name="freespin_rewards[${index}][wagering_strategy]">
+                  <option value="">Выберите стратегию</option>
+                  <option value="bonus_only">Только бонус</option>
+                  <option value="bonus_and_deposit">Бонус + депозит</option>
+                  <option value="winnings_only">Только выигрыши</option>
+                </select>
+                <!--Метод расчета отыгрыша</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Дополнительные параметры -->
+          <div class="mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'freespin')">
+              <span id="freespin-advanced-toggle-text-${index}">+ Показать дополнительные параметры</span>
+            </button>
+            <div id="freespin-advanced-params-${index}" style="display: none;" class="mt-3">
+              <h6 class="text-secondary mb-3">Дополнительные параметры</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <!-- Auto Activate -->
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="freespin_rewards[${index}][auto_activate]" id="auto_activate_${index}" value="true">
+                      <label class="form-check-label" for="auto_activate_${index}">
+                        Auto Activate
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Duration -->
+                  <div class="mb-3">
+                    <label class="form-label">Duration</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][duration]" min="0" >
+                    <!--Длительность в часах</div>
+                  </div>
+
+                  <!-- Activation Duration -->
+                  <div class="mb-3">
+                    <label class="form-label">Activation Duration</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][activation_duration]" min="0" >
+                    <!--Время на активацию в часах</div>
+                  </div>
+
+                  <!-- Email Template -->
+                  <div class="mb-3">
+                    <label class="form-label">Email Template</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][email_template]">
+                  </div>
+
+                  <!-- Range -->
+                  <div class="mb-3">
+                    <label class="form-label">Range</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][range]">
+                  </div>
+
+                  <!-- Last Login Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Last Login Country</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][last_login_country]">
+                  </div>
+
+                  <!-- Profile Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Profile Country</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][profile_country]">
+                  </div>
+
+                  <!-- Current IP Country -->
+                  <div class="mb-3">
+                    <label class="form-label">Current IP Country</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][current_ip_country]">
+                  </div>
+
+                  <!-- Emails -->
+                  <div class="mb-3">
+                    <label class="form-label">Emails</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][emails]">
+                  </div>
+
+                  <!-- Deposit Payment Systems -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposit Payment Systems</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][deposit_payment_systems]">
+                  </div>
+
+                  <!-- Cashout Payment Systems -->
+                  <div class="mb-3">
+                    <label class="form-label">Cashout Payment Systems</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][cashout_payment_systems]">
+                  </div>
+
+                  <!-- User Can Have Duplicates -->
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="freespin_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_freespin_${index}" value="true">
+                      <label class="form-check-label" for="user_can_have_duplicates_freespin_${index}">
+                        User Can Have Duplicates
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- User Can Have Disposable Email -->
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" name="freespin_rewards[${index}][user_can_have_disposable_email]" id="user_can_have_disposable_email_freespin_${index}" value="true">
+                      <label class="form-check-label" for="user_can_have_disposable_email_freespin_${index}">
+                        User Can Have Disposable Email
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Total Deposits -->
+                  <div class="mb-3">
+                    <label class="form-label">Total Deposits</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][total_deposits]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Deposits Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposits Sum</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][deposits_sum]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Loss Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Loss Sum</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][loss_sum]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Deposits Count -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposits Count</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][deposits_count]" min="0">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <!-- Spend Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Spend Sum</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][spend_sum]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Category Loss Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Category Loss Sum</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][category_loss_sum]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Wager Sum -->
+                  <div class="mb-3">
+                    <label class="form-label">Wager Sum</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][wager_sum]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Bets Count -->
+                  <div class="mb-3">
+                    <label class="form-label">Bets Count</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][bets_count]" min="0">
+                  </div>
+
+                  <!-- Affiliates User -->
+                  <div class="mb-3">
+                    <label class="form-label">Affiliates User</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][affiliates_user]">
+                  </div>
+
+                  <!-- Balance -->
+                  <div class="mb-3">
+                    <label class="form-label">Balance</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][balance]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Chargeable Comp Points -->
+                  <div class="mb-3">
+                    <label class="form-label">Chargeable Comp Points</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][chargeable_comp_points]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Persistent Comp Points -->
+                  <div class="mb-3">
+                    <label class="form-label">Persistent Comp Points</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][persistent_comp_points]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Date of Birth -->
+                  <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="freespin_rewards[${index}][date_of_birth]">
+                  </div>
+
+                  <!-- Deposit -->
+                  <div class="mb-3">
+                    <label class="form-label">Deposit</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][deposit]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Gender -->
+                  <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" name="freespin_rewards[${index}][gender]">
+                      <option value="">Не задано</option>
+                      <option value="male">Мужской</option>
+                      <option value="female">Женский</option>
+                    </select>
+                  </div>
+
+                  <!-- Issued Bonus -->
+                  <div class="mb-3">
+                    <label class="form-label">Issued Bonus</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][issued_bonus]">
+                  </div>
+
+                  <!-- Registered -->
+                  <div class="mb-3">
+                    <label class="form-label">Registered</label>
+                    <input type="date" class="form-control" name="freespin_rewards[${index}][registered]">
+                  </div>
+
+                  <!-- Social Networks -->
+                  <div class="mb-3">
+                    <label class="form-label">Social Networks</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][social_networks]" >
+                  </div>
+
+                  <!-- Wager Done -->
+                  <div class="mb-3">
+                    <label class="form-label">Wager Done</label>
+                    <select class="form-select" name="freespin_rewards[${index}][wager_done]">
+                      <option value="">Не задано</option>
+                      <option value="true">Да</option>
+                      <option value="false">Нет</option>
+                    </select>
+                  </div>
+
+                  <!-- Hold min -->
+                  <div class="mb-3">
+                    <label class="form-label">Hold min</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][hold_min]" step="0.01" min="0">
+                  </div>
+
+                  <!-- Hold max -->
+                  <div class="mb-3">
+                    <label class="form-label">Hold max</label>
+                    <input type="number" class="form-control" name="freespin_rewards[${index}][hold_max]" step="0.01" min="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // JavaScript helper functions for bonus rewards
+  function toggleBonusType(type, index) {
+    const amountField = document.getElementById('amount_field_' + index);
+    const percentageField = document.getElementById('percentage_field_' + index);
+    
+    if (type === 'fixed') {
+      amountField.style.display = 'block';
+      percentageField.style.display = 'none';
+    } else {
+      amountField.style.display = 'none';
+      percentageField.style.display = 'block';
+    }
+  }
+
+  function toggleMaxWinType(type, index) {
+    const fixedField = document.getElementById('max_win_fixed_field_' + index);
+    const multiplierField = document.getElementById('max_win_multiplier_field_' + index);
+    
+    if (type === 'fixed') {
+      fixedField.style.display = 'block';
+      multiplierField.style.display = 'none';
+    } else {
+      fixedField.style.display = 'none';
+      multiplierField.style.display = 'block';
+    }
+  }
+
+  function toggleAdvancedParams(index, type) {
+    const sectionId = type === 'bonus' ? 'advanced-params-section-' + index : 'freespin-advanced-params-' + index;
+    const toggleTextId = type === 'bonus' ? 'advanced-params-toggle-text-' + index : 'freespin-advanced-toggle-text-' + index;
+    
+    const section = document.getElementById(sectionId);
+    const toggleText = document.getElementById(toggleTextId);
+    
+    if (section.style.display === 'none') {
+      section.style.display = 'block';
+      toggleText.textContent = type === 'bonus' ? 'Скрыть дополнительные' : '− Скрыть дополнительные параметры';
+    } else {
+      section.style.display = 'none';
+      toggleText.textContent = type === 'bonus' ? 'Показать дополнительные' : '+ Показать дополнительные параметры';
+    }
+  }
+
+  function updateCurrencyBetLevels(index) {
+    const currencySelect = document.querySelector(`select[name="freespin_rewards[${index}][currencies][]"]`);
+    const betLevelsContainer = document.getElementById(`currency-bet-levels-${index}`);
+    
+    if (!currencySelect || !betLevelsContainer) return;
+    
+    // Получаем все выбранные валюты
+    const selectedCurrencies = Array.from(currencySelect.selectedOptions).map(option => option.value);
+    
+    if (selectedCurrencies.length === 0) {
+      betLevelsContainer.innerHTML = `
+        <div class="alert-removed">
+          Сначала выберите валюты выше, затем укажите ставки для каждой валюты
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '';
+    selectedCurrencies.forEach((currency, i) => {
+      html += `
+        <div class="mb-2">
+          <label class="form-label">Ставка для ${currency}</label>
+          <div class="input-group">
+            <input type="number" 
+                   class="form-control" 
+                   name="freespin_rewards[${index}][currency_bet_levels][${currency}]" 
+                   step="0.01" 
+                   min="0" 
+                    
+                   required>
+            <span class="input-group-text">${currency}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    betLevelsContainer.innerHTML = html;
+  }
+
+  // Инициализация полей ставок при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    // Находим все freespin формы и инициализируем их
+    const freespinForms = document.querySelectorAll('[id^="freespin-reward-"]');
+    freespinForms.forEach(form => {
+      const index = form.id.replace('freespin-reward-', '');
+      updateCurrencyBetLevels(index);
+    });
+  });
+
+  // Инициализация полей ставок после добавления новой формы
+  function initializeCurrencyBetLevels() {
+    setTimeout(() => {
+      const freespinForms = document.querySelectorAll('[id^="freespin-reward-"]');
+      freespinForms.forEach(form => {
+        const index = form.id.replace('freespin-reward-', '');
+        updateCurrencyBetLevels(index);
+      });
+    }, 100);
+  }
+
+  // Comp Point Rewards Functions
+  function addCompPointReward() {
+    const container = document.getElementById('comp-point-rewards-section');
+    container.style.display = 'block';
+    
+    // Create basic form structure
+    const formHtml = createCompPointRewardFormHtml(compPointRewardIndex);
+    container.insertAdjacentHTML('beforeend', formHtml);
+    compPointRewardIndex++;
+    
+    hideNoRewardsMessage();
+  }
+
+  function removeCompPointReward(index) {
+    const rewardForm = document.getElementById(`comp-point-reward-${index}`);
+    if (rewardForm) {
+      rewardForm.remove();
+      checkAndShowNoRewardsMessage();
+    }
+  }
+
+  function createBonusBuyRewardFormHtml(index) {
+    return `
+      <div class="card mb-3" id="bonus-buy-reward-${index}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Bonus Buy Reward #${index + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBonusBuyReward(${index})">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Buy Amount -->
+              <div class="mb-3">
+                <label class="form-label">Сумма покупки (buy_amount) *</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_buy_rewards[${index}][buy_amount]" min="1"  required>
+                  <span class="input-group-text">€</span>
+                </div>
+                <!--Сумма которую игрок должен заплатить за покупку бонуса</div>
+              </div>
+
+              <!-- Multiplier -->
+              <div class="mb-3">
+                <label class="form-label">Множитель покупки (multiplier)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_buy_rewards[${index}][multiplier]" min="1" step="0.1" >
+                  <span class="input-group-text">x</span>
+                </div>
+                <!--Множитель от ставки для расчета покупки</div>
+              </div>
+
+              <!-- Games -->
+              <div class="mb-3">
+                <label class="form-label">Игры (games)</label>
+                <input type="text" class="form-control" name="bonus_buy_rewards[${index}][games]" >
+                <!--Список доступных игр через запятую</div>
+              </div>
+
+              <!-- Bet Level -->
+              <div class="mb-3">
+                <label class="form-label">Уровень ставки (bet_level)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="bonus_buy_rewards[${index}][bet_level]" min="0" step="0.01" >
+                  <span class="input-group-text">€</span>
+                </div>
+                <!--Размер ставки за покупку</div>
+              </div>
+
+              <!-- Max Win -->
+              <div class="mb-3">
+                <label class="form-label">Максимальный выигрыш (max_win)</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" name="bonus_buy_rewards[${index}][max_win]" >
+                  <span class="input-group-text">€ или x</span>
+                </div>
+                <!--Фиксированная сумма (500) или множитель (x10)</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <!-- Available -->
+              <div class="mb-3">
+                <label class="form-label">Доступно (available)</label>
+                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][available]" min="1" >
+
+              </div>
+
+              <!-- Code -->
+              <div class="mb-3">
+                <label class="form-label">Код активации (code)</label>
+                <input type="text" class="form-control" name="bonus_buy_rewards[${index}][code]" >
+
+              </div>
+
+              <!-- Tags -->
+              <div class="mb-3">
+                <label class="form-label">Теги (tags)</label>
+                <input type="text" class="form-control" name="bonus_buy_rewards[${index}][tags]" placeholder="bonus-buy, promo, special">
+
+              </div>
+
+              <!-- Stag -->
+              <div class="mb-3">
+                <label class="form-label">Stag (stag)</label>
+                <input type="text" class="form-control" name="bonus_buy_rewards[${index}][stag]" >
+                <!--Специальный тег</div>
+              </div>
+
+              <!-- Note about common parameters -->
+              <div class="alert-removed">
+                <small>
+                  <strong>Общие параметры:</strong><br>
+                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function createCompPointRewardFormHtml(index) {
+    return `
+      <div class="card mb-3" id="comp-point-reward-${index}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Comp Point Reward #${index + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCompPointReward(${index})">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Title -->
+              <div class="mb-3">
+                <label class="form-label">Название награды (title) *</label>
+                <input type="text" class="form-control" name="comp_point_rewards[${index}][title]" placeholder="Очки лояльности" required>
+                <!--Описательное название для награды</div>
+              </div>
+
+              <!-- Issue Chargeable Award -->
+              <div class="mb-3">
+                <label class="form-label">Расходуемые баллы (issue_chargeable_award)</label>
+                <input type="number" class="form-control" name="comp_point_rewards[${index}][issue_chargeable_award]" min="0" >
+                <!--Количество расходуемых баллов, которые получит игрок</div>
+              </div>
+
+              <!-- Issue Persistent Award -->
+              <div class="mb-3">
+                <label class="form-label">Статусные баллы (issue_persistent_award)</label>
+                <input type="number" class="form-control" name="comp_point_rewards[${index}][issue_persistent_award]" min="0" >
+                <!--Количество статусных баллов, которые получит игрок</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <!-- Note about common parameters -->
+              <div class="alert-removed">
+                <small>
+                  <strong>Общие параметры:</strong><br>
+                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Bonus Code Rewards Functions
+  function addBonusCodeReward() {
+    const container = document.getElementById('bonus-code-rewards-section');
+    container.style.display = 'block';
+    
+    // Create basic form structure
+    const formHtml = createBonusCodeRewardFormHtml(bonusCodeRewardIndex);
+    container.insertAdjacentHTML('beforeend', formHtml);
+    bonusCodeRewardIndex++;
+    
+    hideNoRewardsMessage();
+  }
+
+  function removeBonusCodeReward(index) {
+    const rewardForm = document.getElementById(`bonus-code-reward-${index}`);
+    if (rewardForm) {
+      rewardForm.remove();
+      checkAndShowNoRewardsMessage();
+    }
+  }
+
+  function createBonusCodeRewardFormHtml(index) {
+    return `
+      <div class="card mb-3" id="bonus-code-reward-${index}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Bonus Code Reward #${index + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBonusCodeReward(${index})">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Title -->
+              <div class="mb-3">
+                <label class="form-label">Название награды (title) *</label>
+                <input type="text" class="form-control" name="bonus_code_rewards[${index}][title]" placeholder="Депозитный бонус-код" required>
+                <!--Описательное название для награды</div>
+              </div>
+
+              <!-- Set Bonus Code -->
+              <div class="mb-3">
+                <label class="form-label">Бонус-код (set_bonus_code) *</label>
+                <input type="text" class="form-control" name="bonus_code_rewards[${index}][set_bonus_code]" placeholder="WELCOME100" required>
+                <!--Бонус-код, который будет применен в профиле игрока</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <!-- Note about common parameters -->
+              <div class="alert-removed">
+                <small>
+                  <strong>Общие параметры:</strong><br>
+                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
+                </small>
+              </div>
+
+              <!-- Information about collect strategy -->
+              <div class="alert alert-warning">
+                <small>
+                  <strong>Стратегия collect:</strong><br>
+                  Этот тип награды работает с бонусами, использующими стратегию "collect".
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+</script>

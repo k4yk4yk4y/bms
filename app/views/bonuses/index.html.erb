@@ -120,11 +120,11 @@
                         <%= link_to bonus.name, bonus_path(bonus), class: "text-decoration-none" %>
                       </td>
                       <td>
-                        <code class="text-dark"><%= bonus.code %></code>
+                        <code class="text-dark"><%= bonus.display_code %></code>
                       </td>
                       <td>
                         <span class="badge bg-info text-dark">
-                          <%= bonus.bonus_type.humanize %>
+                          <%= bonus.event.humanize %>
                         </span>
                       </td>
                       <td>
@@ -282,7 +282,7 @@
                   Bonuses that require a minimum deposit amount. Users get bonus funds based on their deposit percentage.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Deposit Bonus", new_bonus_path(type: 'deposit'), 
+                  <%= link_to "Create Deposit Bonus", new_bonus_path(event: 'deposit'), 
                       class: "btn btn-success btn-sm" %>
                 </div>
               </div>
@@ -300,7 +300,7 @@
                   Bonuses activated by entering a coupon code. No deposit required, just enter the valid code.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Coupon Bonus", new_bonus_path(type: 'input_coupon'), 
+                  <%= link_to "Create Coupon Bonus", new_bonus_path(event: 'input_coupon'), 
                       class: "btn btn-primary btn-sm" %>
                 </div>
               </div>
@@ -318,7 +318,7 @@
                   Bonuses that require manual approval or are applied manually by administrators.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Manual Bonus", new_bonus_path(type: 'manual'), 
+                  <%= link_to "Create Manual Bonus", new_bonus_path(event: 'manual'), 
                       class: "btn btn-warning btn-sm" %>
                 </div>
               </div>
@@ -336,7 +336,7 @@
                   Daily, weekly, or monthly collectible bonuses that users can claim periodically.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Collection Bonus", new_bonus_path(type: 'collection'), 
+                  <%= link_to "Create Collection Bonus", new_bonus_path(event: 'collection'), 
                       class: "btn btn-info btn-sm" %>
                 </div>
               </div>
@@ -354,7 +354,7 @@
                   Bonuses that update multiple user groups at once with batch processing capabilities.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Groups Update Bonus", new_bonus_path(type: 'groups_update'), 
+                  <%= link_to "Create Groups Update Bonus", new_bonus_path(event: 'groups_update'), 
                       class: "btn btn-secondary btn-sm" %>
                 </div>
               </div>
@@ -372,7 +372,7 @@
                   Time-based bonuses that are automatically triggered according to a schedule or cron expression.
                 </p>
                 <div class="text-center">
-                  <%= link_to "Create Scheduler Bonus", new_bonus_path(type: 'scheduler'), 
+                  <%= link_to "Create Scheduler Bonus", new_bonus_path(event: 'scheduler'), 
                       class: "btn btn-dark btn-sm" %>
                 </div>
               </div>

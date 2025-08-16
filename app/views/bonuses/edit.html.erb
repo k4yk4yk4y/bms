@@ -7,7 +7,7 @@
         <div>
           <h1 class="h2">Edit Bonus</h1>
           <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+            <span class="badge bg-info text-dark"><%= @bonus.event.humanize %></span>
             <code><%= @bonus.code %></code>
           </div>
         </div>
@@ -56,10 +56,10 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="mb-3">
-                      <%= form.label :bonus_type, class: "form-label" %>
-                      <%= form.select :bonus_type, bonus_type_options, {}, 
+                      <%= form.label :event, class: "form-label" %>
+                      <%= form.select :event, event_type_options, {}, 
                           { class: "form-select", required: true, disabled: true } %>
-                      <div class="form-text">Bonus type cannot be changed after creation</div>
+                      <div class="form-text">Event type cannot be changed after creation</div>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -134,7 +134,7 @@
                 <div class="row">
                   <% 
                     non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
-                    should_hide_minimum_deposit = non_deposit_types.include?(@bonus.bonus_type) || @bonus.bonus_type == 'deposit'
+                    should_hide_minimum_deposit = non_deposit_types.include?(@bonus.event) || @bonus.event == 'deposit'
                   %>
                   <div class="col-md-4" id="minimum-deposit-field" style="<%= 'display: none;' if should_hide_minimum_deposit %>">
                     <div class="mb-3">

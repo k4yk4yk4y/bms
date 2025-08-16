@@ -21,100 +21,78 @@
         <% end %>
 
         <div class="row">
-          <div class="col-lg-8">
+          <!-- Левая колонка: Basic Information -->
+          <div class="col-lg-4">
             <!-- Basic Information -->
             <div class="card mb-4">
               <div class="card-header">
                 <h5 class="card-title mb-0">Basic Information</h5>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :name, class: "form-label" %>
-                      <%= form.text_field :name, class: "form-control", required: true %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :code, class: "form-label" %>
-                      <%= form.text_field :code, class: "form-control" %>
-                      <div class="form-text">Leave empty to auto-generate</div>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :name, class: "form-label" %>
+                  <%= form.text_field :name, class: "form-control", required: true %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :bonus_type, class: "form-label" %>
-                      <%= form.select :bonus_type, bonus_type_options, 
-                          { selected: @bonus_type }, 
-                          { class: "form-select", required: true, 
-                            onchange: "toggleTypeSpecificFields(this.value)" } %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :status, class: "form-label" %>
-                      <%= form.select :status, status_options, 
-                          { selected: 'draft' }, 
-                          { class: "form-select", required: true } %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :event, class: "form-label" %>
+                  <%= form.select :event, event_type_options, 
+                      { selected: @event_type }, 
+                      { class: "form-select", required: true, 
+                        onchange: "toggleTypeSpecificFields(this.value)" } %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :currency, class: "form-label" %>
-                      <%= form.select :currency, currency_options, 
-                          { selected: 'USD' }, 
-                          { class: "form-select", required: true } %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :country, class: "form-label" %>
-                      <%= form.text_field :country, class: "form-control", 
-                          placeholder: "Leave empty for all countries" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :status, class: "form-label" %>
+                  <%= form.select :status, status_options, 
+                      { selected: 'draft' }, 
+                      { class: "form-select", required: true } %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :user_group, class: "form-label" %>
-                      <%= form.text_field :user_group, class: "form-control", 
-                          placeholder: "Leave empty for all users" %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :tags, class: "form-label" %>
-                      <%= form.text_field :tags, class: "form-control", 
-                          placeholder: "Comma-separated tags" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :project, class: "form-label" %>
+                  <%= form.select :project, project_options, 
+                      { include_blank: "Select project" }, 
+                      { class: "form-select" } %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :project, class: "form-label" %>
-                      <%= form.select :project, project_options, 
-                          { include_blank: "Select project" }, 
-                          { class: "form-select" } %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :dsl_tag, class: "form-label" %>
-                      <%= form.text_field :dsl_tag, class: "form-control", 
-                          placeholder: "DSL tag for bonus identification" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :dsl_tag, class: "form-label" %>
+                  <%= form.text_field :dsl_tag, class: "form-control" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :currencies, "Currencies", class: "form-label" %>
+                  <%= form.select :currencies, 
+                      options_for_select([
+                        ['USD', 'USD'], ['EUR', 'EUR'], ['GBP', 'GBP'], ['RUB', 'RUB'],
+                        ['UAH', 'UAH'], ['KZT', 'KZT'], ['BTC', 'BTC'], ['ETH', 'ETH']
+                      ], @bonus.currencies), 
+                      {}, { class: "form-select", multiple: true, 
+                           size: 4, style: "height: auto;" } %>
+
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :groups, "Target Groups", class: "form-label" %>
+                  <%= form.text_field :groups, class: "form-control", 
+                      value: @bonus.groups.is_a?(Array) ? @bonus.groups.join(', ') : @bonus.groups %>
+
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :no_more, "Usage Limitation", class: "form-label" %>
+                  <%= form.text_field :no_more, class: "form-control", 
+                      value: @bonus.no_more %>
+
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :totally_no_more, "Total Activation Limit", class: "form-label" %>
+                  <%= form.number_field :totally_no_more, class: "form-control", 
+                      min: 1, 
+                      value: @bonus.totally_no_more %>
+
                 </div>
               </div>
             </div>
@@ -125,29 +103,23 @@
                 <h5 class="card-title mb-0">Financial Information</h5>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="col-md-4" id="minimum-deposit-field" style="display: none;">
-                    <div class="mb-3">
-                      <%= form.label :minimum_deposit, class: "form-label" %>
-                      <%= form.number_field :minimum_deposit, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                      <div class="form-text">Не используется для депозитных бонусов</div>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <%= form.label :wager, class: "form-label" %>
-                      <%= form.number_field :wager, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <%= form.label :maximum_winnings, class: "form-label" %>
-                      <%= form.number_field :maximum_winnings, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                    </div>
-                  </div>
+                <div class="mb-3" id="minimum-deposit-field" style="display: none;">
+                  <%= form.label :minimum_deposit, class: "form-label" %>
+                  <%= form.number_field :minimum_deposit, step: 0.01, 
+                      class: "form-control", min: 0 %>
+
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :wager, class: "form-label" %>
+                  <%= form.number_field :wager, step: 0.01, 
+                      class: "form-control", min: 0 %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :maximum_winnings, class: "form-label" %>
+                  <%= form.number_field :maximum_winnings, step: 0.01, 
+                      class: "form-control", min: 0 %>
                 </div>
 
                 <div class="mb-3">
@@ -159,13 +131,6 @@
               </div>
             </div>
 
-            <!-- Type-Specific Fields -->
-            <div id="type-specific-fields">
-              <%= render "type_specific_form", form: form, bonus: @bonus %>
-            </div>
-          </div>
-
-          <div class="col-lg-4">
             <!-- Availability -->
             <div class="card mb-4">
               <div class="card-header">
@@ -196,6 +161,14 @@
                   <%= link_to "Cancel", bonuses_path, class: "btn btn-outline-secondary" %>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Правая колонка: Type-Specific Fields -->
+          <div class="col-lg-8">
+            <!-- Type-Specific Fields -->
+            <div id="type-specific-fields">
+              <%= render "type_specific_form", form: form, bonus: @bonus %>
             </div>
           </div>
         </div>
@@ -237,7 +210,7 @@
   
   // Инициализируем при загрузке страницы
   document.addEventListener('DOMContentLoaded', function() {
-    const bonusTypeSelect = document.querySelector('select[name="bonus[bonus_type]"]');
+    const bonusTypeSelect = document.querySelector('select[name="bonus[event]"]');
     if (bonusTypeSelect && bonusTypeSelect.value) {
       toggleTypeSpecificFields(bonusTypeSelect.value);
     }

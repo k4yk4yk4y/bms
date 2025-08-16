@@ -7,7 +7,7 @@
         <div>
           <h1 class="h2"><%= @bonus.name %></h1>
           <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+            <span class="badge bg-info text-dark"><%= @bonus.event.humanize %></span>
             <span class="badge <%= status_badge_class(@bonus.status) %>">
               <%= @bonus.status.humanize %>
             </span>
@@ -41,7 +41,7 @@
                     
                     <dt class="col-sm-4">Type:</dt>
                     <dd class="col-sm-8">
-                      <span class="badge bg-info text-dark"><%= @bonus.bonus_type.humanize %></span>
+                      <span class="badge bg-info text-dark"><%= @bonus.event.humanize %></span>
                     </dd>
                     
                     <dt class="col-sm-4">Status:</dt>
@@ -103,7 +103,7 @@
               <div class="row">
                 <% 
                   non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
-                  should_show_minimum_deposit = !non_deposit_types.include?(@bonus.bonus_type) && @bonus.bonus_type != 'deposit' && @bonus.minimum_deposit.present?
+                  should_show_minimum_deposit = !non_deposit_types.include?(@bonus.event) && @bonus.event != 'deposit' && @bonus.minimum_deposit.present?
                 %>
                 <% if should_show_minimum_deposit %>
                 <div class="col-md-4">
@@ -144,7 +144,7 @@
           <!-- Type-Specific Information -->
           <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title mb-0"><%= @bonus.bonus_type.humanize %> Details</h5>
+              <h5 class="card-title mb-0"><%= @bonus.event.humanize %> Details</h5>
             </div>
             <div class="card-body">
               <%= render "type_specific_details", bonus: @bonus %>
