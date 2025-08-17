@@ -1,11 +1,11 @@
 class MarketingController < ApplicationController
-  before_action :set_marketing_request, only: [:show, :edit, :update, :destroy, :activate, :reject, :transfer]
+  before_action :set_marketing_request, only: [ :show, :edit, :update, :destroy, :activate, :reject, :transfer ]
 
   def index
     @current_tab = params[:tab] || MarketingRequest::REQUEST_TYPES.first
     @marketing_requests = MarketingRequest.by_request_type(@current_tab)
                                          .order(:created_at)
-    
+
     # Filter by status if provided
     if params[:status].present?
       @marketing_requests = @marketing_requests.by_status(params[:status])
@@ -41,8 +41,8 @@ class MarketingController < ApplicationController
     @marketing_request = MarketingRequest.new(marketing_request_params)
 
     if @marketing_request.save
-      redirect_to marketing_index_path(tab: @marketing_request.request_type), 
-                  notice: 'Заявка успешно создана.'
+      redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                  notice: "Заявка успешно создана."
     else
       render :new, status: :unprocessable_entity
     end
@@ -53,8 +53,8 @@ class MarketingController < ApplicationController
 
   def update
     if @marketing_request.update(marketing_request_params)
-      redirect_to marketing_index_path(tab: @marketing_request.request_type), 
-                  notice: 'Заявка успешно обновлена.'
+      redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                  notice: "Заявка успешно обновлена."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -63,50 +63,50 @@ class MarketingController < ApplicationController
   def destroy
     tab = @marketing_request.request_type
     @marketing_request.destroy
-    redirect_to marketing_index_path(tab: tab), 
-                notice: 'Заявка успешно удалена.'
+    redirect_to marketing_index_path(tab: tab),
+                notice: "Заявка успешно удалена."
   end
 
   def activate
     @marketing_request.activate!
-    redirect_to marketing_index_path(tab: @marketing_request.request_type), 
-                notice: 'Заявка активирована.'
+    redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                notice: "Заявка активирована."
   rescue => e
-    redirect_to marketing_index_path(tab: @marketing_request.request_type), 
+    redirect_to marketing_index_path(tab: @marketing_request.request_type),
                 alert: "Ошибка при активации: #{e.message}"
   end
 
   def reject
     @marketing_request.reject!
-    redirect_to marketing_index_path(tab: @marketing_request.request_type), 
-                notice: 'Заявка отклонена.'
+    redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                notice: "Заявка отклонена."
   rescue => e
-    redirect_to marketing_index_path(tab: @marketing_request.request_type), 
+    redirect_to marketing_index_path(tab: @marketing_request.request_type),
                 alert: "Ошибка при отклонении: #{e.message}"
   end
 
   def transfer
     new_request_type = params[:new_request_type]
-    
+
     unless MarketingRequest::REQUEST_TYPES.include?(new_request_type)
-      redirect_to marketing_path(@marketing_request), 
-                  alert: 'Неверный тип заявки для переноса.'
+      redirect_to marketing_path(@marketing_request),
+                  alert: "Неверный тип заявки для переноса."
       return
     end
 
     old_type = @marketing_request.request_type_label
     old_request_type = @marketing_request.request_type
-    
+
     @marketing_request.update!(
       request_type: new_request_type,
-      status: 'pending',  # Всегда возвращаем в pending при переносе
+      status: "pending",  # Всегда возвращаем в pending при переносе
       activation_date: nil
     )
-    
-    redirect_to marketing_index_path(tab: new_request_type), 
+
+    redirect_to marketing_index_path(tab: new_request_type),
                 notice: "Заявка перенесена из \"#{old_type}\" в \"#{@marketing_request.request_type_label}\"."
   rescue => e
-    redirect_to marketing_path(@marketing_request), 
+    redirect_to marketing_path(@marketing_request),
                 alert: "Ошибка при переносе: #{e.message}"
   end
 
@@ -118,7 +118,7 @@ class MarketingController < ApplicationController
 
   def marketing_request_params
     params.require(:marketing_request).permit(
-      :manager, :platform, :partner_email, :promo_code, 
+      :manager, :platform, :partner_email, :promo_code,
       :stag, :activation_date, :status, :request_type
     )
   end

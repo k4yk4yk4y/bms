@@ -8,7 +8,7 @@ class CreateMaterialPrizeRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :material_prize_rewards, :prize_name
   end
 end

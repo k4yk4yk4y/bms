@@ -1,7 +1,7 @@
 class AddEventToBonuses < ActiveRecord::Migration[8.0]
   def change
     add_column :bonuses, :event, :string
-    
+
     # Заполняем event на основе существующих bonus_type
     reversible do |dir|
       dir.up do
@@ -10,7 +10,7 @@ class AddEventToBonuses < ActiveRecord::Migration[8.0]
         SQL
       end
     end
-    
+
     change_column_null :bonuses, :event, false
     add_index :bonuses, :event
   end

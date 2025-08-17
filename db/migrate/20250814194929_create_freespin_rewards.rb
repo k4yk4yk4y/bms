@@ -8,7 +8,7 @@ class CreateFreespinRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :freespin_rewards, :spins_count
   end
 end

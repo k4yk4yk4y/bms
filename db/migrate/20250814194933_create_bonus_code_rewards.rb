@@ -8,7 +8,7 @@ class CreateBonusCodeRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :bonus_code_rewards, :code, unique: true
     add_index :bonus_code_rewards, :code_type
   end

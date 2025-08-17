@@ -154,7 +154,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
           'Laptop Computer',
           'Smart TV 55"'
         ]
-        
+
         valid_names.each do |name|
           material_prize_reward.prize_name = name
           expect(material_prize_reward).to be_valid, "Expected '#{name}' to be valid"
@@ -174,7 +174,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
           'Device 10"',
           'Set 2x1'
         ]
-        
+
         special_names.each do |name|
           material_prize_reward.prize_name = name
           expect(material_prize_reward).to be_valid, "Expected '#{name}' to be valid"
@@ -196,7 +196,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
           'Товар для дома',
           'Электроника'
         ]
-        
+
         unicode_names.each do |name|
           material_prize_reward.prize_name = name
           expect(material_prize_reward).to be_valid, "Expected '#{name}' to be valid"
@@ -359,9 +359,9 @@ RSpec.describe MaterialPrizeReward, type: :model do
       ]
 
       electronic_prizes.each do |prize_data|
-        reward = build(:material_prize_reward, 
-                      bonus: bonus, 
-                      prize_name: prize_data[:name], 
+        reward = build(:material_prize_reward,
+                      bonus: bonus,
+                      prize_name: prize_data[:name],
                       prize_value: prize_data[:value])
         expect(reward).to be_valid
         expect(reward).to have_monetary_value
@@ -378,9 +378,9 @@ RSpec.describe MaterialPrizeReward, type: :model do
       ]
 
       gift_cards.each do |card_data|
-        reward = build(:material_prize_reward, 
-                      bonus: bonus, 
-                      prize_name: card_data[:name], 
+        reward = build(:material_prize_reward,
+                      bonus: bonus,
+                      prize_name: card_data[:name],
                       prize_value: card_data[:value])
         expect(reward).to be_valid
         expect(reward).to have_monetary_value
@@ -397,9 +397,9 @@ RSpec.describe MaterialPrizeReward, type: :model do
       ]
 
       non_monetary_prizes.each do |prize_name|
-        reward = build(:material_prize_reward, 
-                      bonus: bonus, 
-                      prize_name: prize_name, 
+        reward = build(:material_prize_reward,
+                      bonus: bonus,
+                      prize_name: prize_name,
                       prize_value: nil)
         expect(reward).to be_valid
         expect(reward).not_to have_monetary_value

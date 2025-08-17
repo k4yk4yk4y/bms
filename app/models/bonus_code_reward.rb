@@ -18,11 +18,11 @@ class BonusCodeReward < ApplicationRecord
   end
 
   def title
-    config['title'] || "Бонус-код #{code}"
+    config["title"] || "Бонус-код #{code}"
   end
 
   def title=(value)
-    self.config = (config || {}).merge('title' => value)
+    self.config = (config || {}).merge("title" => value)
   end
 
   def display_title

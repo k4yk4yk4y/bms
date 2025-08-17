@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   # Marketing requests routes
-  resources :marketing, path: 'marketing' do
+  resources :marketing, path: "marketing" do
     member do
       patch :activate
       patch :reject

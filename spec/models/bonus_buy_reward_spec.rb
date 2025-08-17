@@ -51,23 +51,23 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'returns games from config' do
-        bonus_buy_reward.config = { 'games' => ['slot1', 'slot2'] }
-        expect(bonus_buy_reward.games).to eq(['slot1', 'slot2'])
+        bonus_buy_reward.config = { 'games' => [ 'slot1', 'slot2' ] }
+        expect(bonus_buy_reward.games).to eq([ 'slot1', 'slot2' ])
       end
 
       it 'sets games as array' do
-        bonus_buy_reward.games = ['game1', 'game2']
-        expect(bonus_buy_reward.config['games']).to eq(['game1', 'game2'])
+        bonus_buy_reward.games = [ 'game1', 'game2' ]
+        expect(bonus_buy_reward.config['games']).to eq([ 'game1', 'game2' ])
       end
 
       it 'sets games from comma-separated string' do
         bonus_buy_reward.games = 'game1, game2, game3'
-        expect(bonus_buy_reward.config['games']).to eq(['game1', 'game2', 'game3'])
+        expect(bonus_buy_reward.config['games']).to eq([ 'game1', 'game2', 'game3' ])
       end
 
       it 'filters blank values' do
         bonus_buy_reward.games = 'game1, , game3,  '
-        expect(bonus_buy_reward.config['games']).to eq(['game1', 'game3'])
+        expect(bonus_buy_reward.config['games']).to eq([ 'game1', 'game3' ])
       end
     end
 
@@ -147,18 +147,18 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'sets currencies as array' do
-        bonus_buy_reward.currencies = ['USD', 'EUR']
-        expect(bonus_buy_reward.config['currencies']).to eq(['USD', 'EUR'])
+        bonus_buy_reward.currencies = [ 'USD', 'EUR' ]
+        expect(bonus_buy_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
       end
 
       it 'sets single currency as array' do
         bonus_buy_reward.currencies = 'USD'
-        expect(bonus_buy_reward.config['currencies']).to eq(['USD'])
+        expect(bonus_buy_reward.config['currencies']).to eq([ 'USD' ])
       end
 
       it 'filters nil values' do
-        bonus_buy_reward.currencies = ['USD', nil, 'EUR']
-        expect(bonus_buy_reward.config['currencies']).to eq(['USD', 'EUR'])
+        bonus_buy_reward.currencies = [ 'USD', nil, 'EUR' ]
+        expect(bonus_buy_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
       end
     end
 
@@ -181,12 +181,12 @@ RSpec.describe BonusBuyReward, type: :model do
 
       it 'sets groups from comma-separated string' do
         bonus_buy_reward.groups = 'group1, group2, group3'
-        expect(bonus_buy_reward.config['groups']).to eq(['group1', 'group2', 'group3'])
+        expect(bonus_buy_reward.config['groups']).to eq([ 'group1', 'group2', 'group3' ])
       end
 
       it 'filters blank values' do
         bonus_buy_reward.groups = 'group1, , group3,  '
-        expect(bonus_buy_reward.config['groups']).to eq(['group1', 'group3'])
+        expect(bonus_buy_reward.config['groups']).to eq([ 'group1', 'group3' ])
       end
     end
 
@@ -197,7 +197,7 @@ RSpec.describe BonusBuyReward, type: :model do
 
       it 'sets tags from comma-separated string' do
         bonus_buy_reward.tags = 'tag1, tag2, tag3'
-        expect(bonus_buy_reward.config['tags']).to eq(['tag1', 'tag2', 'tag3'])
+        expect(bonus_buy_reward.config['tags']).to eq([ 'tag1', 'tag2', 'tag3' ])
       end
     end
   end
@@ -338,7 +338,7 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'returns true when games specified' do
-        bonus_buy_reward.games = ['slot1', 'slot2']
+        bonus_buy_reward.games = [ 'slot1', 'slot2' ]
         expect(bonus_buy_reward).to have_game_restrictions
       end
     end
@@ -350,7 +350,7 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'joins games with comma' do
-        bonus_buy_reward.games = ['Slot Game 1', 'Slot Game 2']
+        bonus_buy_reward.games = [ 'Slot Game 1', 'Slot Game 2' ]
         expect(bonus_buy_reward.formatted_games).to eq('Slot Game 1, Slot Game 2')
       end
     end
@@ -379,7 +379,7 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'joins groups with comma' do
-        bonus_buy_reward.groups = ['group1', 'group2']
+        bonus_buy_reward.groups = [ 'group1', 'group2' ]
         expect(bonus_buy_reward.formatted_groups).to eq('group1, group2')
       end
     end
@@ -391,7 +391,7 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'joins tags with comma' do
-        bonus_buy_reward.tags = ['tag1', 'tag2']
+        bonus_buy_reward.tags = [ 'tag1', 'tag2' ]
         expect(bonus_buy_reward.formatted_tags).to eq('tag1, tag2')
       end
     end
@@ -403,7 +403,7 @@ RSpec.describe BonusBuyReward, type: :model do
       end
 
       it 'joins currencies with comma' do
-        bonus_buy_reward.currencies = ['USD', 'EUR']
+        bonus_buy_reward.currencies = [ 'USD', 'EUR' ]
         expect(bonus_buy_reward.formatted_currencies).to eq('USD, EUR')
       end
     end
@@ -451,12 +451,12 @@ RSpec.describe BonusBuyReward, type: :model do
     end
 
     it 'preserves config when setting multiple parameters' do
-      bonus_buy_reward.games = ['game1']
+      bonus_buy_reward.games = [ 'game1' ]
       bonus_buy_reward.bet_level = 10
       bonus_buy_reward.max_win = '100x'
-      
+
       expect(bonus_buy_reward.config).to include(
-        'games' => ['game1'],
+        'games' => [ 'game1' ],
         'bet_level' => 10,
         'max_win' => '100x'
       )
@@ -464,10 +464,10 @@ RSpec.describe BonusBuyReward, type: :model do
 
     it 'handles config merge correctly' do
       bonus_buy_reward.config = { 'existing' => 'value' }
-      bonus_buy_reward.games = ['game1']
-      
+      bonus_buy_reward.games = [ 'game1' ]
+
       expect(bonus_buy_reward.config['existing']).to eq('value')
-      expect(bonus_buy_reward.config['games']).to eq(['game1'])
+      expect(bonus_buy_reward.config['games']).to eq([ 'game1' ])
     end
   end
 end

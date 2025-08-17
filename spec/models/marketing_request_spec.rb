@@ -152,12 +152,12 @@ RSpec.describe MarketingRequest, type: :model do
             manager: 'Test Manager',
             partner_email: 'test@example.com',
             stag: 'TESTSTAG',
-            promo_code: 'NOT_EMPTY', # Set non-empty initially  
+            promo_code: 'NOT_EMPTY', # Set non-empty initially
             request_type: 'promo_webs_50',
             status: 'pending'
           )
           marketing_request.save!
-          
+
           # Now test the specific custom validation by directly calling it
           marketing_request.instance_variable_set(:@promo_code, '   ,   ,   ')
           allow(marketing_request).to receive(:promo_codes_array).and_return([])
@@ -182,7 +182,7 @@ RSpec.describe MarketingRequest, type: :model do
   # Scopes tests
   describe 'scopes' do
     before { MarketingRequest.destroy_all } # Clear any existing records
-    
+
     let!(:pending_request) { create(:marketing_request, :pending, :promo_no_link_50, :with_unique_stag, :with_unique_promo_code) }
     let!(:activated_request) { create(:marketing_request, :activated, :promo_no_link_100, :with_unique_stag, :with_unique_promo_code) }
     let!(:rejected_request) { create(:marketing_request, :rejected, :promo_no_link_125, :with_unique_stag, :with_unique_promo_code) }
@@ -358,7 +358,7 @@ RSpec.describe MarketingRequest, type: :model do
         end
 
         it 'filters blank values' do
-          marketing_request.promo_codes_array = ['CODE1', '', 'CODE2', nil, 'CODE3']
+          marketing_request.promo_codes_array = [ 'CODE1', '', 'CODE2', nil, 'CODE3' ]
           expect(marketing_request.promo_code).to eq('CODE1, CODE2, CODE3')
         end
       end
@@ -469,13 +469,13 @@ RSpec.describe MarketingRequest, type: :model do
       it 'handles simultaneous updates gracefully' do
         request1 = create(:marketing_request, :activated)
         request2 = MarketingRequest.find(request1.id)
-        
+
         request1.manager = 'Manager 1'
         request2.manager = 'Manager 2'
-        
+
         request1.save!
         expect(request1.status).to eq('pending')
-        
+
         request2.save!
         expect(request2.status).to eq('pending')
       end

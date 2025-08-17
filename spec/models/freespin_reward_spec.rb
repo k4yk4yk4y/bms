@@ -50,23 +50,23 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'returns games from config' do
-        freespin_reward.config = { 'games' => ['slot1', 'slot2'] }
-        expect(freespin_reward.games).to eq(['slot1', 'slot2'])
+        freespin_reward.config = { 'games' => [ 'slot1', 'slot2' ] }
+        expect(freespin_reward.games).to eq([ 'slot1', 'slot2' ])
       end
 
       it 'sets games as array' do
-        freespin_reward.games = ['game1', 'game2']
-        expect(freespin_reward.config['games']).to eq(['game1', 'game2'])
+        freespin_reward.games = [ 'game1', 'game2' ]
+        expect(freespin_reward.config['games']).to eq([ 'game1', 'game2' ])
       end
 
       it 'sets games from comma-separated string' do
         freespin_reward.games = 'game1, game2, game3'
-        expect(freespin_reward.config['games']).to eq(['game1', 'game2', 'game3'])
+        expect(freespin_reward.config['games']).to eq([ 'game1', 'game2', 'game3' ])
       end
 
       it 'filters blank values' do
         freespin_reward.games = 'game1, , game3,  '
-        expect(freespin_reward.config['games']).to eq(['game1', 'game3'])
+        expect(freespin_reward.config['games']).to eq([ 'game1', 'game3' ])
       end
     end
 
@@ -146,18 +146,18 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'sets currencies as array' do
-        freespin_reward.currencies = ['USD', 'EUR']
-        expect(freespin_reward.config['currencies']).to eq(['USD', 'EUR'])
+        freespin_reward.currencies = [ 'USD', 'EUR' ]
+        expect(freespin_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
       end
 
       it 'sets single currency as array' do
         freespin_reward.currencies = 'USD'
-        expect(freespin_reward.config['currencies']).to eq(['USD'])
+        expect(freespin_reward.config['currencies']).to eq([ 'USD' ])
       end
 
       it 'filters nil values' do
-        freespin_reward.currencies = ['USD', nil, 'EUR']
-        expect(freespin_reward.config['currencies']).to eq(['USD', 'EUR'])
+        freespin_reward.currencies = [ 'USD', nil, 'EUR' ]
+        expect(freespin_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
       end
     end
 
@@ -180,12 +180,12 @@ RSpec.describe FreespinReward, type: :model do
 
       it 'sets groups from comma-separated string' do
         freespin_reward.groups = 'group1, group2, group3'
-        expect(freespin_reward.config['groups']).to eq(['group1', 'group2', 'group3'])
+        expect(freespin_reward.config['groups']).to eq([ 'group1', 'group2', 'group3' ])
       end
 
       it 'filters blank values' do
         freespin_reward.groups = 'group1, , group3,  '
-        expect(freespin_reward.config['groups']).to eq(['group1', 'group3'])
+        expect(freespin_reward.config['groups']).to eq([ 'group1', 'group3' ])
       end
     end
 
@@ -196,7 +196,7 @@ RSpec.describe FreespinReward, type: :model do
 
       it 'sets tags from comma-separated string' do
         freespin_reward.tags = 'tag1, tag2, tag3'
-        expect(freespin_reward.config['tags']).to eq(['tag1', 'tag2', 'tag3'])
+        expect(freespin_reward.config['tags']).to eq([ 'tag1', 'tag2', 'tag3' ])
       end
     end
   end
@@ -326,7 +326,7 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'returns true when games specified' do
-        freespin_reward.games = ['slot1', 'slot2']
+        freespin_reward.games = [ 'slot1', 'slot2' ]
         expect(freespin_reward).to have_game_restrictions
       end
     end
@@ -338,7 +338,7 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'joins games with comma' do
-        freespin_reward.games = ['Slot Game 1', 'Slot Game 2']
+        freespin_reward.games = [ 'Slot Game 1', 'Slot Game 2' ]
         expect(freespin_reward.formatted_games).to eq('Slot Game 1, Slot Game 2')
       end
     end
@@ -367,7 +367,7 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'joins groups with comma' do
-        freespin_reward.groups = ['group1', 'group2']
+        freespin_reward.groups = [ 'group1', 'group2' ]
         expect(freespin_reward.formatted_groups).to eq('group1, group2')
       end
     end
@@ -379,7 +379,7 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'joins tags with comma' do
-        freespin_reward.tags = ['tag1', 'tag2']
+        freespin_reward.tags = [ 'tag1', 'tag2' ]
         expect(freespin_reward.formatted_tags).to eq('tag1, tag2')
       end
     end
@@ -391,7 +391,7 @@ RSpec.describe FreespinReward, type: :model do
       end
 
       it 'joins currencies with comma' do
-        freespin_reward.currencies = ['USD', 'EUR']
+        freespin_reward.currencies = [ 'USD', 'EUR' ]
         expect(freespin_reward.formatted_currencies).to eq('USD, EUR')
       end
     end
@@ -417,12 +417,12 @@ RSpec.describe FreespinReward, type: :model do
     end
 
     it 'preserves config when setting multiple parameters' do
-      freespin_reward.games = ['game1']
+      freespin_reward.games = [ 'game1' ]
       freespin_reward.bet_level = 1.5
       freespin_reward.max_win = '100x'
-      
+
       expect(freespin_reward.config).to include(
-        'games' => ['game1'],
+        'games' => [ 'game1' ],
         'bet_level' => 1.5,
         'max_win' => '100x'
       )
@@ -430,10 +430,10 @@ RSpec.describe FreespinReward, type: :model do
 
     it 'handles config merge correctly' do
       freespin_reward.config = { 'existing' => 'value' }
-      freespin_reward.games = ['game1']
-      
+      freespin_reward.games = [ 'game1' ]
+
       expect(freespin_reward.config['existing']).to eq('value')
-      expect(freespin_reward.config['games']).to eq(['game1'])
+      expect(freespin_reward.config['games']).to eq([ 'game1' ])
     end
   end
 end

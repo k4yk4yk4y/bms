@@ -7,7 +7,7 @@ class RemoveOldBonusTables < ActiveRecord::Migration[8.0]
     remove_foreign_key :collect_bonuses, :bonuses if foreign_key_exists?(:collect_bonuses, :bonuses)
     remove_foreign_key :groups_update_bonuses, :bonuses if foreign_key_exists?(:groups_update_bonuses, :bonuses)
     remove_foreign_key :scheduler_bonuses, :bonuses if foreign_key_exists?(:scheduler_bonuses, :bonuses)
-    
+
     # Удаляем таблицы
     drop_table :deposit_bonuses, if_exists: true
     drop_table :input_coupon_bonuses, if_exists: true
@@ -15,7 +15,7 @@ class RemoveOldBonusTables < ActiveRecord::Migration[8.0]
     drop_table :collect_bonuses, if_exists: true
     drop_table :groups_update_bonuses, if_exists: true
     drop_table :scheduler_bonuses, if_exists: true
-    
+
     # Удаляем старую колонку bonus_type
     remove_column :bonuses, :bonus_type, :string if column_exists?(:bonuses, :bonus_type)
   end
@@ -23,10 +23,10 @@ class RemoveOldBonusTables < ActiveRecord::Migration[8.0]
   def down
     # Восстанавливаем bonus_type
     add_column :bonuses, :bonus_type, :string unless column_exists?(:bonuses, :bonus_type)
-    
+
     # Заполняем bonus_type на основе event
     execute "UPDATE bonuses SET bonus_type = event WHERE event IS NOT NULL;"
-    
+
     # Воссоздаем старые таблицы (простая структура)
     create_table :deposit_bonuses do |t|
       t.references :bonus, null: false, foreign_key: true

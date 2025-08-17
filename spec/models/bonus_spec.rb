@@ -42,13 +42,13 @@ RSpec.describe Bonus, type: :model do
   describe 'validations' do
     describe 'presence validations' do
       it { is_expected.to validate_presence_of(:name) }
-      
+
       it 'validates presence of code or generates one' do
         bonus.code = nil
         expect(bonus).to be_valid
         expect(bonus.code).to be_present
       end
-      
+
       it { is_expected.to validate_presence_of(:event) }
       it { is_expected.to validate_presence_of(:status) }
       it { is_expected.to validate_presence_of(:availability_start_date) }
@@ -166,7 +166,7 @@ RSpec.describe Bonus, type: :model do
 
         it 'validates currencies are in supported list' do
           bonus.event = 'deposit'
-          bonus.currencies = ['USD']
+          bonus.currencies = [ 'USD' ]
           bonus.currency_minimum_deposits = { 'EUR' => 50.0 }
           expect(bonus).not_to be_valid
           expect(bonus.errors[:currency_minimum_deposits]).to include('содержит валюты, которые не указаны в списке поддерживаемых валют: EUR')
@@ -201,7 +201,7 @@ RSpec.describe Bonus, type: :model do
       end
 
       it 'filters blank values' do
-        bonus.currencies = ['USD', '', 'EUR', nil, 'RUB']
+        bonus.currencies = [ 'USD', '', 'EUR', nil, 'RUB' ]
         expect(bonus.currencies).to eq(%w[USD EUR RUB])
       end
     end

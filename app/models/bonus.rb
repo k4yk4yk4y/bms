@@ -6,18 +6,18 @@ class Bonus < ApplicationRecord
   STATUSES = %w[draft active inactive expired].freeze
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
   PROJECTS = %w[VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
-  
+
   # Permanent bonus types for preview cards
   PERMANENT_BONUS_TYPES = [
-    { name: 'Welcome Bonus', slug: 'welcome_bonus', dsl_tag: 'welcome_bonus' },
-    { name: 'Second Bonus', slug: 'second_bonus', dsl_tag: 'second' },
-    { name: 'Third Bonus', slug: 'third_bonus', dsl_tag: 'third' },
-    { name: 'Fourth Bonus', slug: 'fourth_bonus', dsl_tag: 'fourth' },
-    { name: 'Reload Cash', slug: 'reload_cash', dsl_tag: 'reload_cash' },
-    { name: 'Reload Freespins', slug: 'reload_freespins', dsl_tag: 'reload_freespins' },
-    { name: 'Happy Birthday Bonus', slug: 'happy_birthday', dsl_tag: 'birthday' },
-    { name: 'Cashback Bonus', slug: 'cashback', dsl_tag: 'cashback' },
-    { name: 'Live Cashback Bonus', slug: 'live_cashback', dsl_tag: 'live_cashback' }
+    { name: "Welcome Bonus", slug: "welcome_bonus", dsl_tag: "welcome_bonus" },
+    { name: "Second Bonus", slug: "second_bonus", dsl_tag: "second" },
+    { name: "Third Bonus", slug: "third_bonus", dsl_tag: "third" },
+    { name: "Fourth Bonus", slug: "fourth_bonus", dsl_tag: "fourth" },
+    { name: "Reload Cash", slug: "reload_cash", dsl_tag: "reload_cash" },
+    { name: "Reload Freespins", slug: "reload_freespins", dsl_tag: "reload_freespins" },
+    { name: "Happy Birthday Bonus", slug: "happy_birthday", dsl_tag: "birthday" },
+    { name: "Cashback Bonus", slug: "cashback", dsl_tag: "cashback" },
+    { name: "Live Cashback Bonus", slug: "live_cashback", dsl_tag: "live_cashback" }
   ].freeze
 
   # New reward associations
@@ -85,7 +85,7 @@ class Bonus < ApplicationRecord
 
   def self.permanent_bonus_previews_for_project(project)
     return [] if project.blank?
-    
+
     PERMANENT_BONUS_TYPES.map do |bonus_type|
       existing_bonus = find_permanent_bonus_for_project(project, bonus_type[:dsl_tag])
       bonus_type.merge(existing_bonus: existing_bonus)
@@ -131,13 +131,13 @@ class Bonus < ApplicationRecord
 
   def reward_types
     types = []
-    types << 'bonus' if bonus_rewards.any?
-    types << 'freespins' if freespin_rewards.any?
-    types << 'bonus_buy' if bonus_buy_rewards.any?
-    types << 'freechips' if freechip_rewards.any?
-    types << 'bonus_code' if bonus_code_rewards.any?
-    types << 'material_prize' if material_prize_rewards.any?
-    types << 'comp_point' if comp_point_rewards.any?
+    types << "bonus" if bonus_rewards.any?
+    types << "freespins" if freespin_rewards.any?
+    types << "bonus_buy" if bonus_buy_rewards.any?
+    types << "freechips" if freechip_rewards.any?
+    types << "bonus_code" if bonus_code_rewards.any?
+    types << "material_prize" if material_prize_rewards.any?
+    types << "comp_point" if comp_point_rewards.any?
     types
   end
 
@@ -152,7 +152,7 @@ class Bonus < ApplicationRecord
     # Try to get currency from first reward, fallback to bonus currency
     first_reward = all_rewards.first
     if first_reward&.respond_to?(:currencies) && first_reward.currencies.present?
-      first_reward.currencies.is_a?(Array) ? first_reward.currencies.join(', ') : first_reward.currencies
+      first_reward.currencies.is_a?(Array) ? first_reward.currencies.join(", ") : first_reward.currencies
     else
       currency
     end
@@ -176,7 +176,7 @@ class Bonus < ApplicationRecord
     # Try to get tags from first reward, fallback to bonus tags
     first_reward = all_rewards.first
     if first_reward&.respond_to?(:tags) && first_reward.tags.present?
-      first_reward.tags.is_a?(Array) ? first_reward.tags.join(', ') : first_reward.tags
+      first_reward.tags.is_a?(Array) ? first_reward.tags.join(", ") : first_reward.tags
     else
       tags
     end
@@ -186,7 +186,7 @@ class Bonus < ApplicationRecord
     # Try to get groups from first reward, fallback to bonus user_group
     first_reward = all_rewards.first
     if first_reward&.respond_to?(:groups) && first_reward.groups.present?
-      first_reward.groups.is_a?(Array) ? first_reward.groups.join(', ') : first_reward.groups
+      first_reward.groups.is_a?(Array) ? first_reward.groups.join(", ") : first_reward.groups
     else
       user_group
     end
@@ -210,14 +210,14 @@ class Bonus < ApplicationRecord
     if value.is_a?(Array)
       super(value.reject(&:blank?))
     elsif value.is_a?(String)
-      super(value.split(',').map(&:strip).reject(&:blank?))
+      super(value.split(",").map(&:strip).reject(&:blank?))
     else
       super(value)
     end
   end
 
   def formatted_currencies
-    currencies.join(', ') if currencies.any?
+    currencies.join(", ") if currencies.any?
   end
 
   # Groups methods
@@ -229,14 +229,14 @@ class Bonus < ApplicationRecord
     if value.is_a?(Array)
       super(value.reject(&:blank?))
     elsif value.is_a?(String)
-      super(value.split(',').map(&:strip).reject(&:blank?))
+      super(value.split(",").map(&:strip).reject(&:blank?))
     else
       super(value)
     end
   end
 
   def formatted_groups
-    groups.join(', ') if groups.any?
+    groups.join(", ") if groups.any?
   end
 
   # Currency minimum deposits methods
@@ -258,9 +258,9 @@ class Bonus < ApplicationRecord
   end
 
   def formatted_currency_minimum_deposits
-    return 'No minimum deposits specified' if currency_minimum_deposits.empty?
-    
-    currency_minimum_deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(', ')
+    return "No minimum deposits specified" if currency_minimum_deposits.empty?
+
+    currency_minimum_deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
   end
 
   def minimum_deposit_for_currency(currency)
@@ -273,11 +273,11 @@ class Bonus < ApplicationRecord
 
   # Limitation methods
   def formatted_no_more
-    no_more.present? ? no_more : 'No limit'
+    no_more.present? ? no_more : "No limit"
   end
 
   def formatted_totally_no_more
-    totally_no_more.present? ? "#{totally_no_more} total" : 'Unlimited'
+    totally_no_more.present? ? "#{totally_no_more} total" : "Unlimited"
   end
 
   def activate!
@@ -294,7 +294,7 @@ class Bonus < ApplicationRecord
 
   def check_and_update_expired_status!
     return unless persisted? # Only check saved records
-    
+
     # If bonus has expired and is still active, mark it as inactive
     if expired? && status == "active"
       update_column(:status, "inactive") # Use update_column to avoid callbacks loop
@@ -358,7 +358,7 @@ class Bonus < ApplicationRecord
 
     # Проверяем, что currency_minimum_deposits не должно быть установлено для событий, которые не требуют депозита
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
-    
+
     if non_deposit_events.include?(event) && currency_minimum_deposits.any?
       errors.add(:currency_minimum_deposits, "не должно быть установлено для события #{event}")
       return

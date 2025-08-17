@@ -8,7 +8,7 @@ class CreateFreechipRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :freechip_rewards, :chip_value
   end
 end
