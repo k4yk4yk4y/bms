@@ -8,7 +8,7 @@ class CreateCompPointRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :comp_point_rewards, :points_amount
   end
 end

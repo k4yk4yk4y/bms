@@ -41,7 +41,7 @@ module BonusesHelper
       [ "Scheduler Event", "scheduler" ]
     ]
   end
-  
+
   # Deprecated - use event_type_options instead
   def bonus_type_options
     event_type_options

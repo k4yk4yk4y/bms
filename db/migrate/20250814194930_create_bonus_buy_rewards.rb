@@ -8,7 +8,7 @@ class CreateBonusBuyRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :bonus_buy_rewards, :buy_amount
   end
 end

@@ -46,7 +46,7 @@ RSpec.describe BonusReward, type: :model do
       config_data = { 'wager' => 35.0, 'max_win' => '500' }
       bonus_reward.config = config_data
       bonus_reward.save!
-      
+
       expect(bonus_reward.reload.config).to eq(config_data)
     end
 
@@ -168,7 +168,7 @@ RSpec.describe BonusReward, type: :model do
 
       it 'converts single value to array' do
         bonus_reward.currencies = 'USD'
-        expect(bonus_reward.config['currencies']).to eq(['USD'])
+        expect(bonus_reward.config['currencies']).to eq([ 'USD' ])
       end
 
       it 'returns empty array when nil' do

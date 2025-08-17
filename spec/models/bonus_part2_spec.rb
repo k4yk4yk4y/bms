@@ -123,7 +123,7 @@ RSpec.describe Bonus, type: :model do
       it 'returns correct reward types' do
         create(:bonus_reward, bonus: bonus)
         create(:freespin_reward, bonus: bonus)
-        
+
         expect(bonus.reward_types).to contain_exactly('bonus', 'freespins')
       end
     end
@@ -169,7 +169,7 @@ RSpec.describe Bonus, type: :model do
 
       it 'splits tags by comma and strips whitespace' do
         bonus.tags = 'vip, weekend , bonus'
-        expect(bonus.tags_array).to eq(['vip', 'weekend', 'bonus'])
+        expect(bonus.tags_array).to eq([ 'vip', 'weekend', 'bonus' ])
       end
     end
 
@@ -377,24 +377,24 @@ RSpec.describe Bonus, type: :model do
           availability_start_date: 2.days.ago,
           availability_end_date: 1.day.ago,
           currency: 'USD',
-          currencies: ['USD'],
-          groups: ['test'],
+          currencies: [ 'USD' ],
+          groups: [ 'test' ],
           currency_minimum_deposits: { 'USD' => 50.0 }
         )
-        
+
         # Force the status to be active in the database (bypass callbacks)
         expired_bonus.update_column(:status, 'active')
-        
+
         # Count how many active expired bonuses exist
         count_before = Bonus.active.where("availability_end_date < ?", Time.current).count
         expect(count_before).to be > 0
-        
+
         # Run the update method
         result = Bonus.update_expired_bonuses!
-        
+
         # Check that the count was returned and bonuses were updated
         expect(result).to eq(count_before)
-        
+
         # Verify the specific bonus was updated (accessing directly from DB to avoid callbacks)
         updated_status = Bonus.connection.select_value("SELECT status FROM bonuses WHERE id = #{expired_bonus.id}")
         expect(updated_status).to eq('inactive')
@@ -417,10 +417,10 @@ RSpec.describe Bonus, type: :model do
     describe 'with time zone changes' do
       it 'handles different time zones correctly' do
         Time.use_zone('UTC') do
-          utc_bonus = create(:bonus, 
+          utc_bonus = create(:bonus,
                            availability_start_date: Time.zone.parse('2024-01-01 00:00:00'),
                            availability_end_date: Time.zone.parse('2024-01-02 00:00:00'))
-          
+
           travel_to Time.zone.parse('2024-01-01 12:00:00') do
             expect(utc_bonus).to be_available_now
           end
@@ -437,7 +437,7 @@ RSpec.describe Bonus, type: :model do
           bonus = create(:bonus, availability_start_date: start_time, availability_end_date: end_time)
           expect(bonus).to be_available_now
         end
-        
+
         # Test availability at exact end time
         travel_to 1.hour.from_now do
           start_time = 1.hour.ago
@@ -445,7 +445,7 @@ RSpec.describe Bonus, type: :model do
           bonus = create(:bonus, availability_start_date: start_time, availability_end_date: end_time)
           expect(bonus).to be_available_now
         end
-        
+
         # Test unavailability after end time
         travel_to 1.hour.from_now do
           start_time = 2.hours.ago
@@ -478,10 +478,10 @@ RSpec.describe Bonus, type: :model do
       it 'handles concurrent code generation' do
         bonus1 = build(:bonus, code: nil)
         bonus2 = build(:bonus, code: nil)
-        
+
         bonus1.valid?
         bonus2.valid?
-        
+
         expect(bonus1.code).not_to eq(bonus2.code)
         expect(bonus1.code).to match(/\ABONUS_[A-Z0-9]{8}\z/)
         expect(bonus2.code).to match(/\ABONUS_[A-Z0-9]{8}\z/)
@@ -492,7 +492,7 @@ RSpec.describe Bonus, type: :model do
       it 'handles nil and empty values gracefully' do
         bonus.write_attribute(:currencies, nil)
         expect(bonus.currencies).to eq([])
-        
+
         bonus.write_attribute(:groups, nil)
         expect(bonus.groups).to eq([])
       end

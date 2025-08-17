@@ -112,7 +112,7 @@ class BonusesController < ApplicationController
     Rails.logger.debug "Update params: #{params.inspect}"
     Rails.logger.debug "Bonus params: #{bonus_params.inspect}"
     Rails.logger.debug "Currency minimum deposits params: #{params[:bonus][:currency_minimum_deposits].inspect}"
-    
+
     respond_to do |format|
       if @bonus.update(bonus_params)
         # Update or create multiple bonus rewards if provided
@@ -200,13 +200,13 @@ class BonusesController < ApplicationController
 
   def bonus_reward_params
     return {} unless params[:bonus_reward].present?
-    
+
     permitted = params.require(:bonus_reward).permit(
       :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
       :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
       # Advanced parameters
       :range, :last_login_country, :profile_country, :current_ip_country, :emails,
-      :stag, :deposit_payment_systems, :cashout_payment_systems, 
+      :stag, :deposit_payment_systems, :cashout_payment_systems,
       :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
       :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
       :affiliates_user, :balance, :cashout, :chargeable_comp_points,
@@ -216,7 +216,7 @@ class BonusesController < ApplicationController
     )
 
     # Process max_win logic
-    if params[:max_win_type] == 'multiplier' && permitted[:max_win_multiplier].present?
+    if params[:max_win_type] == "multiplier" && permitted[:max_win_multiplier].present?
       permitted[:max_win] = "x#{permitted[:max_win_multiplier]}"
     elsif permitted[:max_win_fixed].present?
       permitted[:max_win] = permitted[:max_win_fixed]
@@ -235,7 +235,7 @@ class BonusesController < ApplicationController
     return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
 
     reward = @bonus.bonus_rewards.build(
-      reward_type: 'bonus',
+      reward_type: "bonus",
       amount: reward_params[:amount],
       percentage: reward_params[:percentage]
     )
@@ -246,7 +246,7 @@ class BonusesController < ApplicationController
       next if value.blank?
       config[key.to_s] = value
     end
-    
+
     reward.config = config unless config.empty?
     reward.save
   end
@@ -256,8 +256,8 @@ class BonusesController < ApplicationController
     return if reward_params.empty?
 
     # Find existing bonus reward or create new one
-    reward = @bonus.bonus_rewards.find_by(reward_type: 'bonus') || 
-             @bonus.bonus_rewards.build(reward_type: 'bonus')
+    reward = @bonus.bonus_rewards.find_by(reward_type: "bonus") ||
+             @bonus.bonus_rewards.build(reward_type: "bonus")
 
     # Update amount/percentage
     reward.amount = reward_params[:amount] if reward_params[:amount].present?
@@ -272,16 +272,16 @@ class BonusesController < ApplicationController
         config[key.to_s] = value
       end
     end
-    
+
     reward.config = config
     reward.save
   end
 
   def freespin_reward_params
     return {} unless params[:freespin_reward].present?
-    
+
     permitted = params.require(:freespin_reward).permit(
-      :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+      :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -293,11 +293,11 @@ class BonusesController < ApplicationController
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
       :wager_done, :hold_min, :hold_max, :currencies, currencies: []
     )
-    
+
     # Handle array fields properly
-    permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
-    permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
-    
+    permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
+    permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
+
     permitted
   end
 
@@ -329,7 +329,7 @@ class BonusesController < ApplicationController
     reward.advanced_params.each do |param|
       config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
     end
-    
+
     reward.config = config
     reward.save
   end
@@ -366,23 +366,23 @@ class BonusesController < ApplicationController
         config[param] = reward_params[param.to_sym]
       end
     end
-    
+
     reward.config = config
     reward.save
   end
 
   def multiple_bonus_rewards_params
     return [] unless params[:bonus_rewards].present?
-    
+
     params[:bonus_rewards].values.map do |reward_params|
       next if reward_params.blank?
-      
+
       permitted = reward_params.permit(
         :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
         :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
         # Advanced parameters
         :range, :last_login_country, :profile_country, :current_ip_country, :emails,
-        :stag, :deposit_payment_systems, :cashout_payment_systems, 
+        :stag, :deposit_payment_systems, :cashout_payment_systems,
         :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
         :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
         :affiliates_user, :balance, :cashout, :chargeable_comp_points,
@@ -390,24 +390,24 @@ class BonusesController < ApplicationController
         :registered, :social_networks, :hold_min, :hold_max,
         :currencies, currencies: []
       )
-      
+
       # Handle array fields properly
-      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
-      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:groups] = permitted[:groups].split(",").map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
       permitted[:currencies] = permitted[:currencies].compact.reject(&:blank?) if permitted[:currencies].is_a?(Array)
-      
+
       permitted
     end.compact
   end
 
   def multiple_freespin_rewards_params
     return [] unless params[:freespin_rewards].present?
-    
+
     params[:freespin_rewards].values.map do |reward_params|
       next if reward_params.blank? || reward_params[:spins_count].blank?
-      
+
       permitted = reward_params.permit(
-        :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+        :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
         :tags, :stag,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -421,13 +421,13 @@ class BonusesController < ApplicationController
         # Currency bet levels
         currency_bet_levels: {}
       )
-      
+
       # Handle array fields properly
-      permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
-      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
-      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
-      permitted[:currencies] = permitted[:currencies].split(',').map(&:strip) if permitted[:currencies].is_a?(String)
-      
+      permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
+      permitted[:groups] = permitted[:groups].split(",").map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:currencies] = permitted[:currencies].split(",").map(&:strip) if permitted[:currencies].is_a?(String)
+
       permitted
     end.compact
   end
@@ -440,7 +440,7 @@ class BonusesController < ApplicationController
       next if reward_params[:amount].blank? && reward_params[:percentage].blank?
 
       reward = @bonus.bonus_rewards.build(
-        reward_type: 'bonus',
+        reward_type: "bonus",
         amount: reward_params[:amount],
         percentage: reward_params[:percentage]
       )
@@ -451,15 +451,15 @@ class BonusesController < ApplicationController
         next if value.blank?
         config[key.to_s] = value
       end
-      
+
       # Add common parameters from bonus
-      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
-      config['groups'] = @bonus.groups if @bonus.groups.present?
-      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
-      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
-      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
-      
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
       reward.config = config unless config.empty?
       reward.save
     end
@@ -484,7 +484,7 @@ class BonusesController < ApplicationController
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.tags = reward_params[:tags] if reward_params[:tags].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
-      
+
       # Use common parameters from bonus
       reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
       reward.groups = @bonus.groups if @bonus.groups.present?
@@ -503,7 +503,7 @@ class BonusesController < ApplicationController
       reward.advanced_params.each do |param|
         config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
       end
-      
+
       reward.config = config
       reward.save
     end
@@ -525,9 +525,9 @@ class BonusesController < ApplicationController
 
   def bonus_buy_reward_params
     return {} unless params[:bonus_buy_reward].present?
-    
+
     permitted = params.require(:bonus_buy_reward).permit(
-      :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+      :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -543,20 +543,20 @@ class BonusesController < ApplicationController
     )
 
     # Handle array fields properly
-    permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
-    permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
-    
+    permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
+    permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
+
     permitted
   end
 
   def multiple_bonus_buy_rewards_params
     return [] unless params[:bonus_buy_rewards].present?
-    
+
     params[:bonus_buy_rewards].values.map do |reward_params|
       next if reward_params.blank? || reward_params[:buy_amount].blank?
-      
+
       permitted = reward_params.permit(
-        :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code, 
+        :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
         :min, :groups, :tags, :stag, :wagering_strategy,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -570,13 +570,13 @@ class BonusesController < ApplicationController
         # Currency bet levels
         currency_bet_levels: {}
       )
-      
+
       # Handle array fields properly
-      permitted[:games] = permitted[:games].split(',').map(&:strip) if permitted[:games].is_a?(String)
-      permitted[:groups] = permitted[:groups].split(',').map(&:strip) if permitted[:groups].is_a?(String)
-      permitted[:tags] = permitted[:tags].split(',').map(&:strip) if permitted[:tags].is_a?(String)
-      permitted[:currencies] = permitted[:currencies].split(',').map(&:strip) if permitted[:currencies].is_a?(String)
-      
+      permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
+      permitted[:groups] = permitted[:groups].split(",").map(&:strip) if permitted[:groups].is_a?(String)
+      permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
+      permitted[:currencies] = permitted[:currencies].split(",").map(&:strip) if permitted[:currencies].is_a?(String)
+
       permitted
     end.compact
   end
@@ -601,7 +601,7 @@ class BonusesController < ApplicationController
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.tags = reward_params[:tags] if reward_params[:tags].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
-      
+
       # Use common parameters from bonus
       reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
       reward.groups = @bonus.groups if @bonus.groups.present?
@@ -620,7 +620,7 @@ class BonusesController < ApplicationController
       reward.advanced_params.each do |param|
         config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
       end
-      
+
       reward.config = config
       reward.save
     end
@@ -667,7 +667,7 @@ class BonusesController < ApplicationController
     reward.advanced_params.each do |param|
       config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
     end
-    
+
     reward.config = config
     reward.save
   end
@@ -710,7 +710,7 @@ class BonusesController < ApplicationController
         config[param] = reward_params[param.to_sym]
       end
     end
-    
+
     reward.config = config
     reward.save
   end
@@ -734,24 +734,24 @@ class BonusesController < ApplicationController
   # Comp Point Rewards Parameters
   def comp_point_reward_params
     return {} unless params[:comp_point_reward].present?
-    
+
     permitted = params.require(:comp_point_reward).permit(
       :issue_chargeable_award, :issue_persistent_award, :title, :config_json
     )
-    
+
     permitted
   end
 
   def multiple_comp_point_rewards_params
     return [] unless params[:comp_point_rewards].present?
-    
+
     params[:comp_point_rewards].values.map do |reward_params|
       next if reward_params.blank? || (reward_params[:issue_chargeable_award].blank? && reward_params[:issue_persistent_award].blank?)
-      
+
       permitted = reward_params.permit(
         :issue_chargeable_award, :issue_persistent_award, :title, :config_json
       )
-      
+
       permitted
     end.compact
   end
@@ -759,24 +759,24 @@ class BonusesController < ApplicationController
   # Bonus Code Rewards Parameters
   def bonus_code_reward_params
     return {} unless params[:bonus_code_reward].present?
-    
+
     permitted = params.require(:bonus_code_reward).permit(
       :set_bonus_code, :title, :config_json
     )
-    
+
     permitted
   end
 
   def multiple_bonus_code_rewards_params
     return [] unless params[:bonus_code_rewards].present?
-    
+
     params[:bonus_code_rewards].values.map do |reward_params|
       next if reward_params.blank? || reward_params[:set_bonus_code].blank?
-      
+
       permitted = reward_params.permit(
         :set_bonus_code, :title, :config_json
       )
-      
+
       permitted
     end.compact
   end
@@ -787,14 +787,14 @@ class BonusesController < ApplicationController
 
     multiple_comp_point_rewards_params.each do |reward_params|
       next if reward_params.values.all?(&:blank?)
-      
+
       reward = @bonus.comp_point_rewards.build
-      
+
       # Set main attributes
       reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
       reward.issue_persistent_award = reward_params[:issue_persistent_award]
       reward.title = reward_params[:title]
-      
+
       # Handle config_json if provided
       if reward_params[:config_json].present?
         begin
@@ -805,15 +805,15 @@ class BonusesController < ApplicationController
       else
         config = {}
       end
-      
+
       # Add common parameters from bonus
-      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
-      config['groups'] = @bonus.groups if @bonus.groups.present?
-      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
-      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
-      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
-      
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
       reward.config = config unless config.empty?
       reward.save
     end
@@ -828,14 +828,14 @@ class BonusesController < ApplicationController
 
     multiple_comp_point_rewards_params.each do |reward_params|
       next if reward_params.values.all?(&:blank?)
-      
+
       reward = @bonus.comp_point_rewards.build
-      
+
       # Set main attributes
       reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
       reward.issue_persistent_award = reward_params[:issue_persistent_award]
       reward.title = reward_params[:title]
-      
+
       # Handle config_json if provided
       if reward_params[:config_json].present?
         begin
@@ -846,15 +846,15 @@ class BonusesController < ApplicationController
       else
         config = {}
       end
-      
+
       # Add common parameters from bonus
-      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
-      config['groups'] = @bonus.groups if @bonus.groups.present?
-      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
-      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
-      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
-      
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
       reward.config = config unless config.empty?
       reward.save
     end
@@ -866,13 +866,13 @@ class BonusesController < ApplicationController
 
     multiple_bonus_code_rewards_params.each do |reward_params|
       next if reward_params.values.all?(&:blank?)
-      
+
       reward = @bonus.bonus_code_rewards.build
-      
+
       # Set main attributes
       reward.set_bonus_code = reward_params[:set_bonus_code]
       reward.title = reward_params[:title]
-      
+
       # Handle config_json if provided
       if reward_params[:config_json].present?
         begin
@@ -883,15 +883,15 @@ class BonusesController < ApplicationController
       else
         config = {}
       end
-      
+
       # Add common parameters from bonus
-      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
-      config['groups'] = @bonus.groups if @bonus.groups.present?
-      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
-      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
-      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
-      
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
       reward.config = config unless config.empty?
       reward.save
     end
@@ -906,13 +906,13 @@ class BonusesController < ApplicationController
 
     multiple_bonus_code_rewards_params.each do |reward_params|
       next if reward_params.values.all?(&:blank?)
-      
+
       reward = @bonus.bonus_code_rewards.build
-      
+
       # Set main attributes
       reward.set_bonus_code = reward_params[:set_bonus_code]
       reward.title = reward_params[:title]
-      
+
       # Handle config_json if provided
       if reward_params[:config_json].present?
         begin
@@ -923,18 +923,17 @@ class BonusesController < ApplicationController
       else
         config = {}
       end
-      
+
       # Add common parameters from bonus
-      config['currencies'] = @bonus.currencies if @bonus.currencies.present?
-      config['groups'] = @bonus.groups if @bonus.groups.present?
-      config['min'] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      config['wagering_strategy'] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
-      config['no_more'] = @bonus.no_more if @bonus.no_more.present?
-      config['totally_no_more'] = @bonus.totally_no_more if @bonus.totally_no_more.present?
-      
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
       reward.config = config unless config.empty?
       reward.save
     end
   end
-
 end

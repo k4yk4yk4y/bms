@@ -79,7 +79,7 @@ FactoryBot.define do
     trait :with_advanced_params do
       config do
         {
-          'auto_activate' => [true, false].sample,
+          'auto_activate' => [ true, false ].sample,
           'duration' => Faker::Number.between(from: 1, to: 30),
           'activation_duration' => Faker::Number.between(from: 1, to: 7),
           'email_template' => 'freespins_welcome',
@@ -87,11 +87,11 @@ FactoryBot.define do
           'last_login_country' => Faker::Address.country_code,
           'profile_country' => Faker::Address.country_code,
           'current_ip_country' => Faker::Address.country_code,
-          'user_can_have_duplicates' => [true, false].sample,
+          'user_can_have_duplicates' => [ true, false ].sample,
           'total_deposits' => Faker::Number.between(from: 1, to: 10),
           'deposits_sum' => Faker::Number.decimal(l_digits: 3, r_digits: 2),
           'loss_sum' => Faker::Number.decimal(l_digits: 3, r_digits: 2),
-          'wager_done' => [true, false].sample
+          'wager_done' => [ true, false ].sample
         }
       end
     end
@@ -111,7 +111,7 @@ FactoryBot.define do
     end
 
     trait :single_game do
-      config { { 'games' => ['Starburst'] } }
+      config { { 'games' => [ 'Starburst' ] } }
     end
 
     trait :unlimited_max_win do

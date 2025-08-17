@@ -63,11 +63,11 @@ RSpec.describe CompPointReward, type: :model do
           'auto_activate' => true,
           'duration' => 30
         },
-        'rules' => ['rule1', 'rule2']
+        'rules' => [ 'rule1', 'rule2' ]
       }
       comp_point_reward.config = complex_config
       expect(comp_point_reward.config['settings']['auto_activate']).to be true
-      expect(comp_point_reward.config['rules']).to eq(['rule1', 'rule2'])
+      expect(comp_point_reward.config['rules']).to eq([ 'rule1', 'rule2' ])
     end
   end
 
@@ -259,7 +259,7 @@ RSpec.describe CompPointReward, type: :model do
               'max_uses' => 100
             }
           },
-          'restrictions' => ['rule1', 'rule2'],
+          'restrictions' => [ 'rule1', 'rule2' ],
           'metadata' => {
             'created_by' => 'admin',
             'version' => 1.2
@@ -268,10 +268,10 @@ RSpec.describe CompPointReward, type: :model do
         comp_point_reward.config = complex_config
         comp_point_reward.save!
         comp_point_reward.reload
-        
+
         expect(comp_point_reward.config['advanced']['auto_activate']).to be true
         expect(comp_point_reward.config['advanced']['settings']['duration']).to eq(30)
-        expect(comp_point_reward.config['restrictions']).to eq(['rule1', 'rule2'])
+        expect(comp_point_reward.config['restrictions']).to eq([ 'rule1', 'rule2' ])
         expect(comp_point_reward.config['metadata']['version']).to eq(1.2)
       end
 
@@ -283,13 +283,13 @@ RSpec.describe CompPointReward, type: :model do
           'boolean_true' => true,
           'boolean_false' => false,
           'null' => nil,
-          'array' => [1, 2, 3],
+          'array' => [ 1, 2, 3 ],
           'hash' => { 'nested' => 'value' }
         }
         comp_point_reward.config = config_with_types
         comp_point_reward.save!
         comp_point_reward.reload
-        
+
         expect(comp_point_reward.config['string']).to be_a(String)
         expect(comp_point_reward.config['integer']).to be_a(Integer)
         expect(comp_point_reward.config['float']).to be_a(Float)

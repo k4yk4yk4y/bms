@@ -2,36 +2,36 @@ class MarketingRequest < ApplicationRecord
   # Constants for status and request types
   STATUSES = %w[pending activated rejected].freeze
   REQUEST_TYPES = [
-    'promo_webs_50',
-    'promo_webs_100', 
-    'promo_no_link_50',
-    'promo_no_link_100',
-    'promo_no_link_125',
-    'promo_no_link_150',
-    'deposit_bonuses_partners'
+    "promo_webs_50",
+    "promo_webs_100",
+    "promo_no_link_50",
+    "promo_no_link_100",
+    "promo_no_link_125",
+    "promo_no_link_150",
+    "deposit_bonuses_partners"
   ].freeze
 
   REQUEST_TYPE_LABELS = {
-    'promo_webs_50' => 'ПРОМО ВЕБОВ 50',
-    'promo_webs_100' => 'ПРОМО ВЕБОВ 100',
-    'promo_no_link_50' => 'ПРОМО БЕЗ ССЫЛКИ 50',
-    'promo_no_link_100' => 'ПРОМО БЕЗ ССЫЛКИ 100',
-    'promo_no_link_125' => 'ПРОМО БЕЗ ССЫЛКИ 125',
-    'promo_no_link_150' => 'ПРОМО БЕЗ ССЫЛКИ 150',
-    'deposit_bonuses_partners' => 'ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ'
+    "promo_webs_50" => "ПРОМО ВЕБОВ 50",
+    "promo_webs_100" => "ПРОМО ВЕБОВ 100",
+    "promo_no_link_50" => "ПРОМО БЕЗ ССЫЛКИ 50",
+    "promo_no_link_100" => "ПРОМО БЕЗ ССЫЛКИ 100",
+    "promo_no_link_125" => "ПРОМО БЕЗ ССЫЛКИ 125",
+    "promo_no_link_150" => "ПРОМО БЕЗ ССЫЛКИ 150",
+    "deposit_bonuses_partners" => "ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ"
   }.freeze
 
   STATUS_LABELS = {
-    'pending' => 'Ожидает',
-    'activated' => 'Активирован',
-    'rejected' => 'Отклонён'
+    "pending" => "Ожидает",
+    "activated" => "Активирован",
+    "rejected" => "Отклонён"
   }.freeze
 
   # Validations
   validates :manager, presence: true, length: { maximum: 255 }
   validates :platform, length: { maximum: 1000 }, allow_blank: true
-  validates :partner_email, presence: true, 
-            format: { with: URI::MailTo::EMAIL_REGEXP, message: 'должен быть валидным email' },
+  validates :partner_email, presence: true,
+            format: { with: URI::MailTo::EMAIL_REGEXP, message: "должен быть валидным email" },
             length: { maximum: 255 }
   validates :promo_code, presence: true, length: { maximum: 2000 }
   validates :stag, presence: true, length: { maximum: 50 }
@@ -47,9 +47,9 @@ class MarketingRequest < ApplicationRecord
   # Scopes
   scope :by_status, ->(status) { where(status: status) }
   scope :by_request_type, ->(request_type) { where(request_type: request_type) }
-  scope :pending, -> { where(status: 'pending') }
-  scope :activated, -> { where(status: 'activated') }
-  scope :rejected, -> { where(status: 'rejected') }
+  scope :pending, -> { where(status: "pending") }
+  scope :activated, -> { where(status: "activated") }
+  scope :rejected, -> { where(status: "rejected") }
 
   # Callbacks
   before_validation :normalize_promo_code_and_stag
@@ -65,27 +65,27 @@ class MarketingRequest < ApplicationRecord
   end
 
   def pending?
-    status == 'pending'
+    status == "pending"
   end
 
   def activated?
-    status == 'activated'
+    status == "activated"
   end
 
   def rejected?
-    status == 'rejected'
+    status == "rejected"
   end
 
   def activate!
-    update!(status: 'activated', activation_date: Time.current)
+    update!(status: "activated", activation_date: Time.current)
   end
 
   def reject!
-    update!(status: 'rejected', activation_date: nil)
+    update!(status: "rejected", activation_date: nil)
   end
 
   def reset_to_pending!
-    update!(status: 'pending', activation_date: nil)
+    update!(status: "pending", activation_date: nil)
   end
 
   # Methods for working with multiple promo codes
@@ -96,7 +96,7 @@ class MarketingRequest < ApplicationRecord
 
   def promo_codes_array=(codes_array)
     if codes_array.is_a?(Array)
-      self.promo_code = codes_array.compact.map(&:strip).reject(&:blank?).join(', ')
+      self.promo_code = codes_array.compact.map(&:strip).reject(&:blank?).join(", ")
     elsif codes_array.is_a?(String)
       self.promo_code = codes_array
     end
@@ -105,7 +105,7 @@ class MarketingRequest < ApplicationRecord
   def formatted_promo_codes
     codes = promo_codes_array
     return promo_code if codes.empty?
-    codes.join(', ')
+    codes.join(", ")
   end
 
   def first_promo_code
@@ -128,20 +128,20 @@ class MarketingRequest < ApplicationRecord
     # Normalize promo codes - each code should be uppercase and trimmed
     if promo_code.present?
       normalized_codes = promo_code.split(/[,\n\r]+/).map(&:strip).reject(&:blank?).map(&:upcase)
-      self.promo_code = normalized_codes.join(', ')
+      self.promo_code = normalized_codes.join(", ")
     end
-    
+
     # Normalize stag - remove spaces and keep case sensitivity
-    self.stag = stag&.strip&.gsub(/\s+/, '') if stag.present?
+    self.stag = stag&.strip&.gsub(/\s+/, "") if stag.present?
   end
 
   def reset_to_pending_if_changed
     # При любом редактировании заявки возвращаем в статус "Ожидает"
     # Исключение - изменение только статуса или activation_date
-    changed_attrs = changed_attributes.keys - ['status', 'activation_date', 'updated_at']
-    
+    changed_attrs = changed_attributes.keys - [ "status", "activation_date", "updated_at" ]
+
     if changed_attrs.any? && !pending?
-      self.status = 'pending'
+      self.status = "pending"
       self.activation_date = nil
     end
   end
@@ -149,7 +149,7 @@ class MarketingRequest < ApplicationRecord
   # Partner rule validations
   def stag_uniqueness_across_all_types
     return if stag.blank?
-    
+
     existing_request = self.class.where(stag: stag).where.not(id: id).first
     if existing_request
       errors.add(:stag, "уже используется в заявке типа \"#{existing_request.request_type_label}\" (ID: #{existing_request.id}). " \
@@ -160,7 +160,7 @@ class MarketingRequest < ApplicationRecord
 
   def promo_codes_uniqueness_across_all_types
     return if promo_code.blank?
-    
+
     current_codes = promo_codes_array
     return if current_codes.empty?
 
@@ -183,12 +183,12 @@ class MarketingRequest < ApplicationRecord
   end
 
   def no_spaces_in_stag_and_codes
-    if stag.present? && stag.include?(' ')
-      errors.add(:stag, 'не должен содержать пробелы')
+    if stag.present? && stag.include?(" ")
+      errors.add(:stag, "не должен содержать пробелы")
     end
 
     if promo_code.present?
-      codes_with_spaces = promo_codes_array.select { |code| code.include?(' ') }
+      codes_with_spaces = promo_codes_array.select { |code| code.include?(" ") }
       if codes_with_spaces.any?
         errors.add(:promo_code, "содержит коды с пробелами: #{codes_with_spaces.join(', ')}")
       end
@@ -197,10 +197,10 @@ class MarketingRequest < ApplicationRecord
 
   def valid_promo_codes_format
     return if promo_code.blank?
-    
+
     codes = promo_codes_array
     if codes.empty?
-      errors.add(:promo_code, 'должен содержать хотя бы один валидный код')
+      errors.add(:promo_code, "должен содержать хотя бы один валидный код")
       return
     end
 

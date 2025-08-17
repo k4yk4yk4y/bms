@@ -59,11 +59,11 @@ RSpec.describe BonusCodeReward, type: :model do
           'auto_activate' => true,
           'duration' => 30
         },
-        'rules' => ['rule1', 'rule2']
+        'rules' => [ 'rule1', 'rule2' ]
       }
       bonus_code_reward.config = complex_config
       expect(bonus_code_reward.config['settings']['auto_activate']).to be true
-      expect(bonus_code_reward.config['rules']).to eq(['rule1', 'rule2'])
+      expect(bonus_code_reward.config['rules']).to eq([ 'rule1', 'rule2' ])
     end
   end
 
@@ -179,7 +179,7 @@ RSpec.describe BonusCodeReward, type: :model do
       end
 
       it 'accepts valid bonus codes' do
-        valid_codes = ['BONUS123', 'welcome_2024', 'TEST-CODE', '12345', 'Aa1_-']
+        valid_codes = [ 'BONUS123', 'welcome_2024', 'TEST-CODE', '12345', 'Aa1_-' ]
         valid_codes.each do |code|
           bonus_code_reward.code = code
           expect(bonus_code_reward).to be_valid, "Expected '#{code}' to be valid"
@@ -207,7 +207,7 @@ RSpec.describe BonusCodeReward, type: :model do
       end
 
       it 'accepts valid code types' do
-        valid_types = ['promocode', 'bonus_code', 'special_code', 'set_bonus_code']
+        valid_types = [ 'promocode', 'bonus_code', 'special_code', 'set_bonus_code' ]
         valid_types.each do |type|
           bonus_code_reward.code_type = type
           expect(bonus_code_reward).to be_valid, "Expected '#{type}' to be valid"
@@ -261,7 +261,7 @@ RSpec.describe BonusCodeReward, type: :model do
               'max_uses' => 100
             }
           },
-          'restrictions' => ['rule1', 'rule2'],
+          'restrictions' => [ 'rule1', 'rule2' ],
           'metadata' => {
             'created_by' => 'admin',
             'version' => 1.2
@@ -270,10 +270,10 @@ RSpec.describe BonusCodeReward, type: :model do
         bonus_code_reward.config = complex_config
         bonus_code_reward.save!
         bonus_code_reward.reload
-        
+
         expect(bonus_code_reward.config['advanced']['auto_activate']).to be true
         expect(bonus_code_reward.config['advanced']['settings']['duration']).to eq(30)
-        expect(bonus_code_reward.config['restrictions']).to eq(['rule1', 'rule2'])
+        expect(bonus_code_reward.config['restrictions']).to eq([ 'rule1', 'rule2' ])
         expect(bonus_code_reward.config['metadata']['version']).to eq(1.2)
       end
 
@@ -281,7 +281,7 @@ RSpec.describe BonusCodeReward, type: :model do
         original_config = { 'key' => 'value', 'number' => 42, 'bool' => true }
         bonus_code_reward.config = original_config
         bonus_code_reward.save!
-        
+
         retrieved = BonusCodeReward.find(bonus_code_reward.id)
         expect(retrieved.config).to eq(original_config)
       end
@@ -294,13 +294,13 @@ RSpec.describe BonusCodeReward, type: :model do
           'boolean_true' => true,
           'boolean_false' => false,
           'null' => nil,
-          'array' => [1, 2, 3],
+          'array' => [ 1, 2, 3 ],
           'hash' => { 'nested' => 'value' }
         }
         bonus_code_reward.config = config_with_types
         bonus_code_reward.save!
         bonus_code_reward.reload
-        
+
         expect(bonus_code_reward.config['string']).to be_a(String)
         expect(bonus_code_reward.config['integer']).to be_a(Integer)
         expect(bonus_code_reward.config['float']).to be_a(Float)

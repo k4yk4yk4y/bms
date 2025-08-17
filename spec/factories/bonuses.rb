@@ -19,8 +19,8 @@ FactoryBot.define do
     project { Bonus::PROJECTS.sample }
     dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
     description { Faker::Lorem.paragraph }
-    currencies { [currency] }
-    groups { [user_group] }
+    currencies { [ currency ] }
+    groups { [ user_group ] }
     currency_minimum_deposits { { currency => minimum_deposit } }
 
     trait :draft do

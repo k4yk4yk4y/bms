@@ -33,8 +33,8 @@ FactoryBot.define do
     end
 
     trait :round_values do
-      chip_value { [1.0, 5.0, 10.0, 25.0, 50.0, 100.0].sample }
-      chips_count { [1, 2, 5, 10, 20].sample }
+      chip_value { [ 1.0, 5.0, 10.0, 25.0, 50.0, 100.0 ].sample }
+      chips_count { [ 1, 2, 5, 10, 20 ].sample }
     end
   end
 end

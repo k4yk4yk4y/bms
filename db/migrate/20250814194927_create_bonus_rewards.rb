@@ -9,8 +9,8 @@ class CreateBonusRewards < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :bonus_rewards, :reward_type
-    add_index :bonus_rewards, [:bonus_id, :reward_type]
+    add_index :bonus_rewards, [ :bonus_id, :reward_type ]
   end
 end
