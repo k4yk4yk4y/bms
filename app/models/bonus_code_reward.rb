@@ -4,8 +4,8 @@ class BonusCodeReward < ApplicationRecord
   # Serialize config as JSON for additional parameters
   serialize :config, coder: JSON
 
-  validates :set_bonus_code, presence: true
-  validates :title, presence: true
+  validates :code, presence: true
+  validates :code_type, presence: true
 
   # Config accessors for common parameters
   def config
@@ -14,10 +14,27 @@ class BonusCodeReward < ApplicationRecord
 
   # Helper methods
   def formatted_bonus_code
-    set_bonus_code.present? ? set_bonus_code.upcase : "N/A"
+    code.present? ? code.upcase : "N/A"
+  end
+
+  def title
+    config['title'] || "Бонус-код #{code}"
+  end
+
+  def title=(value)
+    self.config = (config || {}).merge('title' => value)
   end
 
   def display_title
-    title.present? ? title : "Бонус-код #{set_bonus_code}"
+    title
+  end
+
+  # For backward compatibility
+  def set_bonus_code
+    code
+  end
+
+  def set_bonus_code=(value)
+    self.code = value
   end
 end

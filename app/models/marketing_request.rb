@@ -96,7 +96,7 @@ class MarketingRequest < ApplicationRecord
 
   def promo_codes_array=(codes_array)
     if codes_array.is_a?(Array)
-      self.promo_code = codes_array.map(&:strip).reject(&:blank?).join(', ')
+      self.promo_code = codes_array.compact.map(&:strip).reject(&:blank?).join(', ')
     elsif codes_array.is_a?(String)
       self.promo_code = codes_array
     end

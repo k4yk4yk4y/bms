@@ -20,7 +20,7 @@
       <ul class="nav nav-tabs mb-4" id="marketingTabs" role="tablist">
         <% @tabs.each_with_index do |tab, index| %>
           <li class="nav-item" role="presentation">
-            <%= link_to marketing_index_path(tab: tab[:key]), 
+            <%= link_to marketing_index_path(tab: tab[:key], search: params[:search], status: params[:status]), 
                         class: "nav-link #{'active' if @current_tab == tab[:key]}", 
                         id: "#{tab[:key]}-tab",
                         role: "tab",
@@ -32,23 +32,43 @@
         <% end %>
       </ul>
 
-      <!-- Фильтры по статусу -->
+      <!-- Поиск и фильтры -->
       <div class="row mb-3">
+        <div class="col-md-4">
+          <%= form_with url: marketing_index_path, method: :get, local: true, class: "d-flex" do |form| %>
+            <%= form.hidden_field :tab, value: @current_tab %>
+            <%= form.hidden_field :status, value: params[:status] if params[:status].present? %>
+            <%= form.text_field :search, 
+                placeholder: "Поиск по промокоду, STAG, менеджеру или email...", 
+                value: params[:search], 
+                class: "form-control form-control-sm me-2" %>
+            <%= form.submit "Найти", class: "btn btn-outline-primary btn-sm" %>
+            <% if params[:search].present? %>
+              <%= link_to "Очистить", marketing_index_path(tab: @current_tab, status: params[:status]), 
+                          class: "btn btn-outline-secondary btn-sm ms-1" %>
+            <% end %>
+          <% end %>
+        </div>
         <div class="col-md-6">
           <div class="btn-group" role="group" aria-label="Фильтр по статусу">
-            <%= link_to "Все", marketing_index_path(tab: @current_tab), 
+            <%= link_to "Все", marketing_index_path(tab: @current_tab, search: params[:search]), 
                         class: "btn btn-outline-secondary #{'active' if params[:status].blank?}" %>
-            <%= link_to "Ожидают", marketing_index_path(tab: @current_tab, status: 'pending'), 
+            <%= link_to "Ожидают", marketing_index_path(tab: @current_tab, status: 'pending', search: params[:search]), 
                         class: "btn btn-outline-warning #{'active' if params[:status] == 'pending'}" %>
-            <%= link_to "Активированы", marketing_index_path(tab: @current_tab, status: 'activated'), 
+            <%= link_to "Активированы", marketing_index_path(tab: @current_tab, status: 'activated', search: params[:search]), 
                         class: "btn btn-outline-success #{'active' if params[:status] == 'activated'}" %>
-            <%= link_to "Отклонены", marketing_index_path(tab: @current_tab, status: 'rejected'), 
+            <%= link_to "Отклонены", marketing_index_path(tab: @current_tab, status: 'rejected', search: params[:search]), 
                         class: "btn btn-outline-danger #{'active' if params[:status] == 'rejected'}" %>
           </div>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-2 text-end">
           <small class="text-muted">
-            Всего заявок: <%= @marketing_requests.count %>
+            <% if params[:search].present? %>
+              Найдено: <%= @marketing_requests.count %>
+              <br><small>по запросу "<%= params[:search] %>"</small>
+            <% else %>
+              Всего заявок: <%= @marketing_requests.count %>
+            <% end %>
           </small>
         </div>
       </div>
@@ -198,12 +218,22 @@
             </div>
           <% else %>
             <div class="text-center py-5">
-              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-              <h5 class="text-muted">Заявки не найдены</h5>
+              <i class="fas fa-<%= params[:search].present? ? 'search' : 'inbox' %> fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">
+                <%= params[:search].present? ? 'Ничего не найдено' : 'Заявки не найдены' %>
+              </h5>
               <p class="text-muted">
-                Нет заявок типа "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
-                <% if params[:status].present? %>
-                  со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                <% if params[:search].present? %>
+                  По запросу "<%= params[:search] %>" в типе "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
+                  <% if params[:status].present? %>
+                    со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                  <% end %>
+                  ничего не найдено.
+                <% else %>
+                  Нет заявок типа "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
+                  <% if params[:status].present? %>
+                    со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                  <% end %>
                 <% end %>
               </p>
               <%= link_to new_marketing_path(request_type: @current_tab), 

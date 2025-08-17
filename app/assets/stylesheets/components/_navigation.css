@@ -225,14 +225,14 @@
 }
 
 #marketingTabs + .row + .card .table thead th {
-  background: linear-gradient(135deg, #4a40b3 0%, #6f63e6 100%);
+  background-color: #212529 !important;
   color: white;
-  border: none;
+  border-color: #495057 !important;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.85rem;
-  padding: 1rem 0.75rem;
+  letter-spacing: 0.3px;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.25rem;
 }
 
 #marketingTabs + .row + .card .table tbody tr {
@@ -246,9 +246,11 @@
 }
 
 #marketingTabs + .row + .card .table tbody td {
-  padding: 1rem 0.75rem;
+  padding: 0.25rem 0.25rem;
   border-color: rgba(0, 0, 0, 0.05);
   vertical-align: middle;
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 /* Empty state styling */
@@ -261,4 +263,51 @@
 #marketingTabs + .row + .card .text-center.py-5 .fas.fa-inbox {
   color: #4a40b3;
   opacity: 0.6;
+}
+
+/* Marketing table header to match bonuses exactly */
+.table-dark {
+  background-color: #212529 !important;
+}
+
+.table-dark th {
+  background-color: #212529 !important;
+  border-color: #495057 !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600;
+  padding: 0.5rem 0.25rem;
+}
+
+/* Компактные элементы в таблице marketing */
+#marketingTabs + .row + .card .table .btn-group-sm .btn {
+  padding: 0.15rem 0.3rem;
+  font-size: 0.7rem;
+  border-radius: 3px;
+}
+
+#marketingTabs + .row + .card .table .badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+}
+
+#marketingTabs + .row + .card .table code {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+}
+
+#marketingTabs + .row + .card .table strong {
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+#marketingTabs + .row + .card .table small {
+  font-size: 0.7rem;
+  line-height: 1.1;
+}
+
+#marketingTabs + .row + .card .table a {
+  font-size: 0.8rem;
+  line-height: 1.2;
 }

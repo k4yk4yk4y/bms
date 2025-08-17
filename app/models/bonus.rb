@@ -76,6 +76,7 @@ class Bonus < ApplicationRecord
 
   # Callbacks
   before_validation :generate_code, if: -> { code.blank? }
+  after_find :check_and_update_expired_status!
 
   # Class methods for permanent bonuses
   def self.find_permanent_bonus_for_project(project, dsl_tag)
@@ -289,6 +290,21 @@ class Bonus < ApplicationRecord
 
   def mark_as_expired!
     update!(status: "expired")
+  end
+
+  def check_and_update_expired_status!
+    return unless persisted? # Only check saved records
+    
+    # If bonus has expired and is still active, mark it as inactive
+    if expired? && status == "active"
+      update_column(:status, "inactive") # Use update_column to avoid callbacks loop
+    end
+  end
+
+  # Class method to update all expired bonuses
+  def self.update_expired_bonuses!
+    active.where("availability_end_date < ?", Time.current)
+          .update_all(status: "inactive")
   end
 
   private
