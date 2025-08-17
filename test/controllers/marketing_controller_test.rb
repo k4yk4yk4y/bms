@@ -18,12 +18,12 @@ class MarketingControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get create" do
-    post marketing_index_url, params: { marketing_request: { 
-      manager: "Test Manager", 
-      partner_email: "test@example.com", 
-      promo_code: "TEST123", 
-      stag: "test_stag_unique", 
-      request_type: "promo_webs_50" 
+    post marketing_index_url, params: { marketing_request: {
+      manager: "Test Manager",
+      partner_email: "test@example.com",
+      promo_code: "TEST123",
+      stag: "test_stag_unique",
+      request_type: "promo_webs_50"
     } }
     assert_response :redirect
   end
@@ -36,8 +36,8 @@ class MarketingControllerTest < ActionDispatch::IntegrationTest
 
   test "should get update" do
     marketing_request = marketing_requests(:one)
-    patch marketing_url(marketing_request), params: { marketing_request: { 
-      manager: "Updated Manager" 
+    patch marketing_url(marketing_request), params: { marketing_request: {
+      manager: "Updated Manager"
     } }
     assert_response :redirect
   end
