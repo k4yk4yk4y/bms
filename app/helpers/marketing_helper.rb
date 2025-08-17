@@ -1,5 +1,5 @@
 module MarketingHelper
-  def status_badge_class(status)
+  def marketing_status_badge_class(status)
     case status
     when 'pending'
       'bg-warning'

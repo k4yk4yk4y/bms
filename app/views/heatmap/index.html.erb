@@ -10,14 +10,14 @@
         <div class="d-flex align-items-center gap-3">
           <!-- Навигация по месяцам -->
           <div class="btn-group" role="group">
-            <%= link_to heatmap_path(year: @prev_month.year, month: @prev_month.month, bonus_type: @bonus_type), 
+            <%= link_to heatmap_path(year: @prev_month.year, month: @prev_month.month, bonus_event: @bonus_event), 
                 class: "btn btn-outline-secondary" do %>
               <i class="fas fa-chevron-left"></i> <%= @prev_month.strftime("%B %Y") %>
             <% end %>
             <button class="btn btn-secondary" disabled>
               <%= @start_date.strftime("%B %Y") %>
             </button>
-            <%= link_to heatmap_path(year: @next_month.year, month: @next_month.month, bonus_type: @bonus_type), 
+            <%= link_to heatmap_path(year: @next_month.year, month: @next_month.month, bonus_event: @bonus_event), 
                 class: "btn btn-outline-secondary" do %>
               <%= @next_month.strftime("%B %Y") %> <i class="fas fa-chevron-right"></i>
             <% end %>
@@ -30,12 +30,12 @@
         <div class="card-body">
           <%= form_with url: heatmap_path, method: :get, local: true, class: "row g-3 align-items-end" do |form| %>
             <div class="col-md-4">
-              <%= form.label :bonus_type, "Bonus Type", class: "form-label" %>
-              <%= form.select :bonus_type, 
+              <%= form.label :bonus_event, "Bonus Event", class: "form-label" %>
+              <%= form.select :bonus_event, 
                   options_for_select([
-                    ['All Types', 'all'],
-                    *@bonus_types.map { |type| [type.humanize, type] }
-                  ], @bonus_type), 
+                    ['All Events', 'all'],
+                    *@bonus_events.map { |event| [event.humanize, event] }
+                  ], @bonus_event), 
                   {}, 
                   { class: "form-select" } %>
             </div>
@@ -65,8 +65,8 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
             Calendar Heatmap 
-            <% if @bonus_type != 'all' %>
-              <span class="badge bg-info"><%= @bonus_type.humanize %></span>
+            <% if @bonus_event != 'all' %>
+              <span class="badge bg-info"><%= @bonus_event.humanize %></span>
             <% end %>
           </h5>
           <div class="heatmap-legend">

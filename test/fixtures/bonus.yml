@@ -3,17 +3,17 @@
 one:
   name: "Test Bonus 1"
   code: "TEST001"
-  bonus_type: "deposit"
   status: "active"
   availability_start_date: <%= 1.day.ago %>
   availability_end_date: <%= 1.month.from_now %>
   currency: "USD"
+  event: "deposit"
 
 two:
   name: "Test Bonus 2"
   code: "TEST002"
-  bonus_type: "manual"
   status: "active"
   availability_start_date: <%= 1.day.ago %>
   availability_end_date: <%= 1.month.from_now %>
   currency: "EUR"
+  event: "manual"

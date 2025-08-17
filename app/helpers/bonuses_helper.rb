@@ -8,7 +8,7 @@ module BonusesHelper
     when "expired"
       "bg-danger"
     when "draft"
-      "bg-warning"
+      "bg-danger"
     else
       "bg-secondary"
     end

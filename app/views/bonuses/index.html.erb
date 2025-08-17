@@ -131,7 +131,7 @@
                         <code class="text-dark"><%= bonus.display_code %></code>
                       </td>
                       <td>
-                        <span class="badge bg-info text-dark">
+                        <span class="badge bg-secondary text-white">
                           <%= bonus.event.humanize %>
                         </span>
                       </td>
@@ -439,7 +439,9 @@
   
   /* Override any Bootstrap gradients or effects */
   .navbar-dark.bg-dark,
-  .navbar-dark.bg-dark * {
+  .navbar-dark.bg-dark .navbar-brand,
+  .navbar-dark.bg-dark .navbar-nav,
+  .navbar-dark.bg-dark .navbar-nav .nav-link {
     background-image: none !important;
     background: #212529 !important;
   }

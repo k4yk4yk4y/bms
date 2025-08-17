@@ -66,7 +66,7 @@ class FreespinReward < ApplicationRecord
   end
 
   def currencies=(value)
-    currencies_array = value.is_a?(Array) ? value : [value].compact
+    currencies_array = value.is_a?(Array) ? value.compact : [value].compact
     self.config = (config || {}).merge('currencies' => currencies_array)
   end
 
@@ -166,7 +166,7 @@ class FreespinReward < ApplicationRecord
   end
 
   def has_game_restrictions?
-    game_restrictions.present? || games.any?
+    games.any?
   end
 
   def formatted_games

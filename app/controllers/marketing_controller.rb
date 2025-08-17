@@ -11,6 +11,15 @@ class MarketingController < ApplicationController
       @marketing_requests = @marketing_requests.by_status(params[:status])
     end
 
+    # Search functionality
+    if params[:search].present?
+      search_term = params[:search].strip.downcase
+      @marketing_requests = @marketing_requests.where(
+        "LOWER(promo_code) LIKE ? OR LOWER(stag) LIKE ? OR LOWER(manager) LIKE ? OR LOWER(partner_email) LIKE ?",
+        "%#{search_term}%", "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+      )
+    end
+
     @tabs = MarketingRequest::REQUEST_TYPES.map do |type|
       {
         key: type,

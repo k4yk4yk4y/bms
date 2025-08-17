@@ -4,12 +4,8 @@ class CompPointReward < ApplicationRecord
   # Serialize config as JSON for additional parameters
   serialize :config, coder: JSON
 
-  validates :issue_chargeable_award, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :issue_persistent_award, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :title, presence: true
-
-  # Validate that at least one award type is present
-  validate :at_least_one_award_present
+  validates :points_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :multiplier, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   # Config accessors for common parameters
   def config
@@ -17,23 +13,24 @@ class CompPointReward < ApplicationRecord
   end
 
   # Helper methods
-  def formatted_chargeable_award
-    issue_chargeable_award.present? ? "#{issue_chargeable_award} расходуемых" : "0"
+  def formatted_points_amount
+    points_amount.present? ? "#{points_amount} очков" : "0"
   end
 
-  def formatted_persistent_award
-    issue_persistent_award.present? ? "#{issue_persistent_award} статусных" : "0"
+  def formatted_multiplier
+    multiplier.present? ? "×#{multiplier}" : "N/A"
   end
 
-  def total_points
-    (issue_chargeable_award || 0) + (issue_persistent_award || 0)
+  def title
+    config['title'] || "#{points_amount} comp points"
   end
 
-  private
+  def title=(value)
+    self.config = (config || {}).merge('title' => value)
+  end
 
-  def at_least_one_award_present
-    if issue_chargeable_award.blank? && issue_persistent_award.blank?
-      errors.add(:base, "Должен быть указан хотя бы один тип баллов (расходуемые или статусные)")
-    end
+  def total_value
+    return points_amount unless multiplier.present?
+    points_amount * multiplier
   end
 end

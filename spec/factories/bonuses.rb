@@ -1,0 +1,109 @@
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :bonus do
+    name { Faker::Commerce.product_name }
+    code { "BONUS_#{Faker::Alphanumeric.alpha(number: 8).upcase}" }
+    event { 'deposit' } # Default to deposit event to avoid validation issues
+    status { 'active' }
+    availability_start_date { 1.day.ago }
+    availability_end_date { 1.month.from_now }
+    currency { %w[USD EUR RUB].sample }
+    minimum_deposit { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
+    wager { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
+    maximum_winnings { Faker::Number.decimal(l_digits: 3, r_digits: 2) }
+    wagering_strategy { %w[bonus_first deposit_first].sample }
+    user_group { Faker::Company.name }
+    tags { "#{Faker::Lorem.word}, #{Faker::Lorem.word}" }
+    country { Faker::Address.country_code }
+    project { Bonus::PROJECTS.sample }
+    dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
+    description { Faker::Lorem.paragraph }
+    currencies { [currency] }
+    groups { [user_group] }
+    currency_minimum_deposits { { currency => minimum_deposit } }
+
+    trait :draft do
+      status { 'draft' }
+    end
+
+    trait :active do
+      status { 'active' }
+    end
+
+    trait :inactive do
+      status { 'inactive' }
+    end
+
+    trait :expired do
+      status { 'expired' }
+      availability_start_date { 2.days.ago }
+      availability_end_date { 1.day.ago }
+    end
+
+    trait :deposit_event do
+      event { 'deposit' }
+      minimum_deposit { 50.0 }
+    end
+
+    trait :input_coupon_event do
+      event { 'input_coupon' }
+      minimum_deposit { nil }
+      currency_minimum_deposits { {} }
+    end
+
+    trait :manual_event do
+      event { 'manual' }
+      minimum_deposit { nil }
+      currency_minimum_deposits { {} }
+    end
+
+    trait :collection_event do
+      event { 'collection' }
+      minimum_deposit { nil }
+      currency_minimum_deposits { {} }
+    end
+
+    trait :groups_update_event do
+      event { 'groups_update' }
+      minimum_deposit { nil }
+      currency_minimum_deposits { {} }
+    end
+
+    trait :scheduler_event do
+      event { 'scheduler' }
+      minimum_deposit { nil }
+      currency_minimum_deposits { {} }
+    end
+
+    trait :with_multiple_currencies do
+      currencies { %w[USD EUR RUB] }
+      currency_minimum_deposits { { 'USD' => 50.0, 'EUR' => 45.0, 'RUB' => 3000.0 } }
+    end
+
+    trait :with_multiple_groups do
+      groups { %w[VIP Regular Premium] }
+    end
+
+    trait :permanent do
+      dsl_tag { Bonus::PERMANENT_BONUS_TYPES.sample[:dsl_tag] }
+      status { 'active' }
+    end
+
+    trait :available_now do
+      availability_start_date { 1.hour.ago }
+      availability_end_date { 1.hour.from_now }
+      status { 'active' }
+    end
+
+    trait :future do
+      availability_start_date { 1.day.from_now }
+      availability_end_date { 1.week.from_now }
+    end
+
+    trait :past do
+      availability_start_date { 1.week.ago }
+      availability_end_date { 1.day.ago }
+    end
+  end
+end

@@ -3,7 +3,7 @@ class HeatmapController < ApplicationController
     # Получаем валидированные параметры
     @year = heatmap_params[:year]&.to_i || Date.current.year
     @month = heatmap_params[:month]&.to_i || Date.current.month
-    @bonus_type = heatmap_params[:bonus_type] || "all"
+    @bonus_event = heatmap_params[:bonus_event] || "all"
 
     # Создаем дату начала и конца месяца
     @start_date = Date.new(@year, @month, 1)
@@ -12,8 +12,8 @@ class HeatmapController < ApplicationController
     # Получаем данные о бонусах для текущего месяца
     @heatmap_data = generate_heatmap_data
 
-    # Получаем список типов бонусов для фильтра
-    @bonus_types = Bonus.distinct.pluck(:bonus_type).compact.sort
+    # Получаем список событий бонусов для фильтра
+    @bonus_events = Bonus.distinct.pluck(:event).compact.sort
 
     # Навигация по месяцам
     @prev_month = @start_date.prev_month
@@ -23,7 +23,7 @@ class HeatmapController < ApplicationController
   private
 
   def heatmap_params
-    params.permit(:year, :month, :bonus_type)
+    params.permit(:year, :month, :bonus_event)
   end
 
   def generate_heatmap_data
@@ -32,9 +32,9 @@ class HeatmapController < ApplicationController
       availability_start_date: @start_date.beginning_of_day..@end_date.end_of_day
     )
 
-    # Фильтруем по типу бонуса, если выбран
-    if @bonus_type != "all"
-      bonuses_query = bonuses_query.where(bonus_type: @bonus_type)
+    # Фильтруем по событию бонуса, если выбран
+    if @bonus_event != "all"
+      bonuses_query = bonuses_query.where(event: @bonus_event)
     end
 
     # Группируем по дате начала и считаем количество
