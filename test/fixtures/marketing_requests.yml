@@ -1,11 +1,21 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  manager: "John Manager"
+  platform: "https://example-casino.com"
+  partner_email: "partner1@example.com"
+  promo_code: "PROMO123, WELCOME50"
+  stag: "partner_casino_1"
+  status: "pending"
+  request_type: "promo_webs_50"
+  activation_date: <%= 1.day.from_now %>
+
+two:
+  manager: "Jane Manager"
+  platform: "https://another-casino.com"
+  partner_email: "partner2@example.com"
+  promo_code: "BONUS456, RELOAD100"
+  stag: "partner_casino_2"
+  status: "activated"
+  request_type: "promo_no_link_100"
+  activation_date: <%= 1.day.ago %>
