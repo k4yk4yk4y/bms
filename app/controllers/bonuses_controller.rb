@@ -41,6 +41,9 @@ class BonusesController < ApplicationController
 
     @bonuses = @bonuses.order(id: :desc)
 
+    # Get permanent bonus previews for current project
+    @permanent_bonus_previews = Bonus.permanent_bonus_previews_for_project(params[:project])
+
     # Pagination with 50 bonuses per page
     page = (params[:page] || 1).to_i
     per_page = 25
@@ -105,6 +108,11 @@ class BonusesController < ApplicationController
 
   # PATCH/PUT /bonuses/1
   def update
+    # Debug logging
+    Rails.logger.debug "Update params: #{params.inspect}"
+    Rails.logger.debug "Bonus params: #{bonus_params.inspect}"
+    Rails.logger.debug "Currency minimum deposits params: #{params[:bonus][:currency_minimum_deposits].inspect}"
+    
     respond_to do |format|
       if @bonus.update(bonus_params)
         # Update or create multiple bonus rewards if provided
@@ -120,6 +128,7 @@ class BonusesController < ApplicationController
         format.html { redirect_to @bonus, notice: "Bonus was successfully updated." }
         format.json { render json: @bonus }
       else
+        Rails.logger.debug "Bonus update failed. Errors: #{@bonus.errors.full_messages}"
         format.html { render :edit }
         format.json { render json: @bonus.errors, status: :unprocessable_entity }
       end
@@ -184,7 +193,8 @@ class BonusesController < ApplicationController
       :maximum_winnings, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country, :currency,
       :project, :dsl_tag, :created_by, :updated_by, :groups, :no_more, :totally_no_more,
-      currencies: []
+      :description,
+      currencies: [], currency_minimum_deposits: {}
     )
   end
 

@@ -53,6 +53,11 @@
                   </div>
                 </div>
 
+                <div class="mb-3">
+                  <%= form.label :description, class: "form-label" %>
+                  <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Описание бонуса..." %>
+                </div>
+
                 <div class="row">
                   <div class="col-md-6">
                     <div class="mb-3">
@@ -125,10 +130,10 @@
               </div>
             </div>
 
-            <!-- Financial Information -->
-            <div class="card mb-4" id="financial-information-card">
+            <!-- Wagering Information -->
+            <div class="card mb-4" id="wagering-information-card">
               <div class="card-header">
-                <h5 class="card-title mb-0">Financial Information</h5>
+                <h5 class="card-title mb-0">Wagering Information</h5>
               </div>
               <div class="card-body">
                 <div class="row">
@@ -176,6 +181,11 @@
           </div>
 
           <div class="col-lg-4">
+            <!-- Currency Minimum Deposits (только для депозитных бонусов) -->
+            <% if @bonus.event == 'deposit' %>
+              <%= render "currency_minimum_deposits", form: form, bonus: @bonus %>
+            <% end %>
+
             <!-- Availability -->
             <div class="card mb-4">
               <div class="card-header">

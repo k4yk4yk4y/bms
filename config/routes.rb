@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  # Marketing requests routes
+  resources :marketing, path: 'marketing' do
+    member do
+      patch :activate
+      patch :reject
+      patch :transfer
+    end
+  end
   get "heatmap", to: "heatmap#index", as: :heatmap
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

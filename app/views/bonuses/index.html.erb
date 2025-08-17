@@ -10,6 +10,9 @@
         </button>
       </div>
 
+      <!-- Permanent Bonus Previews -->
+      <%= render 'permanent_bonus_previews' %>
+
       <!-- Filters -->
       <div class="card mb-4">
         <div class="card-body">
@@ -118,6 +121,11 @@
                       </td>
                       <td>
                         <%= link_to bonus.name, bonus_path(bonus), class: "text-decoration-none" %>
+                        <% if bonus.description.present? %>
+                          <div class="small text-muted mt-1" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= h(bonus.description) %>">
+                            <%= truncate(bonus.description, length: 50) %>
+                          </div>
+                        <% end %>
                       </td>
                       <td>
                         <code class="text-dark"><%= bonus.display_code %></code>

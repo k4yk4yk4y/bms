@@ -116,13 +116,6 @@
     <% elsif bonus.persisted? %>
       <p class="text-muted mt-3">No rewards configured yet.</p>
     <% end %>
-    
-    <div class="mt-3">
-      <small class="text-muted">
-        Event Type: <strong><%= bonus.event&.humanize || 'Not specified' %></strong><br>
-        This determines when the bonus will be triggered (e.g., on deposit, coupon input, etc.)
-      </small>
-    </div>
   </div>
 </div>
 
@@ -394,9 +387,11 @@
                 <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
                 <select class="form-select" name="bonus_rewards[${index}][wagering_strategy]">
                   <option value="">Выберите стратегию</option>
-                  <option value="bonus_only">Только бонус</option>
-                  <option value="bonus_and_deposit">Бонус + депозит</option>
-                  <option value="winnings_only">Только выигрыши</option>
+                  <option value="wager">Wager</option>
+                  <option value="wager_win">Wager Win</option>
+                  <option value="wager_free">Wager Free</option>
+                  <option value="insurance_bonus">Insurance Bonus</option>
+                  <option value="wager_real">Wager Real</option>
                 </select>
                 <!--Метод расчета отыгрыша</div>
               </div>
@@ -708,9 +703,11 @@
                 <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
                 <select class="form-select" name="freespin_rewards[${index}][wagering_strategy]">
                   <option value="">Выберите стратегию</option>
-                  <option value="bonus_only">Только бонус</option>
-                  <option value="bonus_and_deposit">Бонус + депозит</option>
-                  <option value="winnings_only">Только выигрыши</option>
+                  <option value="wager">Wager</option>
+                  <option value="wager_win">Wager Win</option>
+                  <option value="wager_free">Wager Free</option>
+                  <option value="insurance_bonus">Insurance Bonus</option>
+                  <option value="wager_real">Wager Real</option>
                 </select>
                 <!--Метод расчета отыгрыша</div>
               </div>
@@ -1178,7 +1175,7 @@
               <!-- Note about common parameters -->
               <div class="alert-removed">
                 <small>
-                  <strong>Общие параметры:</strong><br>
+                  Общие параметры:<br>
                   Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
                 </small>
               </div>
@@ -1227,7 +1224,7 @@
               <!-- Note about common parameters -->
               <div class="alert-removed">
                 <small>
-                  <strong>Общие параметры:</strong><br>
+                  Общие параметры:<br>
                   Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
                 </small>
               </div>
@@ -1290,7 +1287,7 @@
               <!-- Note about common parameters -->
               <div class="alert-removed">
                 <small>
-                  <strong>Общие параметры:</strong><br>
+                  Общие параметры:<br>
                   Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
                 </small>
               </div>
@@ -1298,7 +1295,7 @@
               <!-- Information about collect strategy -->
               <div class="alert alert-warning">
                 <small>
-                  <strong>Стратегия collect:</strong><br>
+                  Стратегия collect:<br>
                   Этот тип награды работает с бонусами, использующими стратегию "collect".
                 </small>
               </div>

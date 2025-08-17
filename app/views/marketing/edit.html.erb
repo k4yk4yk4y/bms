@@ -1,0 +1,209 @@
+<% content_for(:title, "Редактирование заявки") %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+          <i class="fas fa-edit text-warning"></i>
+          Редактирование заявки
+        </h1>
+        <div class="d-flex gap-2">
+          <%= link_to marketing_path(@marketing_request), class: "btn btn-outline-info" do %>
+            <i class="fas fa-eye"></i> Просмотр
+          <% end %>
+          <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
+            <i class="fas fa-arrow-left"></i> Назад к списку
+          <% end %>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-bullhorn"></i>
+                <%= @marketing_request.request_type_label %>
+              </h5>
+              <small class="text-muted">
+                Заявка от <%= l(@marketing_request.created_at, format: :short) %>
+              </small>
+            </div>
+            <div class="card-body">
+              <% unless @marketing_request.pending? %>
+                <div class="alert alert-warning" role="alert">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <strong>Внимание!</strong> 
+                  После редактирования заявка автоматически вернется в статус "Ожидает".
+                </div>
+              <% end %>
+
+              <%= form_with model: @marketing_request, url: marketing_path(@marketing_request), method: :patch, local: true, 
+                            class: "needs-validation", 
+                            data: { turbo: false } do |form| %>
+                
+                <% if @marketing_request.errors.any? %>
+                  <div class="alert alert-danger" role="alert">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Исправьте следующие ошибки:</h6>
+                    <ul class="mb-0">
+                      <% @marketing_request.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :request_type, "Тип заявки", class: "form-label" %>
+                    <%= form.select :request_type, 
+                                    options_for_select(
+                                      MarketingRequest::REQUEST_TYPES.map { |type| 
+                                        [MarketingRequest::REQUEST_TYPE_LABELS[type], type] 
+                                      }, 
+                                      @marketing_request.request_type
+                                    ),
+                                    {},
+                                    { class: "form-select", required: true } %>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :manager, "Менеджер", class: "form-label" %>
+                    <%= form.text_field :manager, 
+                                        class: "form-control", 
+                                        required: true %>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :platform, "Площадка", class: "form-label" %>
+                  <%= form.text_area :platform, 
+                                     class: "form-control", 
+                                     rows: 3 %>
+                  <div class="form-text">
+                    Можете указать ссылку на площадку или текстовое описание
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :partner_email, "Почта партнёра", class: "form-label" %>
+                    <%= form.email_field :partner_email, 
+                                         class: "form-control", 
+                                         required: true %>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :promo_code, "Промокоды", class: "form-label" %>
+                    <%= form.text_area :promo_code, 
+                                       class: "form-control", 
+                                       required: true,
+                                       rows: 3,
+                                       style: "text-transform: uppercase;" %>
+                    <div class="form-text">
+                      <strong>Несколько кодов:</strong> разделяйте запятыми или новыми строками.<br>
+                      <strong>Один партнер - один бонус:</strong> коды автоматически приводятся к верхнему регистру.<br>
+                      <strong>Без пробелов:</strong> разрешены только буквы, цифры и подчеркивания.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :stag, "STAG", class: "form-label" %>
+                    <%= form.text_field :stag, 
+                                        class: "form-control", 
+                                        required: true %>
+                    <div class="form-text">
+                      <strong>Уникальный идентификатор партнёра.</strong><br>
+                      <strong>Важно:</strong> для одного партнера может быть только одна заявка.<br>
+                      <strong>Без пробелов:</strong> пробелы будут автоматически удалены.
+                    </div>
+                    <% if @marketing_request.has_existing_partner_request? %>
+                      <div class="alert alert-warning mt-2" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Внимание!</strong> Для этого партнера уже существует другая заявка.
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <%= form.label :status, "Статус", class: "form-label" %>
+                    <%= form.select :status, 
+                                    options_for_select(
+                                      MarketingRequest::STATUSES.map { |status| 
+                                        [MarketingRequest::STATUS_LABELS[status], status] 
+                                      }, 
+                                      @marketing_request.status
+                                    ),
+                                    {},
+                                    { class: "form-select" } %>
+                    <div class="form-text">
+                      Изменение статуса доступно только администраторам
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <%= form.label :activation_date, "Дата активации", class: "form-label" %>
+                  <%= form.datetime_local_field :activation_date, 
+                                                class: "form-control",
+                                                value: @marketing_request.activation_date&.strftime("%Y-%m-%dT%H:%M") %>
+                  <div class="form-text">
+                    Устанавливается при активации заявки
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
+                    <i class="fas fa-times"></i> Отмена
+                  <% end %>
+                  
+                  <%= form.submit "Сохранить изменения", 
+                                  class: "btn btn-warning" do %>
+                    <i class="fas fa-save"></i> Сохранить изменения
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Bootstrap validation
+  (function() {
+    'use strict';
+    window.addEventListener('load', function() {
+      var forms = document.getElementsByClassName('needs-validation');
+      var validation = Array.prototype.filter.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
+
+  // Auto-uppercase promo code and remove spaces from STAG
+  const promoCodeField = document.querySelector('textarea[name="marketing_request[promo_code]"]');
+  if (promoCodeField) {
+    promoCodeField.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+  }
+
+  const stagField = document.querySelector('input[name="marketing_request[stag]"]');
+  if (stagField) {
+    stagField.addEventListener('input', function() {
+      this.value = this.value.replace(/\s+/g, '');
+    });
+  }
+</script>

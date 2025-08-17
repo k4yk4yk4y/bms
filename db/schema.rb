@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_16_113809) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
   create_table "bonus_buy_rewards", force: :cascade do |t|
     t.integer "bonus_id", null: false
     t.decimal "buy_amount", precision: 15, scale: 2
@@ -72,6 +72,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_16_113809) do
     t.text "groups"
     t.text "no_more"
     t.integer "totally_no_more"
+    t.text "currency_minimum_deposits"
+    t.text "description"
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["code"], name: "index_bonuses_on_code", unique: true
@@ -115,6 +117,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_16_113809) do
     t.datetime "updated_at", null: false
     t.index ["bonus_id"], name: "index_freespin_rewards_on_bonus_id"
     t.index ["spins_count"], name: "index_freespin_rewards_on_spins_count"
+  end
+
+  create_table "marketing_requests", force: :cascade do |t|
+    t.string "manager", null: false
+    t.text "platform"
+    t.string "partner_email", null: false
+    t.text "promo_code"
+    t.string "stag", null: false
+    t.datetime "activation_date"
+    t.string "status", default: "pending", null: false
+    t.string "request_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["partner_email"], name: "index_marketing_requests_on_partner_email"
+    t.index ["promo_code"], name: "index_marketing_requests_on_promo_code", unique: true
+    t.index ["request_type"], name: "index_marketing_requests_on_request_type"
+    t.index ["stag"], name: "index_marketing_requests_on_stag", unique: true
+    t.index ["status"], name: "index_marketing_requests_on_status"
   end
 
   create_table "material_prize_rewards", force: :cascade do |t|

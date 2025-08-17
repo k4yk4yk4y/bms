@@ -1,0 +1,323 @@
+<% content_for(:title, "Заявка ##{@marketing_request.id}") %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+          <i class="fas fa-eye text-info"></i>
+          Заявка #<%= @marketing_request.id %>
+        </h1>
+        <div class="d-flex gap-2">
+          <%= link_to edit_marketing_path(@marketing_request), class: "btn btn-outline-warning" do %>
+            <i class="fas fa-edit"></i> Редактировать
+          <% end %>
+          <%= link_to marketing_index_path(tab: @marketing_request.request_type), class: "btn btn-outline-secondary" do %>
+            <i class="fas fa-arrow-left"></i> Назад к списку
+          <% end %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-bullhorn"></i>
+                <%= @marketing_request.request_type_label %>
+              </h5>
+              <small class="text-muted">
+                Создана <%= l(@marketing_request.created_at, format: :long) %>
+                <% if @marketing_request.updated_at != @marketing_request.created_at %>
+                  • Обновлена <%= l(@marketing_request.updated_at, format: :long) %>
+                <% end %>
+              </small>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">Менеджер</label>
+                  <p class="fw-bold mb-0"><%= @marketing_request.manager %></p>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">Статус</label>
+                  <p class="mb-0">
+                    <span class="badge fs-6
+                                 <%= case @marketing_request.status
+                                     when 'pending' then 'bg-warning'
+                                     when 'activated' then 'bg-success'
+                                     when 'rejected' then 'bg-danger'
+                                     end %>">
+                      <%= @marketing_request.status_label %>
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <% if @marketing_request.platform.present? %>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Площадка</label>
+                  <% if @marketing_request.platform.match?(URI::DEFAULT_PARSER.make_regexp) %>
+                    <p class="mb-0">
+                      <%= link_to @marketing_request.platform, @marketing_request.platform, 
+                                  target: "_blank", 
+                                  class: "text-primary text-decoration-none" %>
+                      <i class="fas fa-external-link-alt ms-1"></i>
+                    </p>
+                  <% else %>
+                    <p class="mb-0"><%= simple_format(@marketing_request.platform) %></p>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">Почта партнёра</label>
+                  <p class="mb-0">
+                    <%= mail_to @marketing_request.partner_email, @marketing_request.partner_email, 
+                                class: "text-decoration-none" %>
+                  </p>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">
+                    Промокод<%= 'ы' if @marketing_request.promo_codes_array.length > 1 %>
+                  </label>
+                  <% codes = @marketing_request.promo_codes_array %>
+                  <% if codes.length == 1 %>
+                    <p class="mb-0">
+                      <code class="bg-light px-3 py-2 rounded fs-5">
+                        <%= codes.first %>
+                      </code>
+                      <button class="btn btn-sm btn-outline-secondary ms-2" 
+                              onclick="copyToClipboard('<%= codes.first %>')"
+                              title="Скопировать промокод">
+                        <i class="fas fa-copy"></i>
+                      </button>
+                    </p>
+                  <% else %>
+                    <div class="mb-2">
+                      <% codes.each_with_index do |code, index| %>
+                        <div class="d-flex align-items-center mb-1">
+                          <code class="bg-light px-2 py-1 rounded me-2">
+                            <%= code %>
+                          </code>
+                          <button class="btn btn-sm btn-outline-secondary" 
+                                  onclick="copyToClipboard('<%= code %>')"
+                                  title="Скопировать код">
+                            <i class="fas fa-copy"></i>
+                          </button>
+                        </div>
+                      <% end %>
+                      <small class="text-muted">Всего кодов: <%= codes.length %></small>
+                    </div>
+                    <button class="btn btn-sm btn-primary" 
+                            onclick="copyToClipboard('<%= @marketing_request.formatted_promo_codes %>')"
+                            title="Скопировать все коды">
+                      <i class="fas fa-copy"></i> Скопировать все
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">STAG</label>
+                  <p class="mb-0">
+                    <code class="bg-light px-3 py-2 rounded fs-5">
+                      <%= @marketing_request.stag %>
+                    </code>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" 
+                            onclick="copyToClipboard('<%= @marketing_request.stag %>')"
+                            title="Скопировать STAG">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </p>
+                  <% if @marketing_request.has_existing_partner_request? %>
+                    <% existing_request = @marketing_request.existing_partner_request %>
+                    <div class="alert alert-warning mt-2" role="alert">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <strong>Внимание!</strong> Для этого партнера существует другая заявка:
+                      <%= link_to "#{existing_request.request_type_label} ##{existing_request.id}", 
+                                  marketing_path(existing_request), 
+                                  class: "alert-link" %>
+                      (статус: <%= existing_request.status_label %>)
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-muted">Дата активации</label>
+                  <p class="mb-0">
+                    <% if @marketing_request.activation_date %>
+                      <i class="fas fa-calendar-check text-success"></i>
+                      <%= l(@marketing_request.activation_date, format: :long) %>
+                    <% else %>
+                      <span class="text-muted">—</span>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <!-- Панель управления -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="card-title mb-0">
+                <i class="fas fa-cogs"></i>
+                Управление заявкой
+              </h6>
+            </div>
+            <div class="card-body">
+              <% if @marketing_request.pending? %>
+                <div class="d-grid gap-2 mb-3">
+                  <%= link_to activate_marketing_path(@marketing_request), 
+                              method: :patch,
+                              class: "btn btn-success",
+                              data: { 
+                                confirm: "Активировать заявку? Дата активации будет установлена автоматически.",
+                                turbo_method: :patch 
+                              } do %>
+                    <i class="fas fa-check"></i> Активировать
+                  <% end %>
+                  
+                  <%= link_to reject_marketing_path(@marketing_request), 
+                              method: :patch,
+                              class: "btn btn-danger",
+                              data: { 
+                                confirm: "Отклонить заявку?",
+                                turbo_method: :patch 
+                              } do %>
+                    <i class="fas fa-times"></i> Отклонить
+                  <% end %>
+                </div>
+              <% elsif @marketing_request.activated? %>
+                <div class="alert alert-success" role="alert">
+                  <i class="fas fa-check-circle"></i>
+                  <small>Заявка активирована</small>
+                </div>
+              <% else %>
+                <div class="alert alert-danger" role="alert">
+                  <i class="fas fa-times-circle"></i>
+                  <small>Заявка отклонена</small>
+                </div>
+              <% end %>
+
+              <div class="d-grid gap-2">
+                <%= link_to edit_marketing_path(@marketing_request), 
+                            class: "btn btn-outline-warning" do %>
+                  <i class="fas fa-edit"></i> Редактировать
+                <% end %>
+
+                <!-- Transfer to different type -->
+                <div class="dropdown">
+                  <button class="btn btn-outline-info dropdown-toggle" type="button" 
+                          data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-exchange-alt"></i> Перенести в другой тип
+                  </button>
+                  <ul class="dropdown-menu">
+                    <% MarketingRequest::REQUEST_TYPES.each do |request_type| %>
+                      <% next if request_type == @marketing_request.request_type %>
+                      <li>
+                        <%= link_to transfer_marketing_path(@marketing_request, new_request_type: request_type),
+                                    method: :patch,
+                                    class: "dropdown-item",
+                                    data: { 
+                                      confirm: "Перенести заявку в тип \"#{MarketingRequest::REQUEST_TYPE_LABELS[request_type]}\"? Статус заявки будет сброшен на \"Ожидает\".",
+                                      turbo_method: :patch 
+                                    } do %>
+                          <%= MarketingRequest::REQUEST_TYPE_LABELS[request_type] %>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+                
+                <%= link_to marketing_path(@marketing_request), 
+                            method: :delete,
+                            class: "btn btn-outline-danger",
+                            data: { 
+                              confirm: "Удалить заявку? Это действие нельзя отменить.",
+                              turbo_method: :delete 
+                            } do %>
+                  <i class="fas fa-trash"></i> Удалить
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Информационная панель -->
+          <div class="card mt-3">
+            <div class="card-header">
+              <h6 class="card-title mb-0">
+                <i class="fas fa-info-circle"></i>
+                Дополнительная информация
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-2">
+                <small class="text-muted">ID заявки:</small>
+                <br>
+                <code><%= @marketing_request.id %></code>
+              </div>
+              
+              <div class="mb-2">
+                <small class="text-muted">Тип заявки:</small>
+                <br>
+                <span class="badge bg-info"><%= @marketing_request.request_type %></span>
+              </div>
+
+              <div class="mb-2">
+                <small class="text-muted">Создана:</small>
+                <br>
+                <%= l(@marketing_request.created_at, format: :short) %>
+              </div>
+
+              <% if @marketing_request.updated_at != @marketing_request.created_at %>
+                <div class="mb-2">
+                  <small class="text-muted">Последнее обновление:</small>
+                  <br>
+                  <%= l(@marketing_request.updated_at, format: :short) %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+      // Показываем уведомление об успешном копировании
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+      toast.style.zIndex = '9999';
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="fas fa-check"></i> Скопировано в буфер обмена
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+      
+      // Удаляем элемент после скрытия
+      toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+      });
+    }).catch(function(err) {
+      console.error('Ошибка при копировании: ', err);
+    });
+  }
+</script>

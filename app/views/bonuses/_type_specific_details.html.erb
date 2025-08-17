@@ -40,7 +40,7 @@
             <h6>Cash Bonuses:</h6>
             <% bonus.bonus_rewards.each do |reward| %>
               <div class="mb-2">
-                <strong><%= reward.reward_type.humanize %>:</strong> 
+                <%= reward.reward_type.humanize %>: 
                 <%= reward.formatted_amount %>
               </div>
             <% end %>
@@ -50,7 +50,7 @@
             <h6>Freespins:</h6>
             <% bonus.freespin_rewards.each do |reward| %>
               <div class="mb-2">
-                <strong><%= reward.formatted_spins %></strong>
+                <%= reward.formatted_spins %>
                 <% if reward.has_game_restrictions? %>
                   <br><small class="text-muted">Restrictions apply</small>
                 <% end %>
@@ -62,7 +62,7 @@
             <h6>Comp Points:</h6>
             <% bonus.comp_point_rewards.each do |reward| %>
               <div class="mb-2">
-                <strong><%= reward.formatted_points %></strong>
+                <%= reward.formatted_points %>
                 <% if reward.multiplier.present? %>
                   (x<%= reward.multiplier %>)
                 <% end %>

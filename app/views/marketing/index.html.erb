@@ -1,0 +1,219 @@
+<% content_for(:title, "Marketing") %>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+          <i class="fas fa-bullhorn text-primary"></i>
+          Marketing
+        </h1>
+        <div class="d-flex gap-2">
+          <%= link_to new_marketing_path(request_type: @current_tab), 
+                      class: "btn btn-primary" do %>
+            <i class="fas fa-plus"></i> Добавить заявку
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Табы для типов заявок -->
+      <ul class="nav nav-tabs mb-4" id="marketingTabs" role="tablist">
+        <% @tabs.each_with_index do |tab, index| %>
+          <li class="nav-item" role="presentation">
+            <%= link_to marketing_index_path(tab: tab[:key]), 
+                        class: "nav-link #{'active' if @current_tab == tab[:key]}", 
+                        id: "#{tab[:key]}-tab",
+                        role: "tab",
+                        'aria-controls': tab[:key],
+                        'aria-selected': @current_tab == tab[:key] do %>
+              <%= tab[:label] %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+
+      <!-- Фильтры по статусу -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="btn-group" role="group" aria-label="Фильтр по статусу">
+            <%= link_to "Все", marketing_index_path(tab: @current_tab), 
+                        class: "btn btn-outline-secondary #{'active' if params[:status].blank?}" %>
+            <%= link_to "Ожидают", marketing_index_path(tab: @current_tab, status: 'pending'), 
+                        class: "btn btn-outline-warning #{'active' if params[:status] == 'pending'}" %>
+            <%= link_to "Активированы", marketing_index_path(tab: @current_tab, status: 'activated'), 
+                        class: "btn btn-outline-success #{'active' if params[:status] == 'activated'}" %>
+            <%= link_to "Отклонены", marketing_index_path(tab: @current_tab, status: 'rejected'), 
+                        class: "btn btn-outline-danger #{'active' if params[:status] == 'rejected'}" %>
+          </div>
+        </div>
+        <div class="col-md-6 text-end">
+          <small class="text-muted">
+            Всего заявок: <%= @marketing_requests.count %>
+          </small>
+        </div>
+      </div>
+
+      <!-- Таблица заявок -->
+      <div class="card">
+        <div class="card-body">
+          <% if @marketing_requests.any? %>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Менеджер</th>
+                    <th>Площадка</th>
+                    <th>Почта партнёра</th>
+                    <th>Промокод</th>
+                    <th>STAG</th>
+                    <th>Дата активации</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @marketing_requests.each do |request| %>
+                    <tr>
+                      <td>
+                        <strong><%= request.manager %></strong>
+                      </td>
+                      <td>
+                        <% if request.platform.present? %>
+                          <% if request.platform.match?(URI::DEFAULT_PARSER.make_regexp) %>
+                            <%= link_to request.platform, request.platform, 
+                                        target: "_blank", 
+                                        class: "text-primary text-decoration-none" %>
+                            <i class="fas fa-external-link-alt ms-1"></i>
+                          <% else %>
+                            <%= truncate(request.platform, length: 50) %>
+                          <% end %>
+                        <% else %>
+                          <span class="text-muted">—</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <%= mail_to request.partner_email, request.partner_email, 
+                                    class: "text-decoration-none" %>
+                      </td>
+                      <td>
+                        <% codes = request.promo_codes_array %>
+                        <% if codes.length == 1 %>
+                          <code class="bg-light px-2 py-1 rounded">
+                            <%= codes.first %>
+                          </code>
+                        <% else %>
+                          <div class="d-flex flex-wrap gap-1">
+                            <% codes.each do |code| %>
+                              <code class="bg-light px-1 py-1 rounded small">
+                                <%= code %>
+                              </code>
+                            <% end %>
+                          </div>
+                          <small class="text-muted">(<%= codes.length %> кодов)</small>
+                        <% end %>
+                      </td>
+                      <td>
+                        <code class="bg-light px-2 py-1 rounded">
+                          <%= request.stag %>
+                        </code>
+                        <% if request.has_existing_partner_request? %>
+                          <br>
+                          <small class="text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Есть другие заявки
+                          </small>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if request.activation_date %>
+                          <%= l(request.activation_date, format: :short) %>
+                        <% else %>
+                          <span class="text-muted">—</span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <span class="badge 
+                                     <%= case request.status
+                                         when 'pending' then 'bg-warning'
+                                         when 'activated' then 'bg-success'
+                                         when 'rejected' then 'bg-danger'
+                                         end %>">
+                          <%= request.status_label %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                          <%= link_to marketing_path(request), 
+                                      class: "btn btn-outline-primary btn-sm",
+                                      title: "Просмотр" do %>
+                            <i class="fas fa-eye"></i>
+                          <% end %>
+                          
+                          <%= link_to edit_marketing_path(request), 
+                                      class: "btn btn-outline-secondary btn-sm",
+                                      title: "Редактировать" do %>
+                            <i class="fas fa-edit"></i>
+                          <% end %>
+
+                          <% if request.pending? %>
+                            <%= link_to activate_marketing_path(request), 
+                                        method: :patch,
+                                        class: "btn btn-outline-success btn-sm",
+                                        title: "Активировать",
+                                        data: { 
+                                          confirm: "Активировать заявку?",
+                                          turbo_method: :patch 
+                                        } do %>
+                              <i class="fas fa-check"></i>
+                            <% end %>
+                            
+                            <%= link_to reject_marketing_path(request), 
+                                        method: :patch,
+                                        class: "btn btn-outline-danger btn-sm",
+                                        title: "Отклонить",
+                                        data: { 
+                                          confirm: "Отклонить заявку?",
+                                          turbo_method: :patch 
+                                        } do %>
+                              <i class="fas fa-times"></i>
+                            <% end %>
+                          <% end %>
+
+                          <%= link_to marketing_path(request), 
+                                      method: :delete,
+                                      class: "btn btn-outline-danger btn-sm",
+                                      title: "Удалить",
+                                      data: { 
+                                        confirm: "Удалить заявку? Это действие нельзя отменить.",
+                                        turbo_method: :delete 
+                                      } do %>
+                            <i class="fas fa-trash"></i>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-5">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">Заявки не найдены</h5>
+              <p class="text-muted">
+                Нет заявок типа "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
+                <% if params[:status].present? %>
+                  со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                <% end %>
+              </p>
+              <%= link_to new_marketing_path(request_type: @current_tab), 
+                          class: "btn btn-primary" do %>
+                <i class="fas fa-plus"></i> Создать первую заявку
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

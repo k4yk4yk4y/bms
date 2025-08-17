@@ -30,6 +30,14 @@
               <h5 class="card-title mb-0">Basic Information</h5>
             </div>
             <div class="card-body">
+              <% if @bonus.description.present? %>
+                <div class="mb-3">
+                  <h6 class="fw-bold">Description:</h6>
+                  <p class="text-muted mb-0"><%= simple_format(@bonus.description) %></p>
+                </div>
+                <hr>
+              <% end %>
+              
               <div class="row">
                 <div class="col-md-6">
                   <dl class="row">
@@ -94,10 +102,51 @@
             </div>
           </div>
 
-          <!-- Financial Information -->
+          <!-- Currency Minimum Deposits (для депозитных бонусов) -->
+          <% if @bonus.event == 'deposit' && @bonus.has_minimum_deposit_requirements? %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-currency-exchange"></i> 
+                  Минимальные депозиты по валютам
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <% @bonus.currency_minimum_deposits.each do |currency, amount| %>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                      <dl class="row">
+                        <dt class="col-sm-4"><%= currency %>:</dt>
+                        <dd class="col-sm-8">
+                          <span class="badge bg-primary"><%= amount %> <%= currency %></span>
+                        </dd>
+                      </dl>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% elsif @bonus.event == 'deposit' %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-currency-exchange"></i> 
+                  Минимальные депозиты по валютам
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="alert alert-info mb-0">
+                  <i class="bi bi-info-circle"></i>
+                  Минимальные депозиты по валютам не установлены
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Wagering Information -->
           <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title mb-0">Financial Information</h5>
+              <h5 class="card-title mb-0">Wagering Information</h5>
             </div>
             <div class="card-body">
               <div class="row">

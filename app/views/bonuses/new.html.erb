@@ -35,6 +35,11 @@
                 </div>
 
                 <div class="mb-3">
+                  <%= form.label :description, class: "form-label" %>
+                  <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Описание бонуса..." %>
+                </div>
+
+                <div class="mb-3">
                   <%= form.label :event, class: "form-label" %>
                   <%= form.select :event, event_type_options, 
                       { selected: @event_type }, 
@@ -97,10 +102,15 @@
               </div>
             </div>
 
-            <!-- Financial Information -->
-            <div class="card mb-4" id="financial-information-card">
+            <!-- Currency Minimum Deposits (только для депозитных бонусов) -->
+            <div id="currency-minimum-deposits-section" style="<%= 'display: none;' unless @bonus.event == 'deposit' %>">
+              <%= render "currency_minimum_deposits", form: form, bonus: @bonus %>
+            </div>
+
+            <!-- Wagering Information -->
+            <div class="card mb-4" id="wagering-information-card">
               <div class="card-header">
-                <h5 class="card-title mb-0">Financial Information</h5>
+                <h5 class="card-title mb-0">Wagering Information</h5>
               </div>
               <div class="card-body">
                 <div class="mb-3" id="minimum-deposit-field" style="display: none;">
@@ -180,7 +190,7 @@
 <script>
   function toggleTypeSpecificFields(bonusType) {
     const minimumDepositField = document.getElementById('minimum-deposit-field');
-    const financialCard = document.getElementById('financial-information-card');
+    const currencyMinimumDepositsSection = document.getElementById('currency-minimum-deposits-section');
     
     // Типы бонусов, которые не должны показывать minimum_deposit
     const nonDepositTypes = ['input_coupon', 'manual', 'collection', 'groups_update', 'scheduler'];
@@ -193,16 +203,33 @@
       if (minimumDepositInput) {
         minimumDepositInput.value = '';
       }
+      // Скрываем секцию минимальных депозитов по валютам
+      if (currencyMinimumDepositsSection) {
+        currencyMinimumDepositsSection.style.display = 'none';
+        // Очищаем значения полей минимальных депозитов
+        const currencyInputs = currencyMinimumDepositsSection.querySelectorAll('input[type="number"]');
+        currencyInputs.forEach(input => input.value = '');
+      }
     } else if (bonusType === 'deposit') {
-      // Для депозитных бонусов тоже скрываем, так как используется deposit_amount_required
+      // Для депозитных бонусов тоже скрываем старое поле, но показываем новую секцию
       minimumDepositField.style.display = 'none';
       const minimumDepositInput = minimumDepositField.querySelector('input');
       if (minimumDepositInput) {
         minimumDepositInput.value = '';
       }
+      // Показываем секцию минимальных депозитов по валютам
+      if (currencyMinimumDepositsSection) {
+        currencyMinimumDepositsSection.style.display = 'block';
+      }
     } else {
       // Показываем поле для других типов (если они появятся в будущем)
       minimumDepositField.style.display = 'block';
+      // Скрываем секцию минимальных депозитов по валютам для других типов
+      if (currencyMinimumDepositsSection) {
+        currencyMinimumDepositsSection.style.display = 'none';
+        const currencyInputs = currencyMinimumDepositsSection.querySelectorAll('input[type="number"]');
+        currencyInputs.forEach(input => input.value = '');
+      }
     }
     
     console.log('Selected bonus type:', bonusType);

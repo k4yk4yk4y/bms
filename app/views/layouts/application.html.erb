@@ -49,6 +49,11 @@
               <i class="fas fa-fire"></i> Heatmap
             <% end %>
           </li>
+          <li class="nav-item">
+            <%= link_to marketing_index_path, class: "nav-link #{'active' if controller_name == 'marketing'}" do %>
+              <i class="fas fa-bullhorn"></i> Marketing
+            <% end %>
+          </li>
           <li class="nav-item dropdown" data-controller="projects-dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
               <i class="fas fa-project-diagram"></i> Projects

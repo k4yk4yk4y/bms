@@ -22,7 +22,7 @@ class BonusBuyReward < ApplicationRecord
   end
 
   def bet_level=(value)
-    self.config = (config || {}).merge('bet_level' => value&.to_f)
+    self.config = (config || {}).merge('bet_level' => value&.to_i)
   end
 
   def max_win

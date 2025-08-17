@@ -92,10 +92,11 @@ module BonusesHelper
 
   def wagering_strategy_options
     [
-      [ "Standard", "standard" ],
-      [ "High Roller", "high_roller" ],
-      [ "Low Stakes", "low_stakes" ],
-      [ "Progressive", "progressive" ]
+      [ "Wager", "wager" ],
+      [ "Wager Win", "wager_win" ],
+      [ "Wager Free", "wager_free" ],
+      [ "Insurance Bonus", "insurance_bonus" ],
+      [ "Wager Real", "wager_real" ]
     ]
   end
 

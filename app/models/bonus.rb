@@ -6,6 +6,19 @@ class Bonus < ApplicationRecord
   STATUSES = %w[draft active inactive expired].freeze
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
   PROJECTS = %w[VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
+  
+  # Permanent bonus types for preview cards
+  PERMANENT_BONUS_TYPES = [
+    { name: 'Welcome Bonus', slug: 'welcome_bonus', dsl_tag: 'welcome_bonus' },
+    { name: 'Second Bonus', slug: 'second_bonus', dsl_tag: 'second' },
+    { name: 'Third Bonus', slug: 'third_bonus', dsl_tag: 'third' },
+    { name: 'Fourth Bonus', slug: 'fourth_bonus', dsl_tag: 'fourth' },
+    { name: 'Reload Cash', slug: 'reload_cash', dsl_tag: 'reload_cash' },
+    { name: 'Reload Freespins', slug: 'reload_freespins', dsl_tag: 'reload_freespins' },
+    { name: 'Happy Birthday Bonus', slug: 'happy_birthday', dsl_tag: 'birthday' },
+    { name: 'Cashback Bonus', slug: 'cashback', dsl_tag: 'cashback' },
+    { name: 'Live Cashback Bonus', slug: 'live_cashback', dsl_tag: 'live_cashback' }
+  ].freeze
 
   # New reward associations
   has_many :bonus_rewards, dependent: :destroy
@@ -23,6 +36,7 @@ class Bonus < ApplicationRecord
   # Store JSON data
   serialize :currencies, coder: JSON
   serialize :groups, coder: JSON
+  serialize :currency_minimum_deposits, coder: JSON
 
   # Validations
   validates :name, presence: true, length: { maximum: 255 }
@@ -34,10 +48,12 @@ class Bonus < ApplicationRecord
   validates :currency, presence: true, length: { maximum: 3 }
   validates :project, inclusion: { in: PROJECTS }, allow_blank: true
   validates :dsl_tag, length: { maximum: 255 }
+  validates :description, length: { maximum: 1000 }, allow_blank: true
 
   validate :end_date_after_start_date
   validate :valid_decimal_fields
   validate :minimum_deposit_for_appropriate_types
+  validate :valid_currency_minimum_deposits
 
   # Scopes
   scope :draft, -> { where(status: "draft") }
@@ -60,6 +76,20 @@ class Bonus < ApplicationRecord
 
   # Callbacks
   before_validation :generate_code, if: -> { code.blank? }
+
+  # Class methods for permanent bonuses
+  def self.find_permanent_bonus_for_project(project, dsl_tag)
+    where(project: project, dsl_tag: dsl_tag).active.first
+  end
+
+  def self.permanent_bonus_previews_for_project(project)
+    return [] if project.blank?
+    
+    PERMANENT_BONUS_TYPES.map do |bonus_type|
+      existing_bonus = find_permanent_bonus_for_project(project, bonus_type[:dsl_tag])
+      bonus_type.merge(existing_bonus: existing_bonus)
+    end
+  end
 
   # Instance methods
   def active?
@@ -208,6 +238,38 @@ class Bonus < ApplicationRecord
     groups.join(', ') if groups.any?
   end
 
+  # Currency minimum deposits methods
+  def currency_minimum_deposits
+    super || {}
+  end
+
+  def currency_minimum_deposits=(value)
+    if value.is_a?(Hash)
+      # Remove blank values and convert to proper format
+      clean_value = value.reject { |_k, v| v.blank? }
+      clean_value = clean_value.transform_values { |v| v.to_f }
+      super(clean_value)
+    elsif value.blank?
+      super({})
+    else
+      super(value)
+    end
+  end
+
+  def formatted_currency_minimum_deposits
+    return 'No minimum deposits specified' if currency_minimum_deposits.empty?
+    
+    currency_minimum_deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(', ')
+  end
+
+  def minimum_deposit_for_currency(currency)
+    currency_minimum_deposits[currency.to_s]
+  end
+
+  def has_minimum_deposit_requirements?
+    currency_minimum_deposits.any?
+  end
+
   # Limitation methods
   def formatted_no_more
     no_more.present? ? no_more : 'No limit'
@@ -272,6 +334,33 @@ class Bonus < ApplicationRecord
     # Для депозитных событий minimum_deposit может использоваться как базовое требование
     if event == "deposit" && minimum_deposit.present?
       # Это теперь нормально - minimum_deposit может быть общим требованием
+    end
+  end
+
+  def valid_currency_minimum_deposits
+    return if currency_minimum_deposits.blank?
+
+    # Проверяем, что currency_minimum_deposits не должно быть установлено для событий, которые не требуют депозита
+    non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
+    
+    if non_deposit_events.include?(event) && currency_minimum_deposits.any?
+      errors.add(:currency_minimum_deposits, "не должно быть установлено для события #{event}")
+      return
+    end
+
+    # Проверяем, что все значения являются положительными числами
+    currency_minimum_deposits.each do |currency, amount|
+      if amount.blank? || amount.to_f <= 0
+        errors.add(:currency_minimum_deposits, "для валюты #{currency} должно быть положительным числом")
+      end
+    end
+
+    # Проверяем, что указанные валюты есть в списке поддерживаемых валют
+    if currencies.present?
+      invalid_currencies = currency_minimum_deposits.keys - currencies
+      if invalid_currencies.any?
+        errors.add(:currency_minimum_deposits, "содержит валюты, которые не указаны в списке поддерживаемых валют: #{invalid_currencies.join(', ')}")
+      end
     end
   end
 end
