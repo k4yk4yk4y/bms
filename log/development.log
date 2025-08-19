@@ -32658,3 +32658,307 @@ Processing by MarketingController#index as HTML
 Completed 200 OK in 19ms (Views: 6.2ms | ActiveRecord: 0.7ms (11 queries, 1 cached) | GC: 0.5ms)
 
 
+  [1m[35m (103.9ms)[0m  [1m[35mCREATE DATABASE "mbs_cbm_development" ENCODING = 'unicode' /*application='MbsPromoRetention'*/[0m
+  [1m[35m (107.9ms)[0m  [1m[35mCREATE DATABASE "mbs_cbm_development" ENCODING = 'unicode' /*application='MbsPromoRetention'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='MbsPromoRetention'*/[0m
+  [1m[35m (16.7ms)[0m  [1m[35mCREATE DATABASE "mbs_cbm_development" ENCODING = 'unicode' /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "bonus_buy_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (6.3ms)[0m  [1m[35mCREATE TABLE "bonus_buy_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "buy_amount" decimal(15,2), "multiplier" decimal(5,2), "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.8ms)[0m  [1m[35mCREATE INDEX "index_bonus_buy_rewards_on_bonus_id" ON "bonus_buy_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_bonus_buy_rewards_on_buy_amount" ON "bonus_buy_rewards" ("buy_amount") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "bonus_code_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (5.0ms)[0m  [1m[35mCREATE TABLE "bonus_code_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "code" character varying NOT NULL, "code_type" character varying NOT NULL, "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_bonus_code_rewards_on_bonus_id" ON "bonus_code_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_bonus_code_rewards_on_code" ON "bonus_code_rewards" ("code") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE INDEX "index_bonus_code_rewards_on_code_type" ON "bonus_code_rewards" ("code_type") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "bonus_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.9ms)[0m  [1m[35mCREATE TABLE "bonus_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "reward_type" character varying NOT NULL, "amount" decimal(15,2), "percentage" decimal(5,2), "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE INDEX "index_bonus_rewards_on_bonus_id_and_reward_type" ON "bonus_rewards" ("bonus_id", "reward_type") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE INDEX "index_bonus_rewards_on_bonus_id" ON "bonus_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE INDEX "index_bonus_rewards_on_reward_type" ON "bonus_rewards" ("reward_type") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "bonuses" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (5.0ms)[0m  [1m[35mCREATE TABLE "bonuses" ("id" bigserial primary key, "name" character varying NOT NULL, "code" character varying NOT NULL, "status" character varying DEFAULT 'active', "minimum_deposit" decimal(10,2), "wager" decimal(10,2), "maximum_winnings" decimal(15,2), "wagering_strategy" character varying, "availability_start_date" timestamp(6) NOT NULL, "availability_end_date" timestamp(6) NOT NULL, "user_group" character varying, "tags" text, "country" character varying, "currency" character varying NOT NULL, "created_by" integer, "updated_by" integer, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "project" character varying, "dsl_tag" character varying, "event" character varying NOT NULL, "currencies" text, "groups" text, "no_more" text, "totally_no_more" integer, "currency_minimum_deposits" text, "description" text) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.6ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_availability_end_date" ON "bonuses" ("availability_end_date") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (3.7ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_availability_start_date" ON "bonuses" ("availability_start_date") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_bonuses_on_code" ON "bonuses" ("code") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_country" ON "bonuses" ("country") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.6ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_currency" ON "bonuses" ("currency") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_dsl_tag" ON "bonuses" ("dsl_tag") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.7ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_event" ON "bonuses" ("event") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (3.0ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_project" ON "bonuses" ("project") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (3.3ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_status" ON "bonuses" ("status") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (3.7ms)[0m  [1m[35mCREATE INDEX "index_bonuses_on_user_group" ON "bonuses" ("user_group") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "comp_point_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (5.6ms)[0m  [1m[35mCREATE TABLE "comp_point_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "points_amount" integer NOT NULL, "multiplier" decimal(5,2), "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.8ms)[0m  [1m[35mCREATE INDEX "index_comp_point_rewards_on_bonus_id" ON "comp_point_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (3.1ms)[0m  [1m[35mCREATE INDEX "index_comp_point_rewards_on_points_amount" ON "comp_point_rewards" ("points_amount") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "freechip_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.7ms)[0m  [1m[35mCREATE TABLE "freechip_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "chip_value" decimal(15,2) NOT NULL, "chips_count" integer NOT NULL, "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.6ms)[0m  [1m[35mCREATE INDEX "index_freechip_rewards_on_bonus_id" ON "freechip_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.6ms)[0m  [1m[35mCREATE INDEX "index_freechip_rewards_on_chip_value" ON "freechip_rewards" ("chip_value") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "freespin_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.7ms)[0m  [1m[35mCREATE TABLE "freespin_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "spins_count" integer NOT NULL, "game_restrictions" text, "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_freespin_rewards_on_bonus_id" ON "freespin_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_freespin_rewards_on_spins_count" ON "freespin_rewards" ("spins_count") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "marketing_requests" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (5.0ms)[0m  [1m[35mCREATE TABLE "marketing_requests" ("id" bigserial primary key, "manager" character varying NOT NULL, "platform" text, "partner_email" character varying NOT NULL, "promo_code" text, "stag" character varying NOT NULL, "activation_date" timestamp(6), "status" character varying DEFAULT 'pending' NOT NULL, "request_type" character varying NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE INDEX "index_marketing_requests_on_partner_email" ON "marketing_requests" ("partner_email") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_marketing_requests_on_promo_code" ON "marketing_requests" ("promo_code") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_marketing_requests_on_request_type" ON "marketing_requests" ("request_type") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_marketing_requests_on_stag" ON "marketing_requests" ("stag") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE INDEX "index_marketing_requests_on_status" ON "marketing_requests" ("status") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "material_prize_rewards" CASCADE /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.6ms)[0m  [1m[35mCREATE TABLE "material_prize_rewards" ("id" bigserial primary key, "bonus_id" integer NOT NULL, "prize_name" character varying NOT NULL, "prize_value" decimal(15,2), "config" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE INDEX "index_material_prize_rewards_on_bonus_id" ON "material_prize_rewards" ("bonus_id") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.7ms)[0m  [1m[35mCREATE INDEX "index_material_prize_rewards_on_prize_name" ON "material_prize_rewards" ("prize_name") /*application='MbsPromoRetention'*/[0m
+  [1m[35m (2.1ms)[0m  [1m[35mALTER TABLE "bonus_buy_rewards" ADD CONSTRAINT "fk_rails_80a3d11f32"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mALTER TABLE "bonus_code_rewards" ADD CONSTRAINT "fk_rails_b43566cf88"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mALTER TABLE "bonus_rewards" ADD CONSTRAINT "fk_rails_04dc838556"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "comp_point_rewards" ADD CONSTRAINT "fk_rails_1c06028258"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mALTER TABLE "freechip_rewards" ADD CONSTRAINT "fk_rails_e619079d60"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "freespin_rewards" ADD CONSTRAINT "fk_rails_7e8de4db09"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mALTER TABLE "material_prize_rewards" ADD CONSTRAINT "fk_rails_0fa35ff8bd"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+ /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.8ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20250817114030) /*application='MbsPromoRetention'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20250817112210),
+(20250817091841),
+(20250816195250),
+(20250816113809),
+(20250816094114),
+(20250814195218),
+(20250814194935),
+(20250814194934),
+(20250814194933),
+(20250814194931),
+(20250814194930),
+(20250814194929),
+(20250814194927),
+(20250814194905),
+(20250812193953),
+(20250811210559),
+(20250811204912),
+(20250811204906),
+(20250811204849),
+(20250811204844),
+(20250811204839),
+(20250811204831),
+(20250811204823); /*application='MbsPromoRetention'*/[0m
+  [1m[35m (4.8ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.4ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.9ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2025-08-19 22:03:26.029479', '2025-08-19 22:03:26.029482') RETURNING "key" /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.9ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'bc26e8c3adb835f265bc5f17d316aea72c30c44f', '2025-08-19 22:03:26.032917', '2025-08-19 22:03:26.032919') RETURNING "key" /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(4676348018947797255) /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='MbsPromoRetention'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(4676348018947797255) /*application='MbsPromoRetention'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='MbsPromoRetention'*/[0m
+Started HEAD "/" for 127.0.0.1 at 2025-08-20 01:03:41 +0300
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='MbsPromoRetention'*/[0m
+Processing by BonusesController#index as */*
+  [1m[36mBonus Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:53:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:95
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 6.3ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 13.7ms | GC: 0.0ms)
+Completed 200 OK in 798ms (Views: 17.8ms | ActiveRecord: 5.5ms (2 queries, 0 cached) | GC: 92.3ms)
+
+
+Started GET "/" for ::1 at 2025-08-20 01:04:22 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mBonus Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:53:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:95
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 2.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 12.4ms | GC: 0.0ms)
+Completed 200 OK in 22ms (Views: 12.6ms | ActiveRecord: 0.5ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/assets/components/navbar" for ::1 at 2025-08-20 01:04:22 +0300
+Started GET "/assets/components/navigation" for ::1 at 2025-08-20 01:04:22 +0300
+Started GET "/heatmap" for ::1 at 2025-08-20 01:04:23 +0300
+Processing by HeatmapController#index as HTML
+  [1m[36mBonus Count (0.6ms)[0m  [1m[34mSELECT COUNT(*) AS "count_all", DATE(availability_start_date) AS "date_availability_start_date" FROM "bonuses" WHERE "bonuses"."availability_start_date" BETWEEN '2025-08-01 00:00:00' AND '2025-08-31 23:59:59.999999' GROUP BY DATE(availability_start_date) /*action='index',application='MbsPromoRetention',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:43:in 'HeatmapController#generate_heatmap_data'
+  [1m[36mBonus Pluck (0.3ms)[0m  [1m[34mSELECT DISTINCT "bonuses"."event" FROM "bonuses" /*action='index',application='MbsPromoRetention',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:16:in 'HeatmapController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering heatmap/index.html.erb within layouts/application
+  Rendered heatmap/index.html.erb within layouts/application (Duration: 3.4ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.0ms | GC: 0.0ms)
+Completed 200 OK in 17ms (Views: 5.4ms | ActiveRecord: 0.8ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/marketing" for ::1 at 2025-08-20 01:04:23 +0300
+Processing by MarketingController#index as HTML
+  [1m[36mMarketingRequest Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_100' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_125' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_150' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'deposit_bonuses_partners' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering marketing/index.html.erb within layouts/application
+  [1m[36mCACHE MarketingRequest Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50'[0m
+  ↳ app/views/marketing/index.html.erb:70
+  [1m[36mMarketingRequest Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' LIMIT 1 /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:79
+  Rendered marketing/index.html.erb within layouts/application (Duration: 6.9ms | GC: 0.2ms)
+  Rendered layout layouts/application.html.erb (Duration: 8.5ms | GC: 0.2ms)
+Completed 200 OK in 27ms (Views: 8.7ms | ActiveRecord: 2.1ms (9 queries, 1 cached) | GC: 0.6ms)
+
+
+Started GET "/marketing?tab=promo_no_link_100" for ::1 at 2025-08-20 01:04:25 +0300
+Processing by MarketingController#index as HTML
+  Parameters: {"tab" => "promo_no_link_100"}
+  [1m[36mMarketingRequest Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_100' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_125' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_150' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'deposit_bonuses_partners' /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:27:in 'block in MarketingController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering marketing/index.html.erb within layouts/application
+  [1m[36mCACHE MarketingRequest Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100'[0m
+  ↳ app/views/marketing/index.html.erb:70
+  [1m[36mMarketingRequest Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' LIMIT 1 /*action='index',application='MbsPromoRetention',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:79
+  Rendered marketing/index.html.erb within layouts/application (Duration: 2.5ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.2ms | GC: 0.2ms)
+Completed 200 OK in 18ms (Views: 4.3ms | ActiveRecord: 1.5ms (9 queries, 1 cached) | GC: 0.3ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-20 01:04:25 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mBonus Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:53:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:95
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 2.3ms | GC: 0.2ms)
+  Rendered layout layouts/application.html.erb (Duration: 3.8ms | GC: 0.2ms)
+Completed 200 OK in 12ms (Views: 3.8ms | ActiveRecord: 0.5ms (2 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/bonuses/new?event=deposit" for ::1 at 2025-08-20 01:04:27 +0300
+Processing by BonusesController#new as HTML
+  Parameters: {"event" => "deposit"}
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/new.html.erb within layouts/application
+  Rendered bonuses/_currency_minimum_deposits.html.erb (Duration: 1.1ms | GC: 0.5ms)
+  Rendered bonuses/_type_specific_form.html.erb (Duration: 2.1ms | GC: 0.6ms)
+  Rendered bonuses/new.html.erb within layouts/application (Duration: 14.0ms | GC: 4.1ms)
+  Rendered layout layouts/application.html.erb (Duration: 16.2ms | GC: 5.0ms)
+Completed 200 OK in 42ms (Views: 16.5ms | ActiveRecord: 1.4ms (0 queries, 0 cached) | GC: 13.8ms)
+
+
+Started POST "/bonuses" for ::1 at 2025-08-20 01:04:55 +0300
+Processing by BonusesController#create as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "bonus" => {"name" => "asda", "description" => "dasd", "event" => "deposit", "status" => "draft", "project" => "", "dsl_tag" => "", "currencies" => [""], "groups" => "", "no_more" => "", "totally_no_more" => "", "currency_minimum_deposits" => {"USD" => "", "EUR" => "", "GBP" => "", "RUB" => "", "UAH" => "", "KZT" => "", "BTC" => "", "ETH" => ""}, "minimum_deposit" => "", "wager" => "123", "maximum_winnings" => "123", "wagering_strategy" => "", "availability_start_date" => "2025-08-19T22:04", "availability_end_date" => "2025-09-19T22:04"}, "bonus_rewards" => {"0" => {"bonus_type" => "fixed", "amount" => "123", "percentage" => "", "wager" => "123", "max_win_fixed" => "", "max_win_multiplier" => "", "available" => "123", "code" => "1231", "min" => "123", "groups" => "123", "tags" => "", "no_more" => "", "totally_no_more" => "", "stag" => "", "wagering_strategy" => "", "range" => "", "last_login_country" => "", "profile_country" => "", "current_ip_country" => "", "emails" => "[FILTERED]", "deposit_payment_systems" => "", "cashout_payment_systems" => "", "total_deposits" => "", "deposits_sum" => "", "loss_sum" => "", "deposits_count" => "", "spend_sum" => "", "category_loss_sum" => "", "wager_sum" => "", "bets_count" => "", "affiliates_user" => "", "balance" => "", "cashout" => "", "chargeable_comp_points" => "", "persistent_comp_points" => "", "date_of_birth" => "", "deposit" => "", "gender" => "", "issued_bonus" => "", "registered" => "", "social_networks" => "", "hold_min" => "", "hold_max" => ""}}, "max_win_type_0" => "fixed", "commit" => "Create Bonus"}
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mBonus Exists? (1.2ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_225A1976' LIMIT 1 /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mCACHE Bonus Exists? (0.0ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_225A1976' LIMIT 1[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/new.html.erb within layouts/application
+  Rendered bonuses/_currency_minimum_deposits.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered bonuses/_type_specific_form.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered bonuses/new.html.erb within layouts/application (Duration: 6.2ms | GC: 2.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 8.2ms | GC: 2.2ms)
+Completed 200 OK in 24ms (Views: 8.6ms | ActiveRecord: 1.4ms (2 queries, 1 cached) | GC: 4.3ms)
+
+
+Started POST "/bonuses" for ::1 at 2025-08-20 01:05:03 +0300
+Processing by BonusesController#create as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "bonus" => {"name" => "asda", "description" => "dasd", "event" => "deposit", "status" => "draft", "project" => "", "dsl_tag" => "", "currencies" => [""], "groups" => "", "no_more" => "", "totally_no_more" => "", "currency_minimum_deposits" => {"USD" => "", "EUR" => "", "GBP" => "", "RUB" => "", "UAH" => "", "KZT" => "", "BTC" => "", "ETH" => ""}, "minimum_deposit" => "", "wager" => "123", "maximum_winnings" => "123", "wagering_strategy" => "", "availability_start_date" => "2025-08-19T22:04", "availability_end_date" => "2025-09-19T22:04"}, "bonus_rewards" => {"0" => {"bonus_type" => "fixed", "amount" => "123", "percentage" => "", "wager" => "123", "max_win_fixed" => "", "max_win_multiplier" => "", "available" => "123", "code" => "1231", "min" => "123", "groups" => "123", "tags" => "", "no_more" => "", "totally_no_more" => "", "stag" => "", "wagering_strategy" => "", "range" => "", "last_login_country" => "", "profile_country" => "", "current_ip_country" => "", "emails" => "[FILTERED]", "deposit_payment_systems" => "", "cashout_payment_systems" => "", "total_deposits" => "", "deposits_sum" => "", "loss_sum" => "", "deposits_count" => "", "spend_sum" => "", "category_loss_sum" => "", "wager_sum" => "", "bets_count" => "", "affiliates_user" => "", "balance" => "", "cashout" => "", "chargeable_comp_points" => "", "persistent_comp_points" => "", "date_of_birth" => "", "deposit" => "", "gender" => "", "issued_bonus" => "", "registered" => "", "social_networks" => "", "hold_min" => "", "hold_max" => ""}}, "max_win_type_0" => "fixed", "commit" => "Create Bonus"}
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mBonus Exists? (0.9ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_19751BC0' LIMIT 1 /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mCACHE Bonus Exists? (0.0ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_19751BC0' LIMIT 1[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/new.html.erb within layouts/application
+  Rendered bonuses/_currency_minimum_deposits.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered bonuses/_type_specific_form.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered bonuses/new.html.erb within layouts/application (Duration: 4.2ms | GC: 0.5ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.8ms | GC: 0.9ms)
+Completed 200 OK in 18ms (Views: 6.1ms | ActiveRecord: 1.1ms (2 queries, 1 cached) | GC: 0.9ms)
+
+
+Started POST "/bonuses" for ::1 at 2025-08-20 01:05:03 +0300
+Processing by BonusesController#create as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "bonus" => {"name" => "asda", "description" => "dasd", "event" => "deposit", "status" => "draft", "project" => "", "dsl_tag" => "", "currencies" => [""], "groups" => "", "no_more" => "", "totally_no_more" => "", "currency_minimum_deposits" => {"USD" => "", "EUR" => "", "GBP" => "", "RUB" => "", "UAH" => "", "KZT" => "", "BTC" => "", "ETH" => ""}, "minimum_deposit" => "", "wager" => "123", "maximum_winnings" => "123", "wagering_strategy" => "", "availability_start_date" => "2025-08-19T22:04", "availability_end_date" => "2025-09-19T22:04"}, "bonus_rewards" => {"0" => {"bonus_type" => "fixed", "amount" => "123", "percentage" => "", "wager" => "123", "max_win_fixed" => "", "max_win_multiplier" => "", "available" => "123", "code" => "1231", "min" => "123", "groups" => "123", "tags" => "", "no_more" => "", "totally_no_more" => "", "stag" => "", "wagering_strategy" => "", "range" => "", "last_login_country" => "", "profile_country" => "", "current_ip_country" => "", "emails" => "[FILTERED]", "deposit_payment_systems" => "", "cashout_payment_systems" => "", "total_deposits" => "", "deposits_sum" => "", "loss_sum" => "", "deposits_count" => "", "spend_sum" => "", "category_loss_sum" => "", "wager_sum" => "", "bets_count" => "", "affiliates_user" => "", "balance" => "", "cashout" => "", "chargeable_comp_points" => "", "persistent_comp_points" => "", "date_of_birth" => "", "deposit" => "", "gender" => "", "issued_bonus" => "", "registered" => "", "social_networks" => "", "hold_min" => "", "hold_max" => ""}}, "max_win_type_0" => "fixed", "commit" => "Create Bonus"}
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mBonus Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_D69A75BB' LIMIT 1 /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/models/bonus.rb:338:in 'block in Bonus#generate_code'
+  [1m[36mCACHE Bonus Exists? (0.0ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" WHERE "bonuses"."code" = 'BONUS_D69A75BB' LIMIT 1[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK /*action='create',application='MbsPromoRetention',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:88:in 'block in BonusesController#create'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/new.html.erb within layouts/application
+  Rendered bonuses/_currency_minimum_deposits.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered bonuses/_type_specific_form.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered bonuses/new.html.erb within layouts/application (Duration: 3.2ms | GC: 0.1ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.6ms | GC: 0.3ms)
+Completed 200 OK in 16ms (Views: 4.8ms | ActiveRecord: 1.0ms (2 queries, 1 cached) | GC: 0.3ms)
+
+

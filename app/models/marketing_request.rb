@@ -167,7 +167,7 @@ class MarketingRequest < ApplicationRecord
     # Check each code for uniqueness across all requests
     current_codes.each do |code|
       # Find all requests that contain this code (excluding current request)
-      # Use LIKE with UPPER for SQLite compatibility
+      # Use LIKE with UPPER for PostgreSQL compatibility
       conflicting_requests = self.class.where.not(id: id).where(
         "UPPER(promo_code) LIKE ?", "%#{code.upcase}%"
       ).select do |request|
