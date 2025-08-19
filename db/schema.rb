@@ -11,6 +11,9 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "bonus_buy_rewards", force: :cascade do |t|
     t.integer "bonus_id", null: false
     t.decimal "buy_amount", precision: 15, scale: 2
