@@ -72,8 +72,8 @@ RSpec.describe BonusesController, type: :controller do
     end
 
     context 'with other filters' do
-      let!(:usd_bonus) { create(:bonus, currency: 'USD') }
-      let!(:eur_bonus) { create(:bonus, currency: 'EUR') }
+      let!(:usd_bonus) { create(:bonus, :with_usd_only) }
+      let!(:eur_bonus) { create(:bonus, currencies: [ 'EUR' ], currency_minimum_deposits: { 'EUR' => 50.0 }, event: 'deposit') }
       let!(:us_bonus) { create(:bonus, country: 'US') }
       let!(:de_bonus) { create(:bonus, country: 'DE') }
       let!(:volna_bonus) { create(:bonus, project: 'VOLNA') }
@@ -81,7 +81,7 @@ RSpec.describe BonusesController, type: :controller do
       let!(:tagged_bonus) { create(:bonus, dsl_tag: 'welcome_bonus') }
 
       it 'filters by currency' do
-        get :index, params: { currency: 'USD' }
+        get :index, params: { currencies: [ 'USD' ] }
         expect(assigns(:bonuses)).to include(usd_bonus)
         expect(assigns(:bonuses)).not_to include(eur_bonus)
       end
@@ -255,7 +255,9 @@ RSpec.describe BonusesController, type: :controller do
         status: 'draft',
         availability_start_date: Date.current,
         availability_end_date: 1.week.from_now,
-        currency: 'USD'
+        currencies: [ 'USD' ],
+        minimum_deposit: 50.0,
+        currency_minimum_deposits: { 'USD' => 50.0 }
       }
     end
 
@@ -391,6 +393,20 @@ RSpec.describe BonusesController, type: :controller do
 
   describe 'PATCH #update' do
     context 'with valid parameters' do
+      let(:valid_attributes) do
+        {
+          name: 'Test Bonus',
+          code: 'TEST123',
+          event: 'deposit',
+          status: 'draft',
+          availability_start_date: Date.current,
+          availability_end_date: 1.week.from_now,
+          currencies: [ 'USD' ],
+          minimum_deposit: 50.0,
+          currency_minimum_deposits: { 'USD' => 50.0 }
+        }
+      end
+
       let(:update_attributes) do
         {
           name: 'Updated Bonus Name',
@@ -420,6 +436,7 @@ RSpec.describe BonusesController, type: :controller do
           }
         }.to change(BonusReward, :count).by(1)
 
+        bonus.reload
         new_reward = bonus.bonus_rewards.last
         expect(new_reward.reward_type).to eq('cashback')
         expect(new_reward.amount).to eq(200.0)
@@ -766,7 +783,7 @@ RSpec.describe BonusesController, type: :controller do
       status: 'draft',
       availability_start_date: Date.current,
       availability_end_date: 1.week.from_now,
-      currency: 'USD'
+              currencies: [ 'USD' ]
     }
   end
 end

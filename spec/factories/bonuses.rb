@@ -8,7 +8,7 @@ FactoryBot.define do
     status { 'active' }
     availability_start_date { 1.day.ago }
     availability_end_date { 1.month.from_now }
-    currency { %w[USD EUR RUB].sample }
+    currencies { %w[USD EUR RUB] }
     minimum_deposit { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
     wager { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
     maximum_winnings { Faker::Number.decimal(l_digits: 3, r_digits: 2) }
@@ -19,9 +19,8 @@ FactoryBot.define do
     project { Bonus::PROJECTS.sample }
     dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
     description { Faker::Lorem.paragraph }
-    currencies { [ currency ] }
     groups { [ user_group ] }
-    currency_minimum_deposits { { currency => minimum_deposit } }
+    currency_minimum_deposits { { 'USD' => minimum_deposit, 'EUR' => minimum_deposit, 'RUB' => minimum_deposit } }
 
     trait :draft do
       status { 'draft' }
@@ -79,6 +78,11 @@ FactoryBot.define do
     trait :with_multiple_currencies do
       currencies { %w[USD EUR RUB] }
       currency_minimum_deposits { { 'USD' => 50.0, 'EUR' => 45.0, 'RUB' => 3000.0 } }
+    end
+
+    trait :with_usd_only do
+      currencies { [ 'USD' ] }
+      currency_minimum_deposits { { 'USD' => minimum_deposit } }
     end
 
     trait :with_multiple_groups do

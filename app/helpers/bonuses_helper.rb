@@ -68,6 +68,7 @@ module BonusesHelper
 
   def project_options
     [
+      [ "All", "All" ],
       [ "VOLNA", "VOLNA" ],
       [ "ROX", "ROX" ],
       [ "FRESH", "FRESH" ],

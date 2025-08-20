@@ -125,6 +125,6 @@ class FreespinReward < ApplicationRecord
   def formatted_max_win
     return "No limit" if max_win.blank?
     return max_win if max_win.to_s.include?("x")
-    "#{max_win} #{bonus.currency}"
+    "#{max_win} #{bonus.currencies.first || ''}"
   end
 end

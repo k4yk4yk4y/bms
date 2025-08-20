@@ -321,7 +321,7 @@ RSpec.describe FreespinReward, type: :model do
 
   # Formatting methods
   describe 'formatting methods' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
     let(:freespin_reward) { build(:freespin_reward, bonus: bonus, spins_count: 50) }
 
     describe 'formatted_spins' do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_20_141944) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
     t.index ["reward_type"], name: "index_bonus_rewards_on_reward_type"
   end
 
+  create_table "bonus_templates", force: :cascade do |t|
+    t.string "name"
+    t.string "dsl_tag"
+    t.string "project"
+    t.string "event"
+    t.decimal "minimum_deposit"
+    t.decimal "wager"
+    t.decimal "maximum_winnings"
+    t.integer "no_more"
+    t.integer "totally_no_more"
+    t.text "currencies"
+    t.text "groups"
+    t.text "currency_minimum_deposits"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dsl_tag", "project", "name"], name: "index_bonus_templates_on_dsl_tag_project_name", unique: true
+    t.index ["dsl_tag"], name: "index_bonus_templates_on_dsl_tag"
+    t.index ["project"], name: "index_bonus_templates_on_project"
+  end
+
   create_table "bonuses", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
@@ -63,7 +84,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
     t.string "user_group"
     t.text "tags"
     t.string "country"
-    t.string "currency", null: false
     t.integer "created_by"
     t.integer "updated_by"
     t.datetime "created_at", null: false
@@ -81,7 +101,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_17_114030) do
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["code"], name: "index_bonuses_on_code", unique: true
     t.index ["country"], name: "index_bonuses_on_country"
-    t.index ["currency"], name: "index_bonuses_on_currency"
     t.index ["dsl_tag"], name: "index_bonuses_on_dsl_tag"
     t.index ["event"], name: "index_bonuses_on_event"
     t.index ["project"], name: "index_bonuses_on_project"

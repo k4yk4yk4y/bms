@@ -20,7 +20,7 @@ class BonusesController < ApplicationController
     end
 
     # Filter by currency if specified
-    @bonuses = @bonuses.by_currency(params[:currency]) if params[:currency].present?
+    @bonuses = @bonuses.by_currency(params[:currency] || params[:currencies]&.first) if (params[:currency] || params[:currencies]).present?
 
     # Filter by country if specified
     @bonuses = @bonuses.by_country(params[:country]) if params[:country].present?
@@ -73,7 +73,19 @@ class BonusesController < ApplicationController
   # GET /bonuses/new
   def new
     @bonus = Bonus.new
-    @event_type = params[:event] || params[:type] || "deposit"
+
+    # Apply template if template_id is provided
+    if params[:template_id].present?
+      begin
+        template = BonusTemplate.find(params[:template_id])
+        template.apply_to_bonus(@bonus)
+      rescue ActiveRecord::RecordNotFound
+        # Template not found, continue without template
+      end
+    end
+
+    # Set event type from params or template, with fallback to deposit
+    @event_type = params[:event] || params[:type] || @bonus.event || "deposit"
     @bonus.event = @event_type
   end
 
@@ -87,11 +99,11 @@ class BonusesController < ApplicationController
 
     @bonus = Bonus.new(bonus_params)
 
-    # Set currency from currencies array if currency is blank
-    if @bonus.currency.blank? && @bonus.currencies.present?
-      # Filter out blank currencies and take the first valid one
+    # Set currency from currencies array if needed
+    if @bonus.currencies.present?
+      # Filter out blank currencies
       valid_currencies = @bonus.currencies.reject(&:blank?)
-      @bonus.currency = valid_currencies.first if valid_currencies.present?
+      # No need to set currency field as it was removed
     end
 
     # Validate freespin rewards before saving bonus
@@ -127,8 +139,12 @@ class BonusesController < ApplicationController
         end
         # Create multiple bonus_buy rewards if provided
         create_multiple_bonus_buy_rewards_if_provided
-        # Create multiple comp_point rewards if provided
-        create_multiple_comp_point_rewards_if_provided
+        # Create comp_point rewards if provided (singular or multiple)
+        if params[:comp_point_rewards].present?
+          create_multiple_comp_point_rewards_if_provided
+        elsif params[:comp_point_reward].present?
+          create_comp_point_reward_if_provided
+        end
         # Create multiple bonus_code rewards if provided
         create_multiple_bonus_code_rewards_if_provided
         update_type_specific_attributes
@@ -152,12 +168,12 @@ class BonusesController < ApplicationController
     Rails.logger.debug "Bonus params: #{bonus_params.inspect}"
     Rails.logger.debug "Currency minimum deposits params: #{params[:bonus][:currency_minimum_deposits].inspect}"
 
-    # Set currency from currencies array if currency is blank
+    # Set currency from currencies array if needed
     bonus_attributes = bonus_params
-    if bonus_attributes[:currency].blank? && bonus_attributes[:currencies].present?
-      # Filter out blank currencies and take the first valid one
+    if bonus_attributes[:currencies].present?
+      # Filter out blank currencies
       valid_currencies = bonus_attributes[:currencies].reject(&:blank?)
-      bonus_attributes[:currency] = valid_currencies.first if valid_currencies.present?
+      # No need to set currency field as it was removed
     end
 
     respond_to do |format|
@@ -235,6 +251,40 @@ class BonusesController < ApplicationController
     redirect_to bonuses_path, notice: message
   end
 
+  # GET /bonuses/find_template
+  def find_template
+    dsl_tag = params[:dsl_tag]
+    name = params[:name]
+    project = params[:project]
+
+    # Only dsl_tag and name are required
+    if dsl_tag.blank? || name.blank?
+      render json: {
+        error: "dsl_tag and name are required",
+        missing_params: {
+          dsl_tag: dsl_tag.blank?,
+          name: name.blank?
+        }
+      }, status: :bad_request
+      return
+    end
+
+    # Use the existing method to find template with all three parameters
+    template = BonusTemplate.find_template_by_dsl_and_name(dsl_tag, name, project)
+
+    if template
+      render json: {
+        template: template.as_json(except: [ :created_at, :updated_at ]),
+        found_by: template.for_all_projects? ? "All projects" : "Project: #{template.project}"
+      }
+    else
+      render json: {
+        error: "Template not found",
+        searched_for: "dsl_tag: #{dsl_tag}, name: #{name}, project: #{project}"
+      }, status: :not_found
+    end
+  end
+
   private
 
   def set_bonus
@@ -243,12 +293,12 @@ class BonusesController < ApplicationController
 
   def bonus_params
     params.require(:bonus).permit(
-      :name, :code, :event, :status, :minimum_deposit, :wager,
+      :name, :code, :event, :status, :wager,
       :maximum_winnings, :wagering_strategy, :availability_start_date,
-      :availability_end_date, :user_group, :tags, :country, :currency,
-      :project, :dsl_tag, :created_by, :updated_by, :groups, :no_more, :totally_no_more,
+      :availability_end_date, :user_group, :tags, :country,
+      :project, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
       :description,
-      currencies: [], currency_minimum_deposits: {}
+      currencies: [], groups: [], currency_minimum_deposits: {}
     )
   end
 
@@ -336,7 +386,7 @@ class BonusesController < ApplicationController
     return {} unless params[:freespin_reward].present?
 
     permitted = params.require(:freespin_reward).permit(
-      :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
+      :spins_count, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -346,7 +396,7 @@ class BonusesController < ApplicationController
       :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
       :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
-      :wager_done, :hold_min, :hold_max, :currencies, currencies: []
+      :wager_done, :hold_min, :hold_max, :currencies, currencies: [], games: []
     )
 
     # Handle array fields properly
@@ -361,6 +411,8 @@ class BonusesController < ApplicationController
     return if reward_params.empty? || reward_params[:spins_count].blank?
 
     Rails.logger.debug "Creating single freespin reward with params: #{reward_params.inspect}"
+    Rails.logger.debug "Games param: #{reward_params[:games].inspect}"
+    Rails.logger.debug "Games param class: #{reward_params[:games].class}"
 
     reward = @bonus.freespin_rewards.build(
       spins_count: reward_params[:spins_count]
@@ -1032,4 +1084,690 @@ class BonusesController < ApplicationController
     # This method is called after bonus creation/update to handle type-specific attributes
     # Currently handled by reward associations, so this is a no-op
   end
+
+  private
+
+  def set_bonus
+    @bonus = Bonus.find(params[:id])
+  end
+
+  def bonus_params
+    params.require(:bonus).permit(
+      :name, :code, :event, :status, :wager,
+      :maximum_winnings, :wagering_strategy, :availability_start_date,
+      :availability_end_date, :user_group, :tags, :country,
+      :project, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
+      :description,
+      currencies: [], groups: [], currency_minimum_deposits: {}
+    )
+  end
+
+  def bonus_reward_params
+    return {} unless params[:bonus_reward].present?
+
+    permitted = params.require(:bonus_reward).permit(
+      :reward_type, :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+      :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
+      # Advanced parameters
+      :range, :last_login_country, :profile_country, :current_ip_country, :emails,
+      :stag, :deposit_payment_systems, :cashout_payment_systems,
+      :user_can_have_disposable_email, :total_deposits, :deposits_sum, :loss_sum,
+      :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
+      :affiliates_user, :balance, :cashout, :chargeable_comp_points,
+      :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
+      :registered, :social_networks, :hold_min, :hold_max,
+      currencies: []
+    )
+
+    # Process max_win logic
+    if params[:max_win_type] == "multiplier" && permitted[:max_win_multiplier].present?
+      permitted[:max_win] = "x#{permitted[:max_win_multiplier]}"
+    elsif permitted[:max_win_fixed].present?
+      permitted[:max_win] = permitted[:max_win_fixed]
+    end
+
+    # Clean up temporary fields
+    permitted.delete(:max_win_fixed)
+    permitted.delete(:max_win_multiplier)
+    permitted.delete(:bonus_type)
+
+    permitted
+  end
+
+  def create_bonus_reward_if_provided
+    reward_params = bonus_reward_params
+    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
+
+    reward = @bonus.bonus_rewards.build(
+      reward_type: reward_params[:reward_type] || "bonus",
+      amount: reward_params[:amount],
+      percentage: reward_params[:percentage]
+    )
+
+    # Set all additional parameters through the config field
+    config = {}
+    reward_params.except(:amount, :percentage, :reward_type).each do |key, value|
+      next if value.blank?
+      config[key.to_s] = value
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_bonus_reward_if_provided
+    reward_params = bonus_reward_params
+    return if reward_params.empty?
+
+    # Find existing bonus reward or create new one
+    reward_type = reward_params[:reward_type] || "bonus"
+    reward = @bonus.bonus_rewards.find_by(reward_type: reward_type) ||
+             @bonus.bonus_rewards.build(reward_type: reward_type)
+
+    # Update amount/percentage
+    reward.amount = reward_params[:amount] if reward_params[:amount].present?
+    reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:amount, :percentage, :reward_type).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def create_multiple_bonus_rewards_if_provided
+    return unless params[:bonus_rewards].present?
+
+    multiple_bonus_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_rewards.build
+
+      # Set main attributes
+      reward.reward_type = reward_params[:reward_type]
+      reward.amount = reward_params[:amount]
+      reward.percentage = reward_params[:percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_multiple_bonus_rewards_if_provided
+    return unless params[:bonus_rewards].present?
+
+    # Remove existing bonus rewards to replace them
+    @bonus.bonus_rewards.destroy_all
+
+    multiple_bonus_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_rewards.build
+
+      # Set main attributes
+      reward.reward_type = reward_params[:reward_type]
+      reward.amount = reward_params[:amount]
+      reward.percentage = reward_params[:percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def create_freespin_reward_if_provided
+    reward_params = freespin_reward_params
+    return if reward_params.empty? || reward_params[:spins_count].blank?
+
+    reward = @bonus.freespin_rewards.build(
+      spins_count: reward_params[:spins_count],
+      games: reward_params[:games],
+      bet_level: reward_params[:bet_level],
+      max_win: reward_params[:max_win]
+    )
+
+    # Set all additional parameters through the config field
+    config = {}
+    reward_params.except(:spins_count, :games, :bet_level, :max_win).each do |key, value|
+      next if value.blank?
+      config[key.to_s] = value
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_freespin_reward_if_provided
+    reward_params = freespin_reward_params
+    return if reward_params.empty?
+
+    # Find existing freespin reward or create new one
+    reward = @bonus.freespin_rewards.first || @bonus.freespin_rewards.build
+
+    # Update main attributes
+    reward.spins_count = reward_params[:spins_count] if reward_params[:spins_count].present?
+    reward.games = reward_params[:games] if reward_params[:games].present?
+    reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
+    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:spins_count, :games, :bet_level, :max_win).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def create_multiple_freespin_rewards_if_provided
+    return unless params[:freespin_rewards].present?
+
+    multiple_freespin_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.freespin_rewards.build
+
+      # Set main attributes
+      reward.spins_count = reward_params[:spins_count]
+      reward.games = reward_params[:games]
+      reward.bet_level = reward_params[:bet_level]
+      reward.max_win = reward_params[:max_win]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_multiple_freespin_rewards_if_provided
+    return unless params[:freespin_rewards].present?
+
+    # Remove existing freespin rewards to replace them
+    @bonus.freespin_rewards.destroy_all
+
+    multiple_freespin_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.freespin_rewards.build
+
+      # Set main attributes
+      reward.spins_count = reward_params[:spins_count]
+      reward.games = reward_params[:games]
+      reward.bet_level = reward_params[:bet_level]
+      reward.max_win = reward_params[:max_win]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def create_bonus_buy_reward_if_provided
+    reward_params = bonus_buy_reward_params
+    return if reward_params.empty? || reward_params[:bonus_buy_amount].blank?
+
+    reward = @bonus.bonus_buy_rewards.build(
+      bonus_buy_amount: reward_params[:bonus_buy_amount],
+      bonus_buy_games: reward_params[:bonus_buy_games],
+      bonus_buy_percentage: reward_params[:bonus_buy_percentage]
+    )
+
+    # Set all additional parameters through the config field
+    config = {}
+    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage).each do |key, value|
+      next if value.blank?
+      config[key.to_s] = value
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_bonus_buy_reward_if_provided
+    reward_params = bonus_buy_reward_params
+    return if reward_params.empty?
+
+    # Find existing bonus_buy reward or create new one
+    reward = @bonus.bonus_buy_rewards.first || @bonus.bonus_buy_rewards.build
+
+    # Update main attributes
+    reward.bonus_buy_amount = reward_params[:bonus_buy_amount] if reward_params[:bonus_buy_amount].present?
+    reward.bonus_buy_games = reward_params[:bonus_buy_games] if reward_params[:bonus_buy_games].present?
+    reward.bonus_buy_percentage = reward_params[:bonus_buy_percentage] if reward_params[:bonus_buy_percentage].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def create_multiple_bonus_buy_rewards_if_provided
+    return unless params[:bonus_buy_rewards].present?
+
+    multiple_bonus_buy_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_buy_rewards.build
+
+      # Set main attributes
+      reward.bonus_buy_amount = reward_params[:bonus_buy_amount]
+      reward.bonus_buy_games = reward_params[:bonus_buy_games]
+      reward.bonus_buy_percentage = reward_params[:bonus_buy_percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_multiple_bonus_buy_rewards_if_provided
+    return unless params[:bonus_buy_rewards].present?
+
+    # Remove existing bonus_buy rewards to replace them
+    @bonus.bonus_buy_rewards.destroy_all
+
+    multiple_bonus_buy_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_buy_rewards.build
+
+      # Set main attributes
+      reward.bonus_buy_amount = reward_params[:bonus_buy_amount]
+      reward.bonus_buy_games = reward_params[:bonus_buy_games]
+      reward.bonus_buy_percentage = reward_params[:bonus_buy_percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def create_comp_point_reward_if_provided
+    reward_params = comp_point_reward_params
+    return if reward_params.empty? || (reward_params[:points].blank? && reward_params[:points_amount].blank?)
+
+    reward = @bonus.comp_point_rewards.build
+
+    # Set main attributes
+    reward.points_amount = reward_params[:points_amount] || reward_params[:points]
+    reward.title = reward_params[:title] if reward_params[:title].present?
+
+    # Handle config_json if provided
+    if reward_params[:config_json].present?
+      begin
+        config = JSON.parse(reward_params[:config_json])
+      rescue JSON::ParserError
+        config = {}
+      end
+    else
+      config = {}
+    end
+
+    # Add common parameters from bonus
+    config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+    config["groups"] = @bonus.groups if @bonus.groups.present?
+    config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+    config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+    config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+    config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_comp_point_reward_if_provided
+    reward_params = comp_point_reward_params
+    return if reward_params.empty?
+
+    # Find existing comp_point reward or create new one
+    reward = @bonus.comp_point_rewards.first || @bonus.comp_point_rewards.build
+
+    # Update main attributes
+    reward.comp_points_amount = reward_params[:comp_points_amount] if reward_params[:comp_points_amount].present?
+    reward.comp_points_percentage = reward_params[:comp_points_percentage] if reward_params[:comp_points_percentage].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:comp_points_amount, :comp_points_percentage).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def create_multiple_comp_point_rewards_if_provided
+    return unless params[:comp_point_rewards].present?
+
+    multiple_comp_point_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.comp_point_rewards.build
+
+      # Set main attributes
+      reward.comp_points_amount = reward_params[:comp_points_amount]
+      reward.comp_points_percentage = reward_params[:comp_points_percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_multiple_comp_point_rewards_if_provided
+    return unless params[:comp_point_rewards].present?
+
+    # Remove existing comp_point rewards to replace them
+    @bonus.comp_point_rewards.destroy_all
+
+    multiple_comp_point_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.comp_point_rewards.build
+
+      # Set main attributes
+      reward.comp_points_amount = reward_params[:comp_points_amount]
+      reward.comp_points_percentage = reward_params[:comp_points_percentage]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def create_bonus_code_reward_if_provided
+    reward_params = bonus_code_reward_params
+    return if reward_params.empty? || reward_params[:set_bonus_code].blank?
+
+    reward = @bonus.bonus_code_rewards.build(
+      set_bonus_code: reward_params[:set_bonus_code],
+      title: reward_params[:title]
+    )
+
+    # Set all additional parameters through the config field
+    config = {}
+    reward_params.except(:set_bonus_code, :title).each do |key, value|
+      next if value.blank?
+      config[key.to_s] = value
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def update_bonus_code_reward_if_provided
+    reward_params = bonus_code_reward_params
+    return if reward_params.empty?
+
+    # Find existing bonus_code reward or create new one
+    reward = @bonus.bonus_code_rewards.first || @bonus.bonus_code_rewards.build
+
+    # Update main attributes
+    reward.set_bonus_code = reward_params[:set_bonus_code] if reward_params[:set_bonus_code].present?
+    reward.title = reward_params[:title] if reward_params[:title].present?
+
+    # Update config
+    config = reward.config || {}
+    reward_params.except(:set_bonus_code, :title).each do |key, value|
+      if value.blank?
+        config.delete(key.to_s)
+      else
+        config[key.to_s] = value
+      end
+    end
+
+    reward.config = config unless config.empty?
+    reward.save
+  end
+
+  def create_multiple_bonus_code_rewards_if_provided
+    return unless params[:bonus_code_rewards].present?
+
+    multiple_bonus_code_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_code_rewards.build
+
+      # Set main attributes
+      reward.set_bonus_code = reward_params[:set_bonus_code]
+      reward.title = reward_params[:title]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_multiple_bonus_code_rewards_if_provided
+    return unless params[:bonus_code_rewards].present?
+
+    # Remove existing bonus_code rewards to replace them
+    @bonus.bonus_code_rewards.destroy_all
+
+    multiple_bonus_code_rewards_params.each do |reward_params|
+      next if reward_params.values.all?(&:blank?)
+
+      reward = @bonus.bonus_code_rewards.build
+
+      # Set main attributes
+      reward.set_bonus_code = reward_params[:set_bonus_code]
+      reward.title = reward_params[:title]
+
+      # Handle config_json if provided
+      if reward_params[:config_json].present?
+        begin
+          config = JSON.parse(reward_params[:config_json])
+        rescue JSON::ParserError
+          config = {}
+        end
+      else
+        config = {}
+      end
+
+      # Add common parameters from bonus
+      config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+      config["groups"] = @bonus.groups if @bonus.groups.present?
+      config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+      config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+      config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+      reward.config = config unless config.empty?
+      reward.save
+    end
+  end
+
+  def update_type_specific_attributes
+    # This method is called after bonus creation/update to handle type-specific attributes
+    # Currently handled by reward associations, so this is a no-op
+  end
+
+  private
 end

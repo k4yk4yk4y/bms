@@ -81,6 +81,18 @@
               <% end %>
             </ul>
           </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-cog"></i> Settings
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+              <li>
+                <%= link_to settings_templates_path, class: "dropdown-item #{'active' if controller_name == 'bonus_templates' && controller.class.name.include?('Settings')}" do %>
+                  <i class="fas fa-layer-group"></i> Templates
+                <% end %>
+              </li>
+            </ul>
+          </li>
         </ul>
         
         <ul class="navbar-nav">

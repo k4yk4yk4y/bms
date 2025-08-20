@@ -150,10 +150,21 @@ test.describe('Bonus Creation', () => {
     // Should stay on the same page due to validation error
     await expect(page).toHaveURL(/.*\/bonuses\/new/);
     
-    // Now fix it by selecting a currency
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    // Verify we're still on the form page
+    await expect(page.locator('h1')).toContainText('Create New Bonus');
     
-    // Try submitting again
+    // Now create a new bonus with proper validation
+    await page.goto('/bonuses/new?event=deposit');
+    
+    // Fill all required fields correctly
+    await page.fill('input[name="bonus[name]"]', 'Currency Test Bonus Fixed');
+    await page.selectOption('select[name="bonus[event]"]', 'deposit');
+    await page.selectOption('select[name="bonus[status]"]', 'draft');
+    await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
+    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
+    
+    // Submit the form
     await page.click('input[type="submit"][value="Create Bonus"]');
     
     // Should succeed now

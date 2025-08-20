@@ -11,10 +11,10 @@ class FreechipReward < ApplicationRecord
   end
 
   def formatted_chip_value
-    "#{chip_value} #{bonus.currency}"
+    "#{chip_value} #{bonus.currencies.first || ''}"
   end
 
   def formatted_total_value
-    "#{total_value} #{bonus.currency}"
+    "#{total_value} #{bonus.currencies.first || ''}"
   end
 end

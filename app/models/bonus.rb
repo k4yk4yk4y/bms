@@ -44,7 +44,7 @@ class Bonus < ApplicationRecord
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :availability_start_date, presence: true
   validates :availability_end_date, presence: true
-  validates :currency, presence: true, length: { maximum: 3 }
+  # Currency validation removed - now using currencies array
   validates :project, inclusion: { in: PROJECTS }, allow_blank: true
   validates :dsl_tag, length: { maximum: 255 }
   validates :description, length: { maximum: 1000 }, allow_blank: true
@@ -60,7 +60,7 @@ class Bonus < ApplicationRecord
   scope :inactive, -> { where(status: "inactive") }
   scope :expired, -> { where(status: "expired") }
   scope :by_event, ->(event) { where(event: event) }
-  scope :by_currency, ->(currency) { where(currency: currency) }
+  scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
   scope :by_dsl_tag, ->(dsl_tag) { where("dsl_tag LIKE ?", "%#{dsl_tag}%") }
@@ -75,7 +75,6 @@ class Bonus < ApplicationRecord
 
   # Callbacks
   before_validation :generate_code, if: -> { code.blank? }
-  before_validation :set_currency_from_currencies
   after_find :check_and_update_expired_status!
 
   # Class methods for permanent bonuses
@@ -149,12 +148,12 @@ class Bonus < ApplicationRecord
   end
 
   def display_currency
-    # Try to get currency from first reward, fallback to bonus currency
+    # Try to get currency from first reward, fallback to bonus currencies
     first_reward = all_rewards.first
     if first_reward&.respond_to?(:currencies) && first_reward.currencies.present?
       first_reward.currencies.is_a?(Array) ? first_reward.currencies.join(", ") : first_reward.currencies
     else
-      currency
+      currencies.present? ? currencies.join(", ") : "All currencies"
     end
   end
 
@@ -339,12 +338,7 @@ class Bonus < ApplicationRecord
     end
   end
 
-  def set_currency_from_currencies
-    # Set currency from currencies array if currency is blank and currencies are present
-    if currency.blank? && currencies.present?
-      self.currency = currencies.first
-    end
-  end
+  # Method removed - no longer needed as we only use currencies array
 
   def minimum_deposit_for_appropriate_types
     # minimum_deposit не должно быть установлено для событий, которые не требуют депозита

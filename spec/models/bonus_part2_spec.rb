@@ -155,7 +155,7 @@ RSpec.describe Bonus, type: :model do
         it 'returns bonus currency when no reward currencies' do
           bonus_reward.config = {}
           bonus_reward.save
-          expect(bonus.display_currency).to eq(bonus.currency)
+          expect(bonus.display_currency).to eq(bonus.currencies.join(', '))
         end
       end
     end
@@ -375,7 +375,6 @@ RSpec.describe Bonus, type: :model do
           status: 'active',
           availability_start_date: 2.days.ago,
           availability_end_date: 1.day.ago,
-          currency: 'USD',
           currencies: [ 'USD' ],
           groups: [ 'test' ],
           currency_minimum_deposits: { 'USD' => 50.0 }

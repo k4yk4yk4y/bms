@@ -8,7 +8,7 @@ class MaterialPrizeReward < ApplicationRecord
 
   def formatted_prize_value
     return "N/A" if prize_value.blank?
-    "#{prize_value} #{bonus.currency}"
+    "#{prize_value} #{bonus.currencies.first || ''}"
   end
 
   def has_monetary_value?

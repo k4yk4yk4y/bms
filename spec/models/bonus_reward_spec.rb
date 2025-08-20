@@ -347,7 +347,7 @@ RSpec.describe BonusReward, type: :model do
 
   # Formatting methods tests
   describe 'formatting methods' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
     let(:bonus_reward) { create(:bonus_reward, bonus: bonus) }
 
     describe '#formatted_amount' do
