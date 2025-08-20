@@ -27,7 +27,6 @@ class Bonus < ApplicationRecord
   has_many :comp_point_rewards, dependent: :destroy
   has_many :bonus_code_rewards, dependent: :destroy
   has_many :freechip_rewards, dependent: :destroy
-  has_many :bonus_code_rewards, dependent: :destroy
   has_many :material_prize_rewards, dependent: :destroy
   has_many :comp_point_rewards, dependent: :destroy
 

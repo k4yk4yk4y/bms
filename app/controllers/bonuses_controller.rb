@@ -83,6 +83,8 @@ class BonusesController < ApplicationController
 
   # POST /bonuses
   def create
+    Rails.logger.debug "CREATE METHOD CALLED with params: #{params.inspect}"
+    
     @bonus = Bonus.new(bonus_params)
 
     # Set currency from currencies array if currency is blank
@@ -92,14 +94,37 @@ class BonusesController < ApplicationController
       @bonus.currency = valid_currencies.first if valid_currencies.present?
     end
 
+    # Validate freespin rewards before saving bonus
+    freespin_reward_params = self.freespin_reward_params
+    Rails.logger.debug "Freespin reward params: #{freespin_reward_params.inspect}"
+    if freespin_reward_params.present?
+      # Check if spins_count is valid (must be present and greater than 0)
+      spins_count = freespin_reward_params[:spins_count]
+      Rails.logger.debug "Checking spins_count: #{spins_count} (type: #{spins_count.class})"
+      if spins_count.blank? || spins_count.to_i <= 0
+        Rails.logger.debug "Adding validation error for spins_count"
+        @bonus.errors.add(:base, "Spins count must be greater than 0")
+        # Don't save the bonus if validation fails
+        respond_to do |format|
+          @event_type = @bonus.event
+          format.html { render :new, status: :unprocessable_entity }
+          format.json { render json: @bonus.errors, status: :unprocessable_entity }
+        end
+        return
+      end
+    end
+
     respond_to do |format|
-      if @bonus.save
+      if @bonus.errors.empty? && @bonus.save
         # Create bonus rewards if provided (singular or multiple)
         create_bonus_reward_if_provided
         create_multiple_bonus_rewards_if_provided
-        # Create freespin rewards if provided (singular or multiple)
-        create_freespin_reward_if_provided
-        create_multiple_freespin_rewards_if_provided
+        # Create freespin rewards if provided (singular or multiple) - only one should be called
+        if params[:freespin_rewards].present?
+          create_multiple_freespin_rewards_if_provided
+        elsif params[:freespin_reward].present?
+          create_freespin_reward_if_provided
+        end
         # Create multiple bonus_buy rewards if provided
         create_multiple_bonus_buy_rewards_if_provided
         # Create multiple comp_point rewards if provided
@@ -140,17 +165,18 @@ class BonusesController < ApplicationController
         # Update or create bonus rewards if provided (singular or multiple)
         update_bonus_reward_if_provided
         update_multiple_bonus_rewards_if_provided
-        # Update or create freespin rewards if provided (singular or multiple)
-        update_freespin_reward_if_provided
-        update_multiple_freespin_rewards_if_provided
+        # Update or create freespin rewards if provided (singular or multiple) - only one should be called
+        if params[:freespin_rewards].present?
+          update_multiple_freespin_rewards_if_provided
+        elsif params[:freespin_reward].present?
+          update_freespin_reward_if_provided
+        end
         # Update or create bonus_buy rewards if provided (singular or multiple)
         update_bonus_buy_reward_if_provided
         update_multiple_bonus_buy_rewards_if_provided
         # Update or create comp_point rewards if provided (singular or multiple)
-        update_comp_point_reward_if_provided
         update_multiple_comp_point_rewards_if_provided
         # Update or create bonus_code rewards if provided (singular or multiple)
-        update_bonus_code_reward_if_provided
         update_multiple_bonus_code_rewards_if_provided
         update_type_specific_attributes
         format.html { redirect_to @bonus, notice: "Bonus was successfully updated." }
@@ -230,7 +256,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_reward].present?
 
     permitted = params.require(:bonus_reward).permit(
-      :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+      :reward_type, :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
       :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
       # Advanced parameters
       :range, :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -263,14 +289,14 @@ class BonusesController < ApplicationController
     return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
 
     reward = @bonus.bonus_rewards.build(
-      reward_type: "bonus",
+      reward_type: reward_params[:reward_type] || "bonus",
       amount: reward_params[:amount],
       percentage: reward_params[:percentage]
     )
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -284,8 +310,9 @@ class BonusesController < ApplicationController
     return if reward_params.empty?
 
     # Find existing bonus reward or create new one
-    reward = @bonus.bonus_rewards.find_by(reward_type: "bonus") ||
-             @bonus.bonus_rewards.build(reward_type: "bonus")
+    reward_type = reward_params[:reward_type] || "bonus"
+    reward = @bonus.bonus_rewards.find_by(reward_type: reward_type) ||
+             @bonus.bonus_rewards.build(reward_type: reward_type)
 
     # Update amount/percentage
     reward.amount = reward_params[:amount] if reward_params[:amount].present?
@@ -293,7 +320,7 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -332,6 +359,8 @@ class BonusesController < ApplicationController
   def create_freespin_reward_if_provided
     reward_params = freespin_reward_params
     return if reward_params.empty? || reward_params[:spins_count].blank?
+
+    Rails.logger.debug "Creating single freespin reward with params: #{reward_params.inspect}"
 
     reward = @bonus.freespin_rewards.build(
       spins_count: reward_params[:spins_count]
@@ -496,6 +525,8 @@ class BonusesController < ApplicationController
   def create_multiple_freespin_rewards_if_provided
     rewards_params = multiple_freespin_rewards_params
     return if rewards_params.empty?
+
+    Rails.logger.debug "Creating multiple freespin rewards with params: #{rewards_params.inspect}"
 
     rewards_params.each do |reward_params|
       reward = @bonus.freespin_rewards.build(
@@ -764,7 +795,7 @@ class BonusesController < ApplicationController
     return {} unless params[:comp_point_reward].present?
 
     permitted = params.require(:comp_point_reward).permit(
-      :issue_chargeable_award, :issue_persistent_award, :title, :config_json
+      :points, :points_amount, :title, :config_json
     )
 
     permitted
@@ -774,10 +805,10 @@ class BonusesController < ApplicationController
     return [] unless params[:comp_point_rewards].present?
 
     params[:comp_point_rewards].values.map do |reward_params|
-      next if reward_params.blank? || (reward_params[:issue_chargeable_award].blank? && reward_params[:issue_persistent_award].blank?)
+      next if reward_params.blank? || (reward_params[:points].blank? && reward_params[:points_amount].blank?)
 
       permitted = reward_params.permit(
-        :issue_chargeable_award, :issue_persistent_award, :title, :config_json
+        :points, :points_amount, :title, :config_json
       )
 
       permitted
@@ -811,17 +842,17 @@ class BonusesController < ApplicationController
 
   # Create multiple comp_point rewards if provided
   def create_multiple_comp_point_rewards_if_provided
-    return unless params[:comp_point_rewards].present?
-
-    multiple_comp_point_rewards_params.each do |reward_params|
-      next if reward_params.values.all?(&:blank?)
+    # Handle both single and multiple comp_point_reward parameters
+    if params[:comp_point_reward].present?
+      # Single comp_point_reward
+      reward_params = comp_point_reward_params
+      return if reward_params.values.all?(&:blank?)
 
       reward = @bonus.comp_point_rewards.build
 
       # Set main attributes
-      reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
-      reward.issue_persistent_award = reward_params[:issue_persistent_award]
-      reward.title = reward_params[:title]
+      reward.points_amount = reward_params[:points_amount] || reward_params[:points]
+      reward.title = reward_params[:title] if reward_params[:title].present?
 
       # Handle config_json if provided
       if reward_params[:config_json].present?
@@ -844,6 +875,39 @@ class BonusesController < ApplicationController
 
       reward.config = config unless config.empty?
       reward.save
+    elsif params[:comp_point_rewards].present?
+      # Multiple comp_point_rewards
+      multiple_comp_point_rewards_params.each do |reward_params|
+        next if reward_params.values.all?(&:blank?)
+
+        reward = @bonus.comp_point_rewards.build
+
+        # Set main attributes
+        reward.points_amount = reward_params[:points_amount] || reward_params[:points]
+        reward.title = reward_params[:title] if reward_params[:title].present?
+
+        # Handle config_json if provided
+        if reward_params[:config_json].present?
+          begin
+            config = JSON.parse(reward_params[:config_json])
+          rescue JSON::ParserError
+            config = {}
+          end
+        else
+          config = {}
+        end
+
+        # Add common parameters from bonus
+        config["currencies"] = @bonus.currencies if @bonus.currencies.present?
+        config["groups"] = @bonus.groups if @bonus.groups.present?
+        config["min"] = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
+        config["wagering_strategy"] = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+        config["no_more"] = @bonus.no_more if @bonus.no_more.present?
+        config["totally_no_more"] = @bonus.totally_no_more if @bonus.totally_no_more.present?
+
+        reward.config = config unless config.empty?
+        reward.save
+      end
     end
   end
 
@@ -860,9 +924,8 @@ class BonusesController < ApplicationController
       reward = @bonus.comp_point_rewards.build
 
       # Set main attributes
-      reward.issue_chargeable_award = reward_params[:issue_chargeable_award]
-      reward.issue_persistent_award = reward_params[:issue_persistent_award]
-      reward.title = reward_params[:title]
+      reward.points_amount = reward_params[:points_amount] || reward_params[:points]
+      reward.title = reward_params[:title] if reward_params[:title].present?
 
       # Handle config_json if provided
       if reward_params[:config_json].present?
