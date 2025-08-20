@@ -84,7 +84,7 @@ class BonusesController < ApplicationController
   # POST /bonuses
   def create
     Rails.logger.debug "CREATE METHOD CALLED with params: #{params.inspect}"
-    
+
     @bonus = Bonus.new(bonus_params)
 
     # Set currency from currencies array if currency is blank
