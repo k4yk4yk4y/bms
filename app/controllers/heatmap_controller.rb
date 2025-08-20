@@ -1,13 +1,21 @@
 class HeatmapController < ApplicationController
   def index
     # Получаем валидированные параметры
-    @year = heatmap_params[:year]&.to_i || Date.current.year
-    @month = heatmap_params[:month]&.to_i || Date.current.month
-    @bonus_event = heatmap_params[:bonus_event] || "all"
+    @year = parse_year_param(heatmap_params[:year])
+    @month = parse_month_param(heatmap_params[:month])
+    @bonus_event = parse_bonus_event_param(heatmap_params[:bonus_event])
 
-    # Создаем дату начала и конца месяца
-    @start_date = Date.new(@year, @month, 1)
-    @end_date = @start_date.end_of_month
+    # Создаем дату начала и конца месяца с обработкой ошибок
+    begin
+      @start_date = Date.new(@year, @month, 1)
+      @end_date = @start_date.end_of_month
+    rescue Date::Error
+      # Fallback to current date if invalid parameters
+      @year = Date.current.year
+      @month = Date.current.month
+      @start_date = Date.new(@year, @month, 1)
+      @end_date = @start_date.end_of_month
+    end
 
     # Получаем данные о бонусах для текущего месяца
     @heatmap_data = generate_heatmap_data
@@ -24,6 +32,30 @@ class HeatmapController < ApplicationController
 
   def heatmap_params
     params.permit(:year, :month, :bonus_event)
+  end
+
+  def parse_year_param(year_param)
+    return Date.current.year if year_param.blank?
+    
+    year = year_param.to_i
+    # Validate year is reasonable (1900-3000)
+    year > 1900 && year < 3000 ? year : Date.current.year
+  end
+
+  def parse_month_param(month_param)
+    return Date.current.month if month_param.blank?
+    
+    month = month_param.to_i
+    # Validate month is between 1-12
+    month >= 1 && month <= 12 ? month : Date.current.month
+  end
+
+  def parse_bonus_event_param(bonus_event_param)
+    return "all" if bonus_event_param.blank?
+    
+    # Validate bonus_event is in the allowed list or "all"
+    valid_events = Bonus::EVENT_TYPES + ["all"]
+    valid_events.include?(bonus_event_param) ? bonus_event_param : "all"
   end
 
   def generate_heatmap_data

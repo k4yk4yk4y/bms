@@ -78,4 +78,7 @@ group :test do
 
   # Database cleaner for managing test data [https://github.com/DatabaseCleaner/database_cleaner]
   gem "database_cleaner-active_record", "~> 2.1"
+
+  # Rails Controller Testing for assigns and render_template [https://github.com/rails/rails-controller-testing]
+  gem "rails-controller-testing", "~> 1.0"
 end

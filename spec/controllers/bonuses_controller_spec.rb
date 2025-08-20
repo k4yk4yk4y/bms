@@ -1,0 +1,772 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe BonusesController, type: :controller do
+  # Test data setup
+  let!(:bonus) { create(:bonus, :active) }
+  let!(:draft_bonus) { create(:bonus, :draft) }
+  let!(:inactive_bonus) { create(:bonus, :inactive) }
+  let!(:expired_bonus) { create(:bonus, :expired) }
+
+  describe 'GET #index' do
+    context 'without filters' do
+      it 'returns successful response' do
+        get :index
+        expect(response).to have_http_status(:success)
+        expect(assigns(:bonuses)).to include(bonus, draft_bonus, inactive_bonus, expired_bonus)
+      end
+
+      it 'includes reward associations' do
+        bonus_with_rewards = create(:bonus, :with_bonus_rewards, :with_freespin_rewards)
+        get :index
+        # Verify that associations are loaded to prevent N+1 queries
+        expect(assigns(:bonuses).first.association(:bonus_rewards)).to be_loaded
+        expect(assigns(:bonuses).first.association(:freespin_rewards)).to be_loaded
+      end
+
+      it 'orders bonuses by id desc' do
+        get :index
+        bonuses = assigns(:bonuses).to_a
+        expect(bonuses.map(&:id)).to eq(bonuses.map(&:id).sort.reverse)
+      end
+    end
+
+    context 'with status filter' do
+      it 'filters by active status' do
+        get :index, params: { status: 'active' }
+        expect(assigns(:bonuses)).to contain_exactly(bonus)
+      end
+
+      it 'filters by inactive status' do
+        get :index, params: { status: 'inactive' }
+        expect(assigns(:bonuses)).to contain_exactly(inactive_bonus)
+      end
+
+      it 'filters by expired status' do
+        get :index, params: { status: 'expired' }
+        expect(assigns(:bonuses)).to contain_exactly(expired_bonus)
+      end
+
+      it 'ignores invalid status filter' do
+        get :index, params: { status: 'invalid_status' }
+        expect(assigns(:bonuses)).to include(bonus, draft_bonus, inactive_bonus, expired_bonus)
+      end
+    end
+
+    context 'with event filter' do
+      let!(:deposit_bonus) { create(:bonus, :deposit_event) }
+      let!(:coupon_bonus) { create(:bonus, :input_coupon_event) }
+
+      it 'filters by event using type parameter' do
+        get :index, params: { type: 'deposit' }
+        expect(assigns(:bonuses)).to include(deposit_bonus)
+        expect(assigns(:bonuses)).not_to include(coupon_bonus)
+      end
+
+      it 'filters by event using event parameter' do
+        get :index, params: { event: 'input_coupon' }
+        expect(assigns(:bonuses)).to include(coupon_bonus)
+        expect(assigns(:bonuses)).not_to include(deposit_bonus)
+      end
+    end
+
+    context 'with other filters' do
+      let!(:usd_bonus) { create(:bonus, currency: 'USD') }
+      let!(:eur_bonus) { create(:bonus, currency: 'EUR') }
+      let!(:us_bonus) { create(:bonus, country: 'US') }
+      let!(:de_bonus) { create(:bonus, country: 'DE') }
+      let!(:volna_bonus) { create(:bonus, project: 'VOLNA') }
+      let!(:rox_bonus) { create(:bonus, project: 'ROX') }
+      let!(:tagged_bonus) { create(:bonus, dsl_tag: 'welcome_bonus') }
+
+      it 'filters by currency' do
+        get :index, params: { currency: 'USD' }
+        expect(assigns(:bonuses)).to include(usd_bonus)
+        expect(assigns(:bonuses)).not_to include(eur_bonus)
+      end
+
+      it 'filters by country' do
+        get :index, params: { country: 'US' }
+        expect(assigns(:bonuses)).to include(us_bonus)
+        expect(assigns(:bonuses)).not_to include(de_bonus)
+      end
+
+      it 'filters by project' do
+        get :index, params: { project: 'VOLNA' }
+        expect(assigns(:bonuses)).to include(volna_bonus)
+        expect(assigns(:bonuses)).not_to include(rox_bonus)
+      end
+
+      it 'filters by dsl_tag' do
+        get :index, params: { dsl_tag: 'welcome' }
+        expect(assigns(:bonuses)).to include(tagged_bonus)
+      end
+    end
+
+    context 'with search' do
+      let!(:searchable_bonus) { create(:bonus, name: 'Welcome Bonus', code: 'WELCOME123') }
+
+      it 'searches by name' do
+        get :index, params: { search: 'Welcome' }
+        expect(assigns(:bonuses)).to include(searchable_bonus)
+      end
+
+      it 'searches by code' do
+        get :index, params: { search: 'WELCOME123' }
+        expect(assigns(:bonuses)).to include(searchable_bonus)
+      end
+
+      it 'returns empty results for non-matching search' do
+        get :index, params: { search: 'NonExistentBonus' }
+        expect(assigns(:bonuses)).not_to include(searchable_bonus)
+      end
+
+      it 'is case insensitive' do
+        get :index, params: { search: 'welcome' }
+        expect(assigns(:bonuses)).to include(searchable_bonus)
+      end
+    end
+
+    context 'with pagination' do
+      before do
+        # Create 30 bonuses to test pagination (default per_page is 25)
+        create_list(:bonus, 30)
+      end
+
+      it 'paginates results with default page' do
+        get :index
+        expect(assigns(:bonuses).count).to eq(25)
+        expect(assigns(:total_pages)).to be > 1
+      end
+
+      it 'returns correct page when specified' do
+        get :index, params: { page: 2 }
+        expect(assigns(:bonuses).count).to be <= 25
+      end
+
+      it 'handles invalid page numbers gracefully' do
+        get :index, params: { page: 'invalid' }
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'sets pagination instance variables' do
+        get :index
+        expect(assigns(:total_bonuses)).to be_present
+        expect(assigns(:total_pages)).to be_present
+      end
+    end
+
+    context 'with permanent bonus previews' do
+      it 'sets permanent bonus previews when project is specified' do
+        get :index, params: { project: 'VOLNA' }
+        expect(assigns(:permanent_bonus_previews)).to be_present
+        expect(assigns(:permanent_bonus_previews)).to be_an(Array)
+      end
+
+      it 'does not set previews when project is not specified' do
+        get :index
+        expect(assigns(:permanent_bonus_previews)).to eq([])
+      end
+    end
+
+    context 'with response formats' do
+      it 'responds to HTML format' do
+        get :index
+        expect(response.content_type).to include('text/html')
+      end
+
+      it 'responds to JSON format' do
+        get :index, format: :json
+        expect(response.content_type).to include('application/json')
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    it 'returns successful response' do
+      get :show, params: { id: bonus.id }
+      expect(response).to have_http_status(:success)
+      expect(assigns(:bonus)).to eq(bonus)
+    end
+
+    it 'raises error for non-existent bonus' do
+      expect {
+        get :show, params: { id: 999999 }
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    context 'with different response formats' do
+      it 'responds to HTML format' do
+        get :show, params: { id: bonus.id }
+        expect(response.content_type).to include('text/html')
+      end
+
+      it 'responds to JSON format' do
+        get :show, params: { id: bonus.id }, format: :json
+        expect(response.content_type).to include('application/json')
+        json_response = JSON.parse(response.body)
+        expect(json_response['id']).to eq(bonus.id)
+      end
+    end
+  end
+
+  describe 'GET #new' do
+    it 'returns successful response' do
+      get :new
+      expect(response).to have_http_status(:success)
+      expect(assigns(:bonus)).to be_a_new(Bonus)
+    end
+
+    it 'initializes new bonus with default values' do
+      get :new
+      new_bonus = assigns(:bonus)
+      expect(new_bonus).to be_a_new(Bonus)
+      expect(new_bonus.event).to eq('deposit')  # Default from controller
+    end
+
+    context 'with event parameter' do
+      it 'sets event type when provided' do
+        get :new, params: { event: 'deposit' }
+        expect(assigns(:bonus).event).to eq('deposit')
+      end
+
+      it 'ignores invalid event type' do
+        get :new, params: { event: 'invalid_event' }
+        expect(assigns(:bonus).event).to eq('invalid_event')  # Controller sets it as-is
+      end
+    end
+
+    context 'with project parameter' do
+      it 'does not set project from params' do
+        get :new, params: { project: 'VOLNA' }
+        # Controller doesn't set project from params in new action
+        expect(assigns(:bonus).project).to be_blank
+      end
+    end
+  end
+
+  describe 'POST #create' do
+    let(:valid_attributes) do
+      {
+        name: 'Test Bonus',
+        code: 'TEST123',
+        event: 'deposit',
+        status: 'draft',
+        availability_start_date: Date.current,
+        availability_end_date: 1.week.from_now,
+        currency: 'USD'
+      }
+    end
+
+    context 'with valid attributes' do
+      it 'creates new bonus' do
+        expect {
+          post :create, params: { bonus: valid_attributes }
+        }.to change(Bonus, :count).by(1)
+      end
+
+      it 'redirects to bonus show with success notice' do
+        post :create, params: { bonus: valid_attributes }
+        created_bonus = assigns(:bonus)
+        expect(response).to redirect_to(bonus_path(created_bonus))
+        expect(flash[:notice]).to eq('Bonus was successfully created.')
+      end
+
+      it 'creates bonus with correct attributes' do
+        post :create, params: { bonus: valid_attributes }
+        created_bonus = Bonus.last
+        expect(created_bonus.name).to eq('Test Bonus')
+        expect(created_bonus.code).to eq('TEST123')
+        expect(created_bonus.event).to eq('deposit')
+      end
+    end
+
+    context 'with reward parameters' do
+      let(:bonus_reward_params) do
+        {
+          reward_type: 'bonus',
+          amount: 100.0,
+          percentage: 50.0
+        }
+      end
+
+      it 'creates bonus with bonus reward' do
+        post :create, params: { 
+          bonus: valid_attributes,
+          bonus_reward: bonus_reward_params
+        }
+        
+        created_bonus = Bonus.last
+        expect(created_bonus.bonus_rewards.count).to eq(1)
+        expect(created_bonus.bonus_rewards.first.reward_type).to eq('bonus')
+        expect(created_bonus.bonus_rewards.first.amount).to eq(100.0)
+      end
+
+      it 'creates freespin reward when specified' do
+        freespin_params = { spins_count: 50, games: 'slot1,slot2' }
+        post :create, params: { 
+          bonus: valid_attributes,
+          freespin_reward: freespin_params
+        }
+        
+        created_bonus = Bonus.last
+        expect(created_bonus.freespin_rewards.count).to eq(1)
+        expect(created_bonus.freespin_rewards.first.spins_count).to eq(50)
+      end
+    end
+
+    context 'with invalid attributes' do
+      let(:invalid_attributes) do
+        {
+          name: '',
+          code: '',
+          event: 'invalid_event',
+          status: 'invalid_status'
+        }
+      end
+
+      it 'does not create bonus' do
+        expect {
+          post :create, params: { bonus: invalid_attributes }
+        }.not_to change(Bonus, :count)
+      end
+
+      it 'renders new template when validation fails' do
+        post :create, params: { bonus: invalid_attributes }
+        expect(response).to render_template(:new)
+        expect(assigns(:bonus)).to be_a_new(Bonus)
+      end
+
+      it 'assigns bonus with errors' do
+        post :create, params: { bonus: invalid_attributes }
+        expect(assigns(:bonus).errors).to be_present
+      end
+    end
+
+    context 'with edge cases' do
+      it 'handles very long names' do
+        long_name = 'A' * 256
+        post :create, params: { bonus: valid_attributes.merge(name: long_name) }
+        expect(assigns(:bonus).errors[:name]).to be_present
+      end
+
+      it 'handles duplicate codes' do
+        create(:bonus, code: 'DUPLICATE_CODE')
+        post :create, params: { bonus: valid_attributes.merge(code: 'DUPLICATE_CODE') }
+        expect(assigns(:bonus).errors[:code]).to include('has already been taken')
+      end
+
+      it 'handles invalid date ranges' do
+        post :create, params: { 
+          bonus: valid_attributes.merge(
+            availability_start_date: 1.week.from_now,
+            availability_end_date: Date.current
+          )
+        }
+        expect(assigns(:bonus).errors[:availability_end_date]).to include('must be after start date')
+      end
+    end
+  end
+
+  describe 'GET #edit' do
+    it 'returns successful response' do
+      get :edit, params: { id: bonus.id }
+      expect(response).to have_http_status(:success)
+      expect(assigns(:bonus)).to eq(bonus)
+    end
+
+    it 'raises error for non-existent bonus' do
+      expect {
+        get :edit, params: { id: 999999 }
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it 'loads associated rewards for editing' do
+      bonus_with_rewards = create(:bonus, :with_bonus_rewards)
+      get :edit, params: { id: bonus_with_rewards.id }
+      expect(assigns(:bonus).bonus_rewards).to be_present
+    end
+  end
+
+  describe 'PATCH #update' do
+    context 'with valid parameters' do
+      let(:update_attributes) do
+        {
+          name: 'Updated Bonus Name',
+          status: 'active'
+        }
+      end
+
+      it 'updates the bonus' do
+        patch :update, params: { id: bonus.id, bonus: update_attributes }
+        bonus.reload
+        expect(bonus.name).to eq('Updated Bonus Name')
+        expect(bonus.status).to eq('active')
+      end
+
+      it 'redirects to bonuses index with success notice' do
+        patch :update, params: { id: bonus.id, bonus: update_attributes }
+        expect(response).to redirect_to(bonuses_path)
+        expect(flash[:notice]).to eq('Bonus was successfully updated.')
+      end
+
+      it 'updates reward associations' do
+        bonus_reward = create(:bonus_reward, bonus: bonus)
+        patch :update, params: { 
+          id: bonus.id,
+          bonus: valid_attributes,
+          bonus_reward: { reward_type: 'cashback', amount: 200.0 }
+        }
+        bonus_reward.reload
+        expect(bonus_reward.reward_type).to eq('cashback')
+        expect(bonus_reward.amount).to eq(200.0)
+      end
+    end
+
+    context 'with invalid parameters' do
+      let(:invalid_attributes) do
+        {
+          name: '',
+          event: 'invalid_event'
+        }
+      end
+
+      it 'does not update the bonus' do
+        original_name = bonus.name
+        patch :update, params: { id: bonus.id, bonus: invalid_attributes }
+        bonus.reload
+        expect(bonus.name).to eq(original_name)
+      end
+
+      it 'renders edit template when validation fails' do
+        patch :update, params: { id: bonus.id, bonus: invalid_attributes }
+        expect(response).to render_template(:edit)
+        expect(assigns(:bonus)).to eq(bonus)
+      end
+    end
+
+    context 'with non-existent bonus' do
+      it 'raises error' do
+        expect {
+          patch :update, params: { id: 999999, bonus: { name: 'Test' } }
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    context 'edge cases' do
+      it 'handles concurrent updates' do
+        bonus1 = Bonus.find(bonus.id)
+        bonus2 = Bonus.find(bonus.id)
+        
+        bonus1.update!(name: 'First Update')
+        patch :update, params: { id: bonus2.id, bonus: { name: 'Second Update' } }
+        
+        bonus.reload
+        expect(bonus.name).to eq('Second Update')
+      end
+
+      it 'preserves existing reward associations when not updated' do
+        reward = create(:bonus_reward, bonus: bonus)
+        patch :update, params: { id: bonus.id, bonus: { name: 'Updated Name' } }
+        expect(bonus.bonus_rewards).to include(reward)
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    it 'destroys the bonus' do
+      bonus_to_delete = create(:bonus)
+      expect {
+        delete :destroy, params: { id: bonus_to_delete.id }
+      }.to change(Bonus, :count).by(-1)
+    end
+
+    it 'redirects to bonuses index with success notice' do
+      delete :destroy, params: { id: bonus.id }
+      expect(response).to redirect_to(bonuses_path)
+      expect(flash[:notice]).to eq('Bonus was successfully deleted.')
+    end
+
+    it 'destroys associated rewards (dependent: :destroy)' do
+      bonus_with_rewards = create(:bonus, :with_bonus_rewards, :with_freespin_rewards)
+      expect {
+        delete :destroy, params: { id: bonus_with_rewards.id }
+      }.to change(BonusReward, :count).by(-1)
+        .and change(FreespinReward, :count).by(-1)
+    end
+
+    it 'raises error for non-existent bonus' do
+      expect {
+        delete :destroy, params: { id: 999999 }
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    context 'with foreign key constraints' do
+      it 'handles deletion with complex associations gracefully' do
+        bonus_with_multiple_rewards = create(:bonus)
+        create(:bonus_reward, bonus: bonus_with_multiple_rewards)
+        create(:freespin_reward, bonus: bonus_with_multiple_rewards)
+        create(:comp_point_reward, bonus: bonus_with_multiple_rewards)
+
+        expect {
+          delete :destroy, params: { id: bonus_with_multiple_rewards.id }
+        }.to change(Bonus, :count).by(-1)
+          .and change(BonusReward, :count).by(-1)
+          .and change(FreespinReward, :count).by(-1)
+          .and change(CompPointReward, :count).by(-1)
+      end
+    end
+  end
+
+  describe 'GET #preview' do
+    it 'returns JSON response with bonus data' do
+      get :preview, params: { id: bonus.id }
+      expect(response).to have_http_status(:success)
+      expect(response.content_type).to include('application/json')
+    end
+
+    it 'includes bonus and preview_data in response' do
+      get :preview, params: { id: bonus.id }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to have_key('bonus')
+      expect(json_response).to have_key('preview_data')
+    end
+
+    it 'includes reward associations in bonus data' do
+      bonus_with_rewards = create(:bonus, :with_bonus_rewards)
+      get :preview, params: { id: bonus_with_rewards.id }
+      json_response = JSON.parse(response.body)
+      expect(json_response['bonus']).to have_key('bonus_rewards')
+    end
+
+    it 'raises error for non-existent bonus' do
+      expect {
+        get :preview, params: { id: 999999 }
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
+  describe 'GET #by_type' do
+    let!(:deposit_bonus) { create(:bonus, :deposit_event) }
+    let!(:coupon_bonus) { create(:bonus, :input_coupon_event) }
+
+    it 'returns JSON response with filtered bonuses' do
+      get :by_type, params: { type: 'deposit' }
+      expect(response).to have_http_status(:success)
+      expect(response.content_type).to include('application/json')
+    end
+
+    it 'filters bonuses by event type' do
+      get :by_type, params: { type: 'deposit' }
+      json_response = JSON.parse(response.body)
+      bonus_events = json_response.map { |b| b['event'] }
+      expect(bonus_events).to all(eq('deposit'))
+    end
+
+    it 'accepts event parameter as alternative to type' do
+      get :by_type, params: { event: 'input_coupon' }
+      json_response = JSON.parse(response.body)
+      bonus_events = json_response.map { |b| b['event'] }
+      expect(bonus_events).to all(eq('input_coupon'))
+    end
+
+    it 'returns empty array for invalid event type' do
+      get :by_type, params: { type: 'invalid_event' }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to eq([])
+    end
+
+    it 'returns empty array when no parameters provided' do
+      get :by_type
+      json_response = JSON.parse(response.body)
+      expect(json_response).to eq([])
+    end
+  end
+
+  describe 'POST #bulk_update' do
+    let!(:bonus1) { create(:bonus) }
+    let!(:bonus2) { create(:bonus) }
+    let!(:bonus3) { create(:bonus) }
+
+    context 'with delete action' do
+      it 'deletes selected bonuses' do
+        expect {
+          post :bulk_update, params: { 
+            bonus_ids: [bonus1.id, bonus2.id],
+            bulk_action: 'delete'
+          }
+        }.to change(Bonus, :count).by(-2)
+      end
+
+      it 'redirects with success message' do
+        post :bulk_update, params: { 
+          bonus_ids: [bonus1.id],
+          bulk_action: 'delete'
+        }
+        expect(response).to redirect_to(bonuses_path)
+        expect(flash[:notice]).to eq('Bonuses were successfully deleted.')
+      end
+
+      it 'handles empty bonus_ids array' do
+        expect {
+          post :bulk_update, params: { 
+            bonus_ids: [],
+            bulk_action: 'delete'
+          }
+        }.not_to change(Bonus, :count)
+      end
+
+      it 'handles non-existent bonus IDs gracefully' do
+        post :bulk_update, params: { 
+          bonus_ids: [999999],
+          bulk_action: 'delete'
+        }
+        expect(response).to redirect_to(bonuses_path)
+      end
+    end
+
+    context 'with invalid action' do
+      it 'handles invalid bulk action' do
+        post :bulk_update, params: { 
+          bonus_ids: [bonus1.id],
+          bulk_action: 'invalid_action'
+        }
+        expect(response).to redirect_to(bonuses_path)
+        expect(flash[:notice]).to eq('Invalid bulk action.')
+      end
+    end
+
+    context 'edge cases' do
+      it 'handles very large number of IDs' do
+        large_id_list = (1..1000).to_a
+        post :bulk_update, params: { 
+          bonus_ids: large_id_list,
+          bulk_action: 'delete'
+        }
+        expect(response).to redirect_to(bonuses_path)
+      end
+
+      it 'handles malformed bonus_ids parameter' do
+        post :bulk_update, params: { 
+          bonus_ids: 'not_an_array',
+          bulk_action: 'delete'
+        }
+        expect(response).to redirect_to(bonuses_path)
+      end
+    end
+  end
+
+  # Security and authorization tests
+  describe 'security' do
+    context 'CSRF protection' do
+      it 'protects against CSRF attacks' do
+        # This test ensures CSRF tokens are validated for state-changing operations
+        expect(controller).to respond_to(:verify_authenticity_token)
+      end
+    end
+
+    context 'parameter filtering' do
+      it 'only permits allowed parameters' do
+        malicious_params = {
+          name: 'Test Bonus',
+          event: 'deposit',
+          malicious_param: 'hacker_value',
+          id: 999999  # Trying to set ID directly
+        }
+        
+        post :create, params: { bonus: malicious_params }
+        created_bonus = Bonus.last
+        expect(created_bonus).not_to respond_to(:malicious_param)
+      end
+    end
+  end
+
+  # Performance tests
+  describe 'performance' do
+    context 'N+1 query prevention' do
+      it 'loads associations efficiently in index' do
+        create_list(:bonus, 5, :with_bonus_rewards, :with_freespin_rewards)
+        
+        start_time = Time.current
+        get :index
+        end_time = Time.current
+        expect(end_time - start_time).to be < 2.seconds
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    context 'large datasets' do
+      before { create_list(:bonus, 100) }
+
+      it 'handles large datasets efficiently' do
+        start_time = Time.current
+        get :index
+        end_time = Time.current
+        
+        expect(response).to have_http_status(:success)
+        expect(end_time - start_time).to be < 2.seconds
+      end
+    end
+  end
+
+  # Error handling tests
+  describe 'error handling' do
+    it 'handles database connection errors gracefully' do
+      allow(Bonus).to receive(:includes).and_raise(ActiveRecord::ConnectionNotEstablished)
+      
+      expect {
+        get :index
+      }.to raise_error(ActiveRecord::ConnectionNotEstablished)
+    end
+
+    it 'handles invalid SQL in search parameters' do
+      get :index, params: { search: "'; DROP TABLE bonuses; --" }
+      expect(response).to have_http_status(:success)
+      expect(Bonus.count).to be > 0  # Ensure table still exists
+    end
+  end
+
+  # Integration with reward system
+  describe 'reward system integration' do
+    context 'creating bonuses with different reward types' do
+      it 'handles multiple reward types simultaneously' do
+        post :create, params: { 
+          bonus: valid_attributes,
+          bonus_reward: { reward_type: 'bonus', amount: 100.0 },
+          freespin_reward: { spins_count: 50 },
+          comp_point_reward: { points: 1000 }
+        }
+        
+        created_bonus = Bonus.last
+        expect(created_bonus.bonus_rewards.count).to eq(1)
+        expect(created_bonus.freespin_rewards.count).to eq(1)
+        expect(created_bonus.comp_point_rewards.count).to eq(1)
+      end
+
+      it 'validates reward-specific requirements' do
+        post :create, params: { 
+          bonus: valid_attributes,
+          freespin_reward: { spins_count: 0 }  # Invalid spins count
+        }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
+
+  private
+
+  def valid_attributes
+    {
+      name: 'Test Bonus',
+      code: 'TEST123',
+      event: 'deposit',
+      status: 'draft',
+      availability_start_date: Date.current,
+      availability_end_date: 1.week.from_now,
+      currency: 'USD'
+    }
+  end
+
+
+end

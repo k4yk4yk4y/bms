@@ -76,7 +76,7 @@
 
     </div>
 
-    <!-- Note: Usage Limitations (no_more, totally_no_more) are now configured in Basic Information -->
+    <!-- Note: Usage Limitations are now configured in Basic Information -->
   </div>
 
   <div class="col-md-6">
@@ -96,16 +96,6 @@
 
     </div>
 
-    <!-- Note: Currencies, Groups, and Minimum Deposit are now configured in Basic Information -->
-
-    <!-- Tags -->
-    <div class="mb-3">
-      <label for="bonus_buy_reward_tags" class="form-label">Теги (tags)</label>
-      <input type="text" class="form-control" name="bonus_buy_reward[tags]" id="bonus_buy_reward_tags" 
-              value="<%= existing_bonus_buy&.tags&.join(', ') %>">
-
-    </div>
-
     <!-- Stag -->
     <div class="mb-3">
       <label for="bonus_buy_reward_stag" class="form-label">Stag</label>
@@ -114,7 +104,7 @@
 
     </div>
 
-    <!-- Note: Wagering Strategy is now configured in Basic Information -->
+    <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are now configured in Basic Information -->
   </div>
 </div>
 

@@ -33,9 +33,10 @@ class BonusesController < ApplicationController
 
     # Search by name or code
     if params[:search].present?
+      search_term = "%#{params[:search]}%"
       @bonuses = @bonuses.where(
-        "name LIKE :search OR code LIKE :search",
-        search: "%#{params[:search]}%"
+        "LOWER(name) LIKE LOWER(?) OR LOWER(code) LIKE LOWER(?)",
+        search_term, search_term
       )
     end
 

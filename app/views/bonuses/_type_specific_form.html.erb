@@ -180,9 +180,6 @@
     freespinRewardIndex++;
     
     hideNoRewardsMessage();
-    
-    // Инициализируем поля ставок для новой формы
-    initializeCurrencyBetLevels();
   }
 
   function addBonusBuyReward() {
@@ -315,41 +312,7 @@
 
               </div>
 
-              <!-- Currencies -->
-              <div class="mb-3">
-                <label class="form-label">Валюты (currencies)</label>
-                <select class="form-select" name="bonus_rewards[${index}][currencies][]" multiple>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="BTC">BTC</option>
-                  <option value="ETH">ETH</option>
-                </select>
-
-              </div>
-
-              <!-- Min -->
-              <div class="mb-3">
-                <label class="form-label">Минимальный депозит (min)</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][min]" step="0.01" min="0">
-                  <span class="input-group-text">USD</span>
-                </div>
-              </div>
-
-              <!-- Groups -->
-              <div class="mb-3">
-                <label class="form-label">Группы пользователей (groups)</label>
-                <input type="text" class="form-control" name="bonus_rewards[${index}][groups]" >
-
-              </div>
-
-              <!-- Tags -->
-              <div class="mb-3">
-                <label class="form-label">Теги (tags)</label>
-                <input type="text" class="form-control" name="bonus_rewards[${index}][tags]" >
-
-              </div>
+              <!-- Note: Currencies, Groups, Tags, and Minimum Deposit are configured in Basic Information -->
 
               <!-- User can have duplicates -->
               <div class="mb-3">
@@ -361,40 +324,14 @@
                 </div>
               </div>
 
-              <!-- No More -->
-              <div class="mb-3">
-                <label class="form-label">Ограничение (no_more)</label>
-                <input type="text" class="form-control" name="bonus_rewards[${index}][no_more]" >
-
-              </div>
-
-              <!-- Totally No More -->
-              <div class="mb-3">
-                <label class="form-label">Общий лимит (totally_no_more)</label>
-                <input type="number" class="form-control" name="bonus_rewards[${index}][totally_no_more]" min="1" >
-
-              </div>
-
               <!-- Stag -->
               <div class="mb-3">
                 <label class="form-label">Stag (stag)</label>
                 <input type="text" class="form-control" name="bonus_rewards[${index}][stag]" >
-                <!--Специальный тег</div>
+
               </div>
 
-              <!-- Wagering Strategy -->
-              <div class="mb-3">
-                <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
-                <select class="form-select" name="bonus_rewards[${index}][wagering_strategy]">
-                  <option value="">Выберите стратегию</option>
-                  <option value="wager">Wager</option>
-                  <option value="wager_win">Wager Win</option>
-                  <option value="wager_free">Wager Free</option>
-                  <option value="insurance_bonus">Insurance Bonus</option>
-                  <option value="wager_real">Wager Real</option>
-                </select>
-                <!--Метод расчета отыгрыша</div>
-              </div>
+              <!-- Note: Usage Limitations and Wagering Strategy are configured in Basic Information -->
             </div>
           </div>
 
@@ -600,30 +537,15 @@
 
               </div>
 
-                                      <!-- Currencies -->
-                        <div class="mb-3">
-                          <label class="form-label">Валюты (currencies)</label>
-                          <select class="form-select" name="freespin_rewards[${index}][currencies][]" multiple onchange="updateCurrencyBetLevels(${index})">
-                            <option value="USD" selected>USD</option>
-                            <option value="EUR" selected>EUR</option>
-                            <option value="GBP" selected>GBP</option>
-                            <option value="RUB" selected>RUB</option>
-                            <option value="UAH" selected>UAH</option>
-                            <option value="KZT" selected>KZT</option>
-                            <option value="BTC" selected>BTC</option>
-                            <option value="ETH" selected>ETH</option>
-                          </select>
+              <!-- Bet Level -->
+              <div class="mb-3">
+                <label class="form-label">Уровень ставки (bet_level)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" step="0.01" min="0">
+                  <span class="input-group-text">€</span>
+                </div>
 
-                        </div>
-
-                        <!-- Currency Bet Levels -->
-                        <div class="mb-3">
-                          <label class="form-label">Ставки по валютам (currency_bet_levels)</label>
-                          <div id="currency-bet-levels-${index}">
-
-                          </div>
-
-                        </div>
+              </div>
 
               <!-- Max Win -->
               <div class="mb-3">
@@ -635,19 +557,7 @@
                 <!--Фиксированная сумма (500) или множитель (x10)</div>
               </div>
 
-              <!-- No More -->
-              <div class="mb-3">
-                <label class="form-label">Ограничение (no_more)</label>
-                <input type="text" class="form-control" name="freespin_rewards[${index}][no_more]" >
-
-              </div>
-
-              <!-- Totally No More -->
-              <div class="mb-3">
-                <label class="form-label">Общий лимит (totally_no_more)</label>
-                <input type="number" class="form-control" name="freespin_rewards[${index}][totally_no_more]" min="1" >
-
-              </div>
+              <!-- Note: Usage Limitations are configured in Basic Information -->
             </div>
             
             <div class="col-md-6">
@@ -667,50 +577,14 @@
 
 
 
-              <!-- Min -->
-              <div class="mb-3">
-                <label class="form-label">Минимальный депозит (min)</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" name="freespin_rewards[${index}][min]" step="0.01" min="0">
-                  <span class="input-group-text">€</span>
-                </div>
-                <!--Минимальная сумма депозита для активации</div>
-              </div>
-
-              <!-- Groups -->
-              <div class="mb-3">
-                <label class="form-label">Группы (groups)</label>
-                <input type="text" class="form-control" name="freespin_rewards[${index}][groups]" >
-                <!--Целевые группы пользователей через запятую</div>
-              </div>
-
-              <!-- Tags -->
-              <div class="mb-3">
-                <label class="form-label">Теги (tags)</label>
-                <input type="text" class="form-control" name="freespin_rewards[${index}][tags]" >
-                <!--Теги для классификации через запятую</div>
-              </div>
-
               <!-- Stag -->
               <div class="mb-3">
                 <label class="form-label">Stag (stag)</label>
                 <input type="text" class="form-control" name="freespin_rewards[${index}][stag]" >
-                <!--Специальный тег</div>
+
               </div>
 
-              <!-- Wagering Strategy -->
-              <div class="mb-3">
-                <label class="form-label">Стратегия отыгрыша (wagering_strategy)</label>
-                <select class="form-select" name="freespin_rewards[${index}][wagering_strategy]">
-                  <option value="">Выберите стратегию</option>
-                  <option value="wager">Wager</option>
-                  <option value="wager_win">Wager Win</option>
-                  <option value="wager_free">Wager Free</option>
-                  <option value="insurance_bonus">Insurance Bonus</option>
-                  <option value="wager_real">Wager Real</option>
-                </select>
-                <!--Метод расчета отыгрыша</div>
-              </div>
+              <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
             </div>
           </div>
 
@@ -1001,66 +875,7 @@
     }
   }
 
-  function updateCurrencyBetLevels(index) {
-    const currencySelect = document.querySelector(`select[name="freespin_rewards[${index}][currencies][]"]`);
-    const betLevelsContainer = document.getElementById(`currency-bet-levels-${index}`);
-    
-    if (!currencySelect || !betLevelsContainer) return;
-    
-    // Получаем все выбранные валюты
-    const selectedCurrencies = Array.from(currencySelect.selectedOptions).map(option => option.value);
-    
-    if (selectedCurrencies.length === 0) {
-      betLevelsContainer.innerHTML = `
-        <div class="alert-removed">
-          Сначала выберите валюты выше, затем укажите ставки для каждой валюты
-        </div>
-      `;
-      return;
-    }
-    
-    let html = '';
-    selectedCurrencies.forEach((currency, i) => {
-      html += `
-        <div class="mb-2">
-          <label class="form-label">Ставка для ${currency}</label>
-          <div class="input-group">
-            <input type="number" 
-                   class="form-control" 
-                   name="freespin_rewards[${index}][currency_bet_levels][${currency}]" 
-                   step="0.01" 
-                   min="0" 
-                    
-                   required>
-            <span class="input-group-text">${currency}</span>
-          </div>
-        </div>
-      `;
-    });
-    
-    betLevelsContainer.innerHTML = html;
-  }
 
-  // Инициализация полей ставок при загрузке страницы
-  document.addEventListener('DOMContentLoaded', function() {
-    // Находим все freespin формы и инициализируем их
-    const freespinForms = document.querySelectorAll('[id^="freespin-reward-"]');
-    freespinForms.forEach(form => {
-      const index = form.id.replace('freespin-reward-', '');
-      updateCurrencyBetLevels(index);
-    });
-  });
-
-  // Инициализация полей ставок после добавления новой формы
-  function initializeCurrencyBetLevels() {
-    setTimeout(() => {
-      const freespinForms = document.querySelectorAll('[id^="freespin-reward-"]');
-      freespinForms.forEach(form => {
-        const index = form.id.replace('freespin-reward-', '');
-        updateCurrencyBetLevels(index);
-      });
-    }, 100);
-  }
 
   // Comp Point Rewards Functions
   function addCompPointReward() {
@@ -1172,13 +987,7 @@
                 <!--Специальный тег</div>
               </div>
 
-              <!-- Note about common parameters -->
-              <div class="alert-removed">
-                <small>
-                  Общие параметры:<br>
-                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
-                </small>
-              </div>
+              <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
             </div>
           </div>
         </div>
@@ -1221,13 +1030,7 @@
             </div>
 
             <div class="col-md-6">
-              <!-- Note about common parameters -->
-              <div class="alert-removed">
-                <small>
-                  Общие параметры:<br>
-                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
-                </small>
-              </div>
+              <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
             </div>
           </div>
         </div>
@@ -1284,13 +1087,7 @@
             </div>
 
             <div class="col-md-6">
-              <!-- Note about common parameters -->
-              <div class="alert-removed">
-                <small>
-                  Общие параметры:<br>
-                  Ограничения использования, валюты, группы пользователей находятся в разделе "Basic Information".
-                </small>
-              </div>
+              <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
 
               <!-- Information about collect strategy -->
               <div class="alert alert-warning">

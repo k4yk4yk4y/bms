@@ -6,22 +6,23 @@ class Api::V1::BonusesController < ApplicationController
 
   # GET /api/v1/bonuses
   def index
-    @bonuses = Bonus.includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus,
-                             :collect_bonus, :groups_update_bonus, :scheduler_bonus)
+    @bonuses = Bonus.includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
 
     # Apply filters
     @bonuses = apply_filters(@bonuses)
 
     # Pagination
-    page = (params[:page] || 1).to_i
+    page = [ (params[:page] || 1).to_i, 1 ].max  # Ensure page is at least 1
     per_page = [ (params[:per_page] || 20).to_i, 100 ].min
-    offset = (page - 1) * per_page
+    per_page = [ per_page, 1 ].max  # Ensure per_page is at least 1
+    offset = [ (page - 1) * per_page, 0 ].max  # Ensure offset is not negative
 
     total_count = @bonuses.count
     @bonuses = @bonuses.limit(per_page).offset(offset)
 
     render json: {
-      bonuses: @bonuses.as_json(include: bonus_type_associations, except: [ :currency ]),
+              bonuses: @bonuses.as_json(include: bonus_includes, except: [ :currency ]),
       pagination: {
         current_page: page,
         per_page: per_page,
@@ -42,11 +43,13 @@ class Api::V1::BonusesController < ApplicationController
     clean_inappropriate_fields
 
     if @bonus.save
-      update_type_specific_attributes
+      create_rewards_if_provided
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ]), status: :created
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors }, status: :unprocessable_entity unless performed?
   end
 
   # PATCH/PUT /api/v1/bonuses/1
@@ -55,7 +58,7 @@ class Api::V1::BonusesController < ApplicationController
     clean_inappropriate_fields
 
     if @bonus.save
-      update_type_specific_attributes
+      update_rewards_if_provided
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ])
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
@@ -70,30 +73,30 @@ class Api::V1::BonusesController < ApplicationController
 
 
 
-  # GET /api/v1/bonuses/by_type
+  # GET /api/v1/bonuses/by_type  
   def by_type
-    @bonuses = Bonus.by_type(params[:type]) if params[:type].present?
+    @bonuses = Bonus.by_event(params[:type]) if params[:type].present?
     @bonuses ||= Bonus.none
 
-    render json: @bonuses.as_json(include: bonus_type_associations, except: [ :currency ])
+    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   # GET /api/v1/bonuses/active
   def active
     @bonuses = Bonus.active.available_now
-                    .includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus,
-                             :collect_bonus, :groups_update_bonus, :scheduler_bonus)
+                    .includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
 
-    render json: @bonuses.as_json(include: bonus_type_associations, except: [ :currency ])
+    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   # GET /api/v1/bonuses/expired
   def expired
     @bonuses = Bonus.expired
-                    .includes(:deposit_bonus, :input_coupon_bonus, :manual_bonus,
-                             :collect_bonus, :groups_update_bonus, :scheduler_bonus)
+                    .includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
 
-    render json: @bonuses.as_json(include: bonus_type_associations, except: [ :currency ])
+    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   private
@@ -106,91 +109,63 @@ class Api::V1::BonusesController < ApplicationController
 
   def bonus_params
     params.require(:bonus).permit(
-      :name, :code, :bonus_type, :status, :minimum_deposit, :wager,
+      :name, :code, :event, :status, :minimum_deposit, :wager,
       :maximum_winnings, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country, :currency,
-      :project, :dsl_tag, :created_by, :updated_by
+      :project, :dsl_tag, :created_by, :updated_by, :description,
+      :no_more, :totally_no_more, currencies: [], groups: [], currency_minimum_deposits: {}
     )
   end
 
   def type_specific_params
-    case @bonus.bonus_type
-    when "deposit"
-      params.require(:deposit_bonus).permit(
-        :deposit_amount_required, :bonus_percentage, :max_bonus_amount,
-        :first_deposit_only, :recurring_eligible
-      ) if params[:deposit_bonus]
-    when "input_coupon"
-      params.require(:input_coupon_bonus).permit(
-        :coupon_code, :usage_limit, :expires_at, :single_use
-      ) if params[:input_coupon_bonus]
-    when "manual"
-      params.require(:manual_bonus).permit(
-        :admin_notes, :approval_required, :auto_apply, :conditions
-      ) if params[:manual_bonus]
-    when "collection"
-      params.require(:collect_bonus).permit(
-        :collection_type, :collection_amount, :collection_frequency,
-        :collection_limit
-      ) if params[:collect_bonus]
-    when "groups_update"
-      params.require(:groups_update_bonus).permit(
-        :target_groups, :update_type, :update_parameters, :batch_size
-      ) if params[:groups_update_bonus]
-    when "scheduler"
-      params.require(:scheduler_bonus).permit(
-        :schedule_type, :cron_expression, :next_run_at, :max_executions
-      ) if params[:scheduler_bonus]
+    # Return empty hash since we now use reward associations instead of type-specific params
+    {}
+  end
+
+  def create_rewards_if_provided
+    # Create bonus reward if parameters provided
+    if params[:bonus_reward].present?
+      reward = @bonus.bonus_rewards.build
+      reward.reward_type = 'bonus'
+      reward.amount = params[:bonus_reward][:amount]
+      reward.percentage = params[:bonus_reward][:percentage]
+      reward.config = params[:bonus_reward][:config] || {}
+      reward.save
+    end
+
+    # Create freespin reward if parameters provided  
+    if params[:freespin_reward].present?
+      reward = @bonus.freespin_rewards.build
+      reward.spins_count = params[:freespin_reward][:spins_count]
+      reward.game_restrictions = params[:freespin_reward][:game_restrictions]
+      reward.config = params[:freespin_reward][:config] || {}
+      reward.save
     end
   end
 
-  def update_type_specific_attributes
-    type_params = type_specific_params
-    return unless type_params
-
-    case @bonus.bonus_type
-    when "deposit"
-      @bonus.deposit_bonus.update(type_params)
-    when "input_coupon"
-      @bonus.input_coupon_bonus.update(type_params)
-    when "manual"
-      @bonus.manual_bonus.update(type_params)
-    when "collection"
-      @bonus.collect_bonus.update(type_params)
-    when "groups_update"
-      @bonus.groups_update_bonus.update(type_params)
-    when "scheduler"
-      @bonus.scheduler_bonus.update(type_params)
-    end
+  def update_rewards_if_provided
+    # Update or create rewards based on provided parameters
+    create_rewards_if_provided
   end
 
   def bonus_includes
-    case @bonus.bonus_type
-    when "deposit"
-      :deposit_bonus
-    when "input_coupon"
-      :input_coupon_bonus
-    when "manual"
-      :manual_bonus
-    when "collection"
-      :collect_bonus
-    when "groups_update"
-      :groups_update_bonus
-    when "scheduler"
-      :scheduler_bonus
-    else
-      []
-    end
+    # Return all reward associations for JSON inclusion
+    [
+      :bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+      :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards
+    ]
   end
 
   def bonus_type_associations
-    [ :deposit_bonus, :input_coupon_bonus, :manual_bonus,
-     :collect_bonus, :groups_update_bonus, :scheduler_bonus ]
+    [
+      :bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
+      :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards
+    ]
   end
 
   def apply_filters(scope)
-    # Filter by type
-    scope = scope.by_type(params[:type]) if params[:type].present?
+    # Filter by event type
+    scope = scope.by_event(params[:type]) if params[:type].present?
 
     # Filter by status
     case params[:status]
@@ -235,11 +210,12 @@ class Api::V1::BonusesController < ApplicationController
   end
 
   def clean_inappropriate_fields
-    # Очищаем minimum_deposit для типов бонусов, которые его не используют
-    non_deposit_types = %w[input_coupon manual collection groups_update scheduler deposit]
+    # Очищаем minimum_deposit для событий, которые его не используют  
+    non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
-    if non_deposit_types.include?(@bonus.bonus_type)
+    if non_deposit_events.include?(@bonus.event)
       @bonus.minimum_deposit = nil
+      @bonus.currency_minimum_deposits = {}
     end
   end
 end
