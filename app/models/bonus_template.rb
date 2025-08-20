@@ -21,6 +21,9 @@ class BonusTemplate < ApplicationRecord
   # minimum_deposit validation removed
   validate :valid_currency_minimum_deposits
 
+  # Callbacks
+  before_destroy :check_dependencies
+
   # Scopes
   scope :by_dsl_tag, ->(dsl_tag) { where(dsl_tag: dsl_tag) }
   scope :by_project, ->(project) { where(project: project) }
@@ -167,6 +170,12 @@ class BonusTemplate < ApplicationRecord
   end
 
   private
+
+  def check_dependencies
+    # Здесь можно добавить проверку зависимостей, если они появятся в будущем
+    # Например, проверка на то, что шаблон не используется в активных бонусах
+    true
+  end
 
   def valid_decimal_fields
     # minimum_deposit validation removed

@@ -60,17 +60,20 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
-                  <%= form.label :currencies, class: "form-label" %>
-                  <%= form.text_field :currencies, class: "form-control", placeholder: "USD, EUR, GBP (comma separated)" %>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <%= form.label :currency_minimum_deposits, class: "form-label" %>
-                  <%= form.text_field :currency_minimum_deposits, class: "form-control", placeholder: '{"USD": 10, "EUR": 8}' %>
+                  <%= form.label :currencies, "Currencies", class: "form-label" %>
+                  <%= form.select :currencies, 
+                      options_for_select([
+                        ['USD', 'USD'], ['EUR', 'EUR'], ['GBP', 'GBP'], ['RUB', 'RUB'],
+                        ['UAH', 'UAH'], ['KZT', 'KZT'], ['BTC', 'BTC'], ['ETH', 'ETH']
+                      ], @bonus_template.currencies), 
+                      {}, { class: "form-select", multiple: true, 
+                           style: "min-height: 120px;" } %>
                 </div>
               </div>
             </div>
+
+            <!-- Currency Minimum Deposits -->
+            <%= render "currency_minimum_deposits", form: form, bonus_template: @bonus_template %>
 
             <div class="row">
               <div class="col-md-6">
