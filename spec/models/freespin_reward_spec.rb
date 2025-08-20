@@ -142,61 +142,78 @@ RSpec.describe FreespinReward, type: :model do
 
     describe 'currencies' do
       it 'returns empty array when not set' do
+        freespin_reward.bonus.currencies = []
         expect(freespin_reward.currencies).to eq([])
       end
 
-      it 'sets currencies as array' do
-        freespin_reward.currencies = [ 'USD', 'EUR' ]
-        expect(freespin_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
+      it 'gets currencies from associated bonus' do
+        freespin_reward.bonus.currencies = %w[USD EUR]
+        expect(freespin_reward.currencies).to eq(%w[USD EUR])
       end
 
-      it 'sets single currency as array' do
-        freespin_reward.currencies = 'USD'
-        expect(freespin_reward.config['currencies']).to eq([ 'USD' ])
-      end
-
-      it 'filters nil values' do
-        freespin_reward.currencies = [ 'USD', nil, 'EUR' ]
-        expect(freespin_reward.config['currencies']).to eq([ 'USD', 'EUR' ])
+      it 'returns empty array when bonus currencies is nil' do
+        freespin_reward.bonus.currencies = nil
+        expect(freespin_reward.currencies).to eq([])
       end
     end
 
-    describe 'min_deposit' do
-      it 'sets min_deposit as float' do
-        freespin_reward.min_deposit = '50.5'
-        expect(freespin_reward.config['min']).to eq(50.5)
+    describe 'min_deposit_for_currency' do
+      it 'gets minimum deposit for specific currency from associated bonus' do
+        freespin_reward.bonus.currency_minimum_deposits = { 'USD' => 50.0, 'EUR' => 25.0 }
+        expect(freespin_reward.min_deposit_for_currency('USD')).to eq(50.0)
+        expect(freespin_reward.min_deposit_for_currency('EUR')).to eq(25.0)
       end
 
-      it 'handles nil value' do
-        freespin_reward.min_deposit = nil
-        expect(freespin_reward.config['min']).to be_nil
+      it 'returns nil for currency without minimum deposit' do
+        freespin_reward.bonus.currency_minimum_deposits = { 'USD' => 50.0 }
+        expect(freespin_reward.min_deposit_for_currency('EUR')).to be_nil
+      end
+    end
+
+    describe 'currency_minimum_deposits' do
+      it 'gets currency minimum deposits from associated bonus' do
+        deposits = { 'USD' => 50.0, 'EUR' => 25.0 }
+        freespin_reward.bonus.currency_minimum_deposits = deposits
+        expect(freespin_reward.currency_minimum_deposits).to eq(deposits)
       end
     end
 
     describe 'groups' do
       it 'returns empty array when not set' do
+        freespin_reward.bonus.groups = []
         expect(freespin_reward.groups).to eq([])
       end
 
-      it 'sets groups from comma-separated string' do
-        freespin_reward.groups = 'group1, group2, group3'
-        expect(freespin_reward.config['groups']).to eq([ 'group1', 'group2', 'group3' ])
+      it 'gets groups from associated bonus' do
+        freespin_reward.bonus.groups = %w[VIP Regular]
+        expect(freespin_reward.groups).to eq(%w[VIP Regular])
       end
 
-      it 'filters blank values' do
-        freespin_reward.groups = 'group1, , group3,  '
-        expect(freespin_reward.config['groups']).to eq([ 'group1', 'group3' ])
+      it 'returns empty array when bonus groups is nil' do
+        freespin_reward.bonus.groups = nil
+        expect(freespin_reward.groups).to eq([])
       end
     end
 
     describe 'tags' do
       it 'returns empty array when not set' do
+        freespin_reward.bonus.tags = ''
         expect(freespin_reward.tags).to eq([])
       end
 
-      it 'sets tags from comma-separated string' do
-        freespin_reward.tags = 'tag1, tag2, tag3'
-        expect(freespin_reward.config['tags']).to eq([ 'tag1', 'tag2', 'tag3' ])
+      it 'gets tags from associated bonus' do
+        freespin_reward.bonus.tags = 'new_player, weekend'
+        expect(freespin_reward.tags).to eq(%w[new_player weekend])
+      end
+
+      it 'returns empty array when bonus tags is nil' do
+        freespin_reward.bonus.tags = nil
+        expect(freespin_reward.tags).to eq([])
+      end
+
+      it 'handles tags with extra spaces' do
+        freespin_reward.bonus.tags = '  new_player  ,  weekend  '
+        expect(freespin_reward.tags).to eq(%w[new_player weekend])
       end
     end
   end
@@ -362,36 +379,36 @@ RSpec.describe FreespinReward, type: :model do
 
     describe 'formatted_groups' do
       it 'returns nil when no groups' do
-        freespin_reward.groups = []
+        freespin_reward.bonus.groups = []
         expect(freespin_reward.formatted_groups).to be_nil
       end
 
       it 'joins groups with comma' do
-        freespin_reward.groups = [ 'group1', 'group2' ]
+        freespin_reward.bonus.groups = %w[group1 group2]
         expect(freespin_reward.formatted_groups).to eq('group1, group2')
       end
     end
 
     describe 'formatted_tags' do
       it 'returns nil when no tags' do
-        freespin_reward.tags = []
+        freespin_reward.bonus.tags = ''
         expect(freespin_reward.formatted_tags).to be_nil
       end
 
       it 'joins tags with comma' do
-        freespin_reward.tags = [ 'tag1', 'tag2' ]
+        freespin_reward.bonus.tags = 'tag1, tag2'
         expect(freespin_reward.formatted_tags).to eq('tag1, tag2')
       end
     end
 
     describe 'formatted_currencies' do
       it 'returns nil when no currencies' do
-        freespin_reward.currencies = []
+        freespin_reward.bonus.currencies = []
         expect(freespin_reward.formatted_currencies).to be_nil
       end
 
       it 'joins currencies with comma' do
-        freespin_reward.currencies = [ 'USD', 'EUR' ]
+        freespin_reward.bonus.currencies = %w[USD EUR]
         expect(freespin_reward.formatted_currencies).to eq('USD, EUR')
       end
     end
