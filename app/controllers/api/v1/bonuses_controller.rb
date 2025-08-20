@@ -44,6 +44,7 @@ class Api::V1::BonusesController < ApplicationController
 
     if @bonus.save
       create_rewards_if_provided
+      update_type_specific_attributes
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ]), status: :created
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
@@ -59,6 +60,7 @@ class Api::V1::BonusesController < ApplicationController
 
     if @bonus.save
       update_rewards_if_provided
+      update_type_specific_attributes
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ])
     else
       render json: { errors: @bonus.errors }, status: :unprocessable_entity
@@ -73,7 +75,7 @@ class Api::V1::BonusesController < ApplicationController
 
 
 
-  # GET /api/v1/bonuses/by_type  
+  # GET /api/v1/bonuses/by_type
   def by_type
     @bonuses = Bonus.by_event(params[:type]) if params[:type].present?
     @bonuses ||= Bonus.none
@@ -126,19 +128,32 @@ class Api::V1::BonusesController < ApplicationController
     # Create bonus reward if parameters provided
     if params[:bonus_reward].present?
       reward = @bonus.bonus_rewards.build
-      reward.reward_type = 'bonus'
+      reward.reward_type = "bonus"
       reward.amount = params[:bonus_reward][:amount]
       reward.percentage = params[:bonus_reward][:percentage]
       reward.config = params[:bonus_reward][:config] || {}
       reward.save
+    elsif params[:bonus] && params[:bonus][:bonus_reward].present?
+      reward = @bonus.bonus_rewards.build
+      reward.reward_type = "bonus"
+      reward.amount = params[:bonus][:bonus_reward][:amount]
+      reward.percentage = params[:bonus][:bonus_reward][:percentage]
+      reward.config = params[:bonus][:bonus_reward][:config] || {}
+      reward.save
     end
 
-    # Create freespin reward if parameters provided  
+    # Create freespin reward if parameters provided
     if params[:freespin_reward].present?
       reward = @bonus.freespin_rewards.build
       reward.spins_count = params[:freespin_reward][:spins_count]
       reward.game_restrictions = params[:freespin_reward][:game_restrictions]
       reward.config = params[:freespin_reward][:config] || {}
+      reward.save
+    elsif params[:bonus] && params[:bonus][:freespin_reward].present?
+      reward = @bonus.freespin_rewards.build
+      reward.spins_count = params[:bonus][:freespin_reward][:spins_count]
+      reward.game_restrictions = params[:bonus][:freespin_reward][:game_restrictions]
+      reward.config = params[:bonus][:freespin_reward][:config] || {}
       reward.save
     end
   end
@@ -210,12 +225,17 @@ class Api::V1::BonusesController < ApplicationController
   end
 
   def clean_inappropriate_fields
-    # Очищаем minimum_deposit для событий, которые его не используют  
+    # Очищаем minimum_deposit для событий, которые его не используют
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
     if non_deposit_events.include?(@bonus.event)
       @bonus.minimum_deposit = nil
       @bonus.currency_minimum_deposits = {}
     end
+  end
+
+  def update_type_specific_attributes
+    # This method is called after bonus creation/update to handle type-specific attributes
+    # Currently handled by reward associations, so this is a no-op
   end
 end

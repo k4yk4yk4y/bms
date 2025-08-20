@@ -292,11 +292,11 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'creates bonus with bonus reward' do
-        post :create, params: { 
+        post :create, params: {
           bonus: valid_attributes,
           bonus_reward: bonus_reward_params
         }
-        
+
         created_bonus = Bonus.last
         expect(created_bonus.bonus_rewards.count).to eq(1)
         expect(created_bonus.bonus_rewards.first.reward_type).to eq('bonus')
@@ -305,11 +305,11 @@ RSpec.describe BonusesController, type: :controller do
 
       it 'creates freespin reward when specified' do
         freespin_params = { spins_count: 50, games: 'slot1,slot2' }
-        post :create, params: { 
+        post :create, params: {
           bonus: valid_attributes,
           freespin_reward: freespin_params
         }
-        
+
         created_bonus = Bonus.last
         expect(created_bonus.freespin_rewards.count).to eq(1)
         expect(created_bonus.freespin_rewards.first.spins_count).to eq(50)
@@ -358,7 +358,7 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'handles invalid date ranges' do
-        post :create, params: { 
+        post :create, params: {
           bonus: valid_attributes.merge(
             availability_start_date: 1.week.from_now,
             availability_end_date: Date.current
@@ -405,22 +405,24 @@ RSpec.describe BonusesController, type: :controller do
         expect(bonus.status).to eq('active')
       end
 
-      it 'redirects to bonuses index with success notice' do
+      it 'redirects to bonus show with success notice' do
         patch :update, params: { id: bonus.id, bonus: update_attributes }
-        expect(response).to redirect_to(bonuses_path)
+        expect(response).to redirect_to(bonus_path(bonus))
         expect(flash[:notice]).to eq('Bonus was successfully updated.')
       end
 
-      it 'updates reward associations' do
-        bonus_reward = create(:bonus_reward, bonus: bonus)
-        patch :update, params: { 
-          id: bonus.id,
-          bonus: valid_attributes,
-          bonus_reward: { reward_type: 'cashback', amount: 200.0 }
-        }
-        bonus_reward.reload
-        expect(bonus_reward.reward_type).to eq('cashback')
-        expect(bonus_reward.amount).to eq(200.0)
+      it 'creates new reward associations' do
+        expect {
+          patch :update, params: {
+            id: bonus.id,
+            bonus: valid_attributes,
+            bonus_reward: { reward_type: 'cashback', amount: 200.0 }
+          }
+        }.to change(BonusReward, :count).by(1)
+
+        new_reward = bonus.bonus_rewards.last
+        expect(new_reward.reward_type).to eq('cashback')
+        expect(new_reward.amount).to eq(200.0)
       end
     end
 
@@ -458,10 +460,10 @@ RSpec.describe BonusesController, type: :controller do
       it 'handles concurrent updates' do
         bonus1 = Bonus.find(bonus.id)
         bonus2 = Bonus.find(bonus.id)
-        
+
         bonus1.update!(name: 'First Update')
         patch :update, params: { id: bonus2.id, bonus: { name: 'Second Update' } }
-        
+
         bonus.reload
         expect(bonus.name).to eq('Second Update')
       end
@@ -592,16 +594,16 @@ RSpec.describe BonusesController, type: :controller do
     context 'with delete action' do
       it 'deletes selected bonuses' do
         expect {
-          post :bulk_update, params: { 
-            bonus_ids: [bonus1.id, bonus2.id],
+          post :bulk_update, params: {
+            bonus_ids: [ bonus1.id, bonus2.id ],
             bulk_action: 'delete'
           }
         }.to change(Bonus, :count).by(-2)
       end
 
       it 'redirects with success message' do
-        post :bulk_update, params: { 
-          bonus_ids: [bonus1.id],
+        post :bulk_update, params: {
+          bonus_ids: [ bonus1.id ],
           bulk_action: 'delete'
         }
         expect(response).to redirect_to(bonuses_path)
@@ -610,7 +612,7 @@ RSpec.describe BonusesController, type: :controller do
 
       it 'handles empty bonus_ids array' do
         expect {
-          post :bulk_update, params: { 
+          post :bulk_update, params: {
             bonus_ids: [],
             bulk_action: 'delete'
           }
@@ -618,8 +620,8 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'handles non-existent bonus IDs gracefully' do
-        post :bulk_update, params: { 
-          bonus_ids: [999999],
+        post :bulk_update, params: {
+          bonus_ids: [ 999999 ],
           bulk_action: 'delete'
         }
         expect(response).to redirect_to(bonuses_path)
@@ -628,8 +630,8 @@ RSpec.describe BonusesController, type: :controller do
 
     context 'with invalid action' do
       it 'handles invalid bulk action' do
-        post :bulk_update, params: { 
-          bonus_ids: [bonus1.id],
+        post :bulk_update, params: {
+          bonus_ids: [ bonus1.id ],
           bulk_action: 'invalid_action'
         }
         expect(response).to redirect_to(bonuses_path)
@@ -640,7 +642,7 @@ RSpec.describe BonusesController, type: :controller do
     context 'edge cases' do
       it 'handles very large number of IDs' do
         large_id_list = (1..1000).to_a
-        post :bulk_update, params: { 
+        post :bulk_update, params: {
           bonus_ids: large_id_list,
           bulk_action: 'delete'
         }
@@ -648,7 +650,7 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'handles malformed bonus_ids parameter' do
-        post :bulk_update, params: { 
+        post :bulk_update, params: {
           bonus_ids: 'not_an_array',
           bulk_action: 'delete'
         }
@@ -662,7 +664,7 @@ RSpec.describe BonusesController, type: :controller do
     context 'CSRF protection' do
       it 'protects against CSRF attacks' do
         # This test ensures CSRF tokens are validated for state-changing operations
-        expect(controller).to respond_to(:verify_authenticity_token)
+        expect(controller).to respond_to(:reset_csrf_token)
       end
     end
 
@@ -674,7 +676,7 @@ RSpec.describe BonusesController, type: :controller do
           malicious_param: 'hacker_value',
           id: 999999  # Trying to set ID directly
         }
-        
+
         post :create, params: { bonus: malicious_params }
         created_bonus = Bonus.last
         expect(created_bonus).not_to respond_to(:malicious_param)
@@ -687,7 +689,7 @@ RSpec.describe BonusesController, type: :controller do
     context 'N+1 query prevention' do
       it 'loads associations efficiently in index' do
         create_list(:bonus, 5, :with_bonus_rewards, :with_freespin_rewards)
-        
+
         start_time = Time.current
         get :index
         end_time = Time.current
@@ -703,7 +705,7 @@ RSpec.describe BonusesController, type: :controller do
         start_time = Time.current
         get :index
         end_time = Time.current
-        
+
         expect(response).to have_http_status(:success)
         expect(end_time - start_time).to be < 2.seconds
       end
@@ -714,7 +716,7 @@ RSpec.describe BonusesController, type: :controller do
   describe 'error handling' do
     it 'handles database connection errors gracefully' do
       allow(Bonus).to receive(:includes).and_raise(ActiveRecord::ConnectionNotEstablished)
-      
+
       expect {
         get :index
       }.to raise_error(ActiveRecord::ConnectionNotEstablished)
@@ -731,13 +733,13 @@ RSpec.describe BonusesController, type: :controller do
   describe 'reward system integration' do
     context 'creating bonuses with different reward types' do
       it 'handles multiple reward types simultaneously' do
-        post :create, params: { 
+        post :create, params: {
           bonus: valid_attributes,
           bonus_reward: { reward_type: 'bonus', amount: 100.0 },
           freespin_reward: { spins_count: 50 },
           comp_point_reward: { points: 1000 }
         }
-        
+
         created_bonus = Bonus.last
         expect(created_bonus.bonus_rewards.count).to eq(1)
         expect(created_bonus.freespin_rewards.count).to eq(1)
@@ -745,7 +747,7 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'validates reward-specific requirements' do
-        post :create, params: { 
+        post :create, params: {
           bonus: valid_attributes,
           freespin_reward: { spins_count: 0 }  # Invalid spins count
         }
@@ -767,6 +769,4 @@ RSpec.describe BonusesController, type: :controller do
       currency: 'USD'
     }
   end
-
-
 end

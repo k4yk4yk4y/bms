@@ -93,5 +93,4 @@ RSpec.describe ApplicationHelper, type: :helper do
         expect(end_time - start_time).to be < 1.second
     end
   end
-
 end

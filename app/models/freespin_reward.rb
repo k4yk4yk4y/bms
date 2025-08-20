@@ -1,6 +1,6 @@
 class FreespinReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   validates :spins_count, presence: true, numericality: { greater_than: 0 }
@@ -127,6 +127,4 @@ class FreespinReward < ApplicationRecord
     return max_win if max_win.to_s.include?("x")
     "#{max_win} #{bonus.currency}"
   end
-
-
 end

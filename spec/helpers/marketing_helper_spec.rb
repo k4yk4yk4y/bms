@@ -125,7 +125,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'creates external link for HTTP URL' do
         url = 'https://example.com'
         result = helper.format_platform_display(url)
-        
+
         expect(result).to include('href="https://example.com"')
         expect(result).to include('target="_blank"')
         expect(result).to include('text-primary')
@@ -135,7 +135,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'creates external link for HTTPS URL' do
         url = 'https://secure-example.com'
         result = helper.format_platform_display(url)
-        
+
         expect(result).to include('href="https://secure-example.com"')
         expect(result).to include('target="_blank"')
       end
@@ -143,7 +143,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'truncates very long URLs in display' do
         long_url = 'https://very-long-domain-name-that-exceeds-normal-length.com/path/to/resource'
         result = helper.format_platform_display(long_url)
-        
+
         expect(result).to include('href="' + long_url + '"')
         # Display text should be truncated but href should be full URL
       end
@@ -151,14 +151,14 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'handles URLs with query parameters' do
         url = 'https://example.com?param1=value1&param2=value2'
         result = helper.format_platform_display(url)
-        
-        expect(result).to include('href="' + url + '"')
+
+        expect(result).to include('href="https://example.com?param1=value1&amp;param2=value2"')
       end
 
       it 'handles URLs with fragments' do
         url = 'https://example.com/page#section'
         result = helper.format_platform_display(url)
-        
+
         expect(result).to include('href="' + url + '"')
       end
     end
@@ -167,7 +167,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'returns truncated text for non-URL platform' do
         platform = 'Some platform description'
         result = helper.format_platform_display(platform)
-        
+
         expect(result).to eq(platform)
         expect(result).not_to include('<a')
       end
@@ -175,7 +175,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'truncates very long non-URL text' do
         long_text = 'A' * 100
         result = helper.format_platform_display(long_text)
-        
+
         expect(result.length).to be <= 50
         expect(result).to include('...')
       end
@@ -183,7 +183,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'handles text that looks like URL but is not valid' do
         fake_url = 'not-a-real-url.com'
         result = helper.format_platform_display(fake_url)
-        
+
         expect(result).to eq(fake_url)
         expect(result).not_to include('<a')
       end
@@ -193,7 +193,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'handles malicious HTML in platform' do
         malicious_html = '<script>alert("xss")</script>'
         result = helper.format_platform_display(malicious_html)
-        
+
         # Should not render as HTML
         expect(result).to include('&lt;script&gt;')
       end
@@ -201,14 +201,14 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'handles platform with quotes' do
         quoted_text = 'Platform "with quotes"'
         result = helper.format_platform_display(quoted_text)
-        
+
         expect(result).to include('Platform &quot;with quotes&quot;')
       end
 
       it 'handles international domain names' do
         idn_url = 'https://пример.рф'
         result = helper.format_platform_display(idn_url)
-        
+
         expect(result).to include('href="https://пример.рф"')
       end
     end
@@ -224,7 +224,7 @@ RSpec.describe MarketingHelper, type: :helper do
 
     it 'returns formatted summary string' do
       result = helper.marketing_request_summary(marketing_request)
-      
+
       expect(result).to include('ПРОМО ВЕБОВ 50')  # request_type_label
       expect(result).to include('TEST_CODE_123')   # promo_code
       expect(result).to include('Ожидает')         # status_label
@@ -236,21 +236,21 @@ RSpec.describe MarketingHelper, type: :helper do
     it 'handles different request types' do
       marketing_request.request_type = 'deposit_bonuses_partners'
       result = helper.marketing_request_summary(marketing_request)
-      
+
       expect(result).to include('ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ')
     end
 
     it 'handles different statuses' do
       marketing_request.status = 'activated'
       result = helper.marketing_request_summary(marketing_request)
-      
+
       expect(result).to include('Активирован')
     end
 
     it 'handles long promo codes' do
       marketing_request.promo_code = 'VERY_LONG_PROMO_CODE_THAT_MIGHT_BREAK_LAYOUT'
       result = helper.marketing_request_summary(marketing_request)
-      
+
       expect(result).to include('VERY_LONG_PROMO_CODE_THAT_MIGHT_BREAK_LAYOUT')
     end
 
@@ -258,21 +258,21 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'handles missing request_type_label' do
         allow(marketing_request).to receive(:request_type_label).and_return(nil)
         result = helper.marketing_request_summary(marketing_request)
-        
+
         expect(result).to be_a(String)
       end
 
       it 'handles missing status_label' do
         allow(marketing_request).to receive(:status_label).and_return(nil)
         result = helper.marketing_request_summary(marketing_request)
-        
+
         expect(result).to be_a(String)
       end
 
       it 'handles nil promo_code' do
         marketing_request.promo_code = nil
         result = helper.marketing_request_summary(marketing_request)
-        
+
         expect(result).to be_a(String)
       end
     end
@@ -285,7 +285,7 @@ RSpec.describe MarketingHelper, type: :helper do
 
     it 'returns badge HTML for positive count' do
       result = helper.tab_count_badge(5)
-      
+
       expect(result).to include('<span')
       expect(result).to include('badge bg-secondary')
       expect(result).to include('ms-1')
@@ -347,7 +347,7 @@ RSpec.describe MarketingHelper, type: :helper do
         # Test with malicious input that could cause XSS
         malicious_count = '<script>alert("xss")</script>'
         result = helper.tab_count_badge(malicious_count)
-        
+
         # Should not render script tags
         expect(result).not_to include('<script>')
       end
@@ -364,37 +364,25 @@ RSpec.describe MarketingHelper, type: :helper do
     end
 
     it 'works correctly in view context' do
-      rendered = render_inline <<~ERB
-        <span class="badge <%= marketing_status_badge_class('pending') %>">Pending</span>
-      ERB
-      
-      expect(rendered).to include('bg-warning')
+      badge_class = helper.marketing_status_badge_class('pending')
+      expect(badge_class).to eq('bg-warning')
     end
 
     it 'renders request type icons correctly' do
-      rendered = render_inline <<~ERB
-        <i class="<%= request_type_icon('promo_webs_50') %>"></i>
-      ERB
-      
-      expect(rendered).to include('fas fa-globe')
+      icon_class = helper.request_type_icon('promo_webs_50')
+      expect(icon_class).to eq('fas fa-globe')
     end
 
     it 'renders platform links correctly' do
-      rendered = render_inline <<~ERB
-        <%= format_platform_display('https://example.com') %>
-      ERB
-      
-      expect(rendered).to include('<a')
-      expect(rendered).to include('href="https://example.com"')
+      result = helper.format_platform_display('https://example.com')
+      expect(result).to include('<a')
+      expect(result).to include('href="https://example.com"')
     end
 
     it 'renders tab count badges in navigation' do
-      rendered = render_inline <<~ERB
-        <span>Promo Webs 50<%= tab_count_badge(5) %></span>
-      ERB
-      
-      expect(rendered).to include('badge bg-secondary')
-      expect(rendered).to include('5')
+      result = helper.tab_count_badge(5)
+      expect(result).to include('badge bg-secondary')
+      expect(result).to include('5')
     end
   end
 
@@ -404,7 +392,7 @@ RSpec.describe MarketingHelper, type: :helper do
 
     it 'works with real MarketingRequest objects' do
       summary = helper.marketing_request_summary(marketing_request)
-      
+
       expect(summary).to include(marketing_request.request_type_label)
       expect(summary).to include(marketing_request.promo_code)
       expect(summary).to include(marketing_request.status_label)
@@ -413,14 +401,14 @@ RSpec.describe MarketingHelper, type: :helper do
     it 'handles requests with complex promo codes' do
       marketing_request.promo_code = 'CODE1, CODE2, CODE3'
       summary = helper.marketing_request_summary(marketing_request)
-      
+
       expect(summary).to include('CODE1, CODE2, CODE3')
     end
 
     it 'handles requests with long manager names' do
       marketing_request.manager = 'Very Long Manager Name That Might Affect Display'
       summary = helper.marketing_request_summary(marketing_request)
-      
+
       expect(summary).to be_a(String)
     end
   end
@@ -444,7 +432,7 @@ RSpec.describe MarketingHelper, type: :helper do
         'https://another-example.com/path',
         'https://third-example.com/very/long/path/to/resource'
       ]
-      
+
               start_time = Time.current
         urls.each { |url| helper.format_platform_display(url) }
         end_time = Time.current
@@ -453,7 +441,7 @@ RSpec.describe MarketingHelper, type: :helper do
 
     it 'marketing_request_summary performs efficiently' do
       marketing_request = build(:marketing_request)
-      
+
               start_time = Time.current
         50.times { helper.marketing_request_summary(marketing_request) }
         end_time = Time.current
@@ -467,7 +455,7 @@ RSpec.describe MarketingHelper, type: :helper do
       it 'properly escapes HTML in platform display' do
         malicious_platform = '<script>alert("xss")</script>malicious.com'
         result = helper.format_platform_display(malicious_platform)
-        
+
         # HTML should be escaped
         expect(result).to include('&lt;script&gt;')
         expect(result).not_to include('<script>')
@@ -487,7 +475,7 @@ RSpec.describe MarketingHelper, type: :helper do
           'data:text/html,<script>alert(1)</script>',
           'ftp://malicious.com'
         ]
-        
+
         invalid_urls.each do |url|
           result = helper.format_platform_display(url)
           # Should not create links for invalid/dangerous URLs
@@ -502,7 +490,7 @@ RSpec.describe MarketingHelper, type: :helper do
           'http://example.com',
           'https://sub.example.com/path?param=value'
         ]
-        
+
         safe_urls.each do |url|
           result = helper.format_platform_display(url)
           expect(result).to include("href=\"#{url}\"")
@@ -528,10 +516,10 @@ RSpec.describe MarketingHelper, type: :helper do
         icon_results = MarketingRequest::REQUEST_TYPES.map do |type|
           helper.request_type_icon(type)
         end
-        
+
         expect(icon_results).to all(be_a(String))
         expect(icon_results).to all(start_with('fas fa-'))
-        
+
         # Verify we get different icons for different categories
         unique_icons = icon_results.uniq
         expect(unique_icons.length).to be >= 3  # Should have at least 3 different icons
@@ -550,7 +538,7 @@ RSpec.describe MarketingHelper, type: :helper do
           'https://example.com/path?query=value',
           'https://example.com/path#fragment'
         ]
-        
+
         url_formats.each do |url|
           result = helper.format_platform_display(url)
           expect(result).to include("href=\"#{url}\"")
@@ -569,7 +557,7 @@ RSpec.describe MarketingHelper, type: :helper do
           'platform-with-dashes',
           'platform_with_underscores'
         ]
-        
+
         edge_cases.each do |platform|
           result = helper.format_platform_display(platform)
           expect(result).to be_a(String)
@@ -584,8 +572,8 @@ RSpec.describe MarketingHelper, type: :helper do
 
   private
 
-        def render_inline(template)
-        # Simple template rendering for testing
-        eval("\"#{template}\"")
-      end
+  def render_inline(template)
+    # Simple template rendering for testing
+    template.gsub('<%=', '#{').gsub('%>', '}')
+  end
 end

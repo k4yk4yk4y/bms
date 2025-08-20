@@ -7,7 +7,7 @@ module HeatmapHelper
     return "background-color: #ffffff;" if intensity <= 0
 
     # Ensure intensity is within valid range
-    intensity = [intensity, 1.0].min
+    intensity = [ intensity, 1.0 ].min
 
     # Цветовая схема: белый → зеленый → красный
     # intensity от 0 до 1, где 1 соответствует 10+ бонусам

@@ -1,6 +1,6 @@
 class FreechipReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   validates :chip_value, presence: true, numericality: { greater_than: 0 }

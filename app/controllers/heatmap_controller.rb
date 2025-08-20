@@ -36,7 +36,7 @@ class HeatmapController < ApplicationController
 
   def parse_year_param(year_param)
     return Date.current.year if year_param.blank?
-    
+
     year = year_param.to_i
     # Validate year is reasonable (1900-3000)
     year > 1900 && year < 3000 ? year : Date.current.year
@@ -44,7 +44,7 @@ class HeatmapController < ApplicationController
 
   def parse_month_param(month_param)
     return Date.current.month if month_param.blank?
-    
+
     month = month_param.to_i
     # Validate month is between 1-12
     month >= 1 && month <= 12 ? month : Date.current.month
@@ -52,9 +52,9 @@ class HeatmapController < ApplicationController
 
   def parse_bonus_event_param(bonus_event_param)
     return "all" if bonus_event_param.blank?
-    
+
     # Validate bonus_event is in the allowed list or "all"
-    valid_events = Bonus::EVENT_TYPES + ["all"]
+    valid_events = Bonus::EVENT_TYPES + [ "all" ]
     valid_events.include?(bonus_event_param) ? bonus_event_param : "all"
   end
 

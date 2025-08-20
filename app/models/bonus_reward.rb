@@ -1,6 +1,6 @@
 class BonusReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   validates :reward_type, presence: true
@@ -103,6 +103,4 @@ class BonusReward < ApplicationRecord
     return max_win if max_win.to_s.include?("x")
     "#{max_win} #{bonus.currency}"
   end
-
-
 end

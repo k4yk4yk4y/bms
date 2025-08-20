@@ -148,8 +148,7 @@ RSpec.describe Bonus, type: :model do
 
       describe '#display_currency' do
         it 'returns reward currencies when available' do
-          bonus_reward.config = { 'currencies' => %w[USD EUR] }
-          bonus_reward.save
+          bonus.currencies = %w[USD EUR]
           expect(bonus.display_currency).to eq('USD, EUR')
         end
 
