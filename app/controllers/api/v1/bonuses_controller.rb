@@ -199,7 +199,7 @@ class Api::V1::BonusesController < ApplicationController
     scope = scope.by_dsl_tag(params[:dsl_tag]) if params[:dsl_tag].present?
 
     # Filter by currency
-    scope = scope.by_currency(params[:currency]) if params[:currency].present?
+    scope = scope.by_currency(params[:currency] || params[:currencies]&.first) if (params[:currency] || params[:currencies]).present?
 
     # Filter by country
     scope = scope.by_country(params[:country]) if params[:country].present?

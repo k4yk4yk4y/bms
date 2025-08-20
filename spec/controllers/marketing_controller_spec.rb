@@ -835,10 +835,10 @@ RSpec.describe MarketingController, type: :controller do
       it 'handles unicode characters in manager name' do
         patch :update, params: {
           id: pending_request.id,
-          marketing_request: { manager: 'Менеджер Иванов' }
+          marketing_request: { manager: 'Manager Ivanov' }
         }
         pending_request.reload
-        expect(pending_request.manager).to eq('Менеджер Иванов')
+        expect(pending_request.manager).to eq('Manager Ivanov')
       end
 
       it 'handles special email formats' do

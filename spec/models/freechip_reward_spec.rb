@@ -25,7 +25,7 @@ RSpec.describe FreechipReward, type: :model do
 
   # Instance methods
   describe 'instance methods' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
     let(:freechip_reward) { build(:freechip_reward, bonus: bonus, chip_value: 5.0, chips_count: 10) }
 
     describe '#total_value' do
@@ -52,7 +52,7 @@ RSpec.describe FreechipReward, type: :model do
       end
 
       it 'handles different currencies' do
-        bonus.currency = 'EUR'
+        bonus.currencies = [ 'EUR' ]
         expect(freechip_reward.formatted_chip_value).to eq('5.0 EUR')
       end
 
@@ -73,7 +73,7 @@ RSpec.describe FreechipReward, type: :model do
       end
 
       it 'handles different currencies' do
-        bonus.currency = 'EUR'
+        bonus.currencies = [ 'EUR' ]
         expect(freechip_reward.formatted_total_value).to eq('50.0 EUR')
       end
 
@@ -210,7 +210,7 @@ RSpec.describe FreechipReward, type: :model do
       it 'handles currency with nil bonus currency' do
         freechip_reward.chip_value = 5.0
         freechip_reward.chips_count = 10
-        freechip_reward.bonus.currency = nil
+        freechip_reward.bonus.currencies = []
         expect(freechip_reward.formatted_chip_value).to eq('5.0 ')
         expect(freechip_reward.formatted_total_value).to eq('50.0 ')
       end
@@ -218,7 +218,7 @@ RSpec.describe FreechipReward, type: :model do
       it 'handles empty currency' do
         freechip_reward.chip_value = 5.0
         freechip_reward.chips_count = 10
-        freechip_reward.bonus.currency = ''
+        freechip_reward.bonus.currencies = []
         expect(freechip_reward.formatted_chip_value).to eq('5.0 ')
         expect(freechip_reward.formatted_total_value).to eq('50.0 ')
       end

@@ -117,14 +117,14 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
     end
 
     context 'with filter parameters' do
-      let!(:usd_bonus) { create(:bonus, currency: 'USD', event: 'deposit') }
-      let!(:eur_bonus) { create(:bonus, :input_coupon_event, currency: 'EUR') }
+      let!(:usd_bonus) { create(:bonus, :with_usd_only, event: 'deposit') }
+              let!(:eur_bonus) { create(:bonus, :input_coupon_event, currencies: [ 'EUR' ]) }
       let!(:us_bonus) { create(:bonus, country: 'US') }
       let!(:volna_bonus) { create(:bonus, project: 'VOLNA') }
 
       it 'applies filters through apply_filters method' do
         # Test assumes apply_filters method exists and filters properly
-        get :index, params: { currency: 'USD' }
+        get :index, params: { currencies: [ 'USD' ] }
         json_response = JSON.parse(response.body)
 
         expect(response).to have_http_status(:success)
@@ -133,7 +133,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
 
       it 'handles multiple filter parameters' do
         get :index, params: {
-          currency: 'USD',
+          currencies: [ 'USD' ],
           event: 'deposit',
           status: 'active'
         }
@@ -219,7 +219,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
         status: 'draft',
         availability_start_date: Date.current.to_s,
         availability_end_date: 1.week.from_now.to_date.to_s,
-        currency: 'USD'
+        currencies: [ 'USD' ]
       }
     end
 
@@ -708,7 +708,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
 
       it 'uses appropriate database indexes' do
         # Test filtering operations that should use indexes
-        get :index, params: { currency: 'USD', status: 'active' }
+        get :index, params: { currencies: [ 'USD' ], status: 'active' }
         expect(response).to have_http_status(:success)
       end
     end
@@ -830,7 +830,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
       status: 'draft',
       availability_start_date: Date.current.to_s,
       availability_end_date: 1.week.from_now.to_date.to_s,
-      currency: 'USD'
+              currencies: [ 'USD' ]
     }
   end
 end

@@ -322,7 +322,7 @@ RSpec.describe BonusBuyReward, type: :model do
 
   # Formatting methods
   describe 'formatting methods' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
     let(:bonus_buy_reward) { build(:bonus_buy_reward, bonus: bonus, buy_amount: 100.0, multiplier: 2.5) }
 
     describe 'formatted_buy_amount' do

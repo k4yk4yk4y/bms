@@ -23,7 +23,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
 
   # Instance methods
   describe 'instance methods' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
     let(:material_prize_reward) { build(:material_prize_reward, bonus: bonus, prize_name: 'iPhone 15', prize_value: 999.99) }
 
     describe '#formatted_prize_value' do
@@ -47,7 +47,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
       end
 
       it 'handles different currencies' do
-        bonus.currency = 'EUR'
+        bonus.currencies = [ 'EUR' ]
         expect(material_prize_reward.formatted_prize_value).to eq('999.99 EUR')
       end
 
@@ -72,12 +72,12 @@ RSpec.describe MaterialPrizeReward, type: :model do
       end
 
       it 'handles nil currency' do
-        bonus.currency = nil
+        bonus.currencies = []
         expect(material_prize_reward.formatted_prize_value).to eq('999.99 ')
       end
 
       it 'handles empty currency' do
-        bonus.currency = ''
+        bonus.currencies = []
         expect(material_prize_reward.formatted_prize_value).to eq('999.99 ')
       end
     end
@@ -292,14 +292,14 @@ RSpec.describe MaterialPrizeReward, type: :model do
 
     describe 'formatting edge cases' do
       it 'handles precision in floating point calculations' do
-        bonus = create(:bonus, currency: 'USD')
+        bonus = create(:bonus, :with_usd_only)
         material_prize_reward = build(:material_prize_reward, bonus: bonus)
         material_prize_reward.prize_value = 0.1 + 0.2  # Classic floating point precision issue
         expect(material_prize_reward.formatted_prize_value).to match(/0\.30*\d* USD/)
       end
 
       it 'handles very precise decimal values' do
-        bonus = create(:bonus, currency: 'USD')
+        bonus = create(:bonus, :with_usd_only)
         material_prize_reward = build(:material_prize_reward, bonus: bonus)
         material_prize_reward.prize_value = 99.999999999
         expect(material_prize_reward.formatted_prize_value).to include('100.0')
@@ -307,7 +307,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
       end
 
       it 'handles scientific notation values' do
-        bonus = create(:bonus, currency: 'USD')
+        bonus = create(:bonus, :with_usd_only)
         material_prize_reward = build(:material_prize_reward, bonus: bonus)
         material_prize_reward.prize_value = 1e6  # 1,000,000
         expect(material_prize_reward.formatted_prize_value).to eq('1000000.0 USD')
@@ -324,7 +324,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
       end
 
       it 'handles symbolic prizes (zero value) correctly' do
-        bonus = create(:bonus, currency: 'USD')
+        bonus = create(:bonus, :with_usd_only)
         material_prize_reward = build(:material_prize_reward, bonus: bonus)
         material_prize_reward.prize_name = 'Certificate of Achievement'
         material_prize_reward.prize_value = 0
@@ -334,7 +334,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
       end
 
       it 'handles expensive prizes correctly' do
-        bonus = create(:bonus, currency: 'USD')
+        bonus = create(:bonus, :with_usd_only)
         material_prize_reward = build(:material_prize_reward, bonus: bonus)
         material_prize_reward.prize_name = 'Luxury Car'
         material_prize_reward.prize_value = 75000.00
@@ -347,7 +347,7 @@ RSpec.describe MaterialPrizeReward, type: :model do
 
   # Real-world scenarios
   describe 'real-world scenarios' do
-    let(:bonus) { create(:bonus, currency: 'USD') }
+    let(:bonus) { create(:bonus, :with_usd_only) }
 
     it 'handles electronic device prizes' do
       electronic_prizes = [

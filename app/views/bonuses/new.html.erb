@@ -27,11 +27,24 @@
             <div class="card mb-4">
               <div class="card-header">
                 <h5 class="card-title mb-0">Basic Information</h5>
+                <!-- Template Status Indicator -->
+                <div id="template-status" class="mt-2" style="display: none;">
+                  <div id="template-loading" class="alert alert-info py-1 px-2 mb-0" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Searching for template...
+                  </div>
+                  <div id="template-found" class="alert alert-success py-1 px-2 mb-0" style="display: none;">
+                    <i class="fas fa-check"></i> <span id="template-found-message">Template applied</span>
+                  </div>
+                  <div id="template-not-found" class="alert alert-warning py-1 px-2 mb-0" style="display: none;">
+                    <i class="fas fa-info-circle"></i> No template found for these parameters
+                  </div>
+                </div>
               </div>
               <div class="card-body">
                 <div class="mb-3">
                   <%= form.label :name, class: "form-label" %>
-                  <%= form.text_field :name, class: "form-control", required: true %>
+                  <%= form.text_field :name, class: "form-control", required: true, 
+                      oninput: "searchTemplate()" %>
                 </div>
 
                 <div class="mb-3">
@@ -58,12 +71,13 @@
                   <%= form.label :project, class: "form-label" %>
                   <%= form.select :project, project_options, 
                       { include_blank: "Select project" }, 
-                      { class: "form-select" } %>
+                      { class: "form-select", onchange: "searchTemplate()" } %>
                 </div>
 
                 <div class="mb-3">
                   <%= form.label :dsl_tag, class: "form-label" %>
-                  <%= form.text_field :dsl_tag, class: "form-control" %>
+                  <%= form.text_field :dsl_tag, class: "form-control", 
+                      oninput: "searchTemplate()" %>
                 </div>
 
                 <div class="mb-3">
@@ -188,6 +202,9 @@
 </div>
 
 <script>
+  let templateSearchTimeout;
+  let lastSearchParams = '';
+
   function toggleTypeSpecificFields(bonusType) {
     const minimumDepositField = document.getElementById('minimum-deposit-field');
     const currencyMinimumDepositsSection = document.getElementById('currency-minimum-deposits-section');
@@ -234,12 +251,217 @@
     
     console.log('Selected bonus type:', bonusType);
   }
-  
+
+  // Auto-search template functionality
+  function searchTemplate() {
+    // Clear previous timeout
+    if (templateSearchTimeout) {
+      clearTimeout(templateSearchTimeout);
+    }
+
+    // Get current values
+    const name = document.querySelector('input[name="bonus[name]"]')?.value?.trim() || '';
+    const dslTag = document.querySelector('input[name="bonus[dsl_tag]"]')?.value?.trim() || '';
+    const project = document.querySelector('select[name="bonus[project]"]')?.value || '';
+
+    // Create search params string to avoid duplicate searches
+    const searchParams = `${name}|${dslTag}|${project}`;
+    
+    // Don't search if params haven't changed
+    if (searchParams === lastSearchParams) {
+      return;
+    }
+
+    lastSearchParams = searchParams;
+
+    // Only search if ALL three parameters are provided
+    if (!name || !dslTag || !project) {
+      console.log('Not all parameters provided, skipping search:', { name, dslTag, project });
+      // Hide any existing status
+      showTemplateStatus('none');
+      return;
+    }
+
+    // Debounce the search (wait 500ms after user stops typing)
+    templateSearchTimeout = setTimeout(async () => {
+      console.log('Searching for template with all three params:', { name, dslTag, project });
+      
+      // Show loading state
+      showTemplateStatus('loading');
+
+      try {
+        // Build API URL with all three parameters
+        const apiUrl = `/bonuses/find_template?dsl_tag=${encodeURIComponent(dslTag)}&name=${encodeURIComponent(name)}&project=${encodeURIComponent(project)}`;
+
+        console.log('API URL:', apiUrl);
+
+        // Make request to find template
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (response.ok && data.template) {
+          console.log('Template found:', data);
+          applyTemplate(data.template);
+          showTemplateStatus('found', `Template "${data.template.name}" applied (${data.found_by})`);
+        } else {
+          console.log('Template not found:', data);
+          showTemplateStatus('not-found');
+        }
+      } catch (error) {
+        console.error('Error searching for template:', error);
+        showTemplateStatus('not-found');
+      }
+    }, 500);
+  }
+
+  function applyTemplate(template) {
+    console.log('Applying template:', template);
+
+    // Apply template values to form fields
+    if (template.dsl_tag && !document.querySelector('input[name="bonus[dsl_tag]"]').value) {
+      document.querySelector('input[name="bonus[dsl_tag]"]').value = template.dsl_tag;
+    }
+
+    if (template.project && template.project !== 'All') {
+      const projectSelect = document.querySelector('select[name="bonus[project]"]');
+      if (projectSelect && !projectSelect.value) {
+        projectSelect.value = template.project;
+      }
+    }
+
+    if (template.event) {
+      const eventSelect = document.querySelector('select[name="bonus[event]"]');
+      if (eventSelect) {
+        eventSelect.value = template.event;
+        // Trigger the change event to update type-specific fields
+        toggleTypeSpecificFields(template.event);
+      }
+    }
+
+    if (template.wager) {
+      const wagerInput = document.querySelector('input[name="bonus[wager]"]');
+      if (wagerInput && !wagerInput.value) {
+        wagerInput.value = template.wager;
+      }
+    }
+
+    if (template.maximum_winnings) {
+      const maxWinningsInput = document.querySelector('input[name="bonus[maximum_winnings]"]');
+      if (maxWinningsInput && !maxWinningsInput.value) {
+        maxWinningsInput.value = template.maximum_winnings;
+      }
+    }
+
+    if (template.no_more) {
+      const noMoreInput = document.querySelector('input[name="bonus[no_more]"]');
+      if (noMoreInput && !noMoreInput.value) {
+        noMoreInput.value = template.no_more;
+      }
+    }
+
+    if (template.totally_no_more) {
+      const totallyNoMoreInput = document.querySelector('input[name="bonus[totally_no_more]"]');
+      if (totallyNoMoreInput && !totallyNoMoreInput.value) {
+        totallyNoMoreInput.value = template.totally_no_more;
+      }
+    }
+
+    if (template.groups && template.groups.length > 0) {
+      const groupsInput = document.querySelector('input[name="bonus[groups]"]');
+      if (groupsInput && !groupsInput.value) {
+        groupsInput.value = Array.isArray(template.groups) ? template.groups.join(', ') : template.groups;
+      }
+    }
+
+    if (template.description) {
+      const descriptionInput = document.querySelector('textarea[name="bonus[description]"]');
+      if (descriptionInput && !descriptionInput.value) {
+        descriptionInput.value = template.description;
+      }
+    }
+
+    if (template.currencies && template.currencies.length > 0) {
+      const currencySelect = document.querySelector('select[name="bonus[currencies][]"]');
+      if (currencySelect) {
+        // Clear current selections
+        Array.from(currencySelect.options).forEach(option => option.selected = false);
+        
+        // Select currencies from template
+        const currencies = Array.isArray(template.currencies) ? template.currencies : template.currencies.split(' ');
+        currencies.forEach(currency => {
+          const option = currencySelect.querySelector(`option[value="${currency.trim()}"]`);
+          if (option) {
+            option.selected = true;
+          }
+        });
+      }
+    }
+
+    // Apply currency minimum deposits if present
+    if (template.currency_minimum_deposits && Object.keys(template.currency_minimum_deposits).length > 0) {
+      Object.entries(template.currency_minimum_deposits).forEach(([currency, amount]) => {
+        const input = document.querySelector(`input[name="bonus[currency_minimum_deposits][${currency}]"]`);
+        if (input && !input.value) {
+          input.value = amount;
+        }
+      });
+    }
+  }
+
+  function showTemplateStatus(status, message = '') {
+    const statusContainer = document.getElementById('template-status');
+    const loadingEl = document.getElementById('template-loading');
+    const foundEl = document.getElementById('template-found');
+    const notFoundEl = document.getElementById('template-not-found');
+    const messageEl = document.getElementById('template-found-message');
+
+    // Hide all status elements first
+    loadingEl.style.display = 'none';
+    foundEl.style.display = 'none';
+    notFoundEl.style.display = 'none';
+
+    switch (status) {
+      case 'loading':
+        statusContainer.style.display = 'block';
+        loadingEl.style.display = 'block';
+        break;
+      case 'found':
+        statusContainer.style.display = 'block';
+        foundEl.style.display = 'block';
+        if (message) {
+          messageEl.textContent = message;
+        }
+        // Hide status after 3 seconds
+        setTimeout(() => {
+          statusContainer.style.display = 'none';
+        }, 3000);
+        break;
+      case 'not-found':
+        statusContainer.style.display = 'block';
+        notFoundEl.style.display = 'block';
+        // Hide status after 2 seconds
+        setTimeout(() => {
+          statusContainer.style.display = 'none';
+        }, 2000);
+        break;
+      default:
+        statusContainer.style.display = 'none';
+    }
+  }
+
   // Инициализируем при загрузке страницы
   document.addEventListener('DOMContentLoaded', function() {
     const bonusTypeSelect = document.querySelector('select[name="bonus[event]"]');
     if (bonusTypeSelect && bonusTypeSelect.value) {
       toggleTypeSpecificFields(bonusTypeSelect.value);
+    }
+
+    // Check if template_id is provided in URL and search for template
+    const urlParams = new URLSearchParams(window.location.search);
+    const templateId = urlParams.get('template_id');
+    if (templateId) {
+      // Template was applied via URL parameter, show success message
+      showTemplateStatus('found', 'Template applied from URL');
     }
   });
 </script>

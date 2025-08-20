@@ -53,18 +53,16 @@ RSpec.describe Bonus, type: :model do
       it { is_expected.to validate_presence_of(:status) }
       it { is_expected.to validate_presence_of(:availability_start_date) }
       it { is_expected.to validate_presence_of(:availability_end_date) }
-      it 'validates currency presence' do
-        bonus.currency = ''
-        bonus.currencies = []  # Clear currencies to prevent callback from setting currency
-        expect(bonus).not_to be_valid
-        expect(bonus.errors[:currency]).to include("can't be blank")
+      it 'validates currencies presence' do
+        bonus.currencies = []
+        expect(bonus).to be_valid # currencies can be empty (all currencies)
       end
     end
 
     describe 'length validations' do
       it { is_expected.to validate_length_of(:name).is_at_most(255) }
       it { is_expected.to validate_length_of(:code).is_at_most(50) }
-      it { is_expected.to validate_length_of(:currency).is_at_most(3) }
+      # Currency length validation removed - now using currencies array
       it { is_expected.to validate_length_of(:dsl_tag).is_at_most(255) }
       it { is_expected.to validate_length_of(:description).is_at_most(1000) }
     end
@@ -342,8 +340,8 @@ RSpec.describe Bonus, type: :model do
     end
 
     context 'filter scopes' do
-      let!(:usd_bonus) { create(:bonus, currency: 'USD') }
-      let!(:eur_bonus) { create(:bonus, currency: 'EUR') }
+      let!(:usd_bonus) { create(:bonus, currencies: [ 'USD' ], currency_minimum_deposits: { 'USD' => 50.0 }) }
+      let!(:eur_bonus) { create(:bonus, currencies: [ 'EUR' ], currency_minimum_deposits: { 'EUR' => 45.0 }) }
       let!(:us_bonus) { create(:bonus, country: 'US') }
       let!(:de_bonus) { create(:bonus, country: 'DE') }
 
@@ -502,9 +500,9 @@ RSpec.describe Bonus, type: :model do
           expect(result).to eq('USD, EUR')
         end
 
-        it 'falls back to bonus currency when no reward currencies' do
-          bonus.currency = 'GBP'
-          expect(bonus.display_currency).to eq('GBP')
+        it 'falls back to bonus currencies when no reward currencies' do
+          bonus.currencies = [ 'GBP', 'EUR' ]
+          expect(bonus.display_currency).to eq('GBP, EUR')
         end
       end
     end
@@ -735,8 +733,7 @@ RSpec.describe Bonus, type: :model do
                       event: 'invalid_event',  # Invalid event
                       status: 'invalid_status',  # Invalid status
                       availability_start_date: nil,  # Missing start date
-                      availability_end_date: nil,   # Missing end date
-                      currency: 'INVALID_CURRENCY_TOO_LONG')  # Too long currency
+                      availability_end_date: nil)   # Missing end date
 
         expect(bonus).not_to be_valid
         expect(bonus.errors.count).to be >= 5
