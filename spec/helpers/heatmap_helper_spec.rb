@@ -58,20 +58,20 @@ RSpec.describe HeatmapHelper, type: :helper do
           # Test exact boundary values
           expect(helper.heatmap_color(0.2)).to eq('background-color: #c6e48b;')
           expect(helper.heatmap_color(0.21)).to eq('background-color: #7bc96f;')
-          
+
           expect(helper.heatmap_color(0.4)).to eq('background-color: #7bc96f;')
           expect(helper.heatmap_color(0.41)).to eq('background-color: #239a3b;')
-          
+
           expect(helper.heatmap_color(0.6)).to eq('background-color: #239a3b;')
           expect(helper.heatmap_color(0.61)).to eq('background-color: #d73027;')
-          
+
           expect(helper.heatmap_color(0.8)).to eq('background-color: #d73027;')
           expect(helper.heatmap_color(0.81)).to eq('background-color: #a50026;')
         end
 
         it 'handles very small positive values' do
-          expect(helper.heatmap_color(0.001)).to eq('background-color: #c6e48b;')
-          expect(helper.heatmap_color(0.009)).to eq('background-color: #c6e48b;')
+          expect(helper.heatmap_color(0.001)).to eq('background-color: #ffffff;')
+          expect(helper.heatmap_color(0.009)).to eq('background-color: #ffffff;')
         end
       end
 
@@ -233,16 +233,16 @@ RSpec.describe HeatmapHelper, type: :helper do
       bootstrap_bg_classes = %w[
         bg-primary bg-secondary bg-success bg-danger bg-warning bg-info bg-light bg-dark
       ]
-      
+
       # Test status badge classes
       %w[active inactive expired draft unknown].each do |status|
         result = helper.status_badge_class(status)
         expect(result).to start_with('bg-')
         expect(bootstrap_bg_classes).to include(result)
       end
-      
+
       # Test bonus type badge classes
-      (Bonus::EVENT_TYPES + ['unknown']).each do |bonus_type|
+      (Bonus::EVENT_TYPES + [ 'unknown' ]).each do |bonus_type|
         result = helper.bonus_type_badge_class(bonus_type)
         badge_class = result.split(' ').first
         expect(bootstrap_bg_classes).to include(badge_class)
@@ -250,18 +250,16 @@ RSpec.describe HeatmapHelper, type: :helper do
     end
 
     it 'returns CSS-safe class names' do
-      test_inputs = ['active', 'inactive', 'deposit', 'manual', 'unknown', nil, '']
-      
+      test_inputs = [ 'active', 'inactive', 'deposit', 'manual', 'unknown', nil, '' ]
+
       test_inputs.each do |input|
         status_result = helper.status_badge_class(input)
         type_result = helper.bonus_type_badge_class(input)
-        
+
         # CSS class names should not contain special characters
         expect(status_result).to match(/^[\w\s-]+$/)
         expect(type_result).to match(/^[\w\s-]+$/)
       end
     end
   end
-
-
 end

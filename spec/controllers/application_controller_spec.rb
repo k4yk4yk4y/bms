@@ -19,7 +19,7 @@ RSpec.describe ApplicationController, type: :controller do
       it 'allows requests from modern browsers' do
         # Set a modern user agent
         request.headers['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        
+
         get :index
         expect(response).to have_http_status(:success)
       end
@@ -29,17 +29,17 @@ RSpec.describe ApplicationController, type: :controller do
       it 'handles legacy browser requests' do
         # Test with old browser user agent
         request.headers['HTTP_USER_AGENT'] = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)'
-        
+
         get :index
         # Legacy browser may be blocked (406) or allowed (200) depending on configuration
-        expect(response.status).to be_in([200, 406])  # Success or Not Acceptable
+        expect(response.status).to be_in([ 200, 406 ])  # Success or Not Acceptable
       end
     end
 
     context 'without user agent' do
       it 'handles requests without user agent header' do
         request.headers['HTTP_USER_AGENT'] = nil
-        
+
         get :index
         expect(response).to have_http_status(:success)
       end
@@ -48,9 +48,9 @@ RSpec.describe ApplicationController, type: :controller do
     context 'with malformed user agent' do
       it 'handles malformed user agent strings' do
         request.headers['HTTP_USER_AGENT'] = 'malformed user agent string'
-        
+
         get :index
-        expect(response.status).to be_in([200, 426])
+        expect(response.status).to be_in([ 200, 426 ])
       end
     end
   end
@@ -98,7 +98,7 @@ RSpec.describe ApplicationController, type: :controller do
       # Test that any before_actions in ApplicationController are inherited
       bonuses_controller = BonusesController.new
       marketing_controller = MarketingController.new
-      
+
       expect(bonuses_controller.class.ancestors).to include(ApplicationController)
       expect(marketing_controller.class.ancestors).to include(ApplicationController)
     end
@@ -130,7 +130,7 @@ RSpec.describe ApplicationController, type: :controller do
   describe 'security headers' do
     it 'sets appropriate security headers' do
       get :index
-      
+
       # Check for common security headers that Rails sets by default
       expect(response.headers).to have_key('X-Frame-Options')
       expect(response.headers).to have_key('X-Content-Type-Options')
@@ -186,7 +186,7 @@ RSpec.describe ApplicationController, type: :controller do
       start_time = Time.current
       get :index
       end_time = Time.current
-      
+
       expect(response).to have_http_status(:success)
       expect(end_time - start_time).to be < 0.1.seconds
     end
@@ -195,10 +195,10 @@ RSpec.describe ApplicationController, type: :controller do
       # Basic test that controller doesn't accumulate state between requests
       get :index
       first_object_id = controller.object_id
-      
+
       get :index
       second_object_id = controller.object_id
-      
+
       # Controllers should be stateless between requests
       expect(response).to have_http_status(:success)
     end
@@ -218,7 +218,7 @@ RSpec.describe ApplicationController, type: :controller do
             }
           }
         }
-        
+
         get :index, params: complex_params
         expect(response).to have_http_status(:success)
       end
@@ -226,7 +226,7 @@ RSpec.describe ApplicationController, type: :controller do
       it 'handles very large parameter sets' do
         large_params = {}
         100.times { |i| large_params["param_#{i}"] = "value_#{i}" }
-        
+
         get :index, params: large_params
         expect(response).to have_http_status(:success)
       end

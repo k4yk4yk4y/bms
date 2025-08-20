@@ -1,6 +1,6 @@
 class MaterialPrizeReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   validates :prize_name, presence: true

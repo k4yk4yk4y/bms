@@ -1,6 +1,6 @@
 class BonusCodeReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   # Serialize config as JSON for additional parameters

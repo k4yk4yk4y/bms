@@ -1,6 +1,6 @@
 class CompPointReward < ApplicationRecord
   include BonusCommonParameters
-  
+
   belongs_to :bonus
 
   # Serialize config as JSON for additional parameters

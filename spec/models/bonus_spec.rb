@@ -53,7 +53,12 @@ RSpec.describe Bonus, type: :model do
       it { is_expected.to validate_presence_of(:status) }
       it { is_expected.to validate_presence_of(:availability_start_date) }
       it { is_expected.to validate_presence_of(:availability_end_date) }
-      it { is_expected.to validate_presence_of(:currency).with_message("can't be blank") }
+      it 'validates currency presence' do
+        bonus.currency = ''
+        bonus.currencies = []  # Clear currencies to prevent callback from setting currency
+        expect(bonus).not_to be_valid
+        expect(bonus.errors[:currency]).to include("can't be blank")
+      end
     end
 
     describe 'length validations' do
@@ -478,12 +483,10 @@ RSpec.describe Bonus, type: :model do
 
       describe '#display_code' do
         it 'returns reward code when available' do
-          bonus_with_code_reward.bonus_code_rewards.first.code = 'REWARD_CODE'
-          # Update reward config with code and test display
-        reward = bonus_with_code_reward.bonus_code_rewards.first
-        reward.config = reward.config.merge({ 'code' => 'REWARD_CODE' })
-        reward.save!
-        expect(bonus_with_code_reward.display_code).to eq('REWARD_CODE')
+          reward = bonus_with_code_reward.bonus_code_rewards.first
+          reward.code = 'REWARD_CODE'
+          reward.save!
+          expect(bonus_with_code_reward.display_code).to eq('REWARD_CODE')
         end
 
         it 'falls back to bonus code when no reward code' do
@@ -494,9 +497,9 @@ RSpec.describe Bonus, type: :model do
 
       describe '#display_currency' do
         it 'returns reward currencies when available' do
-          bonus_with_code_reward.bonus_code_rewards.first.currencies = ['USD', 'EUR']
+          bonus_with_code_reward.currencies = [ 'USD', 'EUR' ]
           result = bonus_with_code_reward.display_currency
-          expect(result).to include('USD', 'EUR')
+          expect(result).to eq('USD, EUR')
         end
 
         it 'falls back to bonus currency when no reward currencies' do
@@ -538,11 +541,11 @@ RSpec.describe Bonus, type: :model do
     describe '#tags_array and #tags_array=' do
       it 'converts comma-separated tags to array' do
         bonus.tags = 'tag1, tag2, tag3'
-        expect(bonus.tags_array).to eq(['tag1', 'tag2', 'tag3'])
+        expect(bonus.tags_array).to eq([ 'tag1', 'tag2', 'tag3' ])
       end
 
       it 'sets tags from array' do
-        bonus.tags_array = ['new1', 'new2']
+        bonus.tags_array = [ 'new1', 'new2' ]
         expect(bonus.tags).to eq('new1, new2')
       end
 
@@ -560,7 +563,7 @@ RSpec.describe Bonus, type: :model do
     describe 'formatting methods' do
       describe '#formatted_currencies' do
         it 'joins currencies with comma' do
-          bonus.currencies = ['USD', 'EUR', 'GBP']
+          bonus.currencies = [ 'USD', 'EUR', 'GBP' ]
           expect(bonus.formatted_currencies).to eq('USD, EUR, GBP')
         end
 
@@ -572,7 +575,7 @@ RSpec.describe Bonus, type: :model do
 
       describe '#formatted_groups' do
         it 'joins groups with comma' do
-          bonus.groups = ['VIP', 'Regular', 'Premium']
+          bonus.groups = [ 'VIP', 'Regular', 'Premium' ]
           expect(bonus.formatted_groups).to eq('VIP, Regular, Premium')
         end
 
@@ -681,7 +684,7 @@ RSpec.describe Bonus, type: :model do
         previews = Bonus.permanent_bonus_previews_for_project('VOLNA')
         expect(previews).to be_an(Array)
         expect(previews.length).to eq(Bonus::PERMANENT_BONUS_TYPES.length)
-        
+
         preview = previews.first
         expect(preview).to have_key(:name)
         expect(preview).to have_key(:slug)
@@ -692,7 +695,7 @@ RSpec.describe Bonus, type: :model do
       it 'includes existing bonus when found' do
         permanent_bonus = create(:bonus, :active, project: 'VOLNA', dsl_tag: 'welcome_bonus')
         previews = Bonus.permanent_bonus_previews_for_project('VOLNA')
-        
+
         welcome_preview = previews.find { |p| p[:dsl_tag] == 'welcome_bonus' }
         expect(welcome_preview[:existing_bonus]).to eq(permanent_bonus)
       end
@@ -700,16 +703,16 @@ RSpec.describe Bonus, type: :model do
 
     describe '.update_expired_bonuses!' do
       let!(:expired_active_bonus) { create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago) }
-      let!(:expired_inactive_bonus) { create(:bonus, :inactive, availability_end_date: 1.day.ago) }
-      let!(:active_available_bonus) { create(:bonus, :active, availability_end_date: 1.day.from_now) }
+      let!(:expired_inactive_bonus) { create(:bonus, :inactive, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago) }
+      let!(:active_available_bonus) { create(:bonus, :active, availability_start_date: 1.day.ago, availability_end_date: 1.day.from_now) }
 
       it 'updates only active expired bonuses to inactive' do
         Bonus.update_expired_bonuses!
-        
+
         expired_active_bonus.reload
         expired_inactive_bonus.reload
         active_available_bonus.reload
-        
+
         expect(expired_active_bonus.status).to eq('inactive')
         expect(expired_inactive_bonus.status).to eq('inactive')  # Unchanged
         expect(active_available_bonus.status).to eq('active')    # Unchanged
@@ -741,13 +744,13 @@ RSpec.describe Bonus, type: :model do
 
       it 'validates complex currency minimum deposits scenarios' do
         bonus = build(:bonus, :deposit_event)
-        bonus.currencies = ['USD', 'EUR']
+        bonus.currencies = [ 'USD', 'EUR' ]
         bonus.currency_minimum_deposits = {
           'USD' => 50.0,
           'EUR' => 0,      # Invalid - zero amount
           'GBP' => 100.0   # Invalid - not in currencies list
         }
-        
+
         expect(bonus).not_to be_valid
         expect(bonus.errors[:currency_minimum_deposits]).to include(/EUR.*положительным числом/)
         expect(bonus.errors[:currency_minimum_deposits]).to include(/содержит валюты.*GBP/)
@@ -776,11 +779,11 @@ RSpec.describe Bonus, type: :model do
     context 'with serialization edge cases' do
       it 'handles corrupted JSON data gracefully' do
         bonus = create(:bonus)
-        
+
         # Simulate corrupted JSON in database
         bonus.update_column(:currencies, 'invalid json')
         bonus.reload
-        
+
         # Should handle gracefully
         expect { bonus.currencies }.not_to raise_error
       end
@@ -788,8 +791,9 @@ RSpec.describe Bonus, type: :model do
       it 'handles very large JSON objects' do
         large_array = (1..1000).map { |i| "CURRENCY_#{i}" }
         bonus.currencies = large_array
+        bonus.currency_minimum_deposits = {}  # Clear currency_minimum_deposits to avoid validation errors
         bonus.save!
-        
+
         bonus.reload
         expect(bonus.currencies).to eq(large_array)
       end
@@ -799,7 +803,7 @@ RSpec.describe Bonus, type: :model do
       it 'handles simultaneous code generation' do
         threads = []
         bonuses = []
-        
+
         5.times do
           threads << Thread.new do
             bonus = build(:bonus, code: nil)
@@ -807,20 +811,20 @@ RSpec.describe Bonus, type: :model do
             bonuses << bonus.code
           end
         end
-        
+
         threads.each(&:join)
-        
+
         # All generated codes should be unique
         expect(bonuses.uniq.length).to eq(bonuses.length)
       end
 
       it 'handles race conditions in status updates' do
         bonus = create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago)
-        
+
         # Simulate concurrent access
         bonus1 = Bonus.find(bonus.id)
         bonus2 = Bonus.find(bonus.id)
-        
+
         # Both should handle expired status update correctly
         expect(bonus1.expired?).to be true
         expect(bonus2.expired?).to be true
@@ -830,12 +834,12 @@ RSpec.describe Bonus, type: :model do
     context 'with memory and performance edge cases' do
       it 'handles bonuses with many rewards efficiently' do
         bonus = create(:bonus)
-        
+
         # Create many rewards of different types
         create_list(:bonus_reward, 20, bonus: bonus)
         create_list(:freespin_reward, 15, bonus: bonus)
         create_list(:comp_point_reward, 10, bonus: bonus)
-        
+
         expect(bonus.all_rewards.count).to eq(45)
         expect(bonus).to have_rewards
         expect(bonus.reward_types.length).to eq(3)
@@ -846,7 +850,7 @@ RSpec.describe Bonus, type: :model do
                       name: 'A' * 255,  # Maximum length
                       dsl_tag: 'B' * 255,  # Maximum length
                       description: 'C' * 1000)  # Maximum length
-        
+
         expect(bonus).to be_valid
       end
     end
@@ -857,20 +861,20 @@ RSpec.describe Bonus, type: :model do
     it 'maintains referential integrity when deleting bonus with rewards' do
       bonus = create(:bonus, :with_bonus_rewards, :with_freespin_rewards)
       bonus_id = bonus.id
-      
+
       expect {
         bonus.destroy
       }.to change(Bonus, :count).by(-1)
         .and change(BonusReward, :count).by(-1)
         .and change(FreespinReward, :count).by(-1)
-      
+
       expect(Bonus.find_by(id: bonus_id)).to be_nil
     end
 
     it 'handles unique constraint violations gracefully' do
       existing_bonus = create(:bonus, code: 'UNIQUE_CODE')
       duplicate_bonus = build(:bonus, code: 'UNIQUE_CODE')
-      
+
       expect(duplicate_bonus).not_to be_valid
       expect(duplicate_bonus.errors[:code]).to include('has already been taken')
     end

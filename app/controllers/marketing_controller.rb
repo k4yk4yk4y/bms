@@ -3,7 +3,7 @@ class MarketingController < ApplicationController
 
   def index
     @current_tab = params[:tab] || MarketingRequest::REQUEST_TYPES.first
-    
+
     # Start with base query - filter by tab only if no search or status filter
     if params[:search].present? || params[:status].present?
       @marketing_requests = MarketingRequest.all.order(:created_at)

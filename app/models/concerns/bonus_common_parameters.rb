@@ -13,7 +13,7 @@ module BonusCommonParameters
 
   # Получаем теги из основного бонуса
   def tags
-    bonus.tags&.split(',')&.map(&:strip)&.reject(&:blank?) || []
+    bonus.tags&.split(",")&.map(&:strip)&.reject(&:blank?) || []
   end
 
   # Получаем минимальный депозит для указанной валюты

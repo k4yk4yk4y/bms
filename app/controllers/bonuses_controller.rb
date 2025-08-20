@@ -84,7 +84,7 @@ class BonusesController < ApplicationController
   # POST /bonuses
   def create
     @bonus = Bonus.new(bonus_params)
-    
+
     # Set currency from currencies array if currency is blank
     if @bonus.currency.blank? && @bonus.currencies.present?
       # Filter out blank currencies and take the first valid one
@@ -94,9 +94,11 @@ class BonusesController < ApplicationController
 
     respond_to do |format|
       if @bonus.save
-        # Create multiple bonus rewards if provided
+        # Create bonus rewards if provided (singular or multiple)
+        create_bonus_reward_if_provided
         create_multiple_bonus_rewards_if_provided
-        # Create multiple freespin rewards if provided
+        # Create freespin rewards if provided (singular or multiple)
+        create_freespin_reward_if_provided
         create_multiple_freespin_rewards_if_provided
         # Create multiple bonus_buy rewards if provided
         create_multiple_bonus_buy_rewards_if_provided
@@ -104,6 +106,7 @@ class BonusesController < ApplicationController
         create_multiple_comp_point_rewards_if_provided
         # Create multiple bonus_code rewards if provided
         create_multiple_bonus_code_rewards_if_provided
+        update_type_specific_attributes
         format.html { redirect_to @bonus, notice: "Bonus was successfully created." }
         format.json { render json: @bonus, status: :created, location: @bonus }
       else
@@ -134,16 +137,22 @@ class BonusesController < ApplicationController
 
     respond_to do |format|
       if @bonus.update(bonus_attributes)
-        # Update or create multiple bonus rewards if provided
+        # Update or create bonus rewards if provided (singular or multiple)
+        update_bonus_reward_if_provided
         update_multiple_bonus_rewards_if_provided
-        # Update or create multiple freespin rewards if provided
+        # Update or create freespin rewards if provided (singular or multiple)
+        update_freespin_reward_if_provided
         update_multiple_freespin_rewards_if_provided
-        # Update or create multiple bonus_buy rewards if provided
+        # Update or create bonus_buy rewards if provided (singular or multiple)
+        update_bonus_buy_reward_if_provided
         update_multiple_bonus_buy_rewards_if_provided
-        # Update or create multiple comp_point rewards if provided
+        # Update or create comp_point rewards if provided (singular or multiple)
+        update_comp_point_reward_if_provided
         update_multiple_comp_point_rewards_if_provided
-        # Update or create multiple bonus_code rewards if provided
+        # Update or create bonus_code rewards if provided (singular or multiple)
+        update_bonus_code_reward_if_provided
         update_multiple_bonus_code_rewards_if_provided
+        update_type_specific_attributes
         format.html { redirect_to @bonus, notice: "Bonus was successfully updated." }
         format.json { render json: @bonus }
       else
@@ -954,5 +963,10 @@ class BonusesController < ApplicationController
       reward.config = config unless config.empty?
       reward.save
     end
+  end
+
+  def update_type_specific_attributes
+    # This method is called after bonus creation/update to handle type-specific attributes
+    # Currently handled by reward associations, so this is a no-op
   end
 end

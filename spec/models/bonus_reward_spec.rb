@@ -461,7 +461,7 @@ RSpec.describe BonusReward, type: :model do
         bonus_reward.bonus.groups = nil
         bonus_reward.bonus.tags = nil
         bonus_reward.config = nil
-        
+
         expect(bonus_reward.wager).to be_nil
         expect(bonus_reward.currencies).to eq([])
         expect(bonus_reward.groups).to eq([])
@@ -509,4 +509,3 @@ RSpec.describe BonusReward, type: :model do
     end
   end
 end
-
