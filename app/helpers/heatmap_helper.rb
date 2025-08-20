@@ -6,24 +6,28 @@ module HeatmapHelper
     intensity = intensity.to_f rescue 0.0
     return "background-color: #ffffff;" if intensity <= 0
 
-    # Ensure intensity is within valid range
+    # Ensure intensity is within valid range and round to avoid float precision issues
     intensity = [ intensity, 1.0 ].min
+    intensity = (intensity * 1000).round / 1000.0
 
     # Цветовая схема: белый → зеленый → красный
     # intensity от 0 до 1, где 1 соответствует 10+ бонусам
-    case intensity
-    when 0
+    case
+    when intensity == 0
       "background-color: #ffffff;" # Белый для нулевых значений
-    when 0.01..0.2
+    when intensity > 0 && intensity < 0.01
+      # Белый для очень маленьких значений
+      "background-color: #ffffff;"
+    when intensity >= 0.01 && intensity <= 0.2
       # Светло-зеленые оттенки (1-2 бонуса)
       "background-color: #c6e48b;"
-    when 0.21..0.4
+    when intensity > 0.2 && intensity <= 0.4
       # Средне-зеленые оттенки (3-4 бонуса)
       "background-color: #7bc96f;"
-    when 0.41..0.6
+    when intensity > 0.4 && intensity <= 0.6
       # Темно-зеленые оттенки (5-6 бонусов)
       "background-color: #239a3b;"
-    when 0.61..0.8
+    when intensity > 0.6 && intensity <= 0.8
       # Переходные зелено-красные оттенки (7-8 бонусов)
       "background-color: #d73027;"
     else
