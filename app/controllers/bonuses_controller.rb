@@ -83,6 +83,13 @@ class BonusesController < ApplicationController
   # POST /bonuses
   def create
     @bonus = Bonus.new(bonus_params)
+    
+    # Set currency from currencies array if currency is blank
+    if @bonus.currency.blank? && @bonus.currencies.present?
+      # Filter out blank currencies and take the first valid one
+      valid_currencies = @bonus.currencies.reject(&:blank?)
+      @bonus.currency = valid_currencies.first if valid_currencies.present?
+    end
 
     respond_to do |format|
       if @bonus.save
@@ -100,6 +107,9 @@ class BonusesController < ApplicationController
         format.json { render json: @bonus, status: :created, location: @bonus }
       else
         @event_type = @bonus.event
+        # Debug logging for validation errors
+        Rails.logger.debug "Bonus creation failed. Errors: #{@bonus.errors.full_messages}"
+        Rails.logger.debug "Bonus attributes: #{@bonus.attributes}"
         format.html { render :new }
         format.json { render json: @bonus.errors, status: :unprocessable_entity }
       end
@@ -113,8 +123,16 @@ class BonusesController < ApplicationController
     Rails.logger.debug "Bonus params: #{bonus_params.inspect}"
     Rails.logger.debug "Currency minimum deposits params: #{params[:bonus][:currency_minimum_deposits].inspect}"
 
+    # Set currency from currencies array if currency is blank
+    bonus_attributes = bonus_params
+    if bonus_attributes[:currency].blank? && bonus_attributes[:currencies].present?
+      # Filter out blank currencies and take the first valid one
+      valid_currencies = bonus_attributes[:currencies].reject(&:blank?)
+      bonus_attributes[:currency] = valid_currencies.first if valid_currencies.present?
+    end
+
     respond_to do |format|
-      if @bonus.update(bonus_params)
+      if @bonus.update(bonus_attributes)
         # Update or create multiple bonus rewards if provided
         update_multiple_bonus_rewards_if_provided
         # Update or create multiple freespin rewards if provided
