@@ -35,3 +35,110 @@
 
 # Ignore node_modules
 /node_modules
+
+# Coverage files (test coverage results)
+coverage/
+
+# MCP (Model Context Protocol) related files and folders
+/mcp/
+*.mcp
+*.mcp.json
+*.mcp.yaml
+*.mcp.yml
+*.mcp.log
+*.mcp.cache
+*.mcp.tmp
+*.mcp.bak
+*.mcp.backup
+*.mcp.old
+
+# MCP configuration and cache files
+mcp_config/
+mcp_cache/
+mcp_data/
+mcp_output/
+mcp_temp/
+mcp_logs/
+mcp_sessions/
+
+# MCP documentation and reports
+mcp_docs/
+mcp_reports/
+*.mcp_report
+*.mcp_summary
+
+# MCP server and client files
+mcp_server/
+mcp_client/
+*.mcp_server
+*.mcp_client
+
+# MCP protocol files
+*.mcp_protocol
+*.mcp_schema
+*.mcp_definition
+
+# Playwright test artifacts
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Image and video files (screenshots, recordings from tests)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webm
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flv
+*.wmv
+*.m4v
+*.3gp
+*.ogv
+*.webp
+*.svg
+*.ico
+*.bmp
+*.tiff
+*.tga
+*.exr
+*.hdr
+*.raw
+*.cr2
+*.nef
+*.arw
+*.dng
+*.heic
+*.heif
+*.avif
+*.jxl
+*.j2k
+*.jp2
+*.jpx
+*.jpm
+*.mj2
+*.tif
+*.dib
+*.rle
+*.pcx
+*.dcx
+*.vda
+*.icb
+*.vst
+*.pix
+*.pxm
+*.ppm
+*.pgm
+*.pbm
+*.pnm
+*.ras
+*.sun
+*.xbm
+*.xpm
+*.wbmp
+*.cur
+*.ani
+*.icns
