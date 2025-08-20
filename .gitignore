@@ -82,6 +82,7 @@ mcp_client/
 playwright-report/
 test-results/
 playwright/.cache/
+playwright/
 
 # Image and video files (screenshots, recordings from tests)
 *.png
