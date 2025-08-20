@@ -76,6 +76,7 @@ class Bonus < ApplicationRecord
 
   # Callbacks
   before_validation :generate_code, if: -> { code.blank? }
+  before_validation :set_currency_from_currencies
   after_find :check_and_update_expired_status!
 
   # Class methods for permanent bonuses
@@ -336,6 +337,13 @@ class Bonus < ApplicationRecord
     loop do
       self.code = "BONUS_#{SecureRandom.hex(4).upcase}"
       break unless self.class.exists?(code: code)
+    end
+  end
+
+  def set_currency_from_currencies
+    # Set currency from currencies array if currency is blank and currencies are present
+    if currency.blank? && currencies.present?
+      self.currency = currencies.first
     end
   end
 
