@@ -105,5 +105,72 @@ FactoryBot.define do
       availability_start_date { 1.week.ago }
       availability_end_date { 1.day.ago }
     end
+
+    # Reward association traits
+    trait :with_bonus_rewards do
+      after(:create) do |bonus|
+        create(:bonus_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_freespin_rewards do
+      after(:create) do |bonus|
+        create(:freespin_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_bonus_buy_rewards do
+      after(:create) do |bonus|
+        create(:bonus_buy_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_comp_point_rewards do
+      after(:create) do |bonus|
+        create(:comp_point_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_bonus_code_rewards do
+      after(:create) do |bonus|
+        create(:bonus_code_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_freechip_rewards do
+      after(:create) do |bonus|
+        create(:freechip_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_material_prize_rewards do
+      after(:create) do |bonus|
+        create(:material_prize_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_all_reward_types do
+      after(:create) do |bonus|
+        create(:bonus_reward, bonus: bonus)
+        create(:freespin_reward, bonus: bonus)
+        create(:bonus_buy_reward, bonus: bonus)
+        create(:comp_point_reward, bonus: bonus)
+        create(:bonus_code_reward, bonus: bonus)
+        create(:freechip_reward, bonus: bonus)
+        create(:material_prize_reward, bonus: bonus)
+      end
+    end
+
+    trait :with_multiple_bonus_rewards do
+      after(:create) do |bonus|
+        create_list(:bonus_reward, 3, bonus: bonus)
+      end
+    end
+
+    trait :with_multiple_freespin_rewards do
+      after(:create) do |bonus|
+        create_list(:freespin_reward, 2, bonus: bonus)
+      end
+    end
   end
 end

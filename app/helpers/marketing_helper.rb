@@ -28,10 +28,12 @@ module MarketingHelper
   def format_platform_display(platform)
     return content_tag(:span, "—", class: "text-muted") if platform.blank?
 
+    # Security check: block javascript: and data: URLs to prevent XSS
+    return truncate(platform, length: 50) if platform.start_with?('javascript:', 'data:')
+
     if platform.match?(URI::DEFAULT_PARSER.make_regexp)
-      link_to platform, platform, target: "_blank", class: "text-primary text-decoration-none" do
-        "#{truncate(platform, length: 30)} #{content_tag(:i, '', class: 'fas fa-external-link-alt ms-1')}".html_safe
-      end
+      display_text = "#{truncate(platform, length: 30)} #{content_tag(:i, '', class: 'fas fa-external-link-alt ms-1')}"
+      link_to display_text.html_safe, platform, target: "_blank", class: "text-primary text-decoration-none"
     else
       truncate(platform, length: 50)
     end
@@ -42,7 +44,17 @@ module MarketingHelper
   end
 
   def tab_count_badge(count)
-    return "" if count.zero?
+    # Handle edge cases: convert to integer safely
+    count = case count
+            when Numeric
+              count.to_i
+            when String
+              count.to_i
+            else
+              0
+            end
+    
+    return "" if count <= 0
 
     content_tag(:span, count, class: "badge bg-secondary ms-1")
   end

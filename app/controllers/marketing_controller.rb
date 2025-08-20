@@ -3,11 +3,16 @@ class MarketingController < ApplicationController
 
   def index
     @current_tab = params[:tab] || MarketingRequest::REQUEST_TYPES.first
-    @marketing_requests = MarketingRequest.by_request_type(@current_tab)
-                                         .order(:created_at)
+    
+    # Start with base query - filter by tab only if no search or status filter
+    if params[:search].present? || params[:status].present?
+      @marketing_requests = MarketingRequest.all.order(:created_at)
+    else
+      @marketing_requests = MarketingRequest.by_request_type(@current_tab).order(:created_at)
+    end
 
     # Filter by status if provided
-    if params[:status].present?
+    if params[:status].present? && MarketingRequest::STATUSES.include?(params[:status])
       @marketing_requests = @marketing_requests.by_status(params[:status])
     end
 
@@ -34,7 +39,9 @@ class MarketingController < ApplicationController
 
   def new
     @marketing_request = MarketingRequest.new
-    @marketing_request.request_type = params[:request_type] if params[:request_type].present?
+    if params[:request_type].present? && MarketingRequest::REQUEST_TYPES.include?(params[:request_type])
+      @marketing_request.request_type = params[:request_type]
+    end
   end
 
   def create

@@ -1,4 +1,6 @@
 class BonusReward < ApplicationRecord
+  include BonusCommonParameters
+  
   belongs_to :bonus
 
   validates :reward_type, presence: true
@@ -48,40 +50,7 @@ class BonusReward < ApplicationRecord
     self.config = (config || {}).merge("code" => value)
   end
 
-  def currencies
-    config&.dig("currencies") || []
-  end
 
-  def currencies=(value)
-    currencies_array = value.is_a?(Array) ? value : [ value ].compact
-    self.config = (config || {}).merge("currencies" => currencies_array)
-  end
-
-  def min_deposit
-    config&.dig("min")
-  end
-
-  def min_deposit=(value)
-    self.config = (config || {}).merge("min" => value&.to_f)
-  end
-
-  def groups
-    config&.dig("groups") || []
-  end
-
-  def groups=(value)
-    groups_array = value.is_a?(Array) ? value : value.to_s.split(",").map(&:strip).reject(&:blank?)
-    self.config = (config || {}).merge("groups" => groups_array)
-  end
-
-  def tags
-    config&.dig("tags") || []
-  end
-
-  def tags=(value)
-    tags_array = value.is_a?(Array) ? value : value.to_s.split(",").map(&:strip).reject(&:blank?)
-    self.config = (config || {}).merge("tags" => tags_array)
-  end
 
   def user_can_have_duplicates
     config&.dig("user_can_have_duplicates") || false
@@ -91,21 +60,7 @@ class BonusReward < ApplicationRecord
     self.config = (config || {}).merge("user_can_have_duplicates" => [ true, "true", "1", 1 ].include?(value))
   end
 
-  def no_more
-    config&.dig("no_more")
-  end
 
-  def no_more=(value)
-    self.config = (config || {}).merge("no_more" => value)
-  end
-
-  def wagering_strategy
-    config&.dig("wagering_strategy")
-  end
-
-  def wagering_strategy=(value)
-    self.config = (config || {}).merge("wagering_strategy" => value)
-  end
 
   def stag
     config&.dig("stag")
@@ -115,13 +70,7 @@ class BonusReward < ApplicationRecord
     self.config = (config || {}).merge("stag" => value)
   end
 
-  def totally_no_more
-    config&.dig("totally_no_more")
-  end
 
-  def totally_no_more=(value)
-    self.config = (config || {}).merge("totally_no_more" => value)
-  end
 
   # Advanced parameters accessors
   def advanced_params
@@ -155,15 +104,5 @@ class BonusReward < ApplicationRecord
     "#{max_win} #{bonus.currency}"
   end
 
-  def formatted_groups
-    groups.join(", ") if groups.any?
-  end
 
-  def formatted_tags
-    tags.join(", ") if tags.any?
-  end
-
-  def formatted_currencies
-    currencies.join(", ") if currencies.any?
-  end
 end

@@ -127,15 +127,7 @@
 
     </div>
 
-    <!-- Note: Currencies, Groups, and Minimum Deposit are now configured in Basic Information -->
-
-    <!-- Tags -->
-    <div class="mb-3">
-      <label for="bonus_reward_tags" class="form-label">Теги (tags)</label>
-      <input type="text" class="form-control" name="bonus_reward[tags]" id="bonus_reward_tags" 
-             value="<%= existing_reward&.formatted_tags %>">
-
-    </div>
+    <!-- Note: Currencies, Groups, Tags, and Minimum Deposit are now configured in Basic Information -->
 
     <!-- User can have duplicates -->
     <div class="mb-3">
@@ -149,8 +141,6 @@
       </div>
     </div>
 
-    <!-- Note: Usage Limitations (no_more, totally_no_more) are now configured in Basic Information -->
-
     <!-- Stag -->
     <div class="mb-3">
       <label for="bonus_reward_stag" class="form-label">Stag</label>
@@ -159,7 +149,7 @@
 
     </div>
 
-    <!-- Note: Wagering Strategy is now configured in Basic Information -->
+    <!-- Note: Usage Limitations and Wagering Strategy are now configured in Basic Information -->
   </div>
 </div>
 

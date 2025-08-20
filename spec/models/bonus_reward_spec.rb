@@ -156,77 +156,80 @@ RSpec.describe BonusReward, type: :model do
       end
     end
 
-    describe '#currencies and #currencies=' do
-      it 'gets currencies from config' do
+    describe '#currencies' do
+      it 'gets currencies from associated bonus' do
+        bonus_reward.bonus.currencies = %w[USD EUR]
         expect(bonus_reward.currencies).to eq(%w[USD EUR])
       end
 
-      it 'sets currencies as array' do
-        bonus_reward.currencies = %w[USD GBP]
-        expect(bonus_reward.config['currencies']).to eq(%w[USD GBP])
+      it 'returns empty array when bonus has no currencies' do
+        bonus_reward.bonus.currencies = []
+        expect(bonus_reward.currencies).to eq([])
       end
 
-      it 'converts single value to array' do
-        bonus_reward.currencies = 'USD'
-        expect(bonus_reward.config['currencies']).to eq([ 'USD' ])
-      end
-
-      it 'returns empty array when nil' do
-        bonus_reward.config = {}
+      it 'returns empty array when bonus currencies is nil' do
+        bonus_reward.bonus.currencies = nil
         expect(bonus_reward.currencies).to eq([])
       end
     end
 
-    describe '#min_deposit and #min_deposit=' do
-      it 'gets min from config' do
-        expect(bonus_reward.min_deposit).to eq(50.0)
+    describe '#min_deposit_for_currency' do
+      it 'gets minimum deposit for specific currency from associated bonus' do
+        bonus_reward.bonus.currency_minimum_deposits = { 'USD' => 50.0, 'EUR' => 25.0 }
+        expect(bonus_reward.min_deposit_for_currency('USD')).to eq(50.0)
+        expect(bonus_reward.min_deposit_for_currency('EUR')).to eq(25.0)
       end
 
-      it 'sets min in config' do
-        bonus_reward.min_deposit = 75.5
-        expect(bonus_reward.config['min']).to eq(75.5)
+      it 'returns nil for currency without minimum deposit' do
+        bonus_reward.bonus.currency_minimum_deposits = { 'USD' => 50.0 }
+        expect(bonus_reward.min_deposit_for_currency('EUR')).to be_nil
       end
     end
 
-    describe '#groups and #groups=' do
-      it 'gets groups from config' do
+    describe '#currency_minimum_deposits' do
+      it 'gets currency minimum deposits from associated bonus' do
+        deposits = { 'USD' => 50.0, 'EUR' => 25.0 }
+        bonus_reward.bonus.currency_minimum_deposits = deposits
+        expect(bonus_reward.currency_minimum_deposits).to eq(deposits)
+      end
+    end
+
+    describe '#groups' do
+      it 'gets groups from associated bonus' do
+        bonus_reward.bonus.groups = %w[VIP Regular]
         expect(bonus_reward.groups).to eq(%w[VIP Regular])
       end
 
-      it 'sets groups as array' do
-        bonus_reward.groups = %w[Premium Basic]
-        expect(bonus_reward.config['groups']).to eq(%w[Premium Basic])
+      it 'returns empty array when bonus has no groups' do
+        bonus_reward.bonus.groups = []
+        expect(bonus_reward.groups).to eq([])
       end
 
-      it 'handles string input' do
-        bonus_reward.groups = 'VIP, Premium, Basic'
-        expect(bonus_reward.config['groups']).to eq(%w[VIP Premium Basic])
-      end
-
-      it 'returns empty array when nil' do
-        bonus_reward.config = {}
+      it 'returns empty array when bonus groups is nil' do
+        bonus_reward.bonus.groups = nil
         expect(bonus_reward.groups).to eq([])
       end
     end
 
-    describe '#tags and #tags=' do
-      it 'gets tags from config' do
+    describe '#tags' do
+      it 'gets tags from associated bonus' do
+        bonus_reward.bonus.tags = 'new_player, weekend'
         expect(bonus_reward.tags).to eq(%w[new_player weekend])
       end
 
-      it 'sets tags as array' do
-        bonus_reward.tags = %w[loyalty bonus]
-        expect(bonus_reward.config['tags']).to eq(%w[loyalty bonus])
-      end
-
-      it 'handles string input' do
-        bonus_reward.tags = 'loyalty, bonus, special'
-        expect(bonus_reward.config['tags']).to eq(%w[loyalty bonus special])
-      end
-
-      it 'returns empty array when nil' do
-        bonus_reward.config = {}
+      it 'returns empty array when bonus has no tags' do
+        bonus_reward.bonus.tags = ''
         expect(bonus_reward.tags).to eq([])
+      end
+
+      it 'returns empty array when bonus tags is nil' do
+        bonus_reward.bonus.tags = nil
+        expect(bonus_reward.tags).to eq([])
+      end
+
+      it 'handles tags with extra spaces' do
+        bonus_reward.bonus.tags = '  new_player  ,  weekend  '
+        expect(bonus_reward.tags).to eq(%w[new_player weekend])
       end
     end
 
@@ -257,25 +260,27 @@ RSpec.describe BonusReward, type: :model do
       end
     end
 
-    describe '#no_more and #no_more=' do
-      it 'gets no_more from config' do
-        expect(bonus_reward.no_more).to eq(5)
+    describe '#no_more' do
+      it 'gets no_more from associated bonus' do
+        bonus_reward.bonus.no_more = '5 per day'
+        expect(bonus_reward.no_more).to eq('5 per day')
       end
 
-      it 'sets no_more in config' do
-        bonus_reward.no_more = 10
-        expect(bonus_reward.config['no_more']).to eq(10)
+      it 'returns nil when bonus has no no_more limit' do
+        bonus_reward.bonus.no_more = nil
+        expect(bonus_reward.no_more).to be_nil
       end
     end
 
-    describe '#wagering_strategy and #wagering_strategy=' do
-      it 'gets wagering_strategy from config' do
+    describe '#wagering_strategy' do
+      it 'gets wagering_strategy from associated bonus' do
+        bonus_reward.bonus.wagering_strategy = 'bonus_first'
         expect(bonus_reward.wagering_strategy).to eq('bonus_first')
       end
 
-      it 'sets wagering_strategy in config' do
-        bonus_reward.wagering_strategy = 'deposit_first'
-        expect(bonus_reward.config['wagering_strategy']).to eq('deposit_first')
+      it 'returns nil when bonus has no wagering strategy' do
+        bonus_reward.bonus.wagering_strategy = nil
+        expect(bonus_reward.wagering_strategy).to be_nil
       end
     end
 
@@ -290,15 +295,15 @@ RSpec.describe BonusReward, type: :model do
       end
     end
 
-    describe '#totally_no_more and #totally_no_more=' do
-      it 'gets totally_no_more from config' do
-        bonus_reward.config = { 'totally_no_more' => 20 }
+    describe '#totally_no_more' do
+      it 'gets totally_no_more from associated bonus' do
+        bonus_reward.bonus.totally_no_more = 20
         expect(bonus_reward.totally_no_more).to eq(20)
       end
 
-      it 'sets totally_no_more in config' do
-        bonus_reward.totally_no_more = 15
-        expect(bonus_reward.config['totally_no_more']).to eq(15)
+      it 'returns nil when bonus has no totally_no_more limit' do
+        bonus_reward.bonus.totally_no_more = nil
+        expect(bonus_reward.totally_no_more).to be_nil
       end
     end
   end
@@ -377,46 +382,86 @@ RSpec.describe BonusReward, type: :model do
 
     describe '#formatted_groups' do
       it 'returns joined groups when groups exist' do
-        bonus_reward.groups = %w[VIP Regular Premium]
+        bonus_reward.bonus.groups = %w[VIP Regular Premium]
         expect(bonus_reward.formatted_groups).to eq('VIP, Regular, Premium')
       end
 
       it 'returns nil when no groups' do
-        bonus_reward.groups = []
+        bonus_reward.bonus.groups = []
         expect(bonus_reward.formatted_groups).to be_nil
       end
     end
 
     describe '#formatted_tags' do
       it 'returns joined tags when tags exist' do
-        bonus_reward.tags = %w[new_player loyalty weekend]
+        bonus_reward.bonus.tags = 'new_player, loyalty, weekend'
         expect(bonus_reward.formatted_tags).to eq('new_player, loyalty, weekend')
       end
 
       it 'returns nil when no tags' do
-        bonus_reward.tags = []
+        bonus_reward.bonus.tags = ''
         expect(bonus_reward.formatted_tags).to be_nil
       end
     end
 
     describe '#formatted_currencies' do
       it 'returns joined currencies when currencies exist' do
-        bonus_reward.currencies = %w[USD EUR GBP]
+        bonus_reward.bonus.currencies = %w[USD EUR GBP]
         expect(bonus_reward.formatted_currencies).to eq('USD, EUR, GBP')
       end
 
       it 'returns nil when no currencies' do
-        bonus_reward.currencies = []
+        bonus_reward.bonus.currencies = []
         expect(bonus_reward.formatted_currencies).to be_nil
+      end
+    end
+
+    describe '#formatted_no_more' do
+      it 'returns no_more when it exists' do
+        bonus_reward.bonus.no_more = '5 per day'
+        expect(bonus_reward.formatted_no_more).to eq('5 per day')
+      end
+
+      it 'returns "No limit" when no_more is nil' do
+        bonus_reward.bonus.no_more = nil
+        expect(bonus_reward.formatted_no_more).to eq('No limit')
+      end
+    end
+
+    describe '#formatted_totally_no_more' do
+      it 'returns formatted totally_no_more when it exists' do
+        bonus_reward.bonus.totally_no_more = 100
+        expect(bonus_reward.formatted_totally_no_more).to eq('100 total')
+      end
+
+      it 'returns "Unlimited" when totally_no_more is nil' do
+        bonus_reward.bonus.totally_no_more = nil
+        expect(bonus_reward.formatted_totally_no_more).to eq('Unlimited')
+      end
+    end
+
+    describe '#has_minimum_deposit_requirements?' do
+      it 'returns true when bonus has minimum deposit requirements' do
+        bonus_reward.bonus.currency_minimum_deposits = { 'USD' => 50.0 }
+        expect(bonus_reward.has_minimum_deposit_requirements?).to be true
+      end
+
+      it 'returns false when bonus has no minimum deposit requirements' do
+        bonus_reward.bonus.currency_minimum_deposits = {}
+        expect(bonus_reward.has_minimum_deposit_requirements?).to be false
       end
     end
   end
 
   # Edge cases and error conditions
   describe 'edge cases' do
-    describe 'with nil config' do
-      it 'handles nil config gracefully' do
+    describe 'with nil bonus data' do
+      it 'handles nil bonus data gracefully' do
+        bonus_reward.bonus.currencies = nil
+        bonus_reward.bonus.groups = nil
+        bonus_reward.bonus.tags = nil
         bonus_reward.config = nil
+        
         expect(bonus_reward.wager).to be_nil
         expect(bonus_reward.currencies).to eq([])
         expect(bonus_reward.groups).to eq([])
@@ -425,14 +470,14 @@ RSpec.describe BonusReward, type: :model do
       end
     end
 
-    describe 'with malformed arrays in config' do
-      it 'handles string arrays with extra spaces' do
-        bonus_reward.groups = '  VIP  ,  Regular  ,  Premium  '
-        expect(bonus_reward.groups).to eq(%w[VIP Regular Premium])
+    describe 'with malformed data in bonus' do
+      it 'handles string arrays with extra spaces in bonus tags' do
+        bonus_reward.bonus.tags = '  new_player  ,  loyalty  ,  weekend  '
+        expect(bonus_reward.tags).to eq(%w[new_player loyalty weekend])
       end
 
-      it 'filters out blank values' do
-        bonus_reward.tags = 'tag1, , tag2, , tag3'
+      it 'filters out blank values in bonus tags' do
+        bonus_reward.bonus.tags = 'tag1, , tag2, , tag3'
         expect(bonus_reward.tags).to eq(%w[tag1 tag2 tag3])
       end
     end
@@ -464,3 +509,4 @@ RSpec.describe BonusReward, type: :model do
     end
   end
 end
+
