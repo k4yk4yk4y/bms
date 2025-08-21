@@ -5,7 +5,7 @@ class Bonus < ApplicationRecord
   # Status and type constants
   STATUSES = %w[draft active inactive expired].freeze
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
-  PROJECTS = %w[VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
+  PROJECTS = %w[All VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
 
   # Permanent bonus types for preview cards
   PERMANENT_BONUS_TYPES = [

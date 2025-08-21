@@ -876,4 +876,22 @@ RSpec.describe Bonus, type: :model do
       expect(duplicate_bonus.errors[:code]).to include('has already been taken')
     end
   end
+
+  describe 'project validation' do
+    it 'accepts "All" as a valid project' do
+      bonus = build(:bonus, project: 'All')
+      expect(bonus).to be_valid
+    end
+
+    it 'accepts other valid projects' do
+      bonus = build(:bonus, project: 'VOLNA')
+      expect(bonus).to be_valid
+    end
+
+    it 'rejects invalid projects' do
+      bonus = build(:bonus, project: 'INVALID_PROJECT')
+      expect(bonus).not_to be_valid
+      expect(bonus.errors[:project]).to include('is not included in the list')
+    end
+  end
 end
