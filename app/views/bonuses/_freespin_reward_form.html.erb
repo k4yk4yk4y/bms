@@ -20,77 +20,62 @@
   <div class="card-body">
 
 <!-- Основные часто используемые параметры для freespins -->
-<div class="row">
-  <div class="col-md-6">
-    <h6 class="text-success mb-3">Основные параметры</h6>
-    
-    <!-- Games -->
-    <div class="mb-3">
-      <label for="freespin_reward_games" class="form-label">Игры (games)</label>
-      <input type="text" class="form-control" name="<%= field_prefix %>[games]" id="freespin_reward_games_<%= index %>" 
-              value="<%= existing_freespin&.games&.join(', ') %>">
-
-    </div>
-
-    <!-- Freespins Count -->
-    <div class="mb-3">
-      <label for="freespin_reward_spins_count" class="form-label">Количество фриспинов *</label>
-      <input type="number" class="form-control" name="<%= field_prefix %>[spins_count]" id="freespin_reward_spins_count_<%= index %>" 
-             min="1" required  value="<%= existing_freespin&.spins_count %>">
-
-    </div>
-
-    <!-- Bet Level -->
-    <div class="mb-3">
-      <label for="freespin_reward_bet_level" class="form-label">Уровень ставки (bet_level)</label>
-      <div class="input-group">
-        <input type="number" class="form-control" name="freespin_reward[bet_level]" id="freespin_reward_bet_level" 
-               step="0.01" min="0"  value="<%= existing_freespin&.bet_level %>">
-        <span class="input-group-text">€</span>
-      </div>
-
-    </div>
-
-    <!-- Max Win -->
-    <div class="mb-3">
-      <label class="form-label">Максимальный выигрыш (max_win)</label>
-      <div class="input-group">
-        <input type="text" class="form-control" name="freespin_reward[max_win]" id="freespin_reward_max_win" 
-                value="<%= existing_freespin&.max_win %>">
-        <span class="input-group-text">€ или x</span>
-      </div>
-
-    </div>
-
-    <!-- Note: Usage Limitations are now configured in Basic Information -->
+<div class="main-params-container">
+  <h6 class="text-success reward-section-header">Основные параметры</h6>
+  
+  <!-- Games -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_games" class="form-label">Игры (games)</label>
+    <input type="text" class="form-control" name="<%= field_prefix %>[games]" id="freespin_reward_games_<%= index %>" 
+            value="<%= existing_freespin&.games&.join(', ') %>">
   </div>
 
-  <div class="col-md-6">
-    <!-- Available -->
-    <div class="mb-3">
-      <label for="freespin_reward_available" class="form-label">Доступно (available)</label>
-      <input type="number" class="form-control" name="freespin_reward[available]" id="freespin_reward_available" 
-             min="0"  value="<%= existing_freespin&.available %>">
+  <!-- Freespins Count -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_spins_count" class="form-label">Количество фриспинов *</label>
+    <input type="number" class="form-control" name="<%= field_prefix %>[spins_count]" id="freespin_reward_spins_count_<%= index %>" 
+           min="1" required  value="<%= existing_freespin&.spins_count %>">
+  </div>
 
+  <!-- Bet Level -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_bet_level" class="form-label">Уровень ставки (bet_level)</label>
+    <div class="input-group">
+      <input type="number" class="form-control" name="freespin_reward[bet_level]" id="freespin_reward_bet_level" 
+             step="0.01" min="0"  value="<%= existing_freespin&.bet_level %>">
+      <span class="input-group-text">€</span>
     </div>
+  </div>
 
-    <!-- Code -->
-    <div class="mb-3">
-      <label for="freespin_reward_code" class="form-label">Код активации (code)</label>
-      <input type="text" class="form-control" name="freespin_reward[code]" id="freespin_reward_code" 
-              value="<%= existing_freespin&.code %>">
-
+  <!-- Max Win -->
+  <div class="reward-param-field mb-3">
+    <label class="form-label">Максимальный выигрыш (max_win)</label>
+    <div class="input-group">
+      <input type="text" class="form-control" name="freespin_reward[max_win]" id="freespin_reward_max_win" 
+              value="<%= existing_freespin&.max_win %>">
+      <span class="input-group-text">€ или x</span>
     </div>
+  </div>
 
-    <!-- Stag -->
-    <div class="mb-3">
-      <label for="freespin_reward_stag" class="form-label">Stag</label>
-      <input type="text" class="form-control" name="freespin_reward[stag]" id="freespin_reward_stag" 
-              value="<%= existing_freespin&.stag %>">
+  <!-- Available -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_available" class="form-label">Доступно (available)</label>
+    <input type="number" class="form-control" name="freespin_reward[available]" id="freespin_reward_available" 
+           min="0"  value="<%= existing_freespin&.available %>">
+  </div>
 
-    </div>
+  <!-- Code -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_code" class="form-label">Код активации (code)</label>
+    <input type="text" class="form-control" name="freespin_reward[code]" id="freespin_reward_code" 
+            value="<%= existing_freespin&.code %>">
+  </div>
 
-    <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are now configured in Basic Information -->
+  <!-- Stag -->
+  <div class="reward-param-field mb-3">
+    <label for="freespin_reward_stag" class="form-label">Stag</label>
+    <input type="text" class="form-control" name="freespin_reward[stag]" id="freespin_reward_stag" 
+            value="<%= existing_freespin&.stag %>">
   </div>
 </div>
 
@@ -107,101 +92,100 @@
         <h6 class="card-title mb-0">Дополнительные параметры</h6>
       </div>
       <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-3">
-              <label for="freespin_reward_auto_activate" class="form-label">Автоактивация</label>
-              <select class="form-select" name="freespin_reward[auto_activate]" id="freespin_reward_auto_activate">
-                <option value="">Не задано</option>
-                <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('auto_activate') == true %>>Да</option>
-                <option value="false" <%= 'selected' if existing_freespin&.get_advanced_param('auto_activate') == false %>>Нет</option>
-              </select>
-            </div>
+        <div class="advanced-params-container">
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_auto_activate" class="form-label">Автоактивация</label>
+            <select class="form-select" name="freespin_reward[auto_activate]" id="freespin_reward_auto_activate">
+              <option value="">Не задано</option>
+              <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('auto_activate') == true %>>Да</option>
+              <option value="false" <%= 'selected' if existing_freespin&.get_advanced_param('auto_activate') == false %>>Нет</option>
+            </select>
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_duration" class="form-label">Длительность</label>
-              <input type="text" class="form-control" name="freespin_reward[duration]" 
-                     id="freespin_reward_duration"  
-                     value="<%= existing_freespin&.get_advanced_param('duration') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_duration" class="form-label">Длительность</label>
+            <input type="text" class="form-control" name="freespin_reward[duration]" 
+                   id="freespin_reward_duration"  
+                   value="<%= existing_freespin&.get_advanced_param('duration') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_activation_duration" class="form-label">Время активации</label>
-              <input type="text" class="form-control" name="freespin_reward[activation_duration]" 
-                     id="freespin_reward_activation_duration"  
-                     value="<%= existing_freespin&.get_advanced_param('activation_duration') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_activation_duration" class="form-label">Время активации</label>
+            <input type="text" class="form-control" name="freespin_reward[activation_duration]" 
+                   id="freespin_reward_activation_duration"  
+                   value="<%= existing_freespin&.get_advanced_param('activation_duration') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_email_template" class="form-label">Email шаблон</label>
-              <input type="text" class="form-control" name="freespin_reward[email_template]" 
-                     id="freespin_reward_email_template"  
-                     value="<%= existing_freespin&.get_advanced_param('email_template') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_email_template" class="form-label">Email шаблон</label>
+            <input type="text" class="form-control" name="freespin_reward[email_template]" 
+                   id="freespin_reward_email_template"  
+                   value="<%= existing_freespin&.get_advanced_param('email_template') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_range" class="form-label">Диапазон (range)</label>
-              <input type="text" class="form-control" name="freespin_reward[range]" 
-                     id="freespin_reward_range"  
-                     value="<%= existing_freespin&.get_advanced_param('range') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_range" class="form-label">Диапазон (range)</label>
+            <input type="text" class="form-control" name="freespin_reward[range]" 
+                   id="freespin_reward_range"  
+                   value="<%= existing_freespin&.get_advanced_param('range') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_last_login_country" class="form-label">Страна последнего входа</label>
-              <input type="text" class="form-control" name="freespin_reward[last_login_country]" 
-                     id="freespin_reward_last_login_country"  
-                     value="<%= existing_freespin&.get_advanced_param('last_login_country') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_last_login_country" class="form-label">Страна последнего входа</label>
+            <input type="text" class="form-control" name="freespin_reward[last_login_country]" 
+                   id="freespin_reward_last_login_country"  
+                   value="<%= existing_freespin&.get_advanced_param('last_login_country') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_profile_country" class="form-label">Страна профиля</label>
-              <input type="text" class="form-control" name="freespin_reward[profile_country]" 
-                     id="freespin_reward_profile_country"  
-                     value="<%= existing_freespin&.get_advanced_param('profile_country') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_profile_country" class="form-label">Страна профиля</label>
+            <input type="text" class="form-control" name="freespin_reward[profile_country]" 
+                   id="freespin_reward_profile_country"  
+                   value="<%= existing_freespin&.get_advanced_param('profile_country') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_current_ip_country" class="form-label">Страна текущего IP</label>
-              <input type="text" class="form-control" name="freespin_reward[current_ip_country]" 
-                     id="freespin_reward_current_ip_country"  
-                     value="<%= existing_freespin&.get_advanced_param('current_ip_country') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_current_ip_country" class="form-label">Страна текущего IP</label>
+            <input type="text" class="form-control" name="freespin_reward[current_ip_country]" 
+                   id="freespin_reward_current_ip_country"  
+                   value="<%= existing_freespin&.get_advanced_param('current_ip_country') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_emails" class="form-label">Email адреса</label>
-              <input type="text" class="form-control" name="freespin_reward[emails]" 
-                     id="freespin_reward_emails"  
-                     value="<%= existing_freespin&.get_advanced_param('emails') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_emails" class="form-label">Email адреса</label>
+            <input type="text" class="form-control" name="freespin_reward[emails]" 
+                   id="freespin_reward_emails"  
+                   value="<%= existing_freespin&.get_advanced_param('emails') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_deposit_payment_systems" class="form-label">Платежные системы депозита</label>
-              <input type="text" class="form-control" name="freespin_reward[deposit_payment_systems]" 
-                     id="freespin_reward_deposit_payment_systems"  
-                     value="<%= existing_freespin&.get_advanced_param('deposit_payment_systems') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_deposit_payment_systems" class="form-label">Платежные системы депозита</label>
+            <input type="text" class="form-control" name="freespin_reward[deposit_payment_systems]" 
+                   id="freespin_reward_deposit_payment_systems"  
+                   value="<%= existing_freespin&.get_advanced_param('deposit_payment_systems') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_cashout_payment_systems" class="form-label">Платежные системы вывода</label>
-              <input type="text" class="form-control" name="freespin_reward[cashout_payment_systems]" 
-                     id="freespin_reward_cashout_payment_systems"  
-                     value="<%= existing_freespin&.get_advanced_param('cashout_payment_systems') %>">
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_cashout_payment_systems" class="form-label">Платежные системы вывода</label>
+            <input type="text" class="form-control" name="freespin_reward[cashout_payment_systems]" 
+                   id="freespin_reward_cashout_payment_systems"  
+                   value="<%= existing_freespin&.get_advanced_param('cashout_payment_systems') %>">
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_user_can_have_duplicates" class="form-label">Дубликаты пользователям</label>
-              <select class="form-select" name="freespin_reward[user_can_have_duplicates]" id="freespin_reward_user_can_have_duplicates">
-                <option value="">Не задано</option>
-                <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_duplicates') == true %>>Да</option>
-                <option value="false" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_duplicates') == false %>>Нет</option>
-              </select>
-            </div>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_user_can_have_duplicates" class="form-label">Дубликаты пользователям</label>
+            <select class="form-select" name="freespin_reward[user_can_have_duplicates]" id="freespin_reward_user_can_have_duplicates">
+              <option value="">Не задано</option>
+              <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_duplicates') == true %>>Да</option>
+              <option value="false" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_duplicates') == false %>>Нет</option>
+            </select>
+          </div>
 
-            <div class="mb-3">
-              <label for="freespin_reward_user_can_have_disposable_email" class="form-label">Одноразовые email</label>
-              <select class="form-select" name="freespin_reward[user_can_have_disposable_email]" id="freespin_reward_user_can_have_disposable_email">
-                <option value="">Не задано</option>
-                <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_disposable_email') == true %>>Разрешить</option>
+          <div class="reward-param-field mb-3">
+            <label for="freespin_reward_user_can_have_disposable_email" class="form-label">Одноразовые email</label>
+            <select class="form-select" name="freespin_reward[user_can_have_disposable_email]" id="freespin_reward_user_can_have_disposable_email">
+              <option value="">Не задано</option>
+              <option value="true" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_disposable_email') == true %>>Разрешить</option>
                 <option value="false" <%= 'selected' if existing_freespin&.get_advanced_param('user_can_have_disposable_email') == false %>>Запретить</option>
               </select>
             </div>

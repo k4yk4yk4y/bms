@@ -3,6 +3,8 @@ class FreechipReward < ApplicationRecord
 
   belongs_to :bonus
 
+  serialize :config, coder: JSON
+
   validates :chip_value, presence: true, numericality: { greater_than: 0 }
   validates :chips_count, presence: true, numericality: { greater_than: 0 }
 

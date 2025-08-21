@@ -230,108 +230,96 @@
         </div>
         <div class="card-body">
           <!-- Основные часто используемые параметры -->
-          <div class="row">
-            <div class="col-md-6">
-              <h6 class="text-primary mb-3">Основные параметры</h6>
-              
-              <!-- Тип бонуса -->
-              <div class="mb-3">
-                <label class="form-label">Тип бонуса (bonus_type)</label>
-                <div class="btn-group w-100" role="group">
-                  <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_fixed_${index}" value="fixed" checked onchange="toggleBonusType('fixed', ${index})">
-                  <label class="btn btn-outline-primary" for="bonus_type_fixed_${index}">Фиксированная сумма</label>
-                  <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_percentage_${index}" value="percentage" onchange="toggleBonusType('percentage', ${index})">
-                  <label class="btn btn-outline-primary" for="bonus_type_percentage_${index}">Процент</label>
-                </div>
+          <div class="main-params-container">
+            <h6 class="text-primary reward-section-header">Основные параметры</h6>
+            
+            <!-- Тип бонуса -->
+            <div class="reward-button-group mb-3">
+              <label class="form-label">Тип бонуса (bonus_type)</label>
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_fixed_${index}" value="fixed" checked onchange="toggleBonusType('fixed', ${index})">
+                <label class="btn btn-outline-primary" for="bonus_type_fixed_${index}">Фиксированная сумма</label>
+                <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_percentage_${index}" value="percentage" onchange="toggleBonusType('percentage', ${index})">
+                <label class="btn btn-outline-primary" for="bonus_type_percentage_${index}">Процент</label>
               </div>
+            </div>
 
-              <!-- Amount -->
-              <div class="mb-3" id="amount_field_${index}">
-                <label class="form-label">Сумма бонуса (amount)</label>
+            <!-- Amount -->
+            <div class="reward-param-field mb-3" id="amount_field_${index}">
+              <label class="form-label">Сумма бонуса (amount)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="bonus_rewards[${index}][amount]" step="0.01" min="0">
+                <span class="input-group-text">USD</span>
+              </div>
+            </div>
+
+            <!-- Percentage -->
+            <div class="reward-param-field mb-3" id="percentage_field_${index}" style="display: none;">
+              <label class="form-label">Процент от депозита (percentage)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+
+            <!-- Wager -->
+            <div class="reward-param-field mb-3">
+              <label class="form-label">Вагер (wager)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="bonus_rewards[${index}][wager]" step="0.01" min="0">
+                <span class="input-group-text">x</span>
+              </div>
+            </div>
+
+            <!-- Max Win -->
+            <div class="reward-param-field-wide mb-3">
+              <label class="form-label">Максимальный выигрыш (max_win)</label>
+              <div class="btn-group w-100 mb-2" role="group">
+                <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_fixed_${index}" value="fixed" checked onchange="toggleMaxWinType('fixed', ${index})">
+                <label class="btn btn-outline-secondary" for="max_win_fixed_${index}">Фиксированная сумма</label>
+                <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_multiplier_${index}" value="multiplier" onchange="toggleMaxWinType('multiplier', ${index})">
+                <label class="btn btn-outline-secondary" for="max_win_multiplier_${index}">Множитель (x5)</label>
+              </div>
+              <div id="max_win_fixed_field_${index}">
                 <div class="input-group">
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][amount]" step="0.01" min="0">
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_fixed]" step="0.01" min="0">
                   <span class="input-group-text">USD</span>
                 </div>
               </div>
-
-              <!-- Percentage -->
-              <div class="mb-3" id="percentage_field_${index}" style="display: none;">
-                <label class="form-label">Процент от депозита (percentage)</label>
+              <div id="max_win_multiplier_field_${index}" style="display: none;">
                 <div class="input-group">
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
-                  <span class="input-group-text">%</span>
-                </div>
-              </div>
-
-              <!-- Wager -->
-              <div class="mb-3">
-                <label class="form-label">Вагер (wager)</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][wager]" step="0.01" min="0">
                   <span class="input-group-text">x</span>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_multiplier]" step="0.01" min="0">
                 </div>
-
-              </div>
-
-              <!-- Max Win -->
-              <div class="mb-3">
-                <label class="form-label">Максимальный выигрыш (max_win)</label>
-                <div class="btn-group w-100 mb-2" role="group">
-                  <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_fixed_${index}" value="fixed" checked onchange="toggleMaxWinType('fixed', ${index})">
-                  <label class="btn btn-outline-secondary" for="max_win_fixed_${index}">Фиксированная сумма</label>
-                  <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_multiplier_${index}" value="multiplier" onchange="toggleMaxWinType('multiplier', ${index})">
-                  <label class="btn btn-outline-secondary" for="max_win_multiplier_${index}">Множитель (x5)</label>
-                </div>
-                <div id="max_win_fixed_field_${index}">
-                  <div class="input-group">
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_fixed]" step="0.01" min="0">
-                    <span class="input-group-text">USD</span>
-                  </div>
-                </div>
-                <div id="max_win_multiplier_field_${index}" style="display: none;">
-                  <div class="input-group">
-                    <span class="input-group-text">x</span>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_multiplier]" step="0.01" min="0">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Available -->
-              <div class="mb-3">
-                <label class="form-label">Доступно (available)</label>
-                <input type="number" class="form-control" name="bonus_rewards[${index}][available]" min="0" >
-
               </div>
             </div>
-            
-            <div class="col-md-6">
-              <!-- Code -->
-              <div class="mb-3">
-                <label class="form-label">Код активации (code)</label>
-                <input type="text" class="form-control" name="bonus_rewards[${index}][code]" >
 
+            <!-- Available -->
+            <div class="reward-param-field mb-3">
+              <label class="form-label">Доступно (available)</label>
+              <input type="number" class="form-control" name="bonus_rewards[${index}][available]" min="0">
+            </div>
+
+            <!-- Code -->
+            <div class="reward-param-field mb-3">
+              <label class="form-label">Код активации (code)</label>
+              <input type="text" class="form-control" name="bonus_rewards[${index}][code]">
+            </div>
+
+            <!-- User can have duplicates -->
+            <div class="reward-checkbox-field mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_${index}" value="true">
+                <label class="form-check-label" for="user_can_have_duplicates_${index}">
+                  Пользователь может получить дубликаты (user_can_have_duplicates)
+                </label>
               </div>
+            </div>
 
-              <!-- Note: Currencies, Groups, Tags, and Minimum Deposit are configured in Basic Information -->
-
-              <!-- User can have duplicates -->
-              <div class="mb-3">
-                <div class="form-check">
-                  <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_${index}" value="true">
-                  <label class="form-check-label" for="user_can_have_duplicates_${index}">
-                    Пользователь может получить дубликаты (user_can_have_duplicates)
-                  </label>
-                </div>
-              </div>
-
-              <!-- Stag -->
-              <div class="mb-3">
-                <label class="form-label">Stag (stag)</label>
-                <input type="text" class="form-control" name="bonus_rewards[${index}][stag]" >
-
-              </div>
-
-              <!-- Note: Usage Limitations and Wagering Strategy are configured in Basic Information -->
+            <!-- Stag -->
+            <div class="reward-param-field mb-3">
+              <label class="form-label">Stag (stag)</label>
+              <input type="text" class="form-control" name="bonus_rewards[${index}][stag]">
             </div>
           </div>
 
@@ -342,124 +330,123 @@
               <span id="advanced-params-toggle-text-${index}">Показать дополнительные</span>
             </button>
             <div id="advanced-params-section-${index}" style="display: none;" class="mt-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <!-- Range -->
-                  <div class="mb-3">
-                    <label class="form-label">Range</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][range]">
+              <div class="advanced-params-container">
+                <!-- Range -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Range</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][range]">
+                </div>
+                <!-- Last Login Country -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Last Login Country</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][last_login_country]">
+                </div>
+                <!-- Profile Country -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Profile Country</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][profile_country]">
+                </div>
+                <!-- Current IP Country -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Current IP Country</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][current_ip_country]">
+                </div>
+                <!-- Emails -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Emails</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][emails]">
+                </div>
+                <!-- Deposit Payment Systems -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Deposit Payment Systems</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][deposit_payment_systems]">
+                </div>
+                <!-- Cashout Payment Systems -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Cashout Payment Systems</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][cashout_payment_systems]">
+                </div>
+                <!-- User Can Have Disposable Email -->
+                <div class="reward-checkbox-field mb-3">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_disposable_email]" id="user_can_have_disposable_email_${index}" value="true">
+                    <label class="form-check-label" for="user_can_have_disposable_email_${index}">
+                      User Can Have Disposable Email
+                    </label>
                   </div>
-                  <!-- Last Login Country -->
-                  <div class="mb-3">
-                    <label class="form-label">Last Login Country</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][last_login_country]">
-                  </div>
-                  <!-- Profile Country -->
-                  <div class="mb-3">
-                    <label class="form-label">Profile Country</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][profile_country]">
-                  </div>
-                  <!-- Current IP Country -->
-                  <div class="mb-3">
-                    <label class="form-label">Current IP Country</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][current_ip_country]">
-                  </div>
-                  <!-- Emails -->
-                  <div class="mb-3">
-                    <label class="form-label">Emails</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][emails]">
-                  </div>
-                  <!-- Deposit Payment Systems -->
-                  <div class="mb-3">
-                    <label class="form-label">Deposit Payment Systems</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][deposit_payment_systems]">
-                  </div>
-                  <!-- Cashout Payment Systems -->
-                  <div class="mb-3">
-                    <label class="form-label">Cashout Payment Systems</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][cashout_payment_systems]">
-                  </div>
-                  <!-- User Can Have Disposable Email -->
-                  <div class="mb-3">
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_disposable_email]" id="user_can_have_disposable_email_${index}" value="true">
-                      <label class="form-check-label" for="user_can_have_disposable_email_${index}">
-                        User Can Have Disposable Email
-                      </label>
-                    </div>
-                  </div>
-                  <!-- Total Deposits -->
-                  <div class="mb-3">
-                    <label class="form-label">Total Deposits</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][total_deposits]" step="0.01" min="0">
-                  </div>
-                  <!-- Deposits Sum -->
-                  <div class="mb-3">
-                    <label class="form-label">Deposits Sum</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_sum]" step="0.01" min="0">
-                  </div>
-                  <!-- Loss Sum -->
-                  <div class="mb-3">
-                    <label class="form-label">Loss Sum</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][loss_sum]" step="0.01" min="0">
-                  </div>
-                  <!-- Deposits Count -->
-                  <div class="mb-3">
-                    <label class="form-label">Deposits Count</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_count]" min="0">
-                  </div>
-                  <!-- Spend Sum -->
-                  <div class="mb-3">
-                    <label class="form-label">Spend Sum</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][spend_sum]" step="0.01" min="0">
-                  </div>
-                  <!-- Category Loss Sum -->
-                  <div class="mb-3">
-                    <label class="form-label">Category Loss Sum</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][category_loss_sum]" step="0.01" min="0">
-                  </div>
-                  <!-- Wager Sum -->
-                  <div class="mb-3">
-                    <label class="form-label">Wager Sum</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][wager_sum]" step="0.01" min="0">
-                  </div>
-                  <!-- Bets Count -->
-                  <div class="mb-3">
-                    <label class="form-label">Bets Count</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][bets_count]" min="0">
-                  </div>
-                  <!-- Affiliates User -->
-                  <div class="mb-3">
-                    <label class="form-label">Affiliates User</label>
-                    <input type="text" class="form-control" name="bonus_rewards[${index}][affiliates_user]">
-                  </div>
-                  <!-- Balance -->
-                  <div class="mb-3">
-                    <label class="form-label">Balance</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][balance]" step="0.01" min="0">
-                  </div>
-                  <!-- Cashout -->
-                  <div class="mb-3">
-                    <label class="form-label">Cashout</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][cashout]" step="0.01" min="0">
-                  </div>
-                  <!-- Chargeable Comp Points -->
-                  <div class="mb-3">
-                    <label class="form-label">Chargeable Comp Points</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][chargeable_comp_points]" step="0.01" min="0">
-                  </div>
-                  <!-- Persistent Comp Points -->
-                  <div class="mb-3">
-                    <label class="form-label">Persistent Comp Points</label>
-                    <input type="number" class="form-control" name="bonus_rewards[${index}][persistent_comp_points]" step="0.01" min="0">
-                  </div>
-                  <!-- Date of Birth -->
-                  <div class="mb-3">
-                    <label class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" name="bonus_rewards[${index}][date_of_birth]">
-                  </div>
-                  <!-- Deposit -->
-                  <div class="mb-3">
+                </div>
+                <!-- Total Deposits -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Total Deposits</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][total_deposits]" step="0.01" min="0">
+                </div>
+                <!-- Deposits Sum -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Deposits Sum</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_sum]" step="0.01" min="0">
+                </div>
+                <!-- Loss Sum -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Loss Sum</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][loss_sum]" step="0.01" min="0">
+                </div>
+                <!-- Deposits Count -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Deposits Count</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][deposits_count]" min="0">
+                </div>
+                <!-- Spend Sum -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Spend Sum</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][spend_sum]" step="0.01" min="0">
+                </div>
+                <!-- Category Loss Sum -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Category Loss Sum</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][category_loss_sum]" step="0.01" min="0">
+                </div>
+                <!-- Wager Sum -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Wager Sum</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][wager_sum]" step="0.01" min="0">
+                </div>
+                <!-- Bets Count -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Bets Count</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][bets_count]" min="0">
+                </div>
+                <!-- Affiliates User -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Affiliates User</label>
+                  <input type="text" class="form-control" name="bonus_rewards[${index}][affiliates_user]">
+                </div>
+                <!-- Balance -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Balance</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][balance]" step="0.01" min="0">
+                </div>
+                <!-- Cashout -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Cashout</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][cashout]" step="0.01" min="0">
+                </div>
+                <!-- Chargeable Comp Points -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Chargeable Comp Points</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][chargeable_comp_points]" step="0.01" min="0">
+                </div>
+                <!-- Persistent Comp Points -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Persistent Comp Points</label>
+                  <input type="number" class="form-control" name="bonus_rewards[${index}][persistent_comp_points]" step="0.01" min="0">
+                </div>
+                <!-- Date of Birth -->
+                <div class="reward-param-field mb-3">
+                  <label class="form-label">Date of Birth</label>
+                  <input type="date" class="form-control" name="bonus_rewards[${index}][date_of_birth]">
+                </div>
+                <!-- Deposit -->
+                <div class="reward-param-field mb-3">
                     <label class="form-label">Deposit</label>
                     <input type="number" class="form-control" name="bonus_rewards[${index}][deposit]" step="0.01" min="0">
                   </div>

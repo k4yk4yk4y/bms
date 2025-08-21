@@ -3,6 +3,8 @@ class MaterialPrizeReward < ApplicationRecord
 
   belongs_to :bonus
 
+  serialize :config, coder: JSON
+
   validates :prize_name, presence: true
   validates :prize_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 

@@ -247,6 +247,32 @@ RSpec.describe BonusesController, type: :controller do
   end
 
   describe 'POST #create' do
+    context 'with valid parameters including groups and minimum_deposit' do
+      let(:valid_params) do
+        {
+          bonus: {
+            name: 'Test Bonus',
+            event: 'deposit',
+            status: 'active',
+            project: 'All',
+            dsl_tag: 'test_tag',
+            availability_start_date: 1.day.from_now,
+            availability_end_date: 1.week.from_now,
+            groups: 'VIP,Regular',
+            minimum_deposit: '10',
+            currencies: [ 'USD' ],
+            currency_minimum_deposits: { 'USD' => '10' }
+          }
+        }
+      end
+
+      it 'permits groups and minimum_deposit parameters' do
+        post :create, params: valid_params
+        expect(response).to have_http_status(:redirect)
+        # The bonus should be created successfully (redirect to show page)
+      end
+    end
+
     let(:valid_attributes) do
       {
         name: 'Test Bonus',
@@ -769,6 +795,313 @@ RSpec.describe BonusesController, type: :controller do
           freespin_reward: { spins_count: 0 }  # Invalid spins count
         }
         expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
+
+  describe "multiple rewards functionality" do
+    let(:bonus) { create(:bonus) }
+    let(:valid_bonus_params) do
+      {
+        name: "Test Bonus",
+        code: "TEST123",
+        event: "deposit",
+        status: "draft",
+        availability_start_date: Date.current,
+        availability_end_date: Date.current + 30.days,
+        currencies: [ "USD", "EUR" ],
+        minimum_deposit: 50.0,
+        currency_minimum_deposits: { "USD" => 50.0, "EUR" => 45.0 }
+      }
+    end
+
+    describe "multiple bonus rewards" do
+      it "creates multiple bonus rewards" do
+        expect {
+          post :create, params: {
+            bonus: valid_bonus_params,
+            bonus_rewards: {
+              "0" => { amount: "100", percentage: "10", wager: "1000" },
+              "1" => { amount: "200", percentage: "20", wager: "2000" }
+            }
+          }
+        }.to change(Bonus, :count).by(1)
+
+        bonus = Bonus.last
+        expect(bonus).to be_present
+        expect(bonus.bonus_rewards.count).to eq(2)
+        expect(bonus.bonus_rewards.pluck(:amount)).to contain_exactly(100, 200)
+      end
+
+      it "updates existing bonus rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:bonus_reward, bonus: bonus, amount: 100)
+        reward2 = create(:bonus_reward, bonus: bonus, amount: 200)
+
+        params = valid_bonus_params.merge(
+          bonus_rewards: {
+            "0" => { id: reward1.id, amount: "150", percentage: "15" },
+            "1" => { id: reward2.id, amount: "250", percentage: "25" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.amount).to eq(150)
+        expect(reward2.amount).to eq(250)
+      end
+
+      it "removes rewards not in params" do
+        bonus = create(:bonus)
+        reward1 = create(:bonus_reward, bonus: bonus, amount: 100)
+        reward2 = create(:bonus_reward, bonus: bonus, amount: 200)
+
+        params = valid_bonus_params.merge(
+          bonus_rewards: {
+            "0" => { id: reward1.id, amount: "150" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        expect(bonus.bonus_rewards.count).to eq(1)
+        expect(bonus.bonus_rewards.first.id).to eq(reward1.id)
+      end
+    end
+
+    describe "multiple freespin rewards" do
+      it "creates multiple freespin rewards" do
+        params = valid_bonus_params.merge(
+          freespin_rewards: {
+            "0" => { spins_count: "50", games: "slot1,slot2", bet_level: "0.10" },
+            "1" => { spins_count: "100", games: "slot3,slot4", bet_level: "0.20" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(FreespinReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.freespin_rewards.count).to eq(2)
+        expect(bonus.freespin_rewards.pluck(:spins_count)).to contain_exactly(50, 100)
+      end
+
+      it "updates existing freespin rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:freespin_reward, bonus: bonus, spins_count: 50)
+        reward2 = create(:freespin_reward, bonus: bonus, spins_count: 100)
+
+        params = valid_bonus_params.merge(
+          freespin_rewards: {
+            "0" => { id: reward1.id, spins_count: "75" },
+            "1" => { id: reward2.id, spins_count: "125" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.spins_count).to eq(75)
+        expect(reward2.spins_count).to eq(125)
+      end
+    end
+
+    describe "multiple bonus_buy rewards" do
+      it "creates multiple bonus_buy rewards" do
+        params = valid_bonus_params.merge(
+          bonus_buy_rewards: {
+            "0" => { buy_amount: "10", multiplier: "2", games: "slot1,slot2" },
+            "1" => { buy_amount: "20", multiplier: "3", games: "slot3,slot4" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(BonusBuyReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.bonus_buy_rewards.count).to eq(2)
+        expect(bonus.bonus_buy_rewards.pluck(:buy_amount)).to contain_exactly(10, 20)
+      end
+
+      it "updates existing bonus_buy rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:bonus_buy_reward, bonus: bonus, buy_amount: 10, multiplier: 2)
+        reward2 = create(:bonus_buy_reward, bonus: bonus, buy_amount: 20, multiplier: 3)
+
+        params = valid_bonus_params.merge(
+          bonus_buy_rewards: {
+            "0" => { id: reward1.id, buy_amount: "15", multiplier: "2.5" },
+            "1" => { id: reward2.id, buy_amount: "25", multiplier: "3.5" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.buy_amount).to eq(15)
+        expect(reward2.buy_amount).to eq(25)
+      end
+    end
+
+    describe "multiple comp_point rewards" do
+      it "creates multiple comp_point rewards" do
+        params = valid_bonus_params.merge(
+          comp_point_rewards: {
+            "0" => { points: "100", title: "Comp Points 1" },
+            "1" => { points: "200", title: "Comp Points 2" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(CompPointReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.comp_point_rewards.count).to eq(2)
+        expect(bonus.comp_point_rewards.pluck(:points_amount)).to contain_exactly(100, 200)
+      end
+
+      it "updates existing comp_point rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:comp_point_reward, bonus: bonus, points_amount: 100)
+        reward2 = create(:comp_point_reward, bonus: bonus, points_amount: 200)
+
+        params = valid_bonus_params.merge(
+          comp_point_rewards: {
+            "0" => { id: reward1.id, points: "150" },
+            "1" => { id: reward2.id, points: "250" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.points_amount).to eq(150)
+        expect(reward2.points_amount).to eq(250)
+      end
+    end
+
+    describe "multiple bonus_code rewards" do
+      it "creates multiple bonus_code rewards" do
+        params = valid_bonus_params.merge(
+          bonus_code_rewards: {
+            "0" => { set_bonus_code: "CODE1", title: "Bonus Code 1" },
+            "1" => { set_bonus_code: "CODE2", title: "Bonus Code 2" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(BonusCodeReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.bonus_code_rewards.count).to eq(2)
+        expect(bonus.bonus_code_rewards.pluck(:code)).to contain_exactly("CODE1", "CODE2")
+      end
+
+      it "updates existing bonus_code rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:bonus_code_reward, bonus: bonus, set_bonus_code: "CODE1")
+        reward2 = create(:bonus_code_reward, bonus: bonus, set_bonus_code: "CODE2")
+
+        params = valid_bonus_params.merge(
+          bonus_code_rewards: {
+            "0" => { id: reward1.id, set_bonus_code: "CODE1_UPDATED" },
+            "1" => { id: reward2.id, set_bonus_code: "CODE2_UPDATED" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.set_bonus_code).to eq("CODE1_UPDATED")
+        expect(reward2.set_bonus_code).to eq("CODE2_UPDATED")
+      end
+    end
+
+    describe "multiple freechip rewards" do
+      it "creates multiple freechip rewards" do
+        params = valid_bonus_params.merge(
+          freechip_rewards: {
+            "0" => { chip_value: "1", chips_count: "50", title: "Freechips 1" },
+            "1" => { chip_value: "2", chips_count: "25", title: "Freechips 2" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(FreechipReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.freechip_rewards.count).to eq(2)
+        expect(bonus.freechip_rewards.pluck(:chip_value)).to contain_exactly(1, 2)
+      end
+
+      it "updates existing freechip rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:freechip_reward, bonus: bonus, chip_value: 1, chips_count: 50)
+        reward2 = create(:freechip_reward, bonus: bonus, chip_value: 2, chips_count: 25)
+
+        params = valid_bonus_params.merge(
+          freechip_rewards: {
+            "0" => { id: reward1.id, chip_value: "1.5", chips_count: "75" },
+            "1" => { id: reward2.id, chip_value: "2.5", chips_count: "35" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.chip_value).to eq(1.5)
+        expect(reward2.chip_value).to eq(2.5)
+      end
+    end
+
+    describe "multiple material_prize rewards" do
+      it "creates multiple material_prize rewards" do
+        params = valid_bonus_params.merge(
+          material_prize_rewards: {
+            "0" => { prize_name: "iPhone", prize_value: "1000", title: "Prize 1" },
+            "1" => { prize_name: "iPad", prize_value: "800", title: "Prize 2" }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(MaterialPrizeReward, :count).by(2)
+
+        bonus = Bonus.last
+        expect(bonus.material_prize_rewards.count).to eq(2)
+        expect(bonus.material_prize_rewards.pluck(:prize_name)).to contain_exactly("iPhone", "iPad")
+      end
+
+      it "updates existing material_prize rewards" do
+        bonus = create(:bonus)
+        reward1 = create(:material_prize_reward, bonus: bonus, prize_name: "iPhone", prize_value: 1000)
+        reward2 = create(:material_prize_reward, bonus: bonus, prize_name: "iPad", prize_value: 800)
+
+        params = valid_bonus_params.merge(
+          material_prize_rewards: {
+            "0" => { id: reward1.id, prize_name: "iPhone Pro", prize_value: "1200" },
+            "1" => { id: reward2.id, prize_name: "iPad Pro", prize_value: "1000" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward1.reload
+        reward2.reload
+        expect(reward1.prize_name).to eq("iPhone Pro")
+        expect(reward2.prize_name).to eq("iPad Pro")
       end
     end
   end
