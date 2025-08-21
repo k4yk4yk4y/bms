@@ -69,43 +69,7 @@
       </div>
     </div>
 
-    <!-- Max Win -->
-    <div class="reward-param-field-wide mb-3">
-      <%
-        max_win_value = existing_reward&.max_win
-        is_multiplier = max_win_value.to_s.include?('x')
-        multiplier_value = is_multiplier ? max_win_value.to_s.gsub('x', '') : ''
-        fixed_value = is_multiplier ? '' : max_win_value
-      %>
-      <label class="form-label">Максимальный выигрыш (max_win)</label>
-      <div class="btn-group w-100 mb-2" role="group">
-        <input type="radio" class="btn-check" name="max_win_type" id="max_win_fixed" value="fixed" 
-               <%= 'checked' unless is_multiplier %>
-               onchange="toggleMaxWinType('fixed')">
-        <label class="btn btn-outline-secondary btn-sm" for="max_win_fixed">Фиксированная сумма</label>
 
-        <input type="radio" class="btn-check" name="max_win_type" id="max_win_multiplier" value="multiplier"
-               <%= 'checked' if is_multiplier %>
-               onchange="toggleMaxWinType('multiplier')">
-        <label class="btn btn-outline-secondary btn-sm" for="max_win_multiplier">Множитель (x5)</label>
-      </div>
-
-      <div id="max_win_fixed_field" <%= 'style="display: none;"' if is_multiplier %>>
-        <div class="input-group">
-          <input type="number" class="form-control" name="bonus_reward[max_win_fixed]" id="bonus_reward_max_win_fixed" 
-                 step="0.01" min="0" value="<%= fixed_value %>">
-          <span class="input-group-text"><%= bonus.currency || 'USD' %></span>
-        </div>
-      </div>
-
-      <div id="max_win_multiplier_field" <%= 'style="display: none;"' unless is_multiplier %>>
-        <div class="input-group">
-          <span class="input-group-text">x</span>
-          <input type="number" class="form-control" name="bonus_reward[max_win_multiplier]" id="bonus_reward_max_win_multiplier" 
-                 step="1" min="1" value="<%= multiplier_value %>">
-        </div>
-      </div>
-    </div>
 
     <!-- Available -->
     <div class="reward-param-field mb-3">
@@ -133,12 +97,6 @@
       </div>
     </div>
 
-    <!-- Stag -->
-    <div class="reward-param-field mb-3">
-      <label for="bonus_reward_stag" class="form-label">Stag</label>
-      <input type="text" class="form-control" name="bonus_reward[stag]" id="bonus_reward_stag" 
-             value="<%= existing_reward&.stag %>">
-    </div>
 </div>
 
 <!-- Раскрывающийся список для редко используемых параметров -->
@@ -390,18 +348,7 @@
     }
   }
 
-  function toggleMaxWinType(type) {
-    const fixedField = document.getElementById('max_win_fixed_field');
-    const multiplierField = document.getElementById('max_win_multiplier_field');
-    
-    if (type === 'fixed') {
-      fixedField.style.display = 'block';
-      multiplierField.style.display = 'none';
-    } else {
-      fixedField.style.display = 'none';
-      multiplierField.style.display = 'block';
-    }
-  }
+
 
   function toggleAdvancedParams() {
     const section = document.getElementById('advanced-params-section');

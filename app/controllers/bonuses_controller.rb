@@ -326,7 +326,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_reward].present?
 
     permitted = params.require(:bonus_reward).permit(
-      :reward_type, :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+      :reward_type, :bonus_type, :amount, :percentage, :wager, 
       :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
       # Advanced parameters
       :range, :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -339,16 +339,7 @@ class BonusesController < ApplicationController
       currencies: []
     )
 
-    # Process max_win logic
-    if params[:max_win_type] == "multiplier" && permitted[:max_win_multiplier].present?
-      permitted[:max_win] = "x#{permitted[:max_win_multiplier]}"
-    elsif permitted[:max_win_fixed].present?
-      permitted[:max_win] = permitted[:max_win_fixed]
-    end
 
-    # Clean up temporary fields
-    permitted.delete(:max_win_fixed)
-    permitted.delete(:max_win_multiplier)
     permitted.delete(:bonus_type)
 
     permitted
@@ -411,7 +402,7 @@ class BonusesController < ApplicationController
     return {} unless params[:freespin_reward].present?
 
     permitted = params.require(:freespin_reward).permit(
-      :spins_count, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
+      :spins_count, :bet_level, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Currency freespin bet levels
       :currency_freespin_bet_levels,
@@ -450,7 +441,7 @@ class BonusesController < ApplicationController
     # Set common parameters
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
     reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
     reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
     reward.available = reward_params[:available] if reward_params[:available].present?
@@ -486,7 +477,7 @@ class BonusesController < ApplicationController
     # Update common parameters
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
     reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
     reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
     reward.available = reward_params[:available] if reward_params[:available].present?
@@ -518,7 +509,7 @@ class BonusesController < ApplicationController
 
     result = rewards_params.values.map do |reward_params|
       permitted = reward_params.permit(
-        :id, :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+        :id, :bonus_type, :amount, :percentage, :wager, 
         :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
         # Advanced parameters
         :range, :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -551,7 +542,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:spins_count].blank?
 
       permitted = reward_params.permit(
-        :id, :spins_count, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
+        :id, :spins_count, :games, :bet_level, :no_more, :totally_no_more, :available, :code,
         :tags, :stag,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -629,7 +620,7 @@ class BonusesController < ApplicationController
       # Set common parameters
       reward.games = reward_params[:games] if reward_params[:games].present?
       reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-      reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+  
       reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
       reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
       reward.available = reward_params[:available] if reward_params[:available].present?
@@ -751,7 +742,7 @@ class BonusesController < ApplicationController
         # Update common parameters using accessors (these store in config)
         reward.games = reward_params[:games] if reward_params[:games].present?
         reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-        reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    
         reward.available = reward_params[:available] if reward_params[:available].present?
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
@@ -790,7 +781,7 @@ class BonusesController < ApplicationController
         # Set common parameters
         reward.games = reward_params[:games] if reward_params[:games].present?
         reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-        reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    
         reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
         reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
         reward.available = reward_params[:available] if reward_params[:available].present?
@@ -827,7 +818,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_buy_reward].present?
 
     permitted = params.require(:bonus_buy_reward).permit(
-      :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
+      :buy_amount, :multiplier, :games, :bet_level, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -858,7 +849,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:buy_amount].blank?
 
       permitted = reward_params.permit(
-        :id, :buy_amount, :multiplier, :games, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
+        :id, :buy_amount, :multiplier, :games, :bet_level, :no_more, :totally_no_more, :available, :code,
         :min, :groups, :tags, :stag, :wagering_strategy,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -896,7 +887,7 @@ class BonusesController < ApplicationController
       # Set common parameters
       reward.games = reward_params[:games] if reward_params[:games].present?
       reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-      reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+  
       reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
       reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
       reward.available = reward_params[:available] if reward_params[:available].present?
@@ -951,7 +942,7 @@ class BonusesController < ApplicationController
         # Update common parameters using accessors (these store in config)
         reward.games = reward_params[:games] if reward_params[:games].present?
         reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-        reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    
         reward.available = reward_params[:available] if reward_params[:available].present?
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
@@ -991,7 +982,7 @@ class BonusesController < ApplicationController
         # Set common parameters
         reward.games = reward_params[:games] if reward_params[:games].present?
         reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-        reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+    
         reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
         reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
         reward.available = reward_params[:available] if reward_params[:available].present?
@@ -1036,7 +1027,7 @@ class BonusesController < ApplicationController
     # Set common parameters
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
     reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
     reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
     reward.available = reward_params[:available] if reward_params[:available].present?
@@ -1077,7 +1068,7 @@ class BonusesController < ApplicationController
     # Update common parameters
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
     reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
     reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
     reward.available = reward_params[:available] if reward_params[:available].present?
@@ -1692,7 +1683,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_reward].present?
 
     permitted = params.require(:bonus_reward).permit(
-      :reward_type, :bonus_type, :amount, :percentage, :wager, :max_win_fixed, :max_win_multiplier,
+      :reward_type, :bonus_type, :amount, :percentage, :wager, 
       :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :no_more, :totally_no_more, :wagering_strategy,
       # Advanced parameters
       :range, :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -1705,16 +1696,7 @@ class BonusesController < ApplicationController
       currencies: []
     )
 
-    # Process max_win logic
-    if params[:max_win_type] == "multiplier" && permitted[:max_win_multiplier].present?
-      permitted[:max_win] = "x#{permitted[:max_win_multiplier]}"
-    elsif permitted[:max_win_fixed].present?
-      permitted[:max_win] = permitted[:max_win_fixed]
-    end
 
-    # Clean up temporary fields
-    permitted.delete(:max_win_fixed)
-    permitted.delete(:max_win_multiplier)
     permitted.delete(:bonus_type)
 
     permitted
@@ -1776,12 +1758,12 @@ class BonusesController < ApplicationController
       spins_count: reward_params[:spins_count],
       games: reward_params[:games],
       bet_level: reward_params[:bet_level],
-      max_win: reward_params[:max_win]
+
     )
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:spins_count, :games, :bet_level, :max_win).each do |key, value|
+    reward_params.except(:spins_count, :games, :bet_level).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -1801,11 +1783,11 @@ class BonusesController < ApplicationController
     reward.spins_count = reward_params[:spins_count] if reward_params[:spins_count].present?
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
-    reward.max_win = reward_params[:max_win] if reward_params[:max_win].present?
+
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:spins_count, :games, :bet_level, :max_win).each do |key, value|
+    reward_params.except(:spins_count, :games, :bet_level).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else

@@ -271,28 +271,7 @@
               </div>
             </div>
 
-            <!-- Max Win -->
-            <div class="reward-param-field-wide mb-3">
-              <label class="form-label">Максимальный выигрыш (max_win)</label>
-              <div class="btn-group w-100 mb-2" role="group">
-                <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_fixed_${index}" value="fixed" checked onchange="toggleMaxWinType('fixed', ${index})">
-                <label class="btn btn-outline-secondary" for="max_win_fixed_${index}">Фиксированная сумма</label>
-                <input type="radio" class="btn-check" name="max_win_type_${index}" id="max_win_multiplier_${index}" value="multiplier" onchange="toggleMaxWinType('multiplier', ${index})">
-                <label class="btn btn-outline-secondary" for="max_win_multiplier_${index}">Множитель (x5)</label>
-              </div>
-              <div id="max_win_fixed_field_${index}">
-                <div class="input-group">
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_fixed]" step="0.01" min="0">
-                  <span class="input-group-text">USD</span>
-                </div>
-              </div>
-              <div id="max_win_multiplier_field_${index}" style="display: none;">
-                <div class="input-group">
-                  <span class="input-group-text">x</span>
-                  <input type="number" class="form-control" name="bonus_rewards[${index}][max_win_multiplier]" step="0.01" min="0">
-                </div>
-              </div>
-            </div>
+
 
             <!-- Available -->
             <div class="reward-param-field mb-3">
@@ -589,15 +568,7 @@
 
               </div>
 
-              <!-- Max Win -->
-              <div class="mb-3">
-                <label class="form-label">Максимальный выигрыш (max_win)</label>
-                <div class="input-group">
-                  <input type="text" class="form-control" name="freespin_rewards[${index}][max_win]" >
-                  <span class="input-group-text">€ или x</span>
-                </div>
-                <!--Фиксированная сумма (500) или множитель (x10)</div>
-              </div>
+
 
               <!-- Note: Usage Limitations are configured in Basic Information -->
             </div>
@@ -886,18 +857,7 @@
     }
   }
 
-  function toggleMaxWinType(type, index) {
-    const fixedField = document.getElementById('max_win_fixed_field_' + index);
-    const multiplierField = document.getElementById('max_win_multiplier_field_' + index);
-    
-    if (type === 'fixed') {
-      fixedField.style.display = 'block';
-      multiplierField.style.display = 'none';
-    } else {
-      fixedField.style.display = 'none';
-      multiplierField.style.display = 'block';
-    }
-  }
+
 
   function toggleAdvancedParams(index, type) {
     const sectionId = type === 'bonus' ? 'advanced-params-section-' + index : 'freespin-advanced-params-' + index;
@@ -987,15 +947,7 @@
                 <!--Размер ставки за покупку</div>
               </div>
 
-              <!-- Max Win -->
-              <div class="mb-3">
-                <label class="form-label">Максимальный выигрыш (max_win)</label>
-                <div class="input-group">
-                  <input type="text" class="form-control" name="bonus_buy_rewards[${index}][max_win]" >
-                  <span class="input-group-text">€ или x</span>
-                </div>
-                <!--Фиксированная сумма (500) или множитель (x10)</div>
-              </div>
+
             </div>
 
             <div class="col-md-6">
