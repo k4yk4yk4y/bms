@@ -295,11 +295,6 @@
               </div>
             </div>
 
-            <!-- Stag -->
-            <div class="reward-param-field mb-3">
-              <label class="form-label">Stag (stag)</label>
-              <input type="text" class="form-control" name="bonus_rewards[${index}][stag]">
-            </div>
           </div>
 
           <!-- Дополнительные параметры -->
@@ -590,13 +585,6 @@
 
 
 
-              <!-- Stag -->
-              <div class="mb-3">
-                <label class="form-label">Stag (stag)</label>
-                <input type="text" class="form-control" name="freespin_rewards[${index}][stag]" >
-
-              </div>
-
               <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
             </div>
           </div>
@@ -761,6 +749,12 @@
                     <input type="number" class="form-control" name="freespin_rewards[${index}][balance]" step="0.01" min="0">
                   </div>
 
+                  <!-- Stag -->
+                  <div class="mb-3">
+                    <label class="form-label">Stag</label>
+                    <input type="text" class="form-control" name="freespin_rewards[${index}][stag]">
+                  </div>
+
                   <!-- Chargeable Comp Points -->
                   <div class="mb-3">
                     <label class="form-label">Chargeable Comp Points</label>
@@ -860,18 +854,40 @@
 
 
   function toggleAdvancedParams(index, type) {
-    const sectionId = type === 'bonus' ? 'advanced-params-section-' + index : 'freespin-advanced-params-' + index;
-    const toggleTextId = type === 'bonus' ? 'advanced-params-toggle-text-' + index : 'freespin-advanced-toggle-text-' + index;
+    let sectionId, toggleTextId;
+    
+    if (type === 'bonus') {
+      sectionId = 'advanced-params-section-' + index;
+      toggleTextId = 'advanced-params-toggle-text-' + index;
+    } else if (type === 'freespin') {
+      sectionId = 'freespin-advanced-params-' + index;
+      toggleTextId = 'freespin-advanced-toggle-text-' + index;
+    } else if (type === 'bonus_buy') {
+      sectionId = 'bonus-buy-advanced-params-' + index;
+      toggleTextId = 'bonus-buy-advanced-toggle-text-' + index;
+    }
     
     const section = document.getElementById(sectionId);
     const toggleText = document.getElementById(toggleTextId);
     
     if (section.style.display === 'none') {
       section.style.display = 'block';
-      toggleText.textContent = type === 'bonus' ? 'Скрыть дополнительные' : '− Скрыть дополнительные параметры';
+      if (type === 'bonus') {
+        toggleText.textContent = 'Скрыть дополнительные';
+      } else if (type === 'freespin') {
+        toggleText.textContent = '− Скрыть дополнительные параметры';
+      } else if (type === 'bonus_buy') {
+        toggleText.textContent = '− Скрыть дополнительные параметры';
+      }
     } else {
       section.style.display = 'none';
-      toggleText.textContent = type === 'bonus' ? 'Показать дополнительные' : '+ Показать дополнительные параметры';
+      if (type === 'bonus') {
+        toggleText.textContent = 'Показать дополнительные';
+      } else if (type === 'freespin') {
+        toggleText.textContent = '+ Показать дополнительные параметры';
+      } else if (type === 'bonus_buy') {
+        toggleText.textContent = '+ Показать дополнительные параметры';
+      }
     }
   }
 
@@ -972,14 +988,26 @@
 
               </div>
 
-              <!-- Stag -->
-              <div class="mb-3">
-                <label class="form-label">Stag (stag)</label>
-                <input type="text" class="form-control" name="bonus_buy_rewards[${index}][stag]" >
-                <!--Специальный тег</div>
-              </div>
-
               <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
+            </div>
+          </div>
+
+          <!-- Дополнительные параметры -->
+          <div class="mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'bonus_buy')">
+              <span id="bonus-buy-advanced-toggle-text-${index}">+ Показать дополнительные параметры</span>
+            </button>
+            <div id="bonus-buy-advanced-params-${index}" style="display: none;" class="mt-3">
+              <h6 class="text-secondary mb-3">Дополнительные параметры</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <!-- Stag -->
+                  <div class="mb-3">
+                    <label class="form-label">Stag</label>
+                    <input type="text" class="form-control" name="bonus_buy_rewards[${index}][stag]">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
