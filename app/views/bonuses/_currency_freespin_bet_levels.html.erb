@@ -1,0 +1,97 @@
+<!-- Currency Freespin Bet Levels Section -->
+<div class="card mb-4" id="currency-freespin-bet-levels-card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-coin"></i>
+      Размер ставки фриспинов по валютам *
+    </h5>
+  </div>
+  <div class="card-body">
+    <div id="currency-freespin-bet-levels-container">
+      <div class="row">
+        <% all_currencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'] %>
+        <% selected_currencies = bonus.currencies.present? ? bonus.currencies : all_currencies %>
+        <% freespin_reward = defined?(existing_freespin) ? existing_freespin : nil %>
+
+        <% selected_currencies.each_with_index do |currency, index| %>
+          <div class="col-12 mb-2">
+            <div class="input-group">
+              <span class="input-group-text"><%= currency %></span>
+              <%= number_field_tag "freespin_reward[currency_freespin_bet_levels][#{currency}]",
+                  freespin_reward&.currency_freespin_bet_levels&.dig(currency),
+                  class: "form-control",
+                  step: 0.01,
+                  min: 0,
+                  placeholder: "0.00",
+                  required: true %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+
+    <!-- Dynamic update based on selected currencies -->
+    <script>
+      // Function to update currency freespin bet levels fields based on selected currencies
+      function updateCurrencyFreespinBetLevelsFields() {
+        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
+        const container = document.getElementById('currency-freespin-bet-levels-container');
+
+        if (!currenciesSelect || !container) return;
+
+        const selectedCurrencies = Array.from(currenciesSelect.selectedOptions).map(option => option.value);
+        const allCurrencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'];
+
+        // If no currencies selected, show all
+        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : allCurrencies;
+
+        // Rebuild the fields
+        const rowDiv = container.querySelector('.row');
+        if (!rowDiv) return;
+
+        // Save current values
+        const currentValues = {};
+        rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+          const match = input.name.match(/currency_freespin_bet_levels\[([^\]]+)\]/);
+          if (match && input.value) {
+            currentValues[match[1]] = input.value;
+          }
+        });
+
+        // Clear and rebuild
+        rowDiv.innerHTML = '';
+
+        displayCurrencies.forEach(currency => {
+          const colDiv = document.createElement('div');
+          colDiv.className = 'col-12 mb-2';
+
+          colDiv.innerHTML = `
+            <div class="input-group">
+              <span class="input-group-text">${currency}</span>
+              <input type="number"
+                     name="freespin_reward[currency_freespin_bet_levels][${currency}]"
+                     value="${currentValues[currency] || ''}"
+                     class="form-control"
+                     step="0.01"
+                     min="0"
+                     placeholder="0.00"
+                     required>
+            </div>
+          `;
+
+          rowDiv.appendChild(colDiv);
+        });
+
+      }
+
+      // Attach event listener to currencies select
+      document.addEventListener('DOMContentLoaded', function() {
+        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
+        if (currenciesSelect) {
+          currenciesSelect.addEventListener('change', updateCurrencyFreespinBetLevelsFields);
+        }
+      });
+    </script>
+  </div>
+</div>
