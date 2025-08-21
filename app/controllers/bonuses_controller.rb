@@ -413,6 +413,8 @@ class BonusesController < ApplicationController
     permitted = params.require(:freespin_reward).permit(
       :spins_count, :bet_level, :max_win, :no_more, :totally_no_more, :available, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
+      # Currency freespin bet levels
+      :currency_freespin_bet_levels,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
       :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -421,7 +423,9 @@ class BonusesController < ApplicationController
       :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
       :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
-      :wager_done, :hold_min, :hold_max, :currencies, currencies: [], games: []
+      :wager_done, :hold_min, :hold_max, :currencies,
+      # Array parameters
+      currencies: [], games: []
     )
 
     # Handle array fields properly
@@ -457,6 +461,7 @@ class BonusesController < ApplicationController
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
     reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
     reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+    reward.currency_freespin_bet_levels = reward_params[:currency_freespin_bet_levels] if reward_params[:currency_freespin_bet_levels].present?
 
     # Set advanced parameters
     config = {}
@@ -492,6 +497,7 @@ class BonusesController < ApplicationController
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
     reward.wagering_strategy = reward_params[:wagering_strategy] if reward_params[:wagering_strategy].present?
     reward.currencies = reward_params[:currencies] if reward_params[:currencies].present?
+    reward.currency_freespin_bet_levels = reward_params[:currency_freespin_bet_levels] if reward_params[:currency_freespin_bet_levels].present?
 
     # Update advanced parameters
     config = reward.config || {}

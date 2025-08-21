@@ -49,10 +49,24 @@
           <% if bonus.freespin_rewards.any? %>
             <h6>Freespins:</h6>
             <% bonus.freespin_rewards.each do |reward| %>
-              <div class="mb-2">
-                <%= reward.formatted_spins %>
-                <% if reward.has_game_restrictions? %>
-                  <br><small class="text-muted">Restrictions apply</small>
+              <div class="mb-3">
+                <div class="mb-1">
+                  <%= reward.formatted_spins %>
+                  <% if reward.has_game_restrictions? %>
+                    <br><small class="text-muted">Restrictions apply</small>
+                  <% end %>
+                </div>
+                <% if reward.has_currency_freespin_bet_levels? %>
+                  <div class="ms-2">
+                    <small class="text-muted">Размер ставки по валютам:</small><br>
+                    <% reward.currency_freespin_bet_levels.each do |currency, amount| %>
+                      <span class="badge bg-light text-dark me-1"><%= currency %>: <%= amount %></span>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <div class="ms-2">
+                    <small class="text-muted">Размер ставки не указан</small>
+                  </div>
                 <% end %>
               </div>
             <% end %>

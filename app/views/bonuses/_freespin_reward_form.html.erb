@@ -33,9 +33,12 @@
   <!-- Freespins Count -->
   <div class="reward-param-field mb-3">
     <label for="freespin_reward_spins_count" class="form-label">Количество фриспинов *</label>
-    <input type="number" class="form-control" name="<%= field_prefix %>[spins_count]" id="freespin_reward_spins_count_<%= index %>" 
+    <input type="number" class="form-control" name="<%= field_prefix %>[spins_count]" id="freespin_reward_spins_count_<%= index %>"
            min="1" required  value="<%= existing_freespin&.spins_count %>">
   </div>
+
+  <!-- Currency Freespin Bet Levels -->
+  <%= render "currency_freespin_bet_levels", bonus: @bonus, existing_freespin: existing_freespin %>
 
   <!-- Bet Level -->
   <div class="reward-param-field mb-3">

@@ -4,6 +4,7 @@ class FreespinReward < ApplicationRecord
   belongs_to :bonus
 
   validates :spins_count, presence: true, numericality: { greater_than: 0 }
+  validate :currency_freespin_bet_levels_must_be_present
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
@@ -126,5 +127,51 @@ class FreespinReward < ApplicationRecord
     return "No limit" if max_win.blank?
     return max_win if max_win.to_s.include?("x")
     "#{max_win} #{bonus.currencies.first || ''}"
+  end
+
+  # Currency-specific freespin bet levels (required field)
+  def currency_freespin_bet_levels
+    config&.dig("currency_freespin_bet_levels") || {}
+  end
+
+  def currency_freespin_bet_levels=(value)
+    if value.is_a?(Hash)
+      # Remove blank values and convert to proper format
+      clean_value = value.reject { |_k, v| v.blank? }
+      clean_value = clean_value.transform_values { |v| v.to_f }
+      self.config = (config || {}).merge("currency_freespin_bet_levels" => clean_value)
+    elsif value.blank?
+      self.config = (config || {}).merge("currency_freespin_bet_levels" => {})
+    else
+      self.config = (config || {}).merge("currency_freespin_bet_levels" => value)
+    end
+  end
+
+  def formatted_currency_freespin_bet_levels
+    return "No bet levels specified" if currency_freespin_bet_levels.empty?
+
+    currency_freespin_bet_levels.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
+  end
+
+  def get_freespin_bet_level_for_currency(currency)
+    currency_freespin_bet_levels[currency.to_s] || bet_level
+  end
+
+  def set_freespin_bet_level_for_currency(currency, value)
+    levels = currency_freespin_bet_levels.dup
+    levels[currency.to_s] = value&.to_f
+    self.currency_freespin_bet_levels = levels
+  end
+
+  def has_currency_freespin_bet_levels?
+    currency_freespin_bet_levels.any?
+  end
+
+  private
+
+  def currency_freespin_bet_levels_must_be_present
+    return if currency_freespin_bet_levels.present? && currency_freespin_bet_levels.values.any?(&:present?)
+
+    errors.add(:currency_freespin_bet_levels, "должен быть указан размер ставки фриспинов хотя бы для одной валюты")
   end
 end
