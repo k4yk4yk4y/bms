@@ -252,6 +252,13 @@
             </div>
 
             <div class="mb-3">
+              <label for="freespin_reward_stag" class="form-label">Stag</label>
+              <input type="text" class="form-control" name="freespin_reward[stag]" 
+                     id="freespin_reward_stag" 
+                     value="<%= existing_freespin&.get_advanced_param('stag') %>">
+            </div>
+
+            <div class="mb-3">
               <label for="freespin_reward_chargeable_comp_points" class="form-label">Списываемые комп-поинты</label>
               <input type="number" class="form-control" name="freespin_reward[chargeable_comp_points]" 
                      id="freespin_reward_chargeable_comp_points" step="0.01" min="0" 
