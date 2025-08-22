@@ -1,0 +1,266 @@
+/* Reward Forms Multi-Column Layout */
+
+/* Main parameters container - 2 columns on large screens, 1 column on smaller screens */
+.main-params-container .reward-param-field {
+  margin-bottom: 1rem;
+}
+
+/* Multi-column layout for main parameters */
+@media (min-width: 768px) {
+  .main-params-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .main-params-container .reward-param-field {
+    margin-bottom: 0;
+  }
+
+  /* Full width items */
+  .main-params-container .reward-param-field.full-width,
+  .main-params-container .reward-param-field-wide,
+  .main-params-container .reward-button-group {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Advanced parameters container - 3 columns on large screens, 1 column on smaller screens */
+.advanced-params-container .reward-param-field {
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .advanced-params-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .advanced-params-container .reward-param-field {
+    margin-bottom: 0;
+  }
+
+  /* Full width items in advanced section */
+  .advanced-params-container .reward-param-field-wide,
+  .advanced-params-container .reward-param-field.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Specific adjustments for different screen sizes */
+@media (min-width: 1200px) {
+  .main-params-container,
+  .advanced-params-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Ensure proper spacing for form labels */
+.main-params-container .form-label,
+.advanced-params-container .form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Button groups should span full width */
+.reward-button-group {
+  width: 100%;
+}
+
+/* Checkbox fields should span full width */
+.reward-checkbox-field {
+  grid-column: 1 / -1;
+}
+
+/* Input group adjustments for multi-column layout */
+.main-params-container .input-group,
+.advanced-params-container .input-group {
+  width: 100%;
+}
+
+/* Ensure proper spacing for card bodies */
+.card-body .main-params-container {
+  margin-bottom: 1rem;
+}
+
+/* Override Bootstrap column classes for consistency */
+@media (min-width: 768px) {
+  .advanced-params-container .col-md-6 {
+    padding: 0;
+    margin-bottom: 0;
+  }
+}
+
+/* Ensure consistent field heights */
+.reward-param-field .form-control,
+.reward-param-field .form-select,
+.reward-param-field .input-group {
+  min-height: 38px;
+}
+
+
+
+.currency-bet-level-item {
+  margin-bottom: 0.5rem;
+}
+
+/* Currency bet levels wrapper - limit width to allow other fields in grid */
+.currency-bet-levels-wrapper-freespin {
+  grid-column: 1 / -1 !important; /* Always span full width in the main grid */
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Currency bet levels wrapper for bonus buy */
+.currency-bet-levels-wrapper-bonus-buy {
+  grid-column: 1 / -1 !important; /* Always span full width in the main grid */
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Currency bet levels section - isolate from main layout */
+.currency-bet-levels-section {
+  clear: both !important;
+  float: none !important;
+  position: relative !important;
+  width: 100% !important;
+  margin-top: 1rem !important;
+  border-top: 1px solid #dee2e6 !important;
+  padding-top: 1rem !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+/* Force main-params-container to use grid layout */
+.main-params-container {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Force advanced-params-container to use grid layout */
+.advanced-params-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (min-width: 1200px) {
+  .main-params-container,
+  .advanced-params-container {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-params-container,
+  .advanced-params-container {
+    display: block !important;
+    grid-template-columns: none !important;
+  }
+}
+
+/* Make currency bet levels more compact and narrow */
+.currency-bet-levels-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important; /* Single column */
+  gap: 0.25rem !important;
+  width: 100% !important; /* Take full width */
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+}
+
+/* Override Bootstrap styles for currency bet levels */
+#currency-freespin-bet-levels-container .currency-bet-levels-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+}
+
+/* Ensure currency bet levels container doesn't expand */
+#currency-freespin-bet-levels-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+}
+
+.currency-bet-levels-grid .currency-bet-level-item {
+  margin-bottom: 0.25rem !important;
+}
+
+.currency-bet-levels-grid .input-group {
+  min-width: 0 !important;
+}
+
+.currency-bet-levels-grid .input-group-text {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.currency-bet-levels-grid .form-control {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+/* Ensure currency bet levels doesn't affect main layout */
+.currency-bet-levels-section .currency-bet-levels-wrapper-freespin {
+  display: block !important;
+  overflow: visible !important;
+  position: static !important;
+  width: 100% !important;
+}
+
+/* Force full-width elements to span all columns */
+.main-params-container .reward-param-field.full-width {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+/* Ensure other fields don't span full width */
+.main-params-container .reward-param-field:not(.full-width) {
+  grid-column: auto !important;
+  width: auto !important;
+}
+
+/* Advanced params container grid rules */
+.advanced-params-container .reward-param-field.full-width {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+.advanced-params-container .reward-param-field:not(.full-width) {
+  grid-column: auto !important;
+  width: auto !important;
+}
+
+/* Force alternating columns for better distribution */
+.advanced-params-container .reward-param-field:nth-child(odd):not(.full-width) {
+  grid-column: 1 !important;
+}
+
+.advanced-params-container .reward-param-field:nth-child(even):not(.full-width) {
+  grid-column: 2 !important;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 767px) {
+  .main-params-container,
+  .advanced-params-container {
+    display: block;
+  }
+
+  .main-params-container .reward-param-field,
+  .advanced-params-container .reward-param-field {
+    margin-bottom: 1rem;
+  }
+}

@@ -5,7 +5,15 @@ FactoryBot.define do
     association :bonus
     buy_amount { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
     multiplier { Faker::Number.decimal(l_digits: 1, r_digits: 2) }
-    config { {} }
+    config do
+      {
+        'currency_bet_levels' => {
+          'USD' => Faker::Number.between(from: 1, to: 10),
+          'EUR' => Faker::Number.between(from: 1, to: 10),
+          'RUB' => Faker::Number.between(from: 50, to: 500)
+        }
+      }
+    end
 
     trait :with_games do
       config { { 'games' => %w[Starburst Gonzo's_Quest Book_of_Dead Sweet_Bonanza] } }

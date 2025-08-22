@@ -18,25 +18,4 @@ class BonusCodeReward < ApplicationRecord
   def formatted_bonus_code
     code.present? ? code.upcase : "N/A"
   end
-
-  def title
-    config["title"] || "Бонус-код #{code}"
-  end
-
-  def title=(value)
-    self.config = (config || {}).merge("title" => value)
-  end
-
-  def display_title
-    title
-  end
-
-  # For backward compatibility
-  def set_bonus_code
-    code
-  end
-
-  def set_bonus_code=(value)
-    self.code = value
-  end
 end

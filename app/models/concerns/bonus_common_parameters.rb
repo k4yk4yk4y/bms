@@ -3,41 +3,41 @@ module BonusCommonParameters
 
   # Получаем валюты из основного бонуса
   def currencies
-    bonus.currencies || []
+    bonus&.currencies || []
   end
 
   # Получаем группы пользователей из основного бонуса
   def groups
-    bonus.groups || []
+    bonus&.groups || []
   end
 
   # Получаем теги из основного бонуса
   def tags
-    bonus.tags&.split(",")&.map(&:strip)&.reject(&:blank?) || []
+    bonus&.tags&.split(",")&.map(&:strip)&.reject(&:blank?) || []
   end
 
   # Получаем минимальный депозит для указанной валюты
   def min_deposit_for_currency(currency)
-    bonus.minimum_deposit_for_currency(currency)
+    bonus&.minimum_deposit_for_currency(currency)
   end
 
   # Получаем минимальные депозиты по всем валютам
   def currency_minimum_deposits
-    bonus.currency_minimum_deposits
+    bonus&.currency_minimum_deposits || {}
   end
 
   # Получаем ограничения использования из основного бонуса
   def no_more
-    bonus.no_more
+    bonus&.no_more
   end
 
   def totally_no_more
-    bonus.totally_no_more
+    bonus&.totally_no_more
   end
 
   # Получаем стратегию отыгрыша из основного бонуса
   def wagering_strategy
-    bonus.wagering_strategy
+    bonus&.wagering_strategy
   end
 
   # Форматированные методы для отображения
@@ -63,6 +63,6 @@ module BonusCommonParameters
 
   # Проверяем, есть ли ограничения по минимальным депозитам
   def has_minimum_deposit_requirements?
-    bonus.has_minimum_deposit_requirements?
+    bonus&.has_minimum_deposit_requirements? || false
   end
 end

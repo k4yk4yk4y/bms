@@ -6,71 +6,19 @@ class BonusReward < ApplicationRecord
   validates :reward_type, presence: true
   validates :amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, allow_nil: true
+  validates :wager, numericality: { greater_than_or_equal_to: 0 }
+  validates :max_win_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_win_type, inclusion: { in: %w[fixed multiplier] }, allow_nil: true
 
   scope :by_type, ->(type) { where(reward_type: type) }
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
 
-  # Common parameters accessors
-  def wager
-    config&.dig("wager")
-  end
-
-  def wager=(value)
-    self.config = (config || {}).merge("wager" => value&.to_f)
-  end
-
-  def max_win
-    config&.dig("max_win")
-  end
-
-  def max_win=(value)
-    self.config = (config || {}).merge("max_win" => value)
-  end
-
-  def max_win_type
-    return "multiplier" if max_win.to_s.include?("x")
-    "fixed"
-  end
-
-  def available
-    config&.dig("available")
-  end
-
-  def available=(value)
-    self.config = (config || {}).merge("available" => value&.to_i)
-  end
-
-  def code
-    config&.dig("code")
-  end
-
-  def code=(value)
-    self.config = (config || {}).merge("code" => value)
-  end
-
-
-
-  def user_can_have_duplicates
-    config&.dig("user_can_have_duplicates") || false
-  end
-
-  def user_can_have_duplicates=(value)
-    self.config = (config || {}).merge("user_can_have_duplicates" => [ true, "true", "1", 1 ].include?(value))
-  end
-
-
-
-  def stag
-    config&.dig("stag")
-  end
-
-  def stag=(value)
-    self.config = (config || {}).merge("stag" => value)
-  end
-
-
+  # Common parameters accessors - DEPRECATED
+  # These attributes have been moved to dedicated columns.
+  # The accessor methods are left here for a transition period if needed,
+  # but direct column access should be used.
 
   # Advanced parameters accessors
   def advanced_params
@@ -99,8 +47,9 @@ class BonusReward < ApplicationRecord
   end
 
   def formatted_max_win
-    return "No limit" if max_win.blank?
-    return max_win if max_win.to_s.include?("x")
-    "#{max_win} #{bonus.currencies.first || ''}"
+    return "No limit" if max_win_value.blank?
+    value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
+    return "#{value}x" if max_win_type == 'multiplier'
+    "#{value} #{bonus.currencies.first || ''}"
   end
 end

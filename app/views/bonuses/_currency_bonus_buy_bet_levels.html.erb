@@ -1,0 +1,95 @@
+<!-- Currency Bonus Buy Bet Levels Section -->
+<div class="reward-param-field full-width currency-bet-levels-wrapper-bonus-buy">
+  <label class="form-label">
+    <i class="bi bi-coin"></i>
+    Размер ставки по валютам *
+  </label>
+  <div id="currency-bonus-buy-bet-levels-container">
+    <div class="currency-bet-levels-grid">
+        <% all_currencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'] %>
+        <% selected_currencies = bonus.currencies.present? ? bonus.currencies : all_currencies %>
+        <% bonus_buy_reward = defined?(existing_bonus_buy) ? existing_bonus_buy : nil %>
+
+        <% selected_currencies.each_with_index do |currency, index| %>
+          <div class="currency-bet-level-item">
+            <div class="input-group">
+              <span class="input-group-text"><%= currency %></span>
+              <%= number_field_tag "bonus_buy_rewards[#{bonus_buy_reward&.id || index}][currency_bet_levels][#{currency}]",
+                  bonus_buy_reward&.currency_bet_levels&.dig(currency),
+                  class: "form-control",
+                  step: 0.01,
+                  min: 0,
+                  placeholder: "0.00",
+                  required: true %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+
+    <!-- Dynamic update based on selected currencies -->
+    <script>
+      // Function to update currency bonus buy bet levels fields based on selected currencies
+      function updateCurrencyBonusBuyBetLevelsFields() {
+        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
+        const container = document.getElementById('currency-bonus-buy-bet-levels-container');
+
+        if (!currenciesSelect || !container) return;
+
+        const selectedCurrencies = Array.from(currenciesSelect.selectedOptions).map(option => option.value);
+        const allCurrencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'];
+
+        // If no currencies selected, show all
+        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : allCurrencies;
+
+        // Rebuild the fields
+        const rowDiv = container.querySelector('.currency-bet-levels-grid');
+        if (!rowDiv) return;
+
+        // Save current values
+        const currentValues = {};
+        rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+          const match = input.name.match(/currency_bet_levels\[([^\]]+)\]/);
+          if (match && input.value) {
+            currentValues[match[1]] = input.value;
+          }
+        });
+
+        // Clear and rebuild
+        rowDiv.innerHTML = '';
+
+        displayCurrencies.forEach(currency => {
+          const colDiv = document.createElement('div');
+          colDiv.className = 'currency-bet-level-item';
+
+          colDiv.innerHTML = `
+            <div class="input-group">
+              <span class="input-group-text">${currency}</span>
+              <input type="number"
+                     name="bonus_buy_rewards[${bonus_buy_reward&.id || index}][currency_bet_levels][${currency}]"
+                     value="${currentValues[currency] || ''}"
+                     class="form-control"
+                     step="0.01"
+                     min="0"
+                     placeholder="0.00"
+                     required>
+            </div>
+          `;
+
+          rowDiv.appendChild(colDiv);
+        });
+
+      }
+
+      // Attach event listener to currencies select
+      document.addEventListener('DOMContentLoaded', function() {
+        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
+        if (currenciesSelect) {
+          currenciesSelect.addEventListener('change', updateCurrencyBonusBuyBetLevelsFields);
+        }
+      });
+    </script>
+    </div>
+  </div>
+</div>

@@ -17,3 +17,5 @@
 /* Import component styles */
 @import "components/navbar";
 @import "components/navigation";
+@import "components/reward_forms";
+

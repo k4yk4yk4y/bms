@@ -914,8 +914,8 @@ RSpec.describe BonusesController, type: :controller do
       it "creates multiple bonus_buy rewards" do
         params = valid_bonus_params.merge(
           bonus_buy_rewards: {
-            "0" => { buy_amount: "10", multiplier: "2", games: "slot1,slot2" },
-            "1" => { buy_amount: "20", multiplier: "3", games: "slot3,slot4" }
+            "0" => { buy_amount: "10", multiplier: "2", games: "slot1,slot2", currency_bet_levels: { "USD" => "5", "EUR" => "4" } },
+            "1" => { buy_amount: "20", multiplier: "3", games: "slot3,slot4", currency_bet_levels: { "USD" => "10", "EUR" => "8" } }
           }
         )
 
@@ -1008,8 +1008,8 @@ RSpec.describe BonusesController, type: :controller do
 
       it "updates existing bonus_code rewards" do
         bonus = create(:bonus)
-        reward1 = create(:bonus_code_reward, bonus: bonus, set_bonus_code: "CODE1")
-        reward2 = create(:bonus_code_reward, bonus: bonus, set_bonus_code: "CODE2")
+        reward1 = create(:bonus_code_reward, bonus: bonus, code: "CODE1")
+        reward2 = create(:bonus_code_reward, bonus: bonus, code: "CODE2")
 
         params = valid_bonus_params.merge(
           bonus_code_rewards: {
@@ -1022,8 +1022,8 @@ RSpec.describe BonusesController, type: :controller do
 
         reward1.reload
         reward2.reload
-        expect(reward1.set_bonus_code).to eq("CODE1_UPDATED")
-        expect(reward2.set_bonus_code).to eq("CODE2_UPDATED")
+        expect(reward1.code).to eq("CODE1_UPDATED")
+        expect(reward2.code).to eq("CODE2_UPDATED")
       end
     end
 

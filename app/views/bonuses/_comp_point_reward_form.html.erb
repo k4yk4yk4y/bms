@@ -8,25 +8,25 @@
 
   <div class="main-params-container">
     <!-- Title -->
-    <div class="reward-param-field mb-3">
+    <div class="reward-param-field mb-3 full-width">
       <label for="comp_point_reward_title" class="form-label">Название награды (title) *</label>
-      <input type="text" class="form-control" name="comp_point_reward[title]" id="comp_point_reward_title" 
+      <input type="text" class="form-control" name="comp_point_reward[title]" id="comp_point_reward_title"
               value="<%= existing_comp_point&.title %>" required>
     </div>
 
     <!-- Issue Chargeable Award -->
     <div class="reward-param-field mb-3">
       <label for="comp_point_reward_issue_chargeable_award" class="form-label">Расходуемые баллы (issue_chargeable_award)</label>
-      <input type="number" class="form-control" name="comp_point_reward[issue_chargeable_award]" 
-             id="comp_point_reward_issue_chargeable_award" min="0"  
+      <input type="number" class="form-control" name="comp_point_reward[issue_chargeable_award]"
+             id="comp_point_reward_issue_chargeable_award" min="0"
              value="<%= existing_comp_point&.issue_chargeable_award %>">
     </div>
 
     <!-- Issue Persistent Award -->
     <div class="reward-param-field mb-3">
       <label for="comp_point_reward_issue_persistent_award" class="form-label">Статусные баллы (issue_persistent_award)</label>
-      <input type="number" class="form-control" name="comp_point_reward[issue_persistent_award]" 
-             id="comp_point_reward_issue_persistent_award" min="0"  
+      <input type="number" class="form-control" name="comp_point_reward[issue_persistent_award]"
+             id="comp_point_reward_issue_persistent_award" min="0"
              value="<%= existing_comp_point&.issue_persistent_award %>">
     </div>
   </div>
@@ -40,9 +40,9 @@
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
       <!-- Custom Config Fields -->
-      <div class="reward-param-field-wide mb-3">
+      <div class="reward-param-field mb-3 full-width">
         <label class="form-label">Дополнительные параметры (JSON)</label>
-        <textarea class="form-control" name="comp_point_reward[config_json]" rows="3" 
+        <textarea class="form-control" name="comp_point_reward[config_json]" rows="3"
                   ><%= existing_comp_point&.config&.to_json %></textarea>
       </div>
     </div>

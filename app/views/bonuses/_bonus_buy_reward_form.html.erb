@@ -21,63 +21,79 @@
 
 <!-- Основные часто используемые параметры для bonus_buy -->
 <div class="main-params-container">
-  <h6 class="text-warning reward-section-header">Основные параметры</h6>
+  <h6 class="text-warning reward-section-header full-width">Основные параметры</h6>
   
   <!-- Buy Amount -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_buy_amount" class="form-label">Сумма покупки *</label>
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_buy_amount_<%= index %>" class="form-label">Сумма покупки *</label>
     <div class="input-group">
-      <input type="number" class="form-control" name="<%= field_prefix %>[buy_amount]" id="bonus_buy_reward_buy_amount_<%= index %>" 
+      <input type="number" class="form-control" name="<%= field_prefix %>[buy_amount]" id="bonus_buy_reward_buy_amount_<%= index %>"
              step="0.01" min="0" required  value="<%= existing_bonus_buy&.buy_amount %>">
       <span class="input-group-text">€</span>
     </div>
   </div>
 
   <!-- Multiplier -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_multiplier" class="form-label">Множитель покупки (multiplier)</label>
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_multiplier_<%= index %>" class="form-label">Множитель покупки (multiplier)</label>
     <div class="input-group">
-      <input type="number" class="form-control" name="<%= field_prefix %>[multiplier]" id="bonus_buy_reward_multiplier_<%= index %>" 
+      <input type="number" class="form-control" name="<%= field_prefix %>[multiplier]" id="bonus_buy_reward_multiplier_<%= index %>"
              step="0.01" min="0"  value="<%= existing_bonus_buy&.multiplier %>">
       <span class="input-group-text">x</span>
     </div>
   </div>
 
   <!-- Games -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_games" class="form-label">Игры (games)</label>
-    <input type="text" class="form-control" name="bonus_buy_reward[games]" id="bonus_buy_reward_games_<%= index %>" 
+  <div class="reward-param-field full-width">
+    <label for="bonus_buy_reward_games_<%= index %>" class="form-label">Игры (games)</label>
+    <input type="text" class="form-control" name="<%= field_prefix %>[games]" id="bonus_buy_reward_games_<%= index %>"
             value="<%= existing_bonus_buy&.games&.join(', ') %>">
   </div>
 
   <!-- Bet Level -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_bet_level" class="form-label">Уровень ставки (bet_level)</label>
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_bet_level_<%= index %>" class="form-label">Уровень ставки (bet_level)</label>
     <div class="input-group">
-      <input type="number" class="form-control" name="bonus_buy_reward[bet_level]" id="bonus_buy_reward_bet_level" 
+      <input type="number" class="form-control" name="<%= field_prefix %>[bet_level]" id="bonus_buy_reward_bet_level_<%= index %>"
              step="0.01" min="0"  value="<%= existing_bonus_buy&.bet_level %>">
       <span class="input-group-text">€</span>
     </div>
   </div>
 
-
+  <!-- Max Win -->
+    <div class="reward-param-field">
+      <label for="bonus_buy_reward_max_win_value_<%= index %>" class="form-label">Макс. выигрыш (max win)</label>
+      <div class="input-group">
+        <select class="form-select" name="<%= field_prefix %>[max_win_type]" id="bonus_buy_reward_max_win_type_<%= index %>" style="max-width: 120px;">
+          <option value="fixed" <%= 'selected' if existing_bonus_buy&.max_win_type == 'fixed' %>>Сумма</option>
+          <option value="multiplier" <%= 'selected' if existing_bonus_buy&.max_win_type == 'multiplier' %>>Множитель</option>
+        </select>
+        <input type="number" class="form-control" name="<%= field_prefix %>[max_win_value]" id="bonus_buy_reward_max_win_value_<%= index %>"
+               step="0.01" min="0" value="<%= existing_bonus_buy&.max_win_value %>">
+      </div>
+    </div>
 
   <!-- Available -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_available" class="form-label">Доступно (available)</label>
-    <input type="number" class="form-control" name="bonus_buy_reward[available]" id="bonus_buy_reward_available" 
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_available_<%= index %>" class="form-label">Доступно (available)</label>
+    <input type="number" class="form-control" name="<%= field_prefix %>[available]" id="bonus_buy_reward_available_<%= index %>"
            min="0"  value="<%= existing_bonus_buy&.available %>">
   </div>
 
   <!-- Code -->
-  <div class="reward-param-field mb-3">
-    <label for="bonus_buy_reward_code" class="form-label">Код активации (code)</label>
-    <input type="text" class="form-control" name="bonus_buy_reward[code]" id="bonus_buy_reward_code" 
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_code_<%= index %>" class="form-label">Код активации (code)</label>
+    <input type="text" class="form-control" name="<%= field_prefix %>[code]" id="bonus_buy_reward_code_<%= index %>"
             value="<%= existing_bonus_buy&.code %>">
   </div>
 
     <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are now configured in Basic Information -->
   </div>
+</div>
+
+<!-- Currency Bonus Buy Bet Levels - в отдельной секции -->
+<div class="currency-bet-levels-section mt-3">
+  <%= render "currency_bonus_buy_bet_levels", bonus: @bonus, existing_bonus_buy: existing_bonus_buy %>
 </div>
 
 <!-- Дополнительные параметры -->
@@ -87,265 +103,265 @@
     <i class="fas fa-plus"></i> Показать дополнительные параметры
   </button>
   
-  <div id="bonus_buy_advanced_params" class="collapse mt-3">
+  <div class="advanced-params mt-3" style="display: none;">
     <div class="card">
       <div class="card-header">
         <h6 class="card-title mb-0">Дополнительные параметры</h6>
       </div>
       <div class="card-body">
         <div class="advanced-params-container">
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_auto_activate" class="form-label">Автоактивация</label>
-            <select class="form-select" name="bonus_buy_reward[auto_activate]" id="bonus_buy_reward_auto_activate">
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_auto_activate_<%= index %>" class="form-label">Автоактивация</label>
+            <select class="form-select" name="<%= field_prefix %>[auto_activate]" id="bonus_buy_reward_auto_activate_<%= index %>">
               <option value="">Не задано</option>
               <option value="true" <%= 'selected' if existing_bonus_buy&.get_advanced_param('auto_activate') == true %>>Да</option>
               <option value="false" <%= 'selected' if existing_bonus_buy&.get_advanced_param('auto_activate') == false %>>Нет</option>
             </select>
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_duration" class="form-label">Длительность</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[duration]" 
-                   id="bonus_buy_reward_duration"  
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_duration_<%= index %>" class="form-label">Длительность</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[duration]"
+                   id="bonus_buy_reward_duration_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('duration') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_activation_duration" class="form-label">Время активации</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[activation_duration]" 
-                   id="bonus_buy_reward_activation_duration"  
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_activation_duration_<%= index %>" class="form-label">Время активации</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[activation_duration]"
+                   id="bonus_buy_reward_activation_duration_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('activation_duration') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_email_template" class="form-label">Email шаблон</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[email_template]" 
-                   id="bonus_buy_reward_email_template"  
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_email_template_<%= index %>" class="form-label">Email шаблон</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[email_template]"
+                   id="bonus_buy_reward_email_template_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('email_template') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_range" class="form-label">Диапазон (range)</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[range]" 
-                   id="bonus_buy_reward_range"  
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_range_<%= index %>" class="form-label">Диапазон (range)</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[range]"
+                   id="bonus_buy_reward_range_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('range') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_last_login_country" class="form-label">Страна последнего входа</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[last_login_country]" 
-                   id="bonus_buy_reward_last_login_country"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_last_login_country_<%= index %>" class="form-label">Страна последнего входа</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[last_login_country]"
+                   id="bonus_buy_reward_last_login_country_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('last_login_country') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_profile_country" class="form-label">Страна профиля</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[profile_country]" 
-                   id="bonus_buy_reward_profile_country"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_profile_country_<%= index %>" class="form-label">Страна профиля</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[profile_country]"
+                   id="bonus_buy_reward_profile_country_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('profile_country') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_current_ip_country" class="form-label">Страна текущего IP</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[current_ip_country]" 
-                   id="bonus_buy_reward_current_ip_country"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_current_ip_country_<%= index %>" class="form-label">Страна текущего IP</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[current_ip_country]"
+                   id="bonus_buy_reward_current_ip_country_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('current_ip_country') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_emails" class="form-label">Email адреса</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[emails]" 
-                   id="bonus_buy_reward_emails"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_emails_<%= index %>" class="form-label">Email адреса</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[emails]"
+                   id="bonus_buy_reward_emails_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('emails') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_deposit_payment_systems" class="form-label">Платежные системы депозита</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[deposit_payment_systems]" 
-                   id="bonus_buy_reward_deposit_payment_systems"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_deposit_payment_systems_<%= index %>" class="form-label">Платежные системы депозита</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[deposit_payment_systems]"
+                   id="bonus_buy_reward_deposit_payment_systems_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('deposit_payment_systems') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_cashout_payment_systems" class="form-label">Платежные системы вывода</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[cashout_payment_systems]" 
-                   id="bonus_buy_reward_cashout_payment_systems"  
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_cashout_payment_systems_<%= index %>" class="form-label">Платежные системы вывода</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[cashout_payment_systems]"
+                   id="bonus_buy_reward_cashout_payment_systems_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('cashout_payment_systems') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_user_can_have_duplicates" class="form-label">Дубликаты пользователям</label>
-            <select class="form-select" name="bonus_buy_reward[user_can_have_duplicates]" id="bonus_buy_reward_user_can_have_duplicates">
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_user_can_have_duplicates_<%= index %>" class="form-label">Дубликаты пользователям</label>
+            <select class="form-select" name="<%= field_prefix %>[user_can_have_duplicates]" id="bonus_buy_reward_user_can_have_duplicates_<%= index %>">
               <option value="">Не задано</option>
               <option value="true" <%= 'selected' if existing_bonus_buy&.get_advanced_param('user_can_have_duplicates') == true %>>Да</option>
               <option value="false" <%= 'selected' if existing_bonus_buy&.get_advanced_param('user_can_have_duplicates') == false %>>Нет</option>
             </select>
             </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_user_can_have_disposable_email" class="form-label">Одноразовые email</label>
-            <select class="form-select" name="bonus_buy_reward[user_can_have_disposable_email]" id="bonus_buy_reward_user_can_have_disposable_email">
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_user_can_have_disposable_email_<%= index %>" class="form-label">Одноразовые email</label>
+            <select class="form-select" name="<%= field_prefix %>[user_can_have_disposable_email]" id="bonus_buy_reward_user_can_have_disposable_email_<%= index %>">
               <option value="">Не задано</option>
               <option value="true" <%= 'selected' if existing_bonus_buy&.get_advanced_param('user_can_have_disposable_email') == true %>>Разрешить</option>
               <option value="false" <%= 'selected' if existing_bonus_buy&.get_advanced_param('user_can_have_disposable_email') == false %>>Запретить</option>
             </select>
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_total_deposits" class="form-label">Общие депозиты</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[total_deposits]" 
-                   id="bonus_buy_reward_total_deposits" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_total_deposits_<%= index %>" class="form-label">Общие депозиты</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[total_deposits]"
+                   id="bonus_buy_reward_total_deposits_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('total_deposits') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_deposits_sum" class="form-label">Сумма депозитов</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[deposits_sum]" 
-                   id="bonus_buy_reward_deposits_sum" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_deposits_sum_<%= index %>" class="form-label">Сумма депозитов</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[deposits_sum]"
+                   id="bonus_buy_reward_deposits_sum_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('deposits_sum') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_loss_sum" class="form-label">Сумма проигрышей</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[loss_sum]" 
-                   id="bonus_buy_reward_loss_sum" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_loss_sum_<%= index %>" class="form-label">Сумма проигрышей</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[loss_sum]"
+                   id="bonus_buy_reward_loss_sum_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('loss_sum') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_deposits_count" class="form-label">Количество депозитов</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[deposits_count]" 
-                   id="bonus_buy_reward_deposits_count" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_deposits_count_<%= index %>" class="form-label">Количество депозитов</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[deposits_count]"
+                   id="bonus_buy_reward_deposits_count_<%= index %>" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('deposits_count') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_spend_sum" class="form-label">Сумма трат</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[spend_sum]" 
-                   id="bonus_buy_reward_spend_sum" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_spend_sum_<%= index %>" class="form-label">Сумма трат</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[spend_sum]"
+                   id="bonus_buy_reward_spend_sum_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('spend_sum') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_category_loss_sum" class="form-label">Проигрыши по категории</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[category_loss_sum]" 
-                   id="bonus_buy_reward_category_loss_sum" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_category_loss_sum_<%= index %>" class="form-label">Проигрыши по категории</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[category_loss_sum]"
+                   id="bonus_buy_reward_category_loss_sum_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('category_loss_sum') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_wager_sum" class="form-label">Сумма вагера</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[wager_sum]" 
-                   id="bonus_buy_reward_wager_sum" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_wager_sum_<%= index %>" class="form-label">Сумма вагера</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[wager_sum]"
+                   id="bonus_buy_reward_wager_sum_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('wager_sum') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_bets_count" class="form-label">Количество ставок</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[bets_count]" 
-                   id="bonus_buy_reward_bets_count" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_bets_count_<%= index %>" class="form-label">Количество ставок</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[bets_count]"
+                   id="bonus_buy_reward_bets_count_<%= index %>" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('bets_count') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_affiliates_user" class="form-label">Пользователь партнера</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[affiliates_user]" 
-                   id="bonus_buy_reward_affiliates_user" 
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_affiliates_user_<%= index %>" class="form-label">Пользователь партнера</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[affiliates_user]"
+                   id="bonus_buy_reward_affiliates_user_<%= index %>"
                    value="<%= existing_bonus_buy&.get_advanced_param('affiliates_user') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_balance" class="form-label">Баланс</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[balance]" 
-                   id="bonus_buy_reward_balance" step="0.01" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_balance_<%= index %>" class="form-label">Баланс</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[balance]"
+                   id="bonus_buy_reward_balance_<%= index %>" step="0.01"
                    value="<%= existing_bonus_buy&.get_advanced_param('balance') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_stag" class="form-label">Stag</label>
-            <input type="text" class="form-control" name="bonus_buy_reward[stag]" 
-                   id="bonus_buy_reward_stag" 
-                   value="<%= existing_bonus_buy&.get_advanced_param('stag') %>">
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_stag_<%= index %>" class="form-label">Stag</label>
+            <input type="text" class="form-control" name="<%= field_prefix %>[stag]"
+                   id="bonus_buy_reward_stag_<%= index %>"
+                   value="<%= existing_bonus_buy&.stag %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_chargeable_comp_points" class="form-label">Списываемые комп-поинты</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[chargeable_comp_points]" 
-                   id="bonus_buy_reward_chargeable_comp_points" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_chargeable_comp_points_<%= index %>" class="form-label">Списываемые комп-поинты</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[chargeable_comp_points]"
+                   id="bonus_buy_reward_chargeable_comp_points_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('chargeable_comp_points') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_persistent_comp_points" class="form-label">Постоянные комп-поинты</label>
-            <input type="number" class="form-control" name="bonus_buy_reward[persistent_comp_points]" 
-                   id="bonus_buy_reward_persistent_comp_points" step="0.01" min="0" 
+          <div class="reward-param-field">
+            <label for="bonus_buy_reward_persistent_comp_points_<%= index %>" class="form-label">Постоянные комп-поинты</label>
+            <input type="number" class="form-control" name="<%= field_prefix %>[persistent_comp_points]"
+                   id="bonus_buy_reward_persistent_comp_points_<%= index %>" step="0.01" min="0"
                    value="<%= existing_bonus_buy&.get_advanced_param('persistent_comp_points') %>">
           </div>
 
-          <div class="reward-param-field mb-3">
-            <label for="bonus_buy_reward_date_of_birth" class="form-label">Дата рождения</label>
-            <input type="date" class="form-control" name="bonus_buy_reward[date_of_birth]" 
-                   id="bonus_buy_reward_date_of_birth" 
+          <div class="reward-param-field full-width">
+            <label for="bonus_buy_reward_date_of_birth_<%= index %>" class="form-label">Дата рождения</label>
+            <input type="date" class="form-control" name="<%= field_prefix %>[date_of_birth]"
+                   id="bonus_buy_reward_date_of_birth_<%= index %>"
                      value="<%= existing_bonus_buy&.get_advanced_param('date_of_birth') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_deposit" class="form-label">Депозит</label>
-              <input type="number" class="form-control" name="bonus_buy_reward[deposit]" 
-                     id="bonus_buy_reward_deposit" step="0.01" min="0" 
+            <div class="reward-param-field">
+              <label for="bonus_buy_reward_deposit_<%= index %>" class="form-label">Депозит</label>
+              <input type="number" class="form-control" name="<%= field_prefix %>[deposit]"
+                     id="bonus_buy_reward_deposit_<%= index %>" step="0.01" min="0"
                      value="<%= existing_bonus_buy&.get_advanced_param('deposit') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_gender" class="form-label">Пол</label>
-              <select class="form-select" name="bonus_buy_reward[gender]" id="bonus_buy_reward_gender">
+            <div class="reward-param-field">
+              <label for="bonus_buy_reward_gender_<%= index %>" class="form-label">Пол</label>
+              <select class="form-select" name="<%= field_prefix %>[gender]" id="bonus_buy_reward_gender_<%= index %>">
                 <option value="">Не задано</option>
                 <option value="male" <%= 'selected' if existing_bonus_buy&.get_advanced_param('gender') == 'male' %>>Мужской</option>
                 <option value="female" <%= 'selected' if existing_bonus_buy&.get_advanced_param('gender') == 'female' %>>Женский</option>
               </select>
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_issued_bonus" class="form-label">Выданный бонус</label>
-              <input type="text" class="form-control" name="bonus_buy_reward[issued_bonus]" 
-                     id="bonus_buy_reward_issued_bonus" 
+            <div class="reward-param-field full-width">
+              <label for="bonus_buy_reward_issued_bonus_<%= index %>" class="form-label">Выданный бонус</label>
+              <input type="text" class="form-control" name="<%= field_prefix %>[issued_bonus]"
+                     id="bonus_buy_reward_issued_bonus_<%= index %>"
                      value="<%= existing_bonus_buy&.get_advanced_param('issued_bonus') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_registered" class="form-label">Зарегистрирован</label>
-              <input type="date" class="form-control" name="bonus_buy_reward[registered]" 
-                     id="bonus_buy_reward_registered" 
+            <div class="reward-param-field full-width">
+              <label for="bonus_buy_reward_registered_<%= index %>" class="form-label">Зарегистрирован</label>
+              <input type="date" class="form-control" name="<%= field_prefix %>[registered]"
+                     id="bonus_buy_reward_registered_<%= index %>"
                      value="<%= existing_bonus_buy&.get_advanced_param('registered') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_social_networks" class="form-label">Социальные сети</label>
-              <input type="text" class="form-control" name="bonus_buy_reward[social_networks]" 
-                     id="bonus_buy_reward_social_networks"  
+            <div class="reward-param-field full-width">
+              <label for="bonus_buy_reward_social_networks_<%= index %>" class="form-label">Социальные сети</label>
+              <input type="text" class="form-control" name="<%= field_prefix %>[social_networks]"
+                     id="bonus_buy_reward_social_networks_<%= index %>"
                      value="<%= existing_bonus_buy&.get_advanced_param('social_networks') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_wager_done" class="form-label">Отыгрыш выполнен</label>
-              <select class="form-select" name="bonus_buy_reward[wager_done]" id="bonus_buy_reward_wager_done">
+            <div class="reward-param-field">
+              <label for="bonus_buy_reward_wager_done_<%= index %>" class="form-label">Отыгрыш выполнен</label>
+              <select class="form-select" name="<%= field_prefix %>[wager_done]" id="bonus_buy_reward_wager_done_<%= index %>">
                 <option value="">Не задано</option>
                 <option value="true" <%= 'selected' if existing_bonus_buy&.get_advanced_param('wager_done') == true %>>Да</option>
                 <option value="false" <%= 'selected' if existing_bonus_buy&.get_advanced_param('wager_done') == false %>>Нет</option>
               </select>
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_hold_min" class="form-label">Hold min</label>
-              <input type="number" class="form-control" name="bonus_buy_reward[hold_min]" 
-                     id="bonus_buy_reward_hold_min" step="0.01" min="0" 
+            <div class="reward-param-field">
+              <label for="bonus_buy_reward_hold_min_<%= index %>" class="form-label">Hold min</label>
+              <input type="number" class="form-control" name="<%= field_prefix %>[hold_min]"
+                     id="bonus_buy_reward_hold_min_<%= index %>" step="0.01" min="0"
                      value="<%= existing_bonus_buy&.get_advanced_param('hold_min') %>">
             </div>
 
-            <div class="mb-3">
-              <label for="bonus_buy_reward_hold_max" class="form-label">Hold max</label>
-              <input type="number" class="form-control" name="bonus_buy_reward[hold_max]" 
-                     id="bonus_buy_reward_hold_max" step="0.01" min="0" 
+            <div class="reward-param-field">
+              <label for="bonus_buy_reward_hold_max_<%= index %>" class="form-label">Hold max</label>
+              <input type="number" class="form-control" name="<%= field_prefix %>[hold_max]"
+                     id="bonus_buy_reward_hold_max_<%= index %>" step="0.01" min="0"
                      value="<%= existing_bonus_buy&.get_advanced_param('hold_max') %>">
             </div>
           </div>
@@ -357,15 +373,15 @@
 
 <script>
 function toggleAdvancedBonusBuyParams() {
-  const advancedSection = document.getElementById('bonus_buy_advanced_params');
+  const advancedSection = document.querySelector('.advanced-params.mt-3');
   const toggleButton = document.getElementById('toggle_bonus_buy_advanced');
-  
-  if (advancedSection.classList.contains('show')) {
-    advancedSection.classList.remove('show');
-    toggleButton.innerHTML = '<i class="fas fa-plus"></i> Показать дополнительные параметры';
-  } else {
-    advancedSection.classList.add('show');
+
+  if (advancedSection.style.display === 'none') {
+    advancedSection.style.display = 'block';
     toggleButton.innerHTML = '<i class="fas fa-minus"></i> Скрыть дополнительные параметры';
+  } else {
+    advancedSection.style.display = 'none';
+    toggleButton.innerHTML = '<i class="fas fa-plus"></i> Показать дополнительные параметры';
   }
 }
 </script>

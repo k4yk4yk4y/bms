@@ -23,14 +23,6 @@ class CompPointReward < ApplicationRecord
     multiplier.present? ? "×#{multiplier}" : "N/A"
   end
 
-  def title
-    config["title"] || "#{points_amount} comp points"
-  end
-
-  def title=(value)
-    self.config = (config || {}).merge("title" => value)
-  end
-
   def total_value
     return points_amount unless multiplier.present?
     points_amount * multiplier
