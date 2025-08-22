@@ -71,7 +71,7 @@ class FreespinReward < ApplicationRecord
   def formatted_max_win
     return "No limit" if max_win_value.blank?
     value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
-    return "#{value}x" if max_win_type == 'multiplier'
+    return "#{value}x" if max_win_type == "multiplier"
     "#{value} #{bonus.currencies.first || ''}"
   end
 
@@ -117,7 +117,7 @@ class FreespinReward < ApplicationRecord
 
   def currency_freespin_bet_levels_must_be_present
     # Check if we have at least one currency with a non-zero bet level
-    return if currency_freespin_bet_levels.present? && 
+    return if currency_freespin_bet_levels.present? &&
               currency_freespin_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
 
     errors.add(:currency_freespin_bet_levels, "должен быть указан размер ставки фриспинов хотя бы для одной валюты")

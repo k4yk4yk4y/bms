@@ -18,7 +18,7 @@ RSpec.describe BonusCodeReward, type: :model do
   describe 'database columns' do
     it { is_expected.to have_db_column(:title).of_type(:string) }
   end
-  
+
   # Helper methods
   describe 'helper methods' do
     let(:bonus_code_reward) { build(:bonus_code_reward, code: 'test123') }

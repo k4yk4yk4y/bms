@@ -58,7 +58,7 @@ FactoryBot.define do
     end
 
     trait :single_game do
-      games { ['Starburst'] }
+      games { [ 'Starburst' ] }
     end
 
     trait :unlimited_max_win do

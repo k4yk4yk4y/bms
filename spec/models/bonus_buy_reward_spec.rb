@@ -23,9 +23,9 @@ RSpec.describe BonusBuyReward, type: :model do
   # Serialization
   describe 'serialization' do
     it 'serializes games as YAML' do
-      reward = create(:bonus_buy_reward, games: ['game1', 'game2'])
+      reward = create(:bonus_buy_reward, games: [ 'game1', 'game2' ])
       reward.reload
-      expect(reward.games).to eq(['game1', 'game2'])
+      expect(reward.games).to eq([ 'game1', 'game2' ])
     end
   end
 

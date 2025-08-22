@@ -468,7 +468,7 @@ class BonusesController < ApplicationController
 
     result = rewards_params.values.map do |reward_params|
       permitted = reward_params.permit(
-        :id, :bonus_type, :amount, :percentage, :wager, 
+        :id, :bonus_type, :amount, :percentage, :wager,
         :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :wagering_strategy,
         # Advanced parameters
         :range, :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -597,7 +597,7 @@ class BonusesController < ApplicationController
       reward.available = reward_params[:available] if reward_params[:available].present?
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
-  
+
       reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
       reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
 
@@ -615,7 +615,7 @@ class BonusesController < ApplicationController
       # Set advanced parameters
       config = reward.config || {}  # Preserve existing config
       reward.advanced_params.each do |param|
-        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
       end
 
       reward.config = config
@@ -718,7 +718,7 @@ class BonusesController < ApplicationController
         reward.available = reward_params[:available] if reward_params[:available].present?
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
-    
+
         # Set currency bet levels
         if reward_params[:currency_bet_levels].present?
           reward.currency_bet_levels = reward_params[:currency_bet_levels]
@@ -727,7 +727,7 @@ class BonusesController < ApplicationController
         # Set advanced parameters and common bonus parameters
         config = reward.config || {}
         reward.advanced_params.each do |param|
-          if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+          if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
             config[param] = reward_params[param.to_sym]
           end
         end
@@ -758,7 +758,7 @@ class BonusesController < ApplicationController
         reward.available = reward_params[:available] if reward_params[:available].present?
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
-    
+
         reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
         reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
 
@@ -770,7 +770,7 @@ class BonusesController < ApplicationController
         # Set advanced parameters
         config = {}
         reward.advanced_params.each do |param|
-          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
         end
 
         reward.config = config
@@ -857,7 +857,7 @@ class BonusesController < ApplicationController
       reward.available = reward_params[:available] if reward_params[:available].present?
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
-  
+
       reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
       reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
 
@@ -954,14 +954,14 @@ class BonusesController < ApplicationController
         reward.available = reward_params[:available] if reward_params[:available].present?
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
-    
+
         reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
         reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
 
         # Set advanced parameters
         config = {}
         reward.advanced_params.each do |param|
-          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
         end
 
         # Set currency bet levels
@@ -1196,7 +1196,7 @@ class BonusesController < ApplicationController
   def create_freespin_reward_if_provided
     reward_params = freespin_reward_params
     return if reward_params.empty? || reward_params[:spins_count].blank?
-    
+
 
 
     # Prepare currency freespin bet levels first
@@ -1228,7 +1228,7 @@ class BonusesController < ApplicationController
     # Set advanced parameters
     config = reward.config || {}  # Preserve existing config
     reward.advanced_params.each do |param|
-      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
     end
 
     reward.config = config
@@ -1259,7 +1259,7 @@ class BonusesController < ApplicationController
     # Update advanced parameters
     config = reward.config || {}
     reward.advanced_params.each do |param|
-      if reward_params[param.to_sym].present? && ![:games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag].include?(param.to_sym)
+      if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
         config[param] = reward_params[param.to_sym]
       end
     end
@@ -1453,7 +1453,7 @@ class BonusesController < ApplicationController
 
     rewards_params.each do |reward_params|
       next if reward_params[:points_amount].blank?
-      
+
       reward = @bonus.comp_point_rewards.build(
         points_amount: reward_params[:points_amount],
         multiplier: reward_params[:multiplier],
@@ -1482,7 +1482,7 @@ class BonusesController < ApplicationController
 
     rewards_params.each_with_index do |reward_params, index|
       next if reward_params[:points_amount].blank?
-      
+
       if reward = existing_rewards[index]
         # Update existing reward
         reward.update!(
@@ -1490,7 +1490,7 @@ class BonusesController < ApplicationController
           multiplier: reward_params[:multiplier],
           title: reward_params[:title]
         )
-        
+
         # Update config
         config = {}
         reward_params.except(:points_amount, :multiplier, :title).each do |key, value|
@@ -1498,7 +1498,7 @@ class BonusesController < ApplicationController
           config[key.to_s] = value
         end
         reward.update!(config: config)
-        
+
         rewards_to_keep << reward
       else
         # Create new reward
@@ -1534,10 +1534,10 @@ class BonusesController < ApplicationController
 
     rewards_params.each do |reward_params|
       next if reward_params[:code].blank?
-      
+
       reward = @bonus.bonus_code_rewards.build(
         code: reward_params[:code],
-        code_type: reward_params[:code_type] || 'bonus',
+        code_type: reward_params[:code_type] || "bonus",
         title: reward_params[:title]
       )
 
@@ -1563,15 +1563,15 @@ class BonusesController < ApplicationController
 
     rewards_params.each_with_index do |reward_params, index|
       next if reward_params[:code].blank?
-      
+
       if reward = existing_rewards[index]
         # Update existing reward
         reward.update!(
           code: reward_params[:code],
-          code_type: reward_params[:code_type] || 'bonus',
+          code_type: reward_params[:code_type] || "bonus",
           title: reward_params[:title]
         )
-        
+
         # Update config
         config = {}
         reward_params.except(:code, :code_type, :title).each do |key, value|
@@ -1579,13 +1579,13 @@ class BonusesController < ApplicationController
           config[key.to_s] = value
         end
         reward.update!(config: config)
-        
+
         rewards_to_keep << reward
       else
         # Create new reward
         reward = @bonus.bonus_code_rewards.build(
           code: reward_params[:code],
-          code_type: reward_params[:code_type] || 'bonus',
+          code_type: reward_params[:code_type] || "bonus",
           title: reward_params[:title]
         )
 
@@ -1615,7 +1615,7 @@ class BonusesController < ApplicationController
 
     rewards_params.each do |reward_params|
       next if reward_params[:chip_value].blank? || reward_params[:chips_count].blank?
-      
+
       reward = @bonus.freechip_rewards.build(
         chip_value: reward_params[:chip_value],
         chips_count: reward_params[:chips_count]
@@ -1643,14 +1643,14 @@ class BonusesController < ApplicationController
 
     rewards_params.each_with_index do |reward_params, index|
       next if reward_params[:chip_value].blank? || reward_params[:chips_count].blank?
-      
+
       if reward = existing_rewards[index]
         # Update existing reward
         reward.update!(
           chip_value: reward_params[:chip_value],
           chips_count: reward_params[:chips_count]
         )
-        
+
         # Update config
         config = {}
         reward_params.except(:chip_value, :chips_count).each do |key, value|
@@ -1658,7 +1658,7 @@ class BonusesController < ApplicationController
           config[key.to_s] = value
         end
         reward.update!(config: config)
-        
+
         rewards_to_keep << reward
       else
         # Create new reward
@@ -1693,7 +1693,7 @@ class BonusesController < ApplicationController
 
     rewards_params.each do |reward_params|
       next if reward_params[:prize_name].blank?
-      
+
       reward = @bonus.material_prize_rewards.build(
         prize_name: reward_params[:prize_name],
         prize_value: reward_params[:prize_value]
@@ -1721,14 +1721,14 @@ class BonusesController < ApplicationController
 
     rewards_params.each_with_index do |reward_params, index|
       next if reward_params[:prize_name].blank?
-      
+
       if reward = existing_rewards[index]
         # Update existing reward
         reward.update!(
           prize_name: reward_params[:prize_name],
           prize_value: reward_params[:prize_value]
         )
-        
+
         # Update config
         config = {}
         reward_params.except(:prize_name, :prize_value).each do |key, value|
@@ -1736,7 +1736,7 @@ class BonusesController < ApplicationController
           config[key.to_s] = value
         end
         reward.update!(config: config)
-        
+
         rewards_to_keep << reward
       else
         # Create new reward
@@ -1767,10 +1767,10 @@ class BonusesController < ApplicationController
   # Parameter methods for multiple rewards
   def multiple_comp_point_rewards_params
     return [] unless params[:comp_point_rewards].present? || params.dig(:bonus, :comp_point_rewards).present?
-    
+
     rewards_data = params[:comp_point_rewards] || params.dig(:bonus, :comp_point_rewards) || []
     return [] unless rewards_data.respond_to?(:values)
-    
+
     rewards_data.values.map do |reward_params|
       next if reward_params.blank?
       permitted = reward_params.permit(:points_amount, :points, :multiplier, :title)
@@ -1782,10 +1782,10 @@ class BonusesController < ApplicationController
 
   def multiple_bonus_code_rewards_params
     return [] unless params[:bonus_code_rewards].present? || params.dig(:bonus, :bonus_code_rewards).present?
-    
+
     rewards_data = params[:bonus_code_rewards] || params.dig(:bonus, :bonus_code_rewards) || []
     return [] unless rewards_data.respond_to?(:values)
-    
+
     rewards_data.values.map do |reward_params|
       next if reward_params.blank?
       permitted = reward_params.permit(:code, :set_bonus_code, :code_type, :title)
@@ -1797,10 +1797,10 @@ class BonusesController < ApplicationController
 
   def multiple_freechip_rewards_params
     return [] unless params[:freechip_rewards].present? || params.dig(:bonus, :freechip_rewards).present?
-    
+
     rewards_data = params[:freechip_rewards] || params.dig(:bonus, :freechip_rewards) || []
     return [] unless rewards_data.respond_to?(:values)
-    
+
     rewards_data.values.map do |reward_params|
       next if reward_params.blank?
       reward_params.permit(:chip_value, :chips_count)
@@ -1809,10 +1809,10 @@ class BonusesController < ApplicationController
 
   def multiple_material_prize_rewards_params
     return [] unless params[:material_prize_rewards].present? || params.dig(:bonus, :material_prize_rewards).present?
-    
+
     rewards_data = params[:material_prize_rewards] || params.dig(:bonus, :material_prize_rewards) || []
     return [] unless rewards_data.respond_to?(:values)
-    
+
     rewards_data.values.map do |reward_params|
       next if reward_params.blank?
       reward_params.permit(:prize_name, :prize_value)
@@ -1822,7 +1822,7 @@ class BonusesController < ApplicationController
   # Single reward parameter methods
   def comp_point_reward_params
     return {} unless params[:comp_point_reward].present? || params.dig(:bonus, :comp_point_reward).present?
-    
+
     reward_data = params[:comp_point_reward] || params.dig(:bonus, :comp_point_reward) || {}
     permitted = reward_data.permit(:points_amount, :points, :multiplier, :title, :config_json)
     # Map 'points' to 'points_amount' for backward compatibility
@@ -1832,7 +1832,7 @@ class BonusesController < ApplicationController
 
   def bonus_code_reward_params
     return {} unless params[:bonus_code_reward].present? || params.dig(:bonus, :bonus_code_reward).present?
-    
+
     reward_data = params[:bonus_code_reward] || params.dig(:bonus, :bonus_code_reward) || {}
     reward_data.permit(:code, :set_bonus_code, :code_type, :title)
   end
