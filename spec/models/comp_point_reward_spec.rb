@@ -19,7 +19,7 @@ RSpec.describe CompPointReward, type: :model do
   describe 'database columns' do
     it { is_expected.to have_db_column(:title).of_type(:string) }
   end
-  
+
   # Helper methods
   describe 'helper methods' do
     let(:comp_point_reward) { build(:comp_point_reward, points_amount: 100, multiplier: 2.5) }

@@ -24,13 +24,13 @@ RSpec.describe FreespinReward, type: :model do
       expect(reward.errors[:currency_freespin_bet_levels]).to include("должен быть указан размер ставки фриспинов хотя бы для одной валюты")
     end
   end
-  
+
   # Serialization
   describe 'serialization' do
     it 'serializes games as YAML' do
-      reward = create(:freespin_reward, games: ['game1', 'game2'])
+      reward = create(:freespin_reward, games: [ 'game1', 'game2' ])
       reward.reload
-      expect(reward.games).to eq(['game1', 'game2'])
+      expect(reward.games).to eq([ 'game1', 'game2' ])
     end
   end
 
@@ -44,7 +44,7 @@ RSpec.describe FreespinReward, type: :model do
     it { is_expected.to have_db_column(:code).of_type(:string) }
     it { is_expected.to have_db_column(:stag).of_type(:string) }
   end
-  
+
   # Delegated parameters from Bonus
   describe 'delegated parameters from Bonus' do
     let(:bonus) { create(:bonus, currencies: %w[USD EUR], groups: %w[VIP Regular], tags: 'new_player, weekend') }
@@ -73,9 +73,9 @@ RSpec.describe FreespinReward, type: :model do
         freespin_reward.games = []
         expect(freespin_reward.formatted_games).to be_nil
       end
-      
+
       it 'joins games with a comma' do
-        freespin_reward.games = ['Slot Game 1', 'Slot Game 2']
+        freespin_reward.games = [ 'Slot Game 1', 'Slot Game 2' ]
         expect(freespin_reward.formatted_games).to eq('Slot Game 1, Slot Game 2')
       end
     end

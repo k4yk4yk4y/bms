@@ -49,7 +49,7 @@ class BonusReward < ApplicationRecord
   def formatted_max_win
     return "No limit" if max_win_value.blank?
     value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
-    return "#{value}x" if max_win_type == 'multiplier'
+    return "#{value}x" if max_win_type == "multiplier"
     "#{value} #{bonus.currencies.first || ''}"
   end
 end
