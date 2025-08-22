@@ -1,23 +1,20 @@
 <!-- Currency Freespin Bet Levels Section -->
-<div class="card mb-4" id="currency-freespin-bet-levels-card">
-  <div class="card-header">
-    <h5 class="card-title mb-0">
-      <i class="bi bi-coin"></i>
-      Размер ставки фриспинов по валютам *
-    </h5>
-  </div>
-  <div class="card-body">
-    <div id="currency-freespin-bet-levels-container">
-      <div class="row">
+<div class="reward-param-field full-width currency-bet-levels-wrapper-freespin">
+  <label class="form-label">
+    <i class="bi bi-coin"></i>
+    Размер ставки фриспинов по валютам *
+  </label>
+  <div id="currency-freespin-bet-levels-container">
+    <div class="currency-bet-levels-grid">
         <% all_currencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'] %>
         <% selected_currencies = bonus.currencies.present? ? bonus.currencies : all_currencies %>
         <% freespin_reward = defined?(existing_freespin) ? existing_freespin : nil %>
 
         <% selected_currencies.each_with_index do |currency, index| %>
-          <div class="col-12 mb-2">
+          <div class="currency-bet-level-item">
             <div class="input-group">
               <span class="input-group-text"><%= currency %></span>
-              <%= number_field_tag "freespin_reward[currency_freespin_bet_levels][#{currency}]",
+              <%= number_field_tag "freespin_rewards[#{freespin_reward&.id || index}][currency_freespin_bet_levels][#{currency}]",
                   freespin_reward&.currency_freespin_bet_levels&.dig(currency),
                   class: "form-control",
                   step: 0.01,
@@ -47,7 +44,7 @@
         const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : allCurrencies;
 
         // Rebuild the fields
-        const rowDiv = container.querySelector('.row');
+        const rowDiv = container.querySelector('.currency-bet-levels-grid');
         if (!rowDiv) return;
 
         // Save current values
@@ -64,13 +61,13 @@
 
         displayCurrencies.forEach(currency => {
           const colDiv = document.createElement('div');
-          colDiv.className = 'col-12 mb-2';
+          colDiv.className = 'currency-bet-level-item';
 
           colDiv.innerHTML = `
             <div class="input-group">
               <span class="input-group-text">${currency}</span>
               <input type="number"
-                     name="freespin_reward[currency_freespin_bet_levels][${currency}]"
+                     name="freespin_rewards[${freespin_reward&.id || index}][currency_freespin_bet_levels][${currency}]"
                      value="${currentValues[currency] || ''}"
                      class="form-control"
                      step="0.01"
@@ -93,5 +90,6 @@
         }
       });
     </script>
+    </div>
   </div>
 </div>

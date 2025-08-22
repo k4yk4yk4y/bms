@@ -6,7 +6,6 @@ FactoryBot.define do
     reward_type { 'bonus' }
     amount { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
     percentage { nil }
-    config { {} }
 
     trait :percentage_based do
       amount { nil }
@@ -14,63 +13,37 @@ FactoryBot.define do
     end
 
     trait :with_wager do
-      config { { 'wager' => Faker::Number.decimal(l_digits: 2, r_digits: 2) } }
+      wager { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
     end
 
     trait :with_max_win_fixed do
-      config { { 'max_win' => Faker::Number.decimal(l_digits: 3, r_digits: 2).to_s } }
+      max_win_type { "fixed" }
+      max_win_value { Faker::Number.decimal(l_digits: 3, r_digits: 2) }
     end
 
     trait :with_max_win_multiplier do
-      config { { 'max_win' => "x#{Faker::Number.between(from: 5, to: 50)}" } }
+      max_win_type { "multiplier" }
+      max_win_value { Faker::Number.between(from: 5, to: 50) }
     end
 
     trait :with_availability do
-      config { { 'available' => Faker::Number.between(from: 1, to: 100) } }
+      available { Faker::Number.between(from: 1, to: 100) }
     end
 
     trait :with_code do
-      config { { 'code' => "REWARD_#{Faker::Alphanumeric.alpha(number: 6).upcase}" } }
-    end
-
-    trait :with_currencies do
-      config { { 'currencies' => %w[USD EUR RUB] } }
-    end
-
-    trait :with_min_deposit do
-      config { { 'min' => Faker::Number.decimal(l_digits: 2, r_digits: 2) } }
-    end
-
-    trait :with_groups do
-      config { { 'groups' => %w[VIP Regular Premium] } }
-    end
-
-    trait :with_tags do
-      config { { 'tags' => %w[new_player returning_player high_roller] } }
+      code { "REWARD_#{Faker::Alphanumeric.alpha(number: 6).upcase}" }
     end
 
     trait :with_duplicates_allowed do
-      config { { 'user_can_have_duplicates' => true } }
-    end
-
-    trait :with_limits do
-      config do
-        {
-          'no_more' => Faker::Number.between(from: 1, to: 10),
-          'totally_no_more' => Faker::Number.between(from: 5, to: 20)
-        }
-      end
-    end
-
-    trait :with_wagering_strategy do
-      config { { 'wagering_strategy' => %w[bonus_first deposit_first].sample } }
+      user_can_have_duplicates { true }
     end
 
     trait :with_stag do
-      config { { 'stag' => "STAG_#{Faker::Alphanumeric.alpha(number: 8).upcase}" } }
+      stag { "STAG_#{Faker::Alphanumeric.alpha(number: 8).upcase}" }
     end
 
-    trait :with_advanced_params do
+    # Traits for advanced params that are still in `config`
+    trait :with_advanced_config_params do
       config do
         {
           'range' => "#{Faker::Number.between(from: 1, to: 100)}-#{Faker::Number.between(from: 101, to: 1000)}",
@@ -92,11 +65,6 @@ FactoryBot.define do
       with_max_win_fixed
       with_availability
       with_code
-      with_currencies
-      with_min_deposit
-      with_groups
-      with_tags
-      with_limits
     end
   end
 end

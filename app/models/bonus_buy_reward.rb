@@ -5,70 +5,16 @@ class BonusBuyReward < ApplicationRecord
 
   validates :buy_amount, presence: true, numericality: { greater_than: 0 }
   validates :multiplier, numericality: { greater_than: 0 }, allow_nil: true
+  validates :bet_level, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_win_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_win_type, inclusion: { in: %w[fixed multiplier] }, allow_nil: true
+  validate :currency_bet_levels_must_be_present
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
+  serialize :games, coder: YAML
 
-  # Common parameters accessors
-  def games
-    config&.dig("games") || []
-  end
-
-  def games=(value)
-    games_array = value.is_a?(Array) ? value : value.to_s.split(",").map(&:strip).reject(&:blank?)
-    self.config = (config || {}).merge("games" => games_array)
-  end
-
-  def bet_level
-    config&.dig("bet_level")
-  end
-
-  def bet_level=(value)
-    self.config = (config || {}).merge("bet_level" => value&.to_i)
-  end
-
-  def max_win
-    config&.dig("max_win")
-  end
-
-  def max_win=(value)
-    self.config = (config || {}).merge("max_win" => value)
-  end
-
-  def max_win_type
-    return "multiplier" if max_win.to_s.include?("x")
-    "fixed"
-  end
-
-
-
-  def available
-    config&.dig("available")
-  end
-
-  def available=(value)
-    self.config = (config || {}).merge("available" => value&.to_i)
-  end
-
-  def code
-    config&.dig("code")
-  end
-
-  def code=(value)
-    self.config = (config || {}).merge("code" => value)
-  end
-
-
-
-  def stag
-    config&.dig("stag")
-  end
-
-  def stag=(value)
-    self.config = (config || {}).merge("stag" => value)
-  end
-
-
+  # Common parameters accessors - DEPRECATED
 
   # Currency-specific bet levels
   def currency_bet_levels
@@ -76,7 +22,16 @@ class BonusBuyReward < ApplicationRecord
   end
 
   def currency_bet_levels=(value)
-    self.config = (config || {}).merge("currency_bet_levels" => value)
+    if value.is_a?(Hash)
+      # Remove blank values and convert to proper format
+      clean_value = value.reject { |_k, v| v.blank? }
+      clean_value = clean_value.transform_values { |v| v.to_f }
+      self.config = (config || {}).merge("currency_bet_levels" => clean_value)
+    elsif value.blank?
+      self.config = (config || {}).merge("currency_bet_levels" => {})
+    else
+      self.config = (config || {}).merge("currency_bet_levels" => value)
+    end
   end
 
   def get_bet_level_for_currency(currency)
@@ -87,6 +42,16 @@ class BonusBuyReward < ApplicationRecord
     levels = currency_bet_levels.dup
     levels[currency.to_s] = value&.to_f
     self.currency_bet_levels = levels
+  end
+
+  def formatted_currency_bet_levels
+    return "No bet levels specified" if currency_bet_levels.empty?
+
+    currency_bet_levels.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
+  end
+
+  def has_currency_bet_levels?
+    currency_bet_levels.any?
   end
 
   # Advanced parameters accessors
@@ -128,8 +93,19 @@ class BonusBuyReward < ApplicationRecord
   end
 
   def formatted_max_win
-    return "No limit" if max_win.blank?
-    return max_win if max_win.to_s.include?("x")
-    "#{max_win} #{bonus.currencies.first || ''}"
+    return "No limit" if max_win_value.blank?
+    value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
+    return "#{value}x" if max_win_type == 'multiplier'
+    "#{value} #{bonus.currencies.first || ''}"
+  end
+
+  private
+
+  def currency_bet_levels_must_be_present
+    # Check if we have at least one currency with a non-zero bet level
+    return if currency_bet_levels.present? && 
+              currency_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
+
+    errors.add(:currency_bet_levels, "должен быть указан размер ставки хотя бы для одной валюты")
   end
 end

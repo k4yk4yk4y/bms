@@ -20,7 +20,10 @@ FactoryBot.define do
     dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
     description { Faker::Lorem.paragraph }
     groups { [ user_group ] }
-    currency_minimum_deposits { { 'USD' => minimum_deposit, 'EUR' => minimum_deposit, 'RUB' => minimum_deposit } }
+
+    after(:build) do |bonus|
+      bonus.currency_minimum_deposits ||= bonus.currencies.index_with { |_| bonus.minimum_deposit || 0.0 }
+    end
 
     trait :draft do
       status { 'draft' }

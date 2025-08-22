@@ -8,17 +8,17 @@
 
   <div class="main-params-container">
     <!-- Title -->
-    <div class="reward-param-field mb-3">
+    <div class="reward-param-field mb-3 full-width">
       <label for="bonus_code_reward_title" class="form-label">Название награды (title) *</label>
-      <input type="text" class="form-control" name="bonus_code_reward[title]" id="bonus_code_reward_title" 
+      <input type="text" class="form-control" name="bonus_code_reward[title]" id="bonus_code_reward_title"
               value="<%= existing_bonus_code&.title %>" required>
     </div>
 
     <!-- Set Bonus Code -->
-    <div class="reward-param-field mb-3">
+    <div class="reward-param-field mb-3 full-width">
       <label for="bonus_code_reward_set_bonus_code" class="form-label">Бонус-код (set_bonus_code) *</label>
-      <input type="text" class="form-control" name="bonus_code_reward[set_bonus_code]" 
-             id="bonus_code_reward_set_bonus_code"  
+      <input type="text" class="form-control" name="bonus_code_reward[set_bonus_code]"
+             id="bonus_code_reward_set_bonus_code"
              value="<%= existing_bonus_code&.set_bonus_code %>" required>
     </div>
   </div>
@@ -32,9 +32,9 @@
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
       <!-- Custom Config Fields -->
-      <div class="reward-param-field-wide mb-3">
+      <div class="reward-param-field mb-3 full-width">
         <label class="form-label">Дополнительные параметры (JSON)</label>
-        <textarea class="form-control" name="bonus_code_reward[config_json]" rows="3" 
+        <textarea class="form-control" name="bonus_code_reward[config_json]" rows="3"
                   ><%= existing_bonus_code&.config&.to_json %></textarea>
       </div>
     </div>

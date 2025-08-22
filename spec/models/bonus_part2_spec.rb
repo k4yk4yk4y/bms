@@ -140,7 +140,7 @@ RSpec.describe Bonus, type: :model do
         end
 
         it 'returns bonus code when no reward code' do
-          bonus_reward.config = {}
+          bonus_reward.code = nil
           bonus_reward.save
           expect(bonus.display_code).to eq(bonus.code)
         end

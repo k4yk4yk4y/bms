@@ -4,71 +4,16 @@ class FreespinReward < ApplicationRecord
   belongs_to :bonus
 
   validates :spins_count, presence: true, numericality: { greater_than: 0 }
+  validates :bet_level, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_win_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_win_type, inclusion: { in: %w[fixed multiplier] }, allow_nil: true
   validate :currency_freespin_bet_levels_must_be_present
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
+  serialize :games, coder: YAML
 
-  # Common parameters accessors
-  def games
-    config&.dig("games") || []
-  end
-
-  def games=(value)
-    games_array = value.is_a?(Array) ? value : value.to_s.split(",").map(&:strip).reject(&:blank?)
-    self.config = (config || {}).merge("games" => games_array)
-  end
-
-  def bet_level
-    config&.dig("bet_level")
-  end
-
-  def bet_level=(value)
-    self.config = (config || {}).merge("bet_level" => value&.to_f)
-  end
-
-  def max_win
-    config&.dig("max_win")
-  end
-
-  def max_win=(value)
-    self.config = (config || {}).merge("max_win" => value)
-  end
-
-  def max_win_type
-    return "multiplier" if max_win.to_s.include?("x")
-    "fixed"
-  end
-
-
-
-  def available
-    config&.dig("available")
-  end
-
-  def available=(value)
-    self.config = (config || {}).merge("available" => value&.to_i)
-  end
-
-  def code
-    config&.dig("code")
-  end
-
-  def code=(value)
-    self.config = (config || {}).merge("code" => value)
-  end
-
-
-
-  def stag
-    config&.dig("stag")
-  end
-
-  def stag=(value)
-    self.config = (config || {}).merge("stag" => value)
-  end
-
-
+  # Common parameters accessors - DEPRECATED
 
   # Currency-specific bet levels
   def currency_bet_levels
@@ -124,9 +69,10 @@ class FreespinReward < ApplicationRecord
   end
 
   def formatted_max_win
-    return "No limit" if max_win.blank?
-    return max_win if max_win.to_s.include?("x")
-    "#{max_win} #{bonus.currencies.first || ''}"
+    return "No limit" if max_win_value.blank?
+    value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
+    return "#{value}x" if max_win_type == 'multiplier'
+    "#{value} #{bonus.currencies.first || ''}"
   end
 
   # Currency-specific freespin bet levels (required field)
@@ -170,7 +116,9 @@ class FreespinReward < ApplicationRecord
   private
 
   def currency_freespin_bet_levels_must_be_present
-    return if currency_freespin_bet_levels.present? && currency_freespin_bet_levels.values.any?(&:present?)
+    # Check if we have at least one currency with a non-zero bet level
+    return if currency_freespin_bet_levels.present? && 
+              currency_freespin_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
 
     errors.add(:currency_freespin_bet_levels, "должен быть указан размер ставки фриспинов хотя бы для одной валюты")
   end
