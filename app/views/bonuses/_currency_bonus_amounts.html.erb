@@ -1,0 +1,147 @@
+<!-- Currency Bonus Amounts Section -->
+<div class="reward-param-field full-width currency-amounts-wrapper-bonus">
+  <label class="form-label">
+    <i class="bi bi-coin"></i>
+    Сумма бонуса по валютам *
+  </label>
+  <div id="currency-bonus-amounts-container">
+    <div class="currency-amounts-grid">
+        <% 
+          # Используем переданные валюты или определяем автоматически как fallback
+          if defined?(currencies) && currencies.present?
+            selected_currencies = currencies
+          else
+            all_currencies = Bonus.all_currencies
+            minimum_deposit_currencies = bonus.currency_minimum_deposits.present? ? bonus.currency_minimum_deposits.keys : []
+            selected_currencies = minimum_deposit_currencies.present? ? minimum_deposit_currencies : (bonus.currencies.present? ? bonus.currencies : all_currencies)
+          end
+        %>
+        <% bonus_reward = defined?(existing_reward) ? existing_reward : nil %>
+
+        <% selected_currencies.each_with_index do |currency, index| %>
+          <div class="currency-amount-item">
+            <div class="input-group">
+              <span class="input-group-text"><%= currency %></span>
+              <%= number_field_tag "bonus_reward[currency_amounts][#{currency}]",
+                  bonus_reward&.currency_amounts&.dig(currency),
+                  class: "form-control currency-input",
+                  step: Bonus.currency_step(currency),
+                  min: 0,
+                  placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
+                  required: true,
+                  data: { 
+                    currency: currency, 
+                    precision: Bonus.currency_precision(currency),
+                    "currency-validation-target": "input"
+                  } %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+
+    <!-- Dynamic update based on selected currencies -->
+    <script>
+      // Helper function to get selected currencies from checkboxes
+      function getSelectedCurrencies() {
+        const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
+        return Array.from(checkboxes).map(checkbox => checkbox.value);
+      }
+
+      // Function to update currency bonus amounts fields based on selected currencies
+      window.updateCurrencyBonusAmountsFields = function() {
+        const container = document.getElementById('currency-bonus-amounts-container');
+        if (!container) return;
+
+        const selectedCurrencies = getSelectedCurrencies();
+        const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
+        const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+
+        // Получаем валюты из минимальных депозитов
+        const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+        const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+          .map(input => {
+            const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+            return match ? match[1] : null;
+          })
+          .filter(currency => currency !== null);
+
+        // Приоритет: выбранные валюты > минимальные депозиты > все валюты
+        let displayCurrencies;
+        if (selectedCurrencies.length > 0) {
+          displayCurrencies = selectedCurrencies;
+        } else if (minimumDepositCurrencies.length > 0) {
+          displayCurrencies = minimumDepositCurrencies;
+        } else {
+          displayCurrencies = allCurrencies;
+        }
+
+        // Rebuild the fields
+        const rowDiv = container.querySelector('.currency-amounts-grid');
+        if (!rowDiv) return;
+
+        // Save ALL current values to preserve user input
+        const currentValues = {};
+        rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+          const match = input.name.match(/currency_amounts\[([^\]]+)\]/);
+          if (match) {
+            // Save value even if it's being edited or just typed
+            const value = input.value || input.getAttribute('value') || '';
+            if (value) {
+              currentValues[match[1]] = value;
+            }
+          }
+        });
+        
+        // Clear and rebuild
+        rowDiv.innerHTML = '';
+
+        displayCurrencies.forEach((currency, index) => {
+          const colDiv = document.createElement('div');
+          colDiv.className = 'currency-amount-item';
+
+          const isCrypto = cryptoCurrencies.includes(currency);
+          const step = isCrypto ? '0.00000001' : '0.01';
+          const placeholder = isCrypto ? '0.00000000' : '0.00';
+          const precision = isCrypto ? 8 : 2;
+
+          // Always use current value if it exists to preserve user input
+          const currentValue = currentValues[currency] || '';
+
+          colDiv.innerHTML = `
+            <div class="input-group">
+              <span class="input-group-text">${currency}</span>
+              <input type="number"
+                     name="bonus_reward[currency_amounts][${currency}]"
+                     value="${currentValue}"
+                     class="form-control currency-input"
+                     step="${step}"
+                     min="0"
+                     placeholder="${placeholder}"
+                     data-currency="${currency}"
+                     data-precision="${precision}"
+                     data-currency-validation-target="input"
+                     required
+                     autocomplete="off">
+            </div>
+          `;
+
+          rowDiv.appendChild(colDiv);
+        });
+
+        // Ensure all new input fields are properly enabled and focusable
+        setTimeout(() => {
+          rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+            input.removeAttribute('disabled');
+            input.removeAttribute('readonly');
+            input.style.pointerEvents = 'auto';
+          });
+        }, 50);
+      };
+
+      // Note: Currency updates are now handled by Stimulus currency controller
+    </script>
+    </div>
+  </div>
+</div>

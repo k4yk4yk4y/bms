@@ -1,4 +1,6 @@
 class Bonus < ApplicationRecord
+  include CurrencyManagement
+
   # Explicitly set table name
   self.table_name = "bonuses"
 
@@ -28,8 +30,6 @@ class Bonus < ApplicationRecord
   has_many :bonus_code_rewards, dependent: :destroy
   has_many :freechip_rewards, dependent: :destroy
   has_many :material_prize_rewards, dependent: :destroy
-  has_many :comp_point_rewards, dependent: :destroy
-
 
 
   # Store JSON data
@@ -39,11 +39,12 @@ class Bonus < ApplicationRecord
 
   # Validations
   validates :name, presence: true, length: { maximum: 255 }
-  validates :code, presence: true, uniqueness: true, length: { maximum: 50 }
+  validates :code, presence: false, length: { maximum: 50 }
   validates :event, presence: true, inclusion: { in: EVENT_TYPES }
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :availability_start_date, presence: true
   validates :availability_end_date, presence: true
+  validates :maximum_winnings_type, presence: true, inclusion: { in: %w[fixed multiplier] }
   # Currency validation removed - now using currencies array
   validates :project, inclusion: { in: PROJECTS }, allow_blank: true
   validates :dsl_tag, length: { maximum: 255 }
@@ -51,6 +52,7 @@ class Bonus < ApplicationRecord
 
   validate :end_date_after_start_date
   validate :valid_decimal_fields
+  validate :validate_currency_minimum_deposits_precision
   validate :minimum_deposit_for_appropriate_types
   validate :valid_currency_minimum_deposits
 
@@ -74,7 +76,8 @@ class Bonus < ApplicationRecord
   scope :scheduler_event, -> { where(event: "scheduler") }
 
   # Callbacks
-  before_validation :generate_code, if: -> { code.blank? }
+  before_validation :set_default_currencies, if: -> { currencies.blank? }
+  before_validation :set_default_project, if: -> { project.blank? }
   after_find :check_and_update_expired_status!
 
   # Class methods for permanent bonuses
@@ -279,6 +282,16 @@ class Bonus < ApplicationRecord
     totally_no_more.present? ? "#{totally_no_more} total" : "Unlimited"
   end
 
+  def formatted_maximum_winnings
+    return "No limit" if maximum_winnings.blank?
+
+    if maximum_winnings_type == "multiplier"
+      "x#{maximum_winnings}"
+    else
+      "#{maximum_winnings} #{currencies.first || 'EUR'}"
+    end
+  end
+
   def activate!
     update!(status: "active")
   end
@@ -331,11 +344,23 @@ class Bonus < ApplicationRecord
     end
   end
 
-  def generate_code
-    loop do
-      self.code = "BONUS_#{SecureRandom.hex(4).upcase}"
-      break unless self.class.exists?(code: code)
+  def validate_currency_minimum_deposits_precision
+    return unless currency_minimum_deposits.present?
+
+    currency_minimum_deposits.each do |currency, amount|
+      next if amount.nil?
+
+      unless self.class.valid_amount_for_currency?(amount, currency)
+        precision = self.class.currency_precision(currency)
+        currency_type = self.class.crypto_currency?(currency) ? "криптовалюты" : "фиатной валюты"
+        errors.add(:currency_minimum_deposits,
+          "для #{currency} (#{currency_type}) максимум #{precision} знаков после запятой")
+      end
     end
+  end
+
+  def set_default_currencies
+    self.currencies = self.class.all_currencies
   end
 
   # Method removed - no longer needed as we only use currencies array
@@ -379,5 +404,9 @@ class Bonus < ApplicationRecord
         errors.add(:currency_minimum_deposits, "содержит валюты, которые не указаны в списке поддерживаемых валют: #{invalid_currencies.join(', ')}")
       end
     end
+  end
+
+  def set_default_project
+    self.project = "All" if project.blank?
   end
 end

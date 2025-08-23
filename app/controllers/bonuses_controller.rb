@@ -1,5 +1,15 @@
+# BonusesController - Manages bonus creation, editing, viewing, and duplication
+#
+# Key Features:
+# - CRUD operations for bonuses
+# - Bonus duplication (single and bulk)
+# - Template-based bonus creation
+# - Bonus preview functionality
+# - Bulk operations (duplicate, delete)
+# - Advanced filtering and search
+#
 class BonusesController < ApplicationController
-  before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :preview ]
+  before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :preview, :duplicate ]
 
   # GET /bonuses
   def index
@@ -253,19 +263,52 @@ class BonusesController < ApplicationController
 
   # POST /bonuses/bulk_update
   def bulk_update
+    Rails.logger.info "BULK_UPDATE ACTION CALLED with params: #{params.inspect}"
     bonus_ids = params[:bonus_ids] || []
     action = params[:bulk_action]
 
+    Rails.logger.info "Bulk action: #{action}, Bonus IDs: #{bonus_ids}"
     bonuses = Bonus.where(id: bonus_ids)
 
     case action
+    when "duplicate"
+      Rails.logger.info "Starting bulk duplicate operation for #{bonuses.count} bonuses"
+      duplicated_count = 0
+      failed_count = 0
+
+      bonuses.each do |bonus|
+        begin
+          Rails.logger.info "Processing bonus #{bonus.id} (#{bonus.name}) for duplication"
+          duplicated_bonus = duplicate_single_bonus(bonus)
+          if duplicated_bonus
+            duplicated_count += 1
+            Rails.logger.info "Successfully duplicated bonus #{bonus.id} to #{duplicated_bonus.id}"
+          else
+            failed_count += 1
+            Rails.logger.error "Failed to duplicate bonus #{bonus.id} - duplicate_single_bonus returned nil"
+          end
+        rescue => e
+          Rails.logger.error "Failed to duplicate bonus #{bonus.id}: #{e.message}"
+          failed_count += 1
+        end
+      end
+
+      Rails.logger.info "Bulk duplicate operation completed: #{duplicated_count} succeeded, #{failed_count} failed"
+      if failed_count == 0
+        message = "#{duplicated_count} bonus(es) were successfully duplicated and are now in draft status. You can edit them to customize settings."
+      else
+        message = "#{duplicated_count} bonus(es) duplicated successfully, #{failed_count} failed. Check logs for details. Duplicated bonuses are in draft status."
+      end
+
     when "delete"
+      deleted_count = bonuses.count
       bonuses.destroy_all
-      message = "Bonuses were successfully deleted."
+      message = "#{deleted_count} bonus(es) were successfully deleted."
     else
-      message = "Invalid bulk action."
+      message = "Invalid bulk action selected. Please choose 'Duplicate' or 'Delete'."
     end
 
+    Rails.logger.info "Bulk update completed with message: #{message}"
     redirect_to bonuses_path, notice: message
   end
 
@@ -303,6 +346,137 @@ class BonusesController < ApplicationController
     end
   end
 
+  # POST /bonuses/:id/duplicate
+  # Creates a complete copy of the bonus with all associated rewards
+  # New bonus will have status 'draft' and new availability dates
+  # Code will be original_code + '_COPY' (truncated if too long)
+  def duplicate
+    Rails.logger.info "DUPLICATE ACTION CALLED with params: #{params.inspect}"
+    Rails.logger.info "Request method: #{request.method}"
+    Rails.logger.info "CSRF token present: #{form_authenticity_token.present?}"
+    Rails.logger.info "Request headers: #{request.headers.select { |k, v| k.start_with?('HTTP_') }.inspect}"
+
+    begin
+      @bonus = Bonus.find(params[:id])
+      Rails.logger.info "Bonus found: #{@bonus.id} - #{@bonus.name}"
+      Rails.logger.info "Bonus class: #{@bonus.class}"
+      Rails.logger.info "Bonus table name: #{@bonus.class.table_name}"
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.error "Bonus not found with ID: #{params[:id]}"
+      flash[:error] = "Bonus not found."
+      redirect_to bonuses_path
+      return
+    end
+
+    # Check if bonus exists
+    unless @bonus
+      flash[:error] = "Bonus not found."
+      redirect_to bonuses_path
+      return
+    end
+
+    # Check if bonus is valid for duplication
+    Rails.logger.info "Checking bonus validity: #{@bonus.valid?}"
+    Rails.logger.info "Bonus attributes: #{@bonus.attributes.slice('name', 'code', 'event', 'status', 'project', 'dsl_tag')}"
+
+    unless @bonus.valid?
+      Rails.logger.error "Bonus validation failed: #{@bonus.errors.full_messages.join(', ')}"
+      Rails.logger.error "Validation errors details: #{@bonus.errors.details}"
+      flash[:error] = "Cannot duplicate invalid bonus: #{@bonus.errors.full_messages.join(', ')}"
+      redirect_to bonus_path(@bonus)
+      return
+    end
+
+    begin
+      Rails.logger.info "Starting duplication process for bonus #{@bonus.id}"
+      Rails.logger.info "Bonus attributes before duplication: #{@bonus.attributes.slice('name', 'code', 'event', 'status', 'project', 'dsl_tag', 'currencies', 'currency_minimum_deposits')}"
+
+      Bonus.transaction do
+        # Create a new bonus with copied attributes
+        new_bonus = Bonus.new(@bonus.attributes.except("id", "created_at", "updated_at", "created_by", "updated_by"))
+        Rails.logger.info "New bonus object created with attributes: #{new_bonus.attributes.slice('name', 'code', 'event', 'status', 'project', 'dsl_tag', 'currencies', 'currency_minimum_deposits')}"
+
+        # Generate a unique copy code
+        base_code = @bonus.code
+        counter = 1
+        new_code = "#{base_code}_COPY#{counter}"
+
+        # Ensure code length doesn't exceed 50 characters and is unique
+        while new_code.length > 50 || Bonus.exists?(code: new_code)
+          counter += 1
+          if base_code.length + counter.to_s.length + 6 > 50
+            # Truncate base code to fit
+            max_base_length = 50 - counter.to_s.length - 6
+            new_code = "#{base_code[0...max_base_length]}_COPY#{counter}"
+          else
+            new_code = "#{base_code}_COPY#{counter}"
+          end
+          break if counter > 999 # Prevent infinite loop
+        end
+
+        new_bonus.code = new_code
+        Rails.logger.info "Generated new code: #{new_code}"
+
+        # Set status to draft
+        new_bonus.status = "draft"
+
+        # Set new availability dates (start from today, end in 1 year)
+        new_bonus.availability_start_date = Time.current
+        new_bonus.availability_end_date = 1.year.from_now
+
+        # Set created_by to nil for now (can be updated later if needed)
+        new_bonus.created_by = nil
+
+        # Clean up currency_minimum_deposits to only include supported currencies
+        if new_bonus.currency_minimum_deposits.present?
+          if new_bonus.currencies.present? && new_bonus.currencies.any?
+            # If currencies are specified, filter deposits to only include supported currencies
+            supported_currencies = new_bonus.currencies
+            cleaned_deposits = new_bonus.currency_minimum_deposits.select { |currency, _| supported_currencies.include?(currency) }
+            new_bonus.currency_minimum_deposits = cleaned_deposits
+            Rails.logger.info "Filtered currency_minimum_deposits to supported currencies: #{cleaned_deposits.keys}"
+          else
+            # If no currencies specified, keep all deposits (this is valid for "All" project)
+            Rails.logger.info "No specific currencies specified, keeping all currency_minimum_deposits: #{new_bonus.currency_minimum_deposits.keys}"
+          end
+        end
+
+        if new_bonus.save
+          Rails.logger.info "New bonus saved successfully with ID: #{new_bonus.id}"
+
+          # Copy all associated rewards
+          Rails.logger.info "Starting to copy associated rewards..."
+          copy_bonus_rewards(@bonus, new_bonus)
+          copy_freespin_rewards(@bonus, new_bonus)
+          copy_bonus_buy_rewards(@bonus, new_bonus)
+          copy_comp_point_rewards(@bonus, new_bonus)
+          copy_bonus_code_rewards(@bonus, new_bonus)
+          copy_freechip_rewards(@bonus, new_bonus)
+          copy_material_prize_rewards(@bonus, new_bonus)
+          Rails.logger.info "All rewards copied successfully"
+
+          # Note: Specific bonus type data (deposit_bonus, manual_bonus, etc.)
+          # is not copied as these associations don't exist in the current model
+
+          # Verify that the new bonus was created successfully
+          Rails.logger.info "Bonus #{@bonus.id} (#{@bonus.name}, Code: #{@bonus.code}) duplicated successfully to new bonus #{new_bonus.id} (#{new_bonus.name}, Code: #{new_bonus.code})"
+          Rails.logger.info "Redirecting to edit page for new bonus: #{edit_bonus_path(new_bonus)}"
+          flash[:success] = "Bonus '#{@bonus.name}' has been duplicated successfully! New bonus '#{new_bonus.name}' (ID: #{new_bonus.id}, Code: #{new_bonus.code}) is now in draft status and ready for editing."
+          redirect_to edit_bonus_path(new_bonus)
+        else
+          Rails.logger.error "Failed to save duplicated bonus: #{new_bonus.errors.full_messages.join(', ')}"
+          flash[:error] = "Failed to duplicate bonus '#{@bonus.name}': #{new_bonus.errors.full_messages.join(', ')}"
+          redirect_to bonus_path(@bonus)
+        end
+      end
+    rescue => e
+      Rails.logger.error "Error duplicating bonus #{@bonus.id} (#{@bonus.name}): #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.first(5).join("\n")}"
+      flash[:error] = "An error occurred while duplicating bonus '#{@bonus.name}'. Please try again or contact support if the problem persists."
+      redirect_to bonus_path(@bonus)
+    end
+  end
+
   private
 
   def bonus_includes
@@ -327,7 +501,7 @@ class BonusesController < ApplicationController
   def bonus_params
     params.require(:bonus).permit(
       :name, :code, :event, :status, :wager,
-      :maximum_winnings, :wagering_strategy, :availability_start_date,
+      :maximum_winnings, :maximum_winnings_type, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country,
       :project, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
       :description, :groups, :minimum_deposit,
@@ -341,9 +515,8 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_reward].present?
 
     permitted = params.require(:bonus_reward).permit(
-      :reward_type, :bonus_type, :amount, :percentage, :wager,
-      :max_win_value, :max_win_type,
-      :available, :code, :min, :groups, :tags, :user_can_have_duplicates, :wagering_strategy,
+      :reward_type, :bonus_type, :amount, :percentage,
+      :code, :min, :groups, :tags, :user_can_have_duplicates, :wagering_strategy,
       # Advanced parameters
       :range, :last_login_country, :profile_country, :current_ip_country, :emails,
       :stag, :deposit_payment_systems, :cashout_payment_systems,
@@ -352,7 +525,7 @@ class BonusesController < ApplicationController
       :affiliates_user, :balance, :cashout, :chargeable_comp_points,
       :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
       :registered, :social_networks, :hold_min, :hold_max,
-      currencies: []
+      currencies: [], currency_amounts: {}
     )
 
     permitted.delete(:bonus_type)
@@ -376,17 +549,14 @@ class BonusesController < ApplicationController
     )
 
     # Set new direct attributes
-    reward.wager = reward_params[:wager] if reward_params[:wager].present?
-    reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
-    reward.max_win_type = reward_params[:max_win_type] if reward_params[:max_win_type].present?
-    reward.available = reward_params[:available] if reward_params[:available].present?
+
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage, :reward_type, :wager, :max_win_value, :max_win_type, :available, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -409,17 +579,14 @@ class BonusesController < ApplicationController
     reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
 
     # Update new direct attributes
-    reward.wager = reward_params[:wager] if reward_params[:wager].present?
-    reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
-    reward.max_win_type = reward_params[:max_win_type] if reward_params[:max_win_type].present?
-    reward.available = reward_params[:available] if reward_params[:available].present?
+
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage, :reward_type, :wager, :max_win_value, :max_win_type, :available, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -432,10 +599,21 @@ class BonusesController < ApplicationController
   end
 
   def freespin_reward_params
-    return {} unless params[:freespin_reward].present?
+    # Check both singular and plural forms to handle different parameter structures
+    return {} unless params[:freespin_reward].present? || params[:freespin_rewards].present?
 
-    permitted = params.require(:freespin_reward).permit(
-      :spins_count, :games, :bet_level, :max_win_value, :max_win_type, :available, :code,
+    # Handle both parameter formats - check for singular first, then plural
+    permitted_params = if params[:freespin_reward].present?
+      params.require(:freespin_reward)
+    elsif params[:freespin_rewards].present? && params[:freespin_rewards]["0"].present?
+      # Handle multiple freespin rewards - take the first one for single reward creation
+      params[:freespin_rewards]["0"]
+    else
+      return {}
+    end
+
+    permitted = permitted_params.permit(
+      :spins_count, :games, :bet_level, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Currency freespin bet levels
       :currency_freespin_bet_levels,
@@ -478,7 +656,7 @@ class BonusesController < ApplicationController
         :affiliates_user, :balance, :cashout, :chargeable_comp_points,
         :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
         :registered, :social_networks, :hold_min, :hold_max,
-        :currencies, currencies: []
+        currencies: []
       )
 
       # Handle array fields properly
@@ -501,7 +679,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:spins_count].blank?
 
       permitted = reward_params.permit(
-        :id, :spins_count, :games, :bet_level, :max_win_value, :max_win_type, :available, :code,
+        :id, :spins_count, :games, :bet_level, :code,
         :tags, :stag,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -598,24 +776,21 @@ class BonusesController < ApplicationController
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-      reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
-      reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+      # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
       # Use common parameters from bonus
-      reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      reward.groups = @bonus.groups if @bonus.groups.present?
-      reward.wagering_strategy = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      # reward.min_deposit and reward.groups are read-only and come from bonus via BonusCommonParameters concern
+      # reward.wagering_strategy is read-only and comes from bonus via BonusCommonParameters concern
       # reward.currencies = @bonus.currencies if @bonus.currencies.present? # Reward models don't have currencies attribute
-      reward.no_more = @bonus.no_more if @bonus.no_more.present?
-      reward.totally_no_more = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
       # Set currency freespin bet levels
-      reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.any?
+      reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.present?
 
       # Set advanced parameters
       config = reward.config || {}  # Preserve existing config
       reward.advanced_params.each do |param|
-        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+        config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
       end
 
       reward.config = config
@@ -727,7 +902,7 @@ class BonusesController < ApplicationController
         # Set advanced parameters and common bonus parameters
         config = reward.config || {}
         reward.advanced_params.each do |param|
-          if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+          if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
             config[param] = reward_params[param.to_sym]
           end
         end
@@ -759,8 +934,7 @@ class BonusesController < ApplicationController
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-        reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
-        reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+        # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
         # Set currency bet levels
         if reward_params[:currency_bet_levels].present?
@@ -770,7 +944,7 @@ class BonusesController < ApplicationController
         # Set advanced parameters
         config = {}
         reward.advanced_params.each do |param|
-          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
         end
 
         reward.config = config
@@ -783,7 +957,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_buy_reward].present?
 
     permitted = params.require(:bonus_buy_reward).permit(
-      :buy_amount, :multiplier, :games, :bet_level, :max_win_value, :max_win_type, :available, :code,
+      :buy_amount, :multiplier, :games, :bet_level, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -793,7 +967,7 @@ class BonusesController < ApplicationController
       :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
       :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
-      :wager_done, :hold_min, :hold_max, :currencies, currencies: [],
+      :wager_done, :hold_min, :hold_max, currencies: [],
       # Currency bet levels
       currency_bet_levels: {}
     )
@@ -814,7 +988,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:buy_amount].blank?
 
       permitted = reward_params.permit(
-        :id, :buy_amount, :multiplier, :games, :bet_level, :max_win_value, :max_win_type, :available, :code,
+        :id, :buy_amount, :multiplier, :games, :bet_level, :code,
         :min, :groups, :tags, :stag, :wagering_strategy,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -824,7 +998,7 @@ class BonusesController < ApplicationController
         :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
         :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
         :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
-        :wager_done, :hold_min, :hold_max, :currencies, currencies: [],
+        :wager_done, :hold_min, :hold_max, currencies: [],
         # Currency bet levels
         currency_bet_levels: {}
       )
@@ -858,16 +1032,13 @@ class BonusesController < ApplicationController
       reward.code = reward_params[:code] if reward_params[:code].present?
       reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-      reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
-      reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+      # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
       # Use common parameters from bonus
-      reward.min_deposit = @bonus.minimum_deposit if @bonus.minimum_deposit.present?
-      reward.groups = @bonus.groups if @bonus.groups.present?
-      reward.wagering_strategy = @bonus.wagering_strategy if @bonus.wagering_strategy.present?
+      # reward.min_deposit and reward.groups are read-only and come from bonus via BonusCommonParameters concern
+      # reward.wagering_strategy is read-only and comes from bonus via BonusCommonParameters concern
       # reward.currencies = @bonus.currencies if @bonus.currencies.present? # Reward models don't have currencies attribute
-      reward.no_more = @bonus.no_more if @bonus.no_more.present?
-      reward.totally_no_more = @bonus.totally_no_more if @bonus.totally_no_more.present?
+      # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
       # Set advanced parameters
       config = {}
@@ -955,13 +1126,12 @@ class BonusesController < ApplicationController
         reward.code = reward_params[:code] if reward_params[:code].present?
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-        reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
-        reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
+        # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
         # Set advanced parameters
         config = {}
         reward.advanced_params.each do |param|
-          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+          config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
         end
 
         # Set currency bet levels
@@ -1096,7 +1266,7 @@ class BonusesController < ApplicationController
   def bonus_params
     params.require(:bonus).permit(
       :name, :code, :event, :status, :wager,
-      :maximum_winnings, :wagering_strategy, :availability_start_date,
+      :maximum_winnings, :maximum_winnings_type, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country,
       :project, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
       :description,
@@ -1119,7 +1289,7 @@ class BonusesController < ApplicationController
       :affiliates_user, :balance, :cashout, :chargeable_comp_points,
       :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
       :registered, :social_networks, :hold_min, :hold_max,
-      currencies: []
+      currencies: [], currency_amounts: {}
     )
 
     permitted.delete(:bonus_type)
@@ -1138,17 +1308,14 @@ class BonusesController < ApplicationController
     )
 
     # Set new direct attributes
-    reward.wager = reward_params[:wager] if reward_params[:wager].present?
-    reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
-    reward.max_win_type = reward_params[:max_win_type] if reward_params[:max_win_type].present?
-    reward.available = reward_params[:available] if reward_params[:available].present?
+
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage, :reward_type, :wager, :max_win_value, :max_win_type, :available, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -1171,17 +1338,14 @@ class BonusesController < ApplicationController
     reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
 
     # Update new direct attributes
-    reward.wager = reward_params[:wager] if reward_params[:wager].present?
-    reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
-    reward.max_win_type = reward_params[:max_win_type] if reward_params[:max_win_type].present?
-    reward.available = reward_params[:available] if reward_params[:available].present?
+
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage, :reward_type, :wager, :max_win_value, :max_win_type, :available, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -1223,12 +1387,12 @@ class BonusesController < ApplicationController
     )
 
     # Set currency freespin bet levels
-    reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.any?
+    reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.present?
 
     # Set advanced parameters
     config = reward.config || {}  # Preserve existing config
     reward.advanced_params.each do |param|
-      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
     end
 
     reward.config = config
@@ -1252,14 +1416,13 @@ class BonusesController < ApplicationController
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-    reward.no_more = reward_params[:no_more] if reward_params[:no_more].present?
-    reward.totally_no_more = reward_params[:totally_no_more] if reward_params[:totally_no_more].present?
-    reward.min_deposit = reward_params[:min] if reward_params[:min].present?
+    # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
+    # reward.min_deposit is read-only and comes from bonus via BonusCommonParameters concern
 
     # Update advanced parameters
     config = reward.config || {}
     reward.advanced_params.each do |param|
-      if reward_params[param.to_sym].present? && ![ :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag ].include?(param.to_sym)
+      if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
         config[param] = reward_params[param.to_sym]
       end
     end
@@ -1290,7 +1453,7 @@ class BonusesController < ApplicationController
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag).each do |key, value|
+    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :code, :stag).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -1322,7 +1485,7 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :max_win_value, :max_win_type, :available, :code, :stag).each do |key, value|
+    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :code, :stag).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -1837,5 +2000,206 @@ class BonusesController < ApplicationController
     reward_data.permit(:code, :set_bonus_code, :code_type, :title)
   end
 
+
+
   private
+
+  # Helper methods for duplicating bonus rewards
+  def copy_bonus_rewards(original_bonus, new_bonus)
+    return unless original_bonus.bonus_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.bonus_rewards.count} bonus rewards"
+    original_bonus.bonus_rewards.each do |reward|
+      new_reward = new_bonus.bonus_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied bonus reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all bonus rewards"
+  rescue => e
+    Rails.logger.error "Error copying bonus rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_freespin_rewards(original_bonus, new_bonus)
+    return unless original_bonus.freespin_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.freespin_rewards.count} freespin rewards"
+    original_bonus.freespin_rewards.each do |reward|
+      new_reward = new_bonus.freespin_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied freespin reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all freespin rewards"
+  rescue => e
+    Rails.logger.error "Error copying freespin rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_bonus_buy_rewards(original_bonus, new_bonus)
+    return unless original_bonus.bonus_buy_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.bonus_buy_rewards.count} bonus buy rewards"
+    original_bonus.bonus_buy_rewards.each do |reward|
+      new_reward = new_bonus.bonus_buy_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied bonus buy reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all bonus buy rewards"
+  rescue => e
+    Rails.logger.error "Error copying bonus buy rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_comp_point_rewards(original_bonus, new_bonus)
+    return unless original_bonus.comp_point_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.comp_point_rewards.count} comp point rewards"
+    original_bonus.comp_point_rewards.each do |reward|
+      new_reward = new_bonus.comp_point_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied comp point reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all comp point rewards"
+  rescue => e
+    Rails.logger.error "Error copying comp point rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_bonus_code_rewards(original_bonus, new_bonus)
+    return unless original_bonus.bonus_code_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.bonus_code_rewards.count} bonus code rewards"
+    original_bonus.bonus_code_rewards.each do |reward|
+      new_reward = new_bonus.bonus_code_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied bonus code reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all bonus code rewards"
+  rescue => e
+    Rails.logger.error "Error copying bonus code rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_freechip_rewards(original_bonus, new_bonus)
+    return unless original_bonus.freechip_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.freechip_rewards.count} freechip rewards"
+    original_bonus.freechip_rewards.each do |reward|
+      new_reward = new_bonus.freechip_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied freechip reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all freechip rewards"
+  rescue => e
+    Rails.logger.error "Error copying freechip rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  def copy_material_prize_rewards(original_bonus, new_bonus)
+    return unless original_bonus.material_prize_rewards.any?
+
+    Rails.logger.info "Copying #{original_bonus.material_prize_rewards.count} material prize rewards"
+    original_bonus.material_prize_rewards.each do |reward|
+      new_reward = new_bonus.material_prize_rewards.build(
+        reward.attributes.except("id", "bonus_id", "created_at", "updated_at")
+      )
+      new_reward.save!
+      Rails.logger.info "Copied material prize reward: #{reward.id} -> #{new_reward.id}"
+    end
+    Rails.logger.info "Successfully copied all material prize rewards"
+  rescue => e
+    Rails.logger.error "Error copying material prize rewards: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join("\n")}"
+    raise e
+  end
+
+  # Helper method for duplicating a single bonus (used in bulk operations)
+  def duplicate_single_bonus(bonus)
+    Rails.logger.info "Starting bulk duplication for bonus #{bonus.id} (#{bonus.name})"
+    Bonus.transaction do
+      # Create a new bonus with copied attributes
+      new_bonus = Bonus.new(bonus.attributes.except("id", "created_at", "updated_at", "created_by", "updated_by"))
+
+      # Generate a unique copy code
+      base_code = bonus.code
+      counter = 1
+      new_code = "#{base_code}_COPY#{counter}"
+
+      # Ensure code length doesn't exceed 50 characters and is unique
+      while new_code.length > 50 || Bonus.exists?(code: new_code)
+        counter += 1
+        if base_code.length + counter.to_s.length + 6 > 50
+          # Truncate base code to fit
+          max_base_length = 50 - counter.to_s.length - 6
+          new_code = "#{base_code[0...max_base_length]}_COPY#{counter}"
+        else
+          new_code = "#{base_code}_COPY#{counter}"
+        end
+        break if counter > 999 # Prevent infinite loop
+      end
+
+      new_bonus.code = new_code
+
+      # Set status to draft
+      new_bonus.status = "draft"
+
+      # Set new availability dates (start from today, end in 1 year)
+      new_bonus.availability_start_date = Time.current
+      new_bonus.availability_end_date = 1.year.from_now
+
+      # Set created_by to nil for now (can be updated later if needed)
+      new_bonus.created_by = nil
+
+      # Clean up currency_minimum_deposits to only include supported currencies
+      if new_bonus.currency_minimum_deposits.present?
+        if new_bonus.currencies.present? && new_bonus.currencies.any?
+          # If currencies are specified, filter deposits to only include supported currencies
+          supported_currencies = new_bonus.currencies
+          cleaned_deposits = new_bonus.currency_minimum_deposits.select { |currency, _| supported_currencies.include?(currency) }
+          new_bonus.currency_minimum_deposits = cleaned_deposits
+        else
+          # If no currencies specified, keep all deposits (this is valid for "All" project)
+        end
+      end
+
+      if new_bonus.save
+        # Copy all associated rewards
+        copy_bonus_rewards(bonus, new_bonus)
+        copy_freespin_rewards(bonus, new_bonus)
+        copy_bonus_buy_rewards(bonus, new_bonus)
+        copy_comp_point_rewards(bonus, new_bonus)
+        copy_bonus_code_rewards(bonus, new_bonus)
+        copy_freechip_rewards(bonus, new_bonus)
+        copy_material_prize_rewards(bonus, new_bonus)
+
+        Rails.logger.info "Bonus #{bonus.id} (#{bonus.name}, Code: #{bonus.code}) duplicated successfully to new bonus #{new_bonus.id} (#{new_bonus.name}, Code: #{new_bonus.code})"
+        return new_bonus
+      else
+        Rails.logger.error "Failed to save duplicated bonus: #{new_bonus.errors.full_messages.join(', ')}"
+        return nil
+      end
+    end
+      rescue => e
+      Rails.logger.error "Error duplicating bonus #{bonus.id}: #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.first(5).join("\n")}"
+      nil
+    end
 end

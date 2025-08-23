@@ -118,7 +118,7 @@
                       <dl class="row">
                         <dt class="col-sm-4"><%= currency %>:</dt>
                         <dd class="col-sm-8">
-                          <span class="badge bg-primary"><%= amount %> <%= currency %></span>
+                          <span class="badge bg-primary"><%= amount %></span>
                         </dd>
                       </dl>
                     </div>
@@ -176,7 +176,7 @@
                   <dl class="row">
                     <dt class="col-sm-6">Max Winnings:</dt>
                     <dd class="col-sm-6">
-                      <%= number_to_currency(@bonus.maximum_winnings) if @bonus.maximum_winnings %>
+                      <%= @bonus.formatted_maximum_winnings %>
                     </dd>
                   </dl>
                 </div>
@@ -273,11 +273,27 @@
                 <%= link_to "Preview", preview_bonus_path(@bonus), 
                     class: "btn btn-outline-info", 
                     data: { remote: true, toggle: "modal", target: "#previewModal" } %>
-                <%= link_to "Duplicate", new_bonus_path(duplicate: @bonus.id), 
-                    class: "btn btn-outline-secondary" %>
+                <%= button_to "Duplicate", duplicate_bonus_path(@bonus), 
+                    method: :post, 
+                    class: "btn btn-outline-secondary w-100",
+                    data: { confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." } %>
                 <%= link_to "Export JSON", bonus_path(@bonus, format: :json), 
                     class: "btn btn-outline-primary", target: "_blank" %>
               </div>
+              
+              <% if @bonus.errors.any? %>
+                <div class="alert alert-warning mt-3">
+                  <h6 class="alert-heading">Validation Warnings:</h6>
+                  <ul class="mb-0">
+                    <% @bonus.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                  <small class="text-muted">
+                    These warnings may prevent the bonus from being duplicated. Please fix them first.
+                  </small>
+                </div>
+              <% end %>
             </div>
           </div>
         </div>

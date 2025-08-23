@@ -65,7 +65,7 @@
                     <th>Project</th>
                     <th>Event</th>
                     <th>Currency</th>
-                    <th>Min Deposit</th>
+                    <th>Min Deposits</th>
                     <th>Wager</th>
                     <th>Actions</th>
                   </tr>
@@ -89,7 +89,7 @@
                       </td>
                       <td><span class="badge bg-primary"><%= template.event.humanize %></span></td>
                       <td><%= template.formatted_currencies || "All currencies" %></td>
-                      <td><%= template.minimum_deposit || "N/A" %></td>
+                      <td><%= template.has_minimum_deposit_requirements? ? "Yes" : "No" %></td>
                       <td><%= template.wager || "N/A" %></td>
                       <td>
                         <div class="btn-group" role="group">

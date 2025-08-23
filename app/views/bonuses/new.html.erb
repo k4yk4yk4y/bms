@@ -8,7 +8,11 @@
         <%= link_to "Back to List", bonuses_path, class: "btn btn-outline-secondary" %>
       </div>
 
-      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true do |form| %>
+      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true, 
+          data: { 
+            controller: "currency-validation currency", 
+            action: "submit->currency-validation#validateForm" 
+          } do |form| %>
         <% if @bonus.errors.any? %>
           <div class="alert alert-danger">
             <h4><%= pluralize(@bonus.errors.count, "error") %> prohibited this bonus from being saved:</h4>
@@ -48,6 +52,12 @@
                 </div>
 
                 <div class="mb-3">
+                  <%= form.label :code, "Bonus Code", class: "form-label" %>
+                  <%= form.text_field :code, class: "form-control", 
+                      placeholder: "Enter bonus code (max 50 characters)" %>
+                </div>
+
+                <div class="mb-3">
                   <%= form.label :description, class: "form-label" %>
                   <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Описание бонуса..." %>
                 </div>
@@ -82,14 +92,32 @@
 
                 <div class="mb-3">
                   <%= form.label :currencies, "Currencies", class: "form-label" %>
-                  <%= form.select :currencies, 
-                      options_for_select([
-                        ['USD', 'USD'], ['EUR', 'EUR'], ['GBP', 'GBP'], ['RUB', 'RUB'],
-                        ['UAH', 'UAH'], ['KZT', 'KZT'], ['BTC', 'BTC'], ['ETH', 'ETH']
-                      ], @bonus.currencies), 
-                      {}, { class: "form-select", multiple: true, 
-                           style: "min-height: 120px;" } %>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">Выберите валюты для бонуса</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="uncheck-all-currencies-btn" 
+                            data-action="click->currency#uncheckAll">
+                      <i class="bi bi-check2-all"></i> Снять все
+                    </button>
 
+                  </div>
+                  <div class="currencies-checkboxes border rounded p-3" style="max-height: 150px; overflow-y: auto;">
+                    <% selected_currencies = @bonus.currencies.present? ? @bonus.currencies : Bonus.all_currencies %>
+                    <% Bonus.all_currencies.each_with_index do |currency, index| %>
+                      <div class="form-check <%= 'mb-1' unless index == Bonus.all_currencies.length - 1 %>">
+                        <%= check_box_tag "bonus[currencies][]", currency, 
+                            selected_currencies.include?(currency),
+                            {
+                              class: "form-check-input currency-checkbox",
+                              id: "currency_#{currency}",
+                              data: { 
+                                currency: currency,
+                                "currency-target": "checkbox"
+                              }
+                            } %>
+                        <%= label_tag "currency_#{currency}", currency, class: "form-check-label" %>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
 
                 <div class="mb-3">
@@ -142,8 +170,24 @@
 
                 <div class="mb-3">
                   <%= form.label :maximum_winnings, class: "form-label" %>
-                  <%= form.number_field :maximum_winnings, step: 0.01, 
-                      class: "form-control", min: 0 %>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <%= form.select :maximum_winnings_type, 
+                          options_for_select([
+                            ['Множитель', 'multiplier'],
+                            ['Фиксированное значение', 'fixed']
+                          ], 'multiplier'), 
+                          {}, 
+                          { class: "form-select", id: "maximum_winnings_type_select" } %>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="input-group">
+                        <%= form.number_field :maximum_winnings, step: 0.01, 
+                            class: "form-control", min: 0, id: "maximum_winnings_input" %>
+                        <span class="input-group-text" id="maximum_winnings_suffix">x</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="mb-3">
@@ -202,8 +246,12 @@
 </div>
 
 <script>
+
+
   let templateSearchTimeout;
   let lastSearchParams = '';
+
+
 
   function toggleTypeSpecificFields(bonusType) {
     const minimumDepositField = document.getElementById('minimum-deposit-field');
@@ -381,17 +429,16 @@
     }
 
     if (template.currencies && template.currencies.length > 0) {
-      const currencySelect = document.querySelector('select[name="bonus[currencies][]"]');
-      if (currencySelect) {
-        // Clear current selections
-        Array.from(currencySelect.options).forEach(option => option.selected = false);
-        
-        // Select currencies from template
-        const currencies = Array.isArray(template.currencies) ? template.currencies : template.currencies.split(' ');
-        currencies.forEach(currency => {
-          const option = currencySelect.querySelector(`option[value="${currency.trim()}"]`);
-          if (option) {
-            option.selected = true;
+      // Clear current currency checkboxes
+      const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox');
+      currencyCheckboxes.forEach(checkbox => checkbox.checked = false);
+      
+      // Select currencies from template
+      const currencies = Array.isArray(template.currencies) ? template.currencies : template.currencies.split(' ');
+      currencies.forEach(currency => {
+        const checkbox = document.querySelector(`input.currency-checkbox[value="${currency.trim()}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
           }
         });
       }
@@ -463,5 +510,21 @@
       // Template was applied via URL parameter, show success message
       showTemplateStatus('found', 'Template applied from URL');
     }
+
+    // Maximum winnings type handler
+    const maxWinningsTypeSelect = document.getElementById('maximum_winnings_type_select');
+    const maxWinningsSuffix = document.getElementById('maximum_winnings_suffix');
+    
+    if (maxWinningsTypeSelect && maxWinningsSuffix) {
+      maxWinningsTypeSelect.addEventListener('change', function() {
+        if (this.value === 'multiplier') {
+          maxWinningsSuffix.textContent = 'x';
+        } else {
+          maxWinningsSuffix.textContent = 'EUR';
+        }
+      });
+    }
+    
+
   });
 </script>

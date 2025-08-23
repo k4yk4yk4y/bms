@@ -6,14 +6,15 @@ class BonusReward < ApplicationRecord
   validates :reward_type, presence: true
   validates :amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, allow_nil: true
-  validates :wager, numericality: { greater_than_or_equal_to: 0 }
-  validates :max_win_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :max_win_type, inclusion: { in: %w[fixed multiplier] }, allow_nil: true
+
 
   scope :by_type, ->(type) { where(reward_type: type) }
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
+
+  # Store currency amounts as JSON
+  serialize :currency_amounts, coder: JSON
 
   # Common parameters accessors - DEPRECATED
   # These attributes have been moved to dedicated columns.
@@ -47,9 +48,69 @@ class BonusReward < ApplicationRecord
   end
 
   def formatted_max_win
-    return "No limit" if max_win_value.blank?
-    value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
-    return "#{value}x" if max_win_type == "multiplier"
-    "#{value} #{bonus.currencies.first || ''}"
+    return "No limit" if bonus.maximum_winnings.blank?
+
+    if bonus.maximum_winnings_type == "multiplier"
+      value = bonus.maximum_winnings.to_i == bonus.maximum_winnings ? bonus.maximum_winnings.to_i : bonus.maximum_winnings
+      "#{value}x"
+    else
+      value = bonus.maximum_winnings.to_i == bonus.maximum_winnings ? bonus.maximum_winnings.to_i : bonus.maximum_winnings
+      "#{value} #{bonus.currencies.first || ''}"
+    end
   end
+
+  # Добавляем недостающие методы для совместимости с тестами
+  def max_win_value
+    bonus&.maximum_winnings
+  end
+
+  def max_win_value=(value)
+    return unless bonus
+    bonus.maximum_winnings = value
+  end
+
+  def max_win_type
+    bonus&.maximum_winnings_type
+  end
+
+  def max_win_type=(value)
+    return unless bonus
+    bonus.maximum_winnings_type = value
+  end
+
+  def available
+    config&.dig("available")
+  end
+
+  def available=(value)
+    self.config = (config || {}).merge("available" => value)
+  end
+
+  # Currency amounts handling
+  def has_currency_amounts?
+    currency_amounts.present? && currency_amounts.any?
+  end
+
+  def formatted_currency_amounts
+    return "No amounts set" if currency_amounts.blank?
+    currency_amounts.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
+  end
+
+  # Include CurrencyManagement for validation methods
+  include CurrencyManagement
+
+  # Validation for currency amounts
+  def validate_currency_amounts
+    return if currency_amounts.blank?
+
+    currency_amounts.each do |currency, amount|
+      next if amount.blank?
+
+      unless self.class.valid_amount_for_currency?(amount, currency)
+        errors.add(:currency_amounts, "Invalid amount for currency #{currency}: #{amount}")
+      end
+    end
+  end
+
+  validate :validate_currency_amounts
 end

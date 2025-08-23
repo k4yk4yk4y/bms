@@ -109,6 +109,10 @@
   margin-bottom: 0.5rem;
 }
 
+.currency-amount-item {
+  margin-bottom: 0.5rem;
+}
+
 /* Currency bet levels wrapper - limit width to allow other fields in grid */
 .currency-bet-levels-wrapper-freespin {
   grid-column: 1 / -1 !important; /* Always span full width in the main grid */
@@ -118,6 +122,13 @@
 
 /* Currency bet levels wrapper for bonus buy */
 .currency-bet-levels-wrapper-bonus-buy {
+  grid-column: 1 / -1 !important; /* Always span full width in the main grid */
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Currency amounts wrapper for bonus rewards */
+.currency-amounts-wrapper-bonus {
   grid-column: 1 / -1 !important; /* Always span full width in the main grid */
   width: 100% !important;
   max-width: 100% !important;
@@ -212,6 +223,34 @@
   padding: 0.25rem 0.5rem !important;
 }
 
+/* Currency amounts grid styles - similar to bet levels */
+.currency-amounts-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important; /* Single column */
+  gap: 0.25rem !important;
+  width: 100% !important; /* Take full width */
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+}
+
+.currency-amounts-grid .currency-amount-item {
+  margin-bottom: 0.25rem !important;
+}
+
+.currency-amounts-grid .input-group {
+  min-width: 0 !important;
+}
+
+.currency-amounts-grid .input-group-text {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.currency-amounts-grid .form-control {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
 /* Ensure currency bet levels doesn't affect main layout */
 .currency-bet-levels-section .currency-bet-levels-wrapper-freespin {
   display: block !important;
@@ -263,4 +302,22 @@
   .advanced-params-container .reward-param-field {
     margin-bottom: 1rem;
   }
+}
+
+/* Currency checkboxes styles */
+.currencies-checkboxes {
+  background-color: #f8f9fa;
+}
+
+.currencies-checkboxes .form-check {
+  padding-left: 1.5em;
+}
+
+.currencies-checkboxes .form-check-input {
+  margin-top: 0.125em;
+}
+
+.currencies-checkboxes .form-check-label {
+  font-size: 0.9rem;
+  margin-left: 0.25rem;
 }

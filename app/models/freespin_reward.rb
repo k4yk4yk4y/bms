@@ -1,13 +1,14 @@
 class FreespinReward < ApplicationRecord
   include BonusCommonParameters
+  include CurrencyManagement
 
   belongs_to :bonus
 
   validates :spins_count, presence: true, numericality: { greater_than: 0 }
   validates :bet_level, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :max_win_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :max_win_type, inclusion: { in: %w[fixed multiplier] }, allow_nil: true
+
   validate :currency_freespin_bet_levels_must_be_present
+  validate :validate_currency_bet_levels_precision
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
@@ -69,10 +70,42 @@ class FreespinReward < ApplicationRecord
   end
 
   def formatted_max_win
-    return "No limit" if max_win_value.blank?
-    value = max_win_value.to_i == max_win_value ? max_win_value.to_i : max_win_value
-    return "#{value}x" if max_win_type == "multiplier"
-    "#{value} #{bonus.currencies.first || ''}"
+    return "No limit" if bonus.maximum_winnings.blank?
+
+    if bonus.maximum_winnings_type == "multiplier"
+      value = bonus.maximum_winnings.to_i == bonus.maximum_winnings ? bonus.maximum_winnings.to_i : bonus.maximum_winnings
+      "#{value}x"
+    else
+      value = bonus.maximum_winnings.to_i == bonus.maximum_winnings ? bonus.maximum_winnings.to_i : bonus.maximum_winnings
+      "#{value} #{bonus.currencies.first || ''}"
+    end
+  end
+
+  # Добавляем недостающие методы для совместимости с тестами
+  def max_win_value
+    bonus&.maximum_winnings
+  end
+
+  def max_win_value=(value)
+    return unless bonus
+    bonus.maximum_winnings = value
+  end
+
+  def max_win_type
+    bonus&.maximum_winnings_type
+  end
+
+  def max_win_type=(value)
+    return unless bonus
+    bonus.maximum_winnings_type = value
+  end
+
+  def available
+    config&.dig("available")
+  end
+
+  def available=(value)
+    self.config = (config || {}).merge("available" => value)
   end
 
   # Currency-specific freespin bet levels (required field)
@@ -121,5 +154,20 @@ class FreespinReward < ApplicationRecord
               currency_freespin_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
 
     errors.add(:currency_freespin_bet_levels, "должен быть указан размер ставки фриспинов хотя бы для одной валюты")
+  end
+
+  def validate_currency_bet_levels_precision
+    return unless currency_freespin_bet_levels.present?
+
+    currency_freespin_bet_levels.each do |currency, amount|
+      next if amount.blank?
+
+      unless self.class.valid_amount_for_currency?(amount, currency)
+        precision = self.class.currency_precision(currency)
+        currency_type = self.class.crypto_currency?(currency) ? "криптовалюты" : "фиатной валюты"
+        errors.add(:currency_freespin_bet_levels,
+          "для #{currency} (#{currency_type}) максимум #{precision} знаков после запятой")
+      end
+    end
   end
 end

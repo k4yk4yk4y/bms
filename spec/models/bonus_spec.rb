@@ -43,10 +43,11 @@ RSpec.describe Bonus, type: :model do
     describe 'presence validations' do
       it { is_expected.to validate_presence_of(:name) }
 
-      it 'validates presence of code or generates one' do
+      it 'allows code to be blank' do
         bonus.code = nil
         expect(bonus).to be_valid
-        expect(bonus.code).to be_present
+        bonus.code = ""
+        expect(bonus).to be_valid
       end
 
       it { is_expected.to validate_presence_of(:event) }
@@ -73,10 +74,7 @@ RSpec.describe Bonus, type: :model do
       it { is_expected.to validate_inclusion_of(:project).in_array(Bonus::PROJECTS) }
     end
 
-    describe 'uniqueness validations' do
-      before { create(:bonus) }
-      it { is_expected.to validate_uniqueness_of(:code) }
-    end
+
 
     describe 'custom validations' do
       context 'end_date_after_start_date' do
@@ -252,29 +250,6 @@ RSpec.describe Bonus, type: :model do
 
   # Callbacks tests
   describe 'callbacks' do
-    describe 'before_validation :generate_code' do
-      it 'generates code when blank' do
-        bonus.code = nil
-        bonus.valid?
-        expect(bonus.code).to be_present
-        expect(bonus.code).to start_with('BONUS_')
-      end
-
-      it 'does not generate code when present' do
-        original_code = 'CUSTOM_CODE'
-        bonus.code = original_code
-        bonus.valid?
-        expect(bonus.code).to eq(original_code)
-      end
-
-      it 'generates unique codes' do
-        bonus1 = create(:bonus, code: nil)
-        bonus2 = build(:bonus, code: nil)
-        bonus2.valid?
-        expect(bonus1.code).not_to eq(bonus2.code)
-      end
-    end
-
     describe 'after_find :check_and_update_expired_status!' do
       it 'updates status to inactive when expired and active' do
         bonus = create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago)
@@ -786,7 +761,9 @@ RSpec.describe Bonus, type: :model do
       end
 
       it 'handles very large JSON objects' do
-        large_array = (1..1000).map { |i| "CURRENCY_#{i}" }
+        # Используем поддерживаемые валюты для теста
+        supported_currencies = %w[EUR USD RUB BTC ETH LTC BCH XRP TRX DOGE USDT]
+        large_array = (1..1000).map { |i| supported_currencies[i % supported_currencies.length] }
         bonus.currencies = large_array
         bonus.currency_minimum_deposits = {}  # Clear currency_minimum_deposits to avoid validation errors
         bonus.save!
@@ -797,21 +774,22 @@ RSpec.describe Bonus, type: :model do
     end
 
     context 'with concurrent access scenarios' do
-      it 'handles simultaneous code generation' do
+      it 'handles simultaneous code validation' do
+        codes = [ 'CODE_001', 'CODE_002', 'CODE_003', 'CODE_004', 'CODE_005' ]
         threads = []
         bonuses = []
 
-        5.times do
+        codes.each_with_index do |code, index|
           threads << Thread.new do
-            bonus = build(:bonus, code: nil)
-            bonus.valid?
+            bonus = build(:bonus, code: code)
+            expect(bonus).to be_valid
             bonuses << bonus.code
           end
         end
 
         threads.each(&:join)
 
-        # All generated codes should be unique
+        # All codes should be unique
         expect(bonuses.uniq.length).to eq(bonuses.length)
       end
 
@@ -868,12 +846,12 @@ RSpec.describe Bonus, type: :model do
       expect(Bonus.find_by(id: bonus_id)).to be_nil
     end
 
-    it 'handles unique constraint violations gracefully' do
-      existing_bonus = create(:bonus, code: 'UNIQUE_CODE')
-      duplicate_bonus = build(:bonus, code: 'UNIQUE_CODE')
+    it 'allows duplicate codes' do
+      existing_bonus = create(:bonus, code: 'DUPLICATE_CODE')
+      duplicate_bonus = build(:bonus, code: 'DUPLICATE_CODE')
 
-      expect(duplicate_bonus).not_to be_valid
-      expect(duplicate_bonus.errors[:code]).to include('has already been taken')
+      expect(duplicate_bonus).to be_valid
+      expect(duplicate_bonus.save).to be_truthy
     end
   end
 

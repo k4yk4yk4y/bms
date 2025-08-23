@@ -12,23 +12,7 @@ FactoryBot.define do
       percentage { Faker::Number.between(from: 5, to: 100) }
     end
 
-    trait :with_wager do
-      wager { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
-    end
 
-    trait :with_max_win_fixed do
-      max_win_type { "fixed" }
-      max_win_value { Faker::Number.decimal(l_digits: 3, r_digits: 2) }
-    end
-
-    trait :with_max_win_multiplier do
-      max_win_type { "multiplier" }
-      max_win_value { Faker::Number.between(from: 5, to: 50) }
-    end
-
-    trait :with_availability do
-      available { Faker::Number.between(from: 1, to: 100) }
-    end
 
     trait :with_code do
       code { "REWARD_#{Faker::Alphanumeric.alpha(number: 6).upcase}" }
@@ -61,9 +45,6 @@ FactoryBot.define do
     end
 
     trait :complete do
-      with_wager
-      with_max_win_fixed
-      with_availability
       with_code
     end
   end

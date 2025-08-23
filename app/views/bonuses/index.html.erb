@@ -4,7 +4,10 @@
   <div class="row">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2">Bonus Management</h1>
+        <div>
+          <h1 class="h2">Bonus Management</h1>
+          <p class="text-muted mb-0">View, edit, duplicate, and manage your bonuses</p>
+        </div>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bonusTypeModal">
           <i class="fas fa-plus"></i> Create New Bonus
         </button>
@@ -86,8 +89,77 @@
               <%= link_to "Clear", bonuses_path, class: "btn btn-outline-secondary ms-2" %>
             </div>
           <% end %>
-        </div>
-      </div>
+          </div>
+</div>
+
+<script>
+// Enhance duplicate button functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // Add loading state to duplicate buttons
+  const duplicateButtons = document.querySelectorAll('button[data-confirm*="duplicate"]');
+  
+  duplicateButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      if (confirm(this.getAttribute('data-confirm'))) {
+        // Add loading state
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        this.disabled = true;
+        
+        // Re-enable button after a delay (in case of error)
+        setTimeout(() => {
+          this.innerHTML = originalText;
+          this.disabled = false;
+        }, 10000); // 10 seconds timeout
+      }
+    });
+  });
+  
+  // Enhance bulk actions
+  const bulkActionSelect = document.querySelector('select[name="bulk_action"]');
+  if (bulkActionSelect) {
+    bulkActionSelect.addEventListener('change', function() {
+      const selectedAction = this.value;
+      const submitButton = this.closest('form').querySelector('input[type="submit"]');
+      
+      if (selectedAction === 'duplicate') {
+        submitButton.textContent = 'Duplicate Selected';
+        submitButton.className = 'btn btn-outline-secondary';
+      } else if (selectedAction === 'delete') {
+        submitButton.textContent = 'Delete Selected';
+        submitButton.className = 'btn btn-outline-danger';
+      } else {
+        submitButton.textContent = 'Apply to Selected';
+        submitButton.className = 'btn btn-secondary';
+      }
+    });
+  }
+});
+
+// Function to submit bulk actions
+function submitBulkAction() {
+  const bulkAction = document.querySelector('select[name="bulk_action"]').value;
+  const selectedBonuses = document.querySelectorAll('input.bonus-checkbox:checked');
+  
+  if (bulkAction === '') {
+    alert('Please select an action');
+    return false;
+  }
+  
+  if (selectedBonuses.length === 0) {
+    alert('Please select at least one bonus');
+    return false;
+  }
+  
+  if (bulkAction === 'duplicate') {
+    return confirm(`Are you sure you want to duplicate ${selectedBonuses.length} bonus(es)? New draft bonuses will be created.`);
+  } else if (bulkAction === 'delete') {
+    return confirm(`Are you sure you want to delete ${selectedBonuses.length} bonus(es)? This action cannot be undone.`);
+  }
+  
+  return true;
+}
+</script>
 
       <!-- Bonuses Table -->
       <div class="card">
@@ -107,7 +179,7 @@
                     <th>DSL Tag</th>
                     <th>Start Date</th>
                     <th>End Date</th>
-                    <th>Actions</th>
+                    <th>Actions <small class="text-muted">(View, Edit, Duplicate, Delete)</small></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -164,6 +236,13 @@
                           <%= link_to edit_bonus_path(bonus), class: "btn btn-outline-primary" do %>
                             <i class="fas fa-edit"></i>
                           <% end %>
+                          <%= button_to duplicate_bonus_path(bonus), 
+                              method: :post, 
+                              class: "btn btn-outline-secondary",
+                              data: { confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." },
+                              title: "Duplicate" do %>
+                            <i class="fas fa-copy"></i>
+                          <% end %>
                           <%= link_to bonus_path(bonus), 
                               class: "btn btn-outline-danger", 
                               data: { "turbo-method": :delete, confirm: "Are you sure?" } do %>
@@ -180,11 +259,13 @@
             <!-- Bulk Actions -->
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div>
+                <small class="text-muted d-block mb-2">Select multiple bonuses and apply bulk actions</small>
                 <%= form_with url: bulk_update_bonuses_path, method: :post, local: true, 
                     class: "d-flex align-items-center" do |form| %>
                   <%= form.select :bulk_action, 
                       options_for_select([
                         ['Select Action', ''],
+                        ['Duplicate', 'duplicate'],
                         ['Delete', 'delete']
                       ]), 
                       {}, 
@@ -590,5 +671,50 @@
   .navbar .badge {
     font-size: 0.7em;
     padding: 0.25em 0.5em;
+  }
+  
+  /* Improve button group styling */
+  .btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+  }
+  
+  /* Add hover effects for action buttons */
+  .btn-group-sm .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+  
+  /* Style for duplicate button specifically */
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+  }
+  
+  /* Loading state for duplicate buttons */
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Tooltip enhancement */
+  .btn[title] {
+    position: relative;
+  }
+  
+  /* Responsive button group */
+  @media (max-width: 768px) {
+    .btn-group-sm {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .btn-group-sm .btn {
+      border-radius: 0.2rem !important;
+      margin-bottom: 0.25rem;
+    }
   }
 </style>

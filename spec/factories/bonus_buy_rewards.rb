@@ -8,9 +8,9 @@ FactoryBot.define do
     config do
       {
         'currency_bet_levels' => {
-          'USD' => Faker::Number.between(from: 1, to: 10),
-          'EUR' => Faker::Number.between(from: 1, to: 10),
-          'RUB' => Faker::Number.between(from: 50, to: 500)
+          'USD' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          'EUR' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          'RUB' => Faker::Number.decimal(l_digits: 3, r_digits: 2)
         }
       }
     end
@@ -23,17 +23,7 @@ FactoryBot.define do
       config { { 'bet_level' => Faker::Number.between(from: 1, to: 10) } }
     end
 
-    trait :with_max_win_fixed do
-      config { { 'max_win' => Faker::Number.decimal(l_digits: 3, r_digits: 2).to_s } }
-    end
 
-    trait :with_max_win_multiplier do
-      config { { 'max_win' => "x#{Faker::Number.between(from: 5, to: 50)}" } }
-    end
-
-    trait :with_availability do
-      config { { 'available' => Faker::Number.between(from: 1, to: 100) } }
-    end
 
     trait :with_code do
       config { { 'code' => "BUY_#{Faker::Alphanumeric.alpha(number: 6).upcase}" } }
@@ -76,9 +66,9 @@ FactoryBot.define do
       config do
         {
           'currency_bet_levels' => {
-            'USD' => Faker::Number.between(from: 1, to: 10),
-            'EUR' => Faker::Number.between(from: 1, to: 10),
-            'RUB' => Faker::Number.between(from: 50, to: 500)
+            'USD' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
+            'EUR' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
+            'RUB' => Faker::Number.decimal(l_digits: 3, r_digits: 2)
           }
         }
       end
@@ -119,8 +109,6 @@ FactoryBot.define do
     trait :complete do
       with_games
       with_bet_level
-      with_max_win_fixed
-      with_availability
       with_code
       with_currencies
       with_min_deposit

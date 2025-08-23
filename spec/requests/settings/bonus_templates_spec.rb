@@ -24,8 +24,8 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
         dsl_tag: "test_tag",
         project: "VOLNA",
         event: "deposit",
-        currency: "USD",
-        minimum_deposit: 10.0,
+        currencies: [ "USD" ],
+        currency_minimum_deposits: { "USD" => 10.0 },
         wager: 35.0,
         maximum_winnings: 500.0
       }

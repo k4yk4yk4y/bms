@@ -1,4 +1,6 @@
 class BonusTemplate < ApplicationRecord
+  include CurrencyManagement
+
   # Status and type constants
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
   PROJECTS = %w[All VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
@@ -22,6 +24,7 @@ class BonusTemplate < ApplicationRecord
   validate :valid_currency_minimum_deposits
 
   # Callbacks
+  before_validation :set_default_currencies, if: -> { currencies.blank? }
   before_destroy :check_dependencies
 
   # Scopes
@@ -170,6 +173,10 @@ class BonusTemplate < ApplicationRecord
   end
 
   private
+
+  def set_default_currencies
+    self.currencies = self.class.all_currencies
+  end
 
   def check_dependencies
     # Здесь можно добавить проверку зависимостей, если они появятся в будущем
