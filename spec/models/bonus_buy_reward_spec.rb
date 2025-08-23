@@ -16,8 +16,6 @@ RSpec.describe BonusBuyReward, type: :model do
     it { should validate_numericality_of(:buy_amount).is_greater_than(0) }
     it { should validate_numericality_of(:multiplier).is_greater_than(0).allow_nil }
     it { should validate_numericality_of(:bet_level).is_greater_than_or_equal_to(0).allow_nil }
-    it { should validate_numericality_of(:max_win_value).is_greater_than_or_equal_to(0).allow_nil }
-    it { should validate_inclusion_of(:max_win_type).in_array(%w[fixed multiplier]).allow_nil }
   end
 
   # Serialization

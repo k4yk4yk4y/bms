@@ -17,7 +17,11 @@
         </div>
       </div>
 
-      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true do |form| %>
+      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true, 
+          data: { 
+            controller: "currency-validation currency", 
+            action: "submit->currency-validation#validateForm" 
+          } do |form| %>
         <% if @bonus.errors.any? %>
           <div class="alert alert-danger">
             <h4><%= pluralize(@bonus.errors.count, "error") %> prohibited this bonus from being saved:</h4>
@@ -30,27 +34,23 @@
         <% end %>
 
         <div class="row">
-          <div class="col-lg-8">
+          <!-- Левая колонка: Basic Information -->
+          <div class="col-lg-4">
             <!-- Basic Information -->
             <div class="card mb-4">
               <div class="card-header">
                 <h5 class="card-title mb-0">Basic Information</h5>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :name, class: "form-label" %>
-                      <%= form.text_field :name, class: "form-control", required: true %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :code, class: "form-label" %>
-                      <%= form.text_field :code, class: "form-control", readonly: true %>
-                      <div class="form-text">Bonus code cannot be changed after creation</div>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :name, class: "form-label" %>
+                  <%= form.text_field :name, class: "form-control", required: true %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :code, "Bonus Code", class: "form-label" %>
+                  <%= form.text_field :code, class: "form-control", 
+                      placeholder: "Enter bonus code (max 50 characters)" %>
                 </div>
 
                 <div class="mb-3">
@@ -58,77 +58,104 @@
                   <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Описание бонуса..." %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :event, class: "form-label" %>
-                      <%= form.select :event, event_type_options, {}, 
-                          { class: "form-select", required: true, disabled: true } %>
-                      <div class="form-text">Event type cannot be changed after creation</div>
-                    </div>
+                <div class="mb-3">
+                  <%= form.label :event, class: "form-label" %>
+                  <%= form.select :event, event_type_options, {}, 
+                      { class: "form-select", required: true, disabled: true } %>
+                  <div class="form-text">Event type cannot be changed after creation</div>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :status, class: "form-label" %>
+                  <%= form.select :status, status_options, {}, 
+                      { class: "form-select", required: true } %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :project, class: "form-label" %>
+                  <%= form.select :project, project_options, 
+                      { include_blank: "Select project" }, 
+                      { class: "form-select" } %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :dsl_tag, class: "form-label" %>
+                  <%= form.text_field :dsl_tag, class: "form-control", 
+                      placeholder: "DSL tag for bonus identification" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :currencies, "Currencies", class: "form-label" %>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">Выберите валюты для бонуса</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="uncheck-all-currencies-btn" 
+                            data-action="click->currency#uncheckAll">
+                      <i class="bi bi-check2-all"></i> Снять все
+                    </button>
                   </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :status, class: "form-label" %>
-                      <%= form.select :status, status_options, {}, 
-                          { class: "form-select", required: true } %>
-                    </div>
+                  <div class="currencies-checkboxes border rounded p-3" style="max-height: 150px; overflow-y: auto;">
+                    <% selected_currencies = @bonus.currencies.present? ? @bonus.currencies : Bonus.all_currencies %>
+                    <% Bonus.all_currencies.each_with_index do |currency, index| %>
+                      <div class="form-check <%= 'mb-1' unless index == Bonus.all_currencies.length - 1 %>">
+                        <%= check_box_tag "bonus[currencies][]", currency, 
+                            selected_currencies.include?(currency),
+                            {
+                              class: "form-check-input currency-checkbox",
+                              id: "currency_#{currency}",
+                              data: { 
+                                currency: currency,
+                                "currency-target": "checkbox"
+                              }
+                            } %>
+                        <%= label_tag "currency_#{currency}", currency, class: "form-check-label" %>
+                      </div>
+                    <% end %>
                   </div>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :currency, class: "form-label" %>
-                      <%= form.select :currency, currency_options, {}, 
-                          { class: "form-select", required: true } %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :country, class: "form-label" %>
-                      <%= form.text_field :country, class: "form-control", 
-                          placeholder: "Leave empty for all countries" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :groups, "Target Groups", class: "form-label" %>
+                  <%= form.text_field :groups, class: "form-control", 
+                      value: @bonus.groups.is_a?(Array) ? @bonus.groups.join(', ') : @bonus.groups %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :user_group, class: "form-label" %>
-                      <%= form.text_field :user_group, class: "form-control", 
-                          placeholder: "Leave empty for all users" %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :tags, class: "form-label" %>
-                      <%= form.text_field :tags, class: "form-control", 
-                          placeholder: "Comma-separated tags" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :no_more, "Usage Limitation", class: "form-label" %>
+                  <%= form.text_field :no_more, class: "form-control", 
+                      value: @bonus.no_more %>
                 </div>
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :project, class: "form-label" %>
-                      <%= form.select :project, project_options, 
-                          { include_blank: "Select project" }, 
-                          { class: "form-select" } %>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <%= form.label :dsl_tag, class: "form-label" %>
-                      <%= form.text_field :dsl_tag, class: "form-control", 
-                          placeholder: "DSL tag for bonus identification" %>
-                    </div>
-                  </div>
+                <div class="mb-3">
+                  <%= form.label :totally_no_more, "Total Activation Limit", class: "form-label" %>
+                  <%= form.number_field :totally_no_more, class: "form-control", 
+                      min: 1, 
+                      value: @bonus.totally_no_more %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :country, class: "form-label" %>
+                  <%= form.text_field :country, class: "form-control", 
+                      placeholder: "Leave empty for all countries" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :user_group, class: "form-label" %>
+                  <%= form.text_field :user_group, class: "form-control", 
+                      placeholder: "Leave empty for all users" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :tags, class: "form-label" %>
+                  <%= form.text_field :tags, class: "form-control", 
+                      placeholder: "Comma-separated tags" %>
                 </div>
               </div>
             </div>
+
+            <!-- Currency Minimum Deposits (только для депозитных бонусов) -->
+            <% if @bonus.event == 'deposit' %>
+              <%= render "currency_minimum_deposits", form: form, bonus: @bonus %>
+            <% end %>
 
             <!-- Wagering Information -->
             <div class="card mb-4" id="wagering-information-card">
@@ -136,32 +163,34 @@
                 <h5 class="card-title mb-0">Wagering Information</h5>
               </div>
               <div class="card-body">
-                <div class="row">
-                  <% 
-                    non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
-                    should_hide_minimum_deposit = non_deposit_types.include?(@bonus.event) || @bonus.event == 'deposit'
-                  %>
-                  <div class="col-md-4" id="minimum-deposit-field" style="<%= 'display: none;' if should_hide_minimum_deposit %>">
-                    <div class="mb-3">
-                      <%= form.label :minimum_deposit, class: "form-label" %>
-                      <%= form.number_field :minimum_deposit, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                      <div class="form-text">Не используется для данного типа бонуса</div>
-                    </div>
+                <div class="mb-3" id="minimum-deposit-field" style="<%= 'display: none;' if %w[input_coupon manual collection groups_update scheduler deposit].include?(@bonus.event) %>">
+                  <%= form.label :minimum_deposit, class: "form-label" %>
+                  <%= form.number_field :minimum_deposit, step: 0.01, 
+                      class: "form-control", min: 0 %>
+                  <div class="form-text">Не используется для данного типа бонуса</div>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :wager, class: "form-label" %>
+                  <%= form.number_field :wager, step: 0.01, 
+                      class: "form-control", min: 0 %>
+                </div>
+
+                <div class="mb-3">
+                  <%= form.label :maximum_winnings, class: "form-label" %>
+                  <div class="mb-2">
+                    <%= form.select :maximum_winnings_type, 
+                        options_for_select([
+                          ['Множитель', 'multiplier'],
+                          ['Фиксированное значение', 'fixed']
+                        ], @bonus.maximum_winnings_type), 
+                        {}, 
+                        { class: "form-select", id: "maximum_winnings_type_select" } %>
                   </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <%= form.label :wager, class: "form-label" %>
-                      <%= form.number_field :wager, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <%= form.label :maximum_winnings, class: "form-label" %>
-                      <%= form.number_field :maximum_winnings, step: 0.01, 
-                          class: "form-control", min: 0 %>
-                    </div>
+                  <div class="input-group">
+                    <%= form.number_field :maximum_winnings, step: 0.01, 
+                        class: "form-control", min: 0, id: "maximum_winnings_input" %>
+                    <span class="input-group-text" id="maximum_winnings_suffix"><%= @bonus.maximum_winnings_type == 'multiplier' ? 'x' : 'EUR' %></span>
                   </div>
                 </div>
 
@@ -173,18 +202,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Type-Specific Fields -->
-            <div id="type-specific-fields">
-              <%= render "type_specific_form", form: form, bonus: @bonus %>
-            </div>
-          </div>
-
-          <div class="col-lg-4">
-            <!-- Currency Minimum Deposits (только для депозитных бонусов) -->
-            <% if @bonus.event == 'deposit' %>
-              <%= render "currency_minimum_deposits", form: form, bonus: @bonus %>
-            <% end %>
 
             <!-- Availability -->
             <div class="card mb-4">
@@ -208,22 +225,6 @@
               </div>
             </div>
 
-            <!-- Metadata -->
-            <div class="card mb-4">
-              <div class="card-header">
-                <h5 class="card-title mb-0">Information</h5>
-              </div>
-              <div class="card-body">
-                <dl class="row">
-                  <dt class="col-sm-5">Created:</dt>
-                  <dd class="col-sm-7"><%= @bonus.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
-                  
-                  <dt class="col-sm-5">Updated:</dt>
-                  <dd class="col-sm-7"><%= @bonus.updated_at.strftime("%Y-%m-%d %H:%M") %></dd>
-                </dl>
-              </div>
-            </div>
-
             <!-- Actions -->
             <div class="card">
               <div class="card-body">
@@ -234,8 +235,154 @@
               </div>
             </div>
           </div>
+
+          <!-- Правая колонка: Type-Specific Fields -->
+          <div class="col-lg-8">
+            <!-- Type-Specific Fields -->
+            <div id="type-specific-fields">
+              <%= render "type_specific_form", form: form, bonus: @bonus %>
+            </div>
+          </div>
         </div>
       <% end %>
     </div>
   </div>
 </div>
+
+<script>
+// Function to uncheck all currency checkboxes - MUST BE GLOBAL
+function uncheckAllCurrencies() {
+  const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox');
+  
+  if (currencyCheckboxes.length === 0) {
+    console.error('No currency checkboxes found!');
+    return;
+  }
+  
+  currencyCheckboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  
+  // Clear currency minimum deposits fields
+  const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+  minimumDepositInputs.forEach(input => {
+    input.value = '';
+  });
+  
+  // Trigger change event to update currency-dependent fields
+  const event = new Event('change', { bubbles: true });
+  currencyCheckboxes.forEach(checkbox => {
+    checkbox.dispatchEvent(event);
+  });
+  
+  // Force update of all currency-dependent fields
+  updateAllCurrencyFields();
+}
+
+// Universal function to update all currency-dependent fields
+function updateAllCurrencyFields() {
+  setTimeout(() => {
+    // Update currency bonus amounts
+    if (typeof updateCurrencyBonusAmountsFields === 'function') {
+      updateCurrencyBonusAmountsFields();
+    }
+    
+    // Update currency minimum deposits
+    if (typeof updateCurrencyMinimumDepositsFields === 'function') {
+      updateCurrencyMinimumDepositsFields();
+    }
+    
+    // Update currency freespin bet levels
+    if (typeof updateCurrencyFreespinBetLevelsFields === 'function') {
+      updateCurrencyFreespinBetLevelsFields();
+    }
+    
+    // Update currency bonus buy bet levels
+    if (typeof updateCurrencyBonusBuyBetLevelsFields === 'function') {
+      updateCurrencyBonusBuyBetLevelsFields();
+    }
+    
+    // Update all type-specific currency forms
+    updateTypeSpecificCurrencyFields();
+  }, 100);
+}
+
+// Function to update currency fields in type-specific forms
+function updateTypeSpecificCurrencyFields() {
+  // Update freespin rewards currency fields
+  const freespinForms = document.querySelectorAll('[id^="freespin-reward-"]');
+  freespinForms.forEach((freespinForm, index) => {
+    if (typeof populateFreespinCurrencyFields === 'function') {
+      populateFreespinCurrencyFields(index);
+    }
+  });
+  
+  // Update bonus rewards currency fields  
+  const bonusForms = document.querySelectorAll('[id^="bonus-reward-"]');
+  bonusForms.forEach((bonusForm, index) => {
+    if (typeof populateBonusRewardCurrencyFields === 'function') {
+      populateBonusRewardCurrencyFields(index);
+    }
+  });
+  
+  // Update bonus buy rewards currency fields
+  const bonusBuyForms = document.querySelectorAll('[id^="bonus-buy-reward-"]');
+  bonusBuyForms.forEach((bonusBuyForm, index) => {
+    if (typeof populateBonusBuyRewardCurrencyFields === 'function') {
+      populateBonusBuyRewardCurrencyFields(index);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Maximum winnings type handler
+  const maxWinningsTypeSelect = document.getElementById('maximum_winnings_type_select');
+  const maxWinningsSuffix = document.getElementById('maximum_winnings_suffix');
+  
+  if (maxWinningsTypeSelect && maxWinningsSuffix) {
+    maxWinningsTypeSelect.addEventListener('change', function() {
+      if (this.value === 'multiplier') {
+        maxWinningsSuffix.textContent = 'x';
+      } else {
+        maxWinningsSuffix.textContent = 'EUR';
+      }
+    });
+  }
+
+  // Initialize minimum deposit field visibility based on bonus type
+  const bonusType = '<%= @bonus.event %>';
+  toggleMinimumDepositField(bonusType);
+  
+  // Add event listeners for currency checkboxes
+  const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox');
+  currencyCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      updateAllCurrencyFields();
+    });
+  });
+  
+  // Add event listener to uncheck all button
+  const uncheckButton = document.getElementById('uncheck-all-currencies-btn');
+  if (uncheckButton) {
+    uncheckButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      uncheckAllCurrencies();
+    });
+  }
+});
+
+// Function to toggle minimum deposit field visibility
+function toggleMinimumDepositField(bonusType) {
+  const minimumDepositField = document.getElementById('minimum-deposit-field');
+  if (!minimumDepositField) return;
+  
+  // Types that don't use minimum_deposit
+  const nonDepositTypes = ['input_coupon', 'manual', 'collection', 'groups_update', 'scheduler', 'deposit'];
+  
+  if (nonDepositTypes.includes(bonusType)) {
+    minimumDepositField.style.display = 'none';
+  } else {
+    minimumDepositField.style.display = 'block';
+  }
+}
+</script>

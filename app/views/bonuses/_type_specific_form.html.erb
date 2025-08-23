@@ -165,6 +165,10 @@
     // Create basic form structure
     const formHtml = createBonusRewardFormHtml(bonusRewardIndex);
     container.insertAdjacentHTML('beforeend', formHtml);
+    
+    // Populate currency fields
+    populateBonusRewardCurrencyFields(bonusRewardIndex);
+    
     bonusRewardIndex++;
     
     hideNoRewardsMessage();
@@ -177,6 +181,10 @@
     // Create basic form structure
     const formHtml = createFreespinRewardFormHtml(freespinRewardIndex);
     container.insertAdjacentHTML('beforeend', formHtml);
+    
+    // Populate currency fields
+    populateFreespinCurrencyFields(freespinRewardIndex);
+    
     freespinRewardIndex++;
     
     hideNoRewardsMessage();
@@ -189,6 +197,10 @@
     // Create basic form structure
     const formHtml = createBonusBuyRewardFormHtml(bonusBuyRewardIndex);
     container.insertAdjacentHTML('beforeend', formHtml);
+    
+    // Populate currency fields
+    populateBonusBuyRewardCurrencyFields(bonusBuyRewardIndex);
+    
     bonusBuyRewardIndex++;
     
     hideNoRewardsMessage();
@@ -244,53 +256,36 @@
               </div>
             </div>
 
-            <!-- Amount -->
-            <div class="reward-param-field mb-3" id="amount_field_${index}">
-              <label class="form-label">Сумма бонуса (amount)</label>
-              <div class="input-group">
-                <input type="number" class="form-control" name="bonus_rewards[${index}][amount]" step="0.01" min="0">
-                <span class="input-group-text">USD</span>
+            <!-- Amount - Currency fields will be populated by JavaScript -->
+            <div id="amount_field_${index}" class="reward-param-field full-width">
+              <label class="form-label">Сумма бонуса по валютам</label>
+              <div id="currency-bonus-amounts-container-${index}">
+                <div class="currency-amounts-grid" id="bonus-amounts-grid-${index}">
+                  <!-- Currency fields will be populated by JavaScript -->
+                </div>
               </div>
             </div>
 
             <!-- Percentage -->
             <div class="reward-param-field mb-3" id="percentage_field_${index}" style="display: none;">
-              <label class="form-label">Процент от депозита (percentage)</label>
+              <label class="form-label">Процент от депозита</label>
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
                 <span class="input-group-text">%</span>
               </div>
             </div>
 
-            <!-- Wager -->
-            <div class="reward-param-field">
-              <label class="form-label">Вагер (wager)</label>
-              <div class="input-group">
-                <input type="number" class="form-control" name="bonus_rewards[${index}][wager]" step="0.01" min="0">
-                <span class="input-group-text">x</span>
-              </div>
-            </div>
 
-
-
-            <!-- Available -->
-            <div class="reward-param-field">
-              <label class="form-label">Доступно (available)</label>
-              <input type="number" class="form-control" name="bonus_rewards[${index}][available]" min="0">
-            </div>
 
             <!-- Code -->
-            <div class="reward-param-field">
-              <label class="form-label">Код активации (code)</label>
-              <input type="text" class="form-control" name="bonus_rewards[${index}][code]">
-            </div>
+
 
             <!-- User can have duplicates -->
             <div class="reward-checkbox-field">
               <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_${index}" value="true">
                 <label class="form-check-label" for="user_can_have_duplicates_${index}">
-                  Пользователь может получить дубликаты (user_can_have_duplicates)
+                  Пользователь может иметь дубликаты (user_can_have_duplicates)
                 </label>
               </div>
             </div>
@@ -490,33 +485,18 @@
 
             <!-- Freespins Count -->
             <div class="reward-param-field">
-              <label class="form-label">Количество фриспинов (spins_count) *</label>
+              <label class="form-label">Количество фриспинов *</label>
               <input type="number" class="form-control" name="freespin_rewards[${index}][spins_count]" min="1" required >
             </div>
 
-            <!-- Max Win -->
+            <!-- Bet Level -->
             <div class="reward-param-field">
-              <label class="form-label">Макс. выигрыш (max win)</label>
-              <div class="input-group">
-                <select class="form-select" name="freespin_rewards[${index}][max_win_type]" style="max-width: 120px;">
-                  <option value="fixed">Сумма</option>
-                  <option value="multiplier">Множитель</option>
-                </select>
-                <input type="number" class="form-control" name="freespin_rewards[${index}][max_win_value]" step="0.01" min="0">
-              </div>
-            </div>
-
-            <!-- Available -->
-            <div class="reward-param-field">
-              <label class="form-label">Доступно (available)</label>
-              <input type="number" class="form-control" name="freespin_rewards[${index}][available]" min="0">
+              <label class="form-label">Уровень ставки (bet_level)</label>
+              <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="0.01" >
             </div>
 
             <!-- Code -->
-            <div class="reward-param-field">
-              <label class="form-label">Код активации (code)</label>
-              <input type="text" class="form-control" name="freespin_rewards[${index}][code]">
-            </div>
+
 
           </div>
 
@@ -525,55 +505,8 @@
             <div class="reward-param-field full-width">
               <label class="form-label">Размер ставки фриспинов по валютам *</label>
               <div id="currency-freespin-bet-levels-container-${index}">
-                <div class="currency-bet-levels-grid">
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">USD</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][USD]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">EUR</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][EUR]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">GBP</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][GBP]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">RUB</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][RUB]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">UAH</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][UAH]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">KZT</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][KZT]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">BTC</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][BTC]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
-                  <div class="currency-bet-level-item">
-                    <div class="input-group">
-                      <span class="input-group-text">ETH</span>
-                      <input type="number" name="freespin_rewards[${index}][currency_freespin_bet_levels][ETH]" class="form-control" step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                  </div>
+                <div class="currency-bet-levels-grid" id="freespin-bet-levels-grid-${index}">
+                  <!-- Currency fields will be populated by JavaScript -->
                 </div>
               </div>
             </div>
@@ -834,6 +767,210 @@
     `;
   }
 
+  // Populate currency fields for freespin rewards
+  function populateFreespinCurrencyFields(index) {
+    const grid = document.getElementById(`freespin-bet-levels-grid-${index}`);
+    if (!grid) return;
+
+    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
+    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    
+    // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
+    let currenciesToUse = allCurrencies;
+    
+    // Проверяем валюты из минимальных депозитов
+    const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+      .map(input => {
+        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        return match ? match[1] : null;
+      })
+      .filter(currency => currency !== null);
+    
+    // Проверяем выбранные валюты
+    const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox:checked');
+    const selectedCurrencies = Array.from(currencyCheckboxes).map(checkbox => checkbox.value);
+    
+    // Приоритет валют
+    if (minimumDepositCurrencies.length > 0) {
+      currenciesToUse = minimumDepositCurrencies;
+    } else if (selectedCurrencies.length > 0) {
+      currenciesToUse = selectedCurrencies;
+    }
+
+    // Clear existing fields first
+    grid.innerHTML = '';
+
+    currenciesToUse.forEach(currency => {
+      const isCrypto = cryptoCurrencies.includes(currency);
+      const step = isCrypto ? '0.00000001' : '0.01';
+      const placeholder = isCrypto ? '0.00000000' : '0.00';
+      const precision = isCrypto ? 8 : 2;
+
+      const fieldHtml = `
+        <div class="currency-bet-level-item">
+          <div class="input-group">
+            <span class="input-group-text">${currency}</span>
+            <input type="number" 
+                   name="freespin_rewards[${index}][currency_freespin_bet_levels][${currency}]"
+                   class="form-control currency-input"
+                   step="${step}"
+                   min="0"
+                   placeholder="${placeholder}"
+                   data-currency="${currency}"
+                   data-precision="${precision}"
+                   data-currency-validation-target="input"
+                   required>
+          </div>
+        </div>
+      `;
+
+      grid.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+    
+    // Ensure all new input fields are properly enabled and focusable
+    setTimeout(() => {
+      grid.querySelectorAll('input[type="number"]').forEach(input => {
+        input.removeAttribute('disabled');
+        input.removeAttribute('readonly');
+        input.style.pointerEvents = 'auto';
+      });
+    }, 50);
+  }
+
+  // Populate currency fields for bonus rewards
+  function populateBonusRewardCurrencyFields(index) {
+    const grid = document.getElementById(`bonus-amounts-grid-${index}`);
+    if (!grid) return;
+
+    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
+    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    
+    // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
+    let currenciesToUse = allCurrencies;
+    
+    // Проверяем валюты из минимальных депозитов
+    const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+      .map(input => {
+        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        return match ? match[1] : null;
+      })
+      .filter(currency => currency !== null);
+    
+    // Проверяем выбранные валюты
+    const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox:checked');
+    const selectedCurrencies = Array.from(currencyCheckboxes).map(checkbox => checkbox.value);
+    
+    // Приоритет валют
+    if (minimumDepositCurrencies.length > 0) {
+      currenciesToUse = minimumDepositCurrencies;
+    } else if (selectedCurrencies.length > 0) {
+      currenciesToUse = selectedCurrencies;
+    }
+
+    // Clear existing fields first
+    grid.innerHTML = '';
+
+    currenciesToUse.forEach(currency => {
+      const isCrypto = cryptoCurrencies.includes(currency);
+      const step = isCrypto ? '0.00000001' : '0.01';
+      const placeholder = isCrypto ? '0.00000000' : '0.00';
+      const precision = isCrypto ? 8 : 2;
+
+      const fieldHtml = `
+        <div class="currency-amount-item">
+          <div class="input-group">
+            <span class="input-group-text">${currency}</span>
+            <input type="number" 
+                   name="bonus_rewards[${index}][currency_amounts][${currency}]"
+                   class="form-control currency-input"
+                   step="${step}"
+                   min="0"
+                   placeholder="${placeholder}"
+                   data-currency="${currency}"
+                   data-precision="${precision}"
+                   data-currency-validation-target="input"
+                   required>
+          </div>
+        </div>
+      `;
+
+      grid.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+    
+    // Ensure all new input fields are properly enabled and focusable
+    setTimeout(() => {
+      grid.querySelectorAll('input[type="number"]').forEach(input => {
+        input.removeAttribute('disabled');
+        input.removeAttribute('readonly');
+        input.style.pointerEvents = 'auto';
+      });
+    }, 50);
+  }
+
+  // Populate currency fields for bonus buy rewards
+  function populateBonusBuyRewardCurrencyFields(index) {
+    const grid = document.getElementById(`bonus-buy-bet-levels-grid-${index}`);
+    if (!grid) return;
+
+    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
+    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    
+    // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
+    let currenciesToUse = allCurrencies;
+    
+    // Проверяем валюты из минимальных депозитов
+    const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+      .map(input => {
+        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        return match ? match[1] : null;
+      })
+      .filter(currency => currency !== null);
+    
+    // Проверяем выбранные валюты
+    const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox:checked');
+    const selectedCurrencies = Array.from(currencyCheckboxes).map(checkbox => checkbox.value);
+    
+    // Приоритет валют
+    if (minimumDepositCurrencies.length > 0) {
+      currenciesToUse = minimumDepositCurrencies;
+    } else if (selectedCurrencies.length > 0) {
+      currenciesToUse = selectedCurrencies;
+    }
+
+    // Clear existing fields first
+    grid.innerHTML = '';
+
+    currenciesToUse.forEach(currency => {
+      const isCrypto = cryptoCurrencies.includes(currency);
+      const step = isCrypto ? '0.00000001' : '0.01';
+      const placeholder = isCrypto ? '0.00000000' : '0.00';
+      const precision = isCrypto ? 8 : 2;
+
+      const fieldHtml = `
+        <div class="currency-bet-level-item">
+          <div class="input-group">
+            <span class="input-group-text">${currency}</span>
+            <input type="number" 
+                   name="bonus_buy_rewards[${index}][bonus_buy_bet_levels][${currency}]"
+                   class="form-control currency-input"
+                   step="${step}"
+                   min="0"
+                   placeholder="${placeholder}"
+                   data-currency="${currency}"
+                   data-precision="${precision}"
+                   data-currency-validation-target="input"
+                   required>
+          </div>
+        </div>
+      `;
+
+      grid.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+  }
+
   // JavaScript helper functions for bonus rewards
   function toggleBonusType(type, index) {
     const amountField = document.getElementById('amount_field_' + index);
@@ -962,17 +1099,10 @@
               <!--Размер ставки за покупку-->
             </div>
 
-            <!-- Available -->
-            <div class="reward-param-field">
-              <label class="form-label">Доступно (available)</label>
-              <input type="number" class="form-control" name="bonus_buy_rewards[${index}][available]" min="1" >
-            </div>
+
 
             <!-- Code -->
-            <div class="reward-param-field">
-              <label class="form-label">Код активации (code)</label>
-              <input type="text" class="form-control" name="bonus_buy_rewards[${index}][code]" >
-            </div>
+
 
             <!-- Tags -->
             <div class="reward-param-field">
@@ -1111,4 +1241,46 @@
       </div>
     `;
   }
+
+  // Function to clear all currency fields in type-specific forms
+  function clearAllCurrencyFields() {
+    // Clear freespin bet levels
+    const freespinGrids = document.querySelectorAll('[id^="freespin-bet-levels-grid-"]');
+    freespinGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+
+    // Clear bonus amounts
+    const bonusAmountsGrids = document.querySelectorAll('[id^="bonus-amounts-grid-"]');
+    bonusAmountsGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+
+    // Clear bonus buy bet levels
+    const bonusBuyGrids = document.querySelectorAll('[id^="bonus-buy-bet-levels-grid-"]');
+    bonusBuyGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+
+    // Clear freechip amounts
+    const freechipGrids = document.querySelectorAll('[id^="freechip-amounts-grid-"]');
+    freechipGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+
+    // Clear comp point amounts
+    const compPointGrids = document.querySelectorAll('[id^="comp-point-amounts-grid-"]');
+    compPointGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+
+    // Clear material prize amounts
+    const materialPrizeGrids = document.querySelectorAll('[id^="material-prize-amounts-grid-"]');
+    materialPrizeGrids.forEach(grid => {
+      grid.innerHTML = '';
+    });
+  }
+
+  // Make function globally available
+  window.clearAllCurrencyFields = clearAllCurrencyFields;
 </script>

@@ -41,14 +41,33 @@
     </div>
   </div>
 
-    <div class="reward-param-field mb-3" id="amount_field" <%= 'style="display: none;"' if has_percentage %>>
-      <label for="bonus_reward_amount" class="form-label">Сумма бонуса</label>
-      <div class="input-group">
-        <input type="number" class="form-control" name="bonus_reward[amount]" id="bonus_reward_amount"
-               step="0.01" min="0" value="<%= existing_reward&.amount %>">
-        <span class="input-group-text"><%= bonus.currency || 'USD' %></span>
+    <!-- Сумма бонуса: показываем поля по валютам только при bonus_type (фиксированная сумма) -->
+    <% 
+      # Определяем, есть ли выбранные валюты из минимальных депозитов или обычного поля currencies
+      available_currencies = []
+      if bonus.currency_minimum_deposits.present? && bonus.currency_minimum_deposits.any?
+        available_currencies = bonus.currency_minimum_deposits.keys
+      elsif bonus.currencies.present? && bonus.currencies.any?
+        available_currencies = bonus.currencies
+      end
+    %>
+    
+    <% if available_currencies.any? %>
+      <!-- Если есть выбранные валюты, показываем поля для каждой валюты -->
+      <div id="amount_field" <%= 'style="display: none;"' if has_percentage %>>
+        <%= render "currency_bonus_amounts", bonus: bonus, existing_reward: existing_reward, currencies: available_currencies %>
       </div>
-    </div>
+    <% else %>
+      <!-- Иначе показываем старое поле для одной валюты -->
+      <div class="reward-param-field mb-3" id="amount_field" <%= 'style="display: none;"' if has_percentage %>>
+        <label for="bonus_reward_amount" class="form-label">Сумма бонуса</label>
+        <div class="input-group">
+          <input type="number" class="form-control" name="bonus_reward[amount]" id="bonus_reward_amount"
+                 step="0.01" min="0" value="<%= existing_reward&.amount %>">
+          <span class="input-group-text"><%= bonus.currency || 'USD' %></span>
+        </div>
+      </div>
+    <% end %>
 
     <div class="reward-param-field mb-3" id="percentage_field" <%= 'style="display: none;"' unless has_percentage %>>
       <label for="bonus_reward_percentage" class="form-label">Процент от депозита</label>
@@ -59,42 +78,9 @@
       </div>
     </div>
 
-    <!-- Wager -->
-    <div class="reward-param-field mb-3">
-      <label for="bonus_reward_wager" class="form-label">Вагер (wager)</label>
-      <div class="input-group">
-        <input type="number" class="form-control" name="bonus_reward[wager]" id="bonus_reward_wager"
-               step="0.01" min="0" value="<%= existing_reward&.wager %>">
-        <span class="input-group-text">x</span>
-      </div>
-    </div>
 
-    <!-- Max Win -->
-    <div class="reward-param-field mb-3">
-      <label for="bonus_reward_max_win_value" class="form-label">Макс. выигрыш (max win)</label>
-      <div class="input-group">
-        <select class="form-select" name="bonus_reward[max_win_type]" id="bonus_reward_max_win_type" style="max-width: 120px;">
-          <option value="fixed" <%= 'selected' if existing_reward&.max_win_type == 'fixed' %>>Сумма</option>
-          <option value="multiplier" <%= 'selected' if existing_reward&.max_win_type == 'multiplier' %>>Множитель</option>
-        </select>
-        <input type="number" class="form-control" name="bonus_reward[max_win_value]" id="bonus_reward_max_win_value"
-               step="0.01" min="0" value="<%= existing_reward&.max_win_value %>">
-      </div>
-    </div>
 
-    <!-- Available -->
-    <div class="reward-param-field mb-3">
-      <label for="bonus_reward_available" class="form-label">Доступно (available)</label>
-      <input type="number" class="form-control" name="bonus_reward[available]" id="bonus_reward_available"
-             min="0" value="<%= existing_reward&.available %>">
-    </div>
 
-    <!-- Code -->
-    <div class="reward-param-field mb-3">
-      <label for="bonus_reward_code" class="form-label">Код активации (code)</label>
-      <input type="text" class="form-control" name="bonus_reward[code]" id="bonus_reward_code"
-             value="<%= existing_reward&.code %>">
-    </div>
 
     <!-- User can have duplicates -->
     <div class="reward-checkbox-field mb-3 full-width">
@@ -103,7 +89,7 @@
                id="bonus_reward_user_can_have_duplicates" value="1"
                <%= 'checked' if existing_reward&.user_can_have_duplicates %>>
         <label class="form-check-label" for="bonus_reward_user_can_have_duplicates">
-          Пользователь может получить дубликаты (user_can_have_duplicates)
+          Пользователь может иметь дубликаты (user_can_have_duplicates)
         </label>
       </div>
     </div>

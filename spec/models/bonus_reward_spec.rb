@@ -17,9 +17,6 @@ RSpec.describe BonusReward, type: :model do
     it { is_expected.to validate_numericality_of(:amount).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:percentage).is_greater_than_or_equal_to(0).is_less_than_or_equal_to(100) }
     it { is_expected.to allow_value(nil).for(:percentage) }
-    it { is_expected.to validate_numericality_of(:wager).is_greater_than_or_equal_to(0) }
-    it { is_expected.to validate_numericality_of(:max_win_value).is_greater_than_or_equal_to(0).allow_nil }
-    it { is_expected.to validate_inclusion_of(:max_win_type).in_array(%w[fixed multiplier]).allow_nil }
   end
 
   # Scopes tests
@@ -35,10 +32,6 @@ RSpec.describe BonusReward, type: :model do
 
   # Database columns and defaults
   describe 'database columns' do
-    it { is_expected.to have_db_column(:wager).of_type(:float).with_options(default: 0.0) }
-    it { is_expected.to have_db_column(:max_win_value).of_type(:decimal) }
-    it { is_expected.to have_db_column(:max_win_type).of_type(:string).with_options(default: 'fixed') }
-    it { is_expected.to have_db_column(:available).of_type(:integer) }
     it { is_expected.to have_db_column(:code).of_type(:string) }
     it { is_expected.to have_db_column(:user_can_have_duplicates).of_type(:boolean).with_options(default: false) }
     it { is_expected.to have_db_column(:stag).of_type(:string) }
@@ -101,20 +94,13 @@ RSpec.describe BonusReward, type: :model do
     end
 
     describe '#formatted_max_win' do
-      it 'returns "No limit" when max_win_value is blank' do
-        bonus_reward.max_win_value = nil
+      it 'returns "No limit" when bonus maximum_winnings is blank' do
+        bonus.update(maximum_winnings: nil)
         expect(bonus_reward.formatted_max_win).to eq('No limit')
       end
 
-      it 'returns multiplier format when max_win_type is multiplier' do
-        bonus_reward.max_win_type = 'multiplier'
-        bonus_reward.max_win_value = 10
-        expect(bonus_reward.formatted_max_win).to eq('10x')
-      end
-
-      it 'returns fixed amount with currency when max_win_type is fixed' do
-        bonus_reward.max_win_type = 'fixed'
-        bonus_reward.max_win_value = 500
+      it 'returns amount with currency when bonus maximum_winnings is present' do
+        bonus.update(maximum_winnings: 500, maximum_winnings_type: 'fixed')
         expect(bonus_reward.formatted_max_win).to eq('500 USD')
       end
     end

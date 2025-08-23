@@ -60,32 +60,9 @@
     </div>
   </div>
 
-  <!-- Max Win -->
-    <div class="reward-param-field">
-      <label for="bonus_buy_reward_max_win_value_<%= index %>" class="form-label">Макс. выигрыш (max win)</label>
-      <div class="input-group">
-        <select class="form-select" name="<%= field_prefix %>[max_win_type]" id="bonus_buy_reward_max_win_type_<%= index %>" style="max-width: 120px;">
-          <option value="fixed" <%= 'selected' if existing_bonus_buy&.max_win_type == 'fixed' %>>Сумма</option>
-          <option value="multiplier" <%= 'selected' if existing_bonus_buy&.max_win_type == 'multiplier' %>>Множитель</option>
-        </select>
-        <input type="number" class="form-control" name="<%= field_prefix %>[max_win_value]" id="bonus_buy_reward_max_win_value_<%= index %>"
-               step="0.01" min="0" value="<%= existing_bonus_buy&.max_win_value %>">
-      </div>
-    </div>
 
-  <!-- Available -->
-  <div class="reward-param-field">
-    <label for="bonus_buy_reward_available_<%= index %>" class="form-label">Доступно (available)</label>
-    <input type="number" class="form-control" name="<%= field_prefix %>[available]" id="bonus_buy_reward_available_<%= index %>"
-           min="0"  value="<%= existing_bonus_buy&.available %>">
-  </div>
 
-  <!-- Code -->
-  <div class="reward-param-field">
-    <label for="bonus_buy_reward_code_<%= index %>" class="form-label">Код активации (code)</label>
-    <input type="text" class="form-control" name="<%= field_prefix %>[code]" id="bonus_buy_reward_code_<%= index %>"
-            value="<%= existing_bonus_buy&.code %>">
-  </div>
+
 
     <!-- Note: Currencies, Groups, Tags, Minimum Deposit, and Wagering Strategy are now configured in Basic Information -->
   </div>
@@ -93,7 +70,16 @@
 
 <!-- Currency Bonus Buy Bet Levels - в отдельной секции -->
 <div class="currency-bet-levels-section mt-3">
-  <%= render "currency_bonus_buy_bet_levels", bonus: @bonus, existing_bonus_buy: existing_bonus_buy %>
+  <%
+    # Определяем валюты для bonus_buy reward
+    bonus_buy_currencies = []
+    if @bonus.currency_minimum_deposits.present? && @bonus.currency_minimum_deposits.any?
+      bonus_buy_currencies = @bonus.currency_minimum_deposits.keys
+    elsif @bonus.currencies.present? && @bonus.currencies.any?
+      bonus_buy_currencies = @bonus.currencies
+    end
+  %>
+  <%= render "currency_bonus_buy_bet_levels", bonus: @bonus, existing_bonus_buy: existing_bonus_buy, currencies: bonus_buy_currencies %>
 </div>
 
 <!-- Дополнительные параметры -->
@@ -190,7 +176,7 @@
           </div>
 
           <div class="reward-param-field">
-            <label for="bonus_buy_reward_user_can_have_duplicates_<%= index %>" class="form-label">Дубликаты пользователям</label>
+            <label for="bonus_buy_reward_user_can_have_duplicates_<%= index %>" class="form-label">Пользователь может иметь дубликаты</label>
             <select class="form-select" name="<%= field_prefix %>[user_can_have_duplicates]" id="bonus_buy_reward_user_can_have_duplicates_<%= index %>">
               <option value="">Не задано</option>
               <option value="true" <%= 'selected' if existing_bonus_buy&.get_advanced_param('user_can_have_duplicates') == true %>>Да</option>

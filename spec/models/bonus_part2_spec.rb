@@ -473,16 +473,16 @@ RSpec.describe Bonus, type: :model do
     end
 
     describe 'concurrent modifications' do
-      it 'handles concurrent code generation' do
-        bonus1 = build(:bonus, code: nil)
-        bonus2 = build(:bonus, code: nil)
+      it 'handles concurrent code validation' do
+        bonus1 = build(:bonus, code: 'CODE_001')
+        bonus2 = build(:bonus, code: 'CODE_002')
 
-        bonus1.valid?
-        bonus2.valid?
+        expect(bonus1).to be_valid
+        expect(bonus2).to be_valid
 
         expect(bonus1.code).not_to eq(bonus2.code)
-        expect(bonus1.code).to match(/\ABONUS_[A-Z0-9]{8}\z/)
-        expect(bonus2.code).to match(/\ABONUS_[A-Z0-9]{8}\z/)
+        expect(bonus1.code).to eq('CODE_001')
+        expect(bonus2.code).to eq('CODE_002')
       end
     end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_22_205319) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_23_161747) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,11 +23,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_205319) do
     t.datetime "updated_at", null: false
     t.text "games", default: "--- []\n"
     t.float "bet_level"
-    t.decimal "max_win_value"
-    t.string "max_win_type", default: "fixed"
-    t.integer "available"
     t.string "code"
     t.string "stag"
+    t.decimal "max_win_value", precision: 15, scale: 2
+    t.string "max_win_type", default: "fixed"
+    t.integer "available"
     t.index ["bonus_id"], name: "index_bonus_buy_rewards_on_bonus_id"
     t.index ["buy_amount"], name: "index_bonus_buy_rewards_on_buy_amount"
   end
@@ -53,13 +53,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_205319) do
     t.text "config"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.float "wager", default: 0.0
-    t.decimal "max_win_value"
-    t.string "max_win_type", default: "fixed"
-    t.integer "available"
     t.string "code"
     t.boolean "user_can_have_duplicates", default: false
     t.string "stag"
+    t.text "currency_amounts"
+    t.decimal "max_win_value", precision: 15, scale: 2
+    t.string "max_win_type", default: "fixed"
+    t.integer "available"
     t.index ["bonus_id", "reward_type"], name: "index_bonus_rewards_on_bonus_id_and_reward_type"
     t.index ["bonus_id"], name: "index_bonus_rewards_on_bonus_id"
     t.index ["reward_type"], name: "index_bonus_rewards_on_reward_type"
@@ -112,9 +112,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_205319) do
     t.integer "totally_no_more"
     t.text "currency_minimum_deposits"
     t.text "description"
+    t.string "maximum_winnings_type", default: "multiplier", null: false
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
-    t.index ["code"], name: "index_bonuses_on_code", unique: true
+    t.index ["code"], name: "index_bonuses_on_code"
     t.index ["country"], name: "index_bonuses_on_country"
     t.index ["dsl_tag"], name: "index_bonuses_on_dsl_tag"
     t.index ["event"], name: "index_bonuses_on_event"
@@ -181,11 +182,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_205319) do
     t.datetime "updated_at", null: false
     t.text "games", default: "--- []\n"
     t.float "bet_level"
-    t.decimal "max_win_value"
-    t.string "max_win_type", default: "fixed"
-    t.integer "available"
     t.string "code"
     t.string "stag"
+    t.decimal "max_win_value", precision: 15, scale: 2
+    t.string "max_win_type", default: "fixed"
+    t.integer "available"
     t.index ["bonus_id"], name: "index_freespin_rewards_on_bonus_id"
     t.index ["spins_count"], name: "index_freespin_rewards_on_spins_count"
   end

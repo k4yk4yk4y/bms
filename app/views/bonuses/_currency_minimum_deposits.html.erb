@@ -9,7 +9,7 @@
   <div class="card-body">
     <div id="currency-minimum-deposits-container">
       <div class="row">
-        <% all_currencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'] %>
+        <% all_currencies = Bonus.all_currencies %>
         <% selected_currencies = bonus.currencies.present? ? bonus.currencies : all_currencies %>
         
         <% selected_currencies.each_with_index do |currency, index| %>
@@ -18,10 +18,16 @@
               <span class="input-group-text"><%= currency %></span>
               <%= number_field_tag "bonus[currency_minimum_deposits][#{currency}]", 
                   bonus.currency_minimum_deposits[currency],
-                  class: "form-control",
-                  step: 0.01,
+                  class: "form-control currency-input",
+                  step: Bonus.currency_step(currency),
                   min: 0,
-                  placeholder: "0.00" %>
+                  placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
+                  data: { 
+                    currency: currency, 
+                    precision: Bonus.currency_precision(currency),
+                    "currency-validation-target": "input",
+                    "currency-target": "minimumDeposit"
+                  } %>
             </div>
           </div>
         <% end %>
@@ -31,29 +37,55 @@
     
     <!-- Dynamic update based on selected currencies -->
     <script>
+      // Helper function to get selected currencies from checkboxes
+      function getSelectedCurrenciesMinimumDeposits() {
+        const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
+        return Array.from(checkboxes).map(checkbox => checkbox.value);
+      }
+
       // Function to update currency minimum deposits fields based on selected currencies
-      function updateCurrencyMinimumDepositsFields() {
-        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
+      window.updateCurrencyMinimumDepositsFields = function() {
         const container = document.getElementById('currency-minimum-deposits-container');
+        if (!container) return;
         
-        if (!currenciesSelect || !container) return;
+        const selectedCurrencies = getSelectedCurrenciesMinimumDeposits();
+        const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
+        const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
         
-        const selectedCurrencies = Array.from(currenciesSelect.selectedOptions).map(option => option.value);
-        const allCurrencies = ['USD', 'EUR', 'GBP', 'RUB', 'UAH', 'KZT', 'BTC', 'ETH'];
+        // If no currencies selected, show only selected currencies (not all)
+        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : [];
         
-        // If no currencies selected, show all
-        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : allCurrencies;
+        // Check if update is actually needed by comparing current displayed currencies
+        const rowDiv = container.querySelector('.row');
+        if (rowDiv) {
+          const currentCurrencies = Array.from(rowDiv.querySelectorAll('input[type="number"]'))
+            .map(input => {
+              const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+              return match ? match[1] : null;
+            })
+            .filter(currency => currency !== null);
+          
+          // If currencies are the same, don't rebuild
+          if (currentCurrencies.length === displayCurrencies.length && 
+              currentCurrencies.every(currency => displayCurrencies.includes(currency))) {
+            return; // No update needed
+          }
+        }
         
         // Rebuild the fields
         const rowDiv = container.querySelector('.row');
         if (!rowDiv) return;
         
-        // Save current values
+        // Save ALL current values to preserve user input
         const currentValues = {};
         rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
           const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-          if (match && input.value) {
-            currentValues[match[1]] = input.value;
+          if (match) {
+            // Save value even if it's being edited or just typed
+            const value = input.value || input.getAttribute('value') || '';
+            if (value) {
+              currentValues[match[1]] = value;
+            }
           }
         });
         
@@ -64,31 +96,38 @@
           const colDiv = document.createElement('div');
           colDiv.className = 'col-12 mb-2';
           
+          const isCrypto = cryptoCurrencies.includes(currency);
+          const step = isCrypto ? '0.00000001' : '0.01';
+          const placeholder = isCrypto ? '0.00000000' : '0.00';
+          const precision = isCrypto ? 8 : 2;
+          
+          // Only use current value if currency is still selected
+          // Always use current value if it exists to preserve user input
+          const currentValue = currentValues[currency] || '';
+          
           colDiv.innerHTML = `
             <div class="input-group">
               <span class="input-group-text">${currency}</span>
               <input type="number" 
                      name="bonus[currency_minimum_deposits][${currency}]" 
-                     value="${currentValues[currency] || ''}"
-                     class="form-control" 
-                     step="0.01" 
+                     value="${currentValue}"
+                     class="form-control currency-input" 
+                     step="${step}" 
                      min="0"
-                     placeholder="0.00">
+                     placeholder="${placeholder}"
+                     data-currency="${currency}"
+                     data-precision="${precision}"
+                     data-currency-validation-target="input"
+                     data-currency-target="minimumDeposit">
             </div>
           `;
           
           rowDiv.appendChild(colDiv);
         });
 
-      }
+      };
       
-      // Attach event listener to currencies select
-      document.addEventListener('DOMContentLoaded', function() {
-        const currenciesSelect = document.querySelector('select[name="bonus[currencies][]"]');
-        if (currenciesSelect) {
-          currenciesSelect.addEventListener('change', updateCurrencyMinimumDepositsFields);
-        }
-      });
+      // Note: Event listeners for currency checkboxes are handled globally
     </script>
   </div>
 </div>

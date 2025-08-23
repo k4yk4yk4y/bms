@@ -400,16 +400,16 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
         expect(active_bonus.event).to be_present
       end
 
-      it 'validates updated data against all constraints' do
+      it 'allows duplicate codes in updates' do
         existing_bonus = create(:bonus, code: 'EXISTING_CODE')
         patch :update, params: {
           id: active_bonus.id,
           bonus: { code: 'EXISTING_CODE' }
         }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)
-        expect(json_response['errors']['code']).to include('has already been taken')
+        expect(json_response['code']).to eq('EXISTING_CODE')
       end
     end
   end

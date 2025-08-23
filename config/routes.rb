@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   resources :bonuses do
     member do
       get :preview
+      post :duplicate
     end
     collection do
       get :by_type

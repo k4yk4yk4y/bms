@@ -68,7 +68,7 @@ RSpec.describe BonusTemplate, type: :model do
 
     context 'when applying template with minimal data' do
       let(:minimal_template) do
-        create(:bonus_template,
+        template = create(:bonus_template,
           name: 'Minimal Template',
           dsl_tag: 'minimal',
           project: 'SOL',
@@ -77,11 +77,14 @@ RSpec.describe BonusTemplate, type: :model do
           maximum_winnings: nil,
           no_more: nil,
           totally_no_more: nil,
-          currencies: [],
           groups: [],
           currency_minimum_deposits: {},
           description: nil
         )
+        # Bypass the callback by updating directly
+        template.update_column(:currencies, [])
+        template.reload
+        template
       end
 
       it 'applies only available attributes' do
@@ -237,9 +240,11 @@ RSpec.describe BonusTemplate, type: :model do
         template = create(:bonus_template,
           dsl_tag: 'empty_test',
           description: '',
-          currencies: [],
           groups: []
         )
+        # Bypass the callback by updating directly
+        template.update_column(:currencies, [])
+        template.reload
 
         template.apply_to_bonus(bonus)
 

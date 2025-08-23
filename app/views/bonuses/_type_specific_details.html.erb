@@ -41,21 +41,31 @@
             <% bonus.bonus_rewards.each do |reward| %>
               <div class="mb-2">
                 <%= reward.reward_type.humanize %>: 
-                <%= reward.formatted_amount %>
+                <% if reward.has_currency_amounts? %>
+                  <%= reward.formatted_currency_amounts %>
+                <% else %>
+                  <%= reward.formatted_amount %>
+                <% end %>
               </div>
             <% end %>
           <% end %>
           
           <% if bonus.freespin_rewards.any? %>
-            <h6>Freespins:</h6>
             <% bonus.freespin_rewards.each do |reward| %>
               <div class="mb-3">
-                <div class="mb-1">
-                  <%= reward.formatted_spins %>
-                  <% if reward.has_game_restrictions? %>
-                    <br><small class="text-muted">Restrictions apply</small>
-                  <% end %>
+                <div class="mb-2">
+                  <strong>Количество фриспинов: <%= reward.spins_count %></strong>
                 </div>
+                
+                <% if reward.has_game_restrictions? %>
+                  <div class="mb-2">
+                    <strong>Игры:</strong><br>
+                    <% reward.games.each do |game| %>
+                      <span class="badge bg-primary me-1 mb-1"><%= game %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+                
                 <% if reward.has_currency_freespin_bet_levels? %>
                   <div class="ms-2">
                     <small class="text-muted">Размер ставки по валютам:</small><br>

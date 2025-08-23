@@ -14,7 +14,11 @@
 
       <div class="card">
         <div class="card-body">
-          <%= form_with model: @bonus_template, url: settings_templates_path, local: true do |form| %>
+          <%= form_with model: @bonus_template, url: settings_templates_path, local: true, 
+              data: { 
+                controller: "currency", 
+                action: "submit->currency#validateForm" 
+              } do |form| %>
             <% if @bonus_template.errors.any? %>
               <div class="alert alert-danger">
                 <h5><%= pluralize(@bonus_template.errors.count, "error") %> prohibited this template from being saved:</h5>
@@ -61,13 +65,31 @@
               <div class="col-md-6">
                 <div class="mb-3">
                   <%= form.label :currencies, "Currencies", class: "form-label" %>
-                  <%= form.select :currencies, 
-                      options_for_select([
-                        ['USD', 'USD'], ['EUR', 'EUR'], ['GBP', 'GBP'], ['RUB', 'RUB'],
-                        ['UAH', 'UAH'], ['KZT', 'KZT'], ['BTC', 'BTC'], ['ETH', 'ETH']
-                      ], @bonus_template.currencies), 
-                      {}, { class: "form-select", multiple: true, 
-                           style: "min-height: 120px;" } %>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">Выберите валюты для шаблона</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                            data-action="click->currency#uncheckAll">
+                      <i class="bi bi-check2-all"></i> Снять все
+                    </button>
+                  </div>
+                  <div class="currencies-checkboxes border rounded p-3" style="max-height: 150px; overflow-y: auto;">
+                    <% selected_currencies = @bonus_template.currencies.present? ? @bonus_template.currencies : Bonus.all_currencies %>
+                    <% Bonus.all_currencies.each_with_index do |currency, index| %>
+                      <div class="form-check <%= 'mb-1' unless index == Bonus.all_currencies.length - 1 %>">
+                        <%= check_box_tag "bonus_template[currencies][]", currency, 
+                            selected_currencies.include?(currency),
+                            {
+                              class: "form-check-input currency-checkbox",
+                              id: "currency_#{currency}",
+                              data: { 
+                                currency: currency,
+                                "currency-target": "checkbox"
+                              }
+                            } %>
+                        <%= label_tag "currency_#{currency}", currency, class: "form-check-label" %>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
               </div>
             </div>
@@ -129,3 +151,5 @@
     </div>
   </div>
 </div>
+
+

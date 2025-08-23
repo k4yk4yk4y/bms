@@ -252,6 +252,7 @@ RSpec.describe BonusesController, type: :controller do
         {
           bonus: {
             name: 'Test Bonus',
+            code: 'TEST_GROUPS',
             event: 'deposit',
             status: 'active',
             project: 'All',
@@ -379,10 +380,11 @@ RSpec.describe BonusesController, type: :controller do
         expect(assigns(:bonus).errors[:name]).to be_present
       end
 
-      it 'handles duplicate codes' do
+      it 'allows duplicate codes' do
         create(:bonus, code: 'DUPLICATE_CODE')
         post :create, params: { bonus: valid_attributes.merge(code: 'DUPLICATE_CODE') }
-        expect(assigns(:bonus).errors[:code]).to include('has already been taken')
+        expect(response).to have_http_status(:redirect)
+        expect(assigns(:bonus)).to be_persisted
       end
 
       it 'handles invalid date ranges' do
@@ -650,7 +652,7 @@ RSpec.describe BonusesController, type: :controller do
           bulk_action: 'delete'
         }
         expect(response).to redirect_to(bonuses_path)
-        expect(flash[:notice]).to eq('Bonuses were successfully deleted.')
+        expect(flash[:notice]).to eq('1 bonus(es) were successfully deleted.')
       end
 
       it 'handles empty bonus_ids array' do
@@ -678,7 +680,7 @@ RSpec.describe BonusesController, type: :controller do
           bulk_action: 'invalid_action'
         }
         expect(response).to redirect_to(bonuses_path)
-        expect(flash[:notice]).to eq('Invalid bulk action.')
+        expect(flash[:notice]).to eq("Invalid bulk action selected. Please choose 'Duplicate' or 'Delete'.")
       end
     end
 

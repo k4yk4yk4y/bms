@@ -15,8 +15,7 @@ RSpec.describe FreespinReward, type: :model do
     it { should validate_presence_of(:spins_count) }
     it { should validate_numericality_of(:spins_count).is_greater_than(0) }
     it { should validate_numericality_of(:bet_level).is_greater_than_or_equal_to(0).allow_nil }
-    it { should validate_numericality_of(:max_win_value).is_greater_than_or_equal_to(0).allow_nil }
-    it { should validate_inclusion_of(:max_win_type).in_array(%w[fixed multiplier]).allow_nil }
+
 
     it 'is invalid without currency_freespin_bet_levels' do
       reward = build(:freespin_reward, currency_freespin_bet_levels: {})
