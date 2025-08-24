@@ -22,12 +22,12 @@ class Ability
 
   def setup_user_abilities(user)
     case user.role
-    when 'admin'
+    when "admin"
       # Администратор имеет полный доступ ко всему
       can :manage, :all
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
-    when 'promo_manager'
+    when "promo_manager"
       # Промо-менеджер может управлять бонусами и просматривать маркетинг
       can :manage, Bonus
       can :manage, BonusTemplate
@@ -43,7 +43,7 @@ class Ability
       can :update, User, id: user.id # Может обновлять только свой профиль
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
-    when 'shift_leader'
+    when "shift_leader"
       # Лидер смены может просматривать бонусы и маркетинг
       can :read, Bonus
       can :read, BonusTemplate
@@ -60,7 +60,7 @@ class Ability
       can :update, User, id: user.id
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
-    when 'support_agent'
+    when "support_agent"
       # Агент поддержки имеет ограниченный доступ
       can :read, Bonus
       can :read, BonusTemplate

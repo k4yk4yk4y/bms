@@ -3,7 +3,7 @@ ActiveAdmin.register User do
 
   # Фильтры для поиска пользователей
   filter :email
-  filter :role, as: :select, collection: User.roles.keys.map { |role| [role.humanize, role] }
+  filter :role, as: :select, collection: User.roles.keys.map { |role| [ role.humanize, role ] }
   filter :created_at
 
   # Настройка индексной страницы
@@ -66,7 +66,7 @@ ActiveAdmin.register User do
       f.input :email
       f.input :first_name, label: "Имя"
       f.input :last_name, label: "Фамилия"
-      f.input :role, as: :select, collection: User.roles.keys.map { |role| [role.humanize, role] }, label: "Роль"
+      f.input :role, as: :select, collection: User.roles.keys.map { |role| [ role.humanize, role ] }, label: "Роль"
     end
 
     f.inputs "Пароль" do
@@ -111,7 +111,7 @@ ActiveAdmin.register User do
   end
 
   # Batch actions
-  batch_action :change_role, form: proc { User.roles.keys.map { |role| [role.humanize, role] } } do |ids, inputs|
+  batch_action :change_role, form: proc { User.roles.keys.map { |role| [ role.humanize, role ] } } do |ids, inputs|
     role = inputs[:change_role]
     User.where(id: ids).update_all(role: User.roles[role])
     redirect_to collection_path, notice: "Роль изменена для #{ids.count} пользователей на #{role.humanize}"
@@ -124,13 +124,13 @@ ActiveAdmin.register User do
 
       def role_status_class(role)
         case role
-        when 'admin'
+        when "admin"
           :error
-        when 'promo_manager'
+        when "promo_manager"
           :warning
-        when 'shift_leader'
+        when "shift_leader"
           :ok
-        when 'support_agent'
+        when "support_agent"
           :default
         else
           :default
@@ -143,13 +143,13 @@ end
 # Хелпер метод для стилизации ролей
 def role_status_class(role)
   case role
-  when 'admin'
+  when "admin"
     :error
-  when 'promo_manager'
+  when "promo_manager"
     :warning
-  when 'shift_leader'
+  when "shift_leader"
     :ok
-  when 'support_agent'
+  when "support_agent"
     :default
   else
     :default
