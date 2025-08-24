@@ -9,6 +9,8 @@
 # - Advanced filtering and search
 #
 class BonusesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :check_bonus_access
   before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :preview, :duplicate ]
 
   # GET /bonuses
@@ -478,6 +480,12 @@ class BonusesController < ApplicationController
   end
 
   private
+
+  def check_bonus_access
+    authorize! :read, Bonus
+  rescue CanCan::AccessDenied
+    redirect_to marketing_index_path, alert: "У вас нет доступа к разделу бонусов."
+  end
 
   def bonus_includes
     [ :bonus_rewards, :freespin_rewards, :bonus_buy_rewards,

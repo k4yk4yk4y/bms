@@ -40,48 +40,56 @@
       
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <%= link_to bonuses_path, class: "nav-link #{'active' if controller_name == 'bonuses'}" do %>
-              <i class="fas fa-gift"></i> Bonuses
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to heatmap_path, class: "nav-link #{'active' if controller_name == 'heatmap'}" do %>
-              <i class="fas fa-fire"></i> Heatmap
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to marketing_index_path, class: "nav-link #{'active' if controller_name == 'marketing'}" do %>
-              <i class="fas fa-bullhorn"></i> Marketing
-            <% end %>
-          </li>
-          <li class="nav-item dropdown" data-controller="projects-dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
-              <i class="fas fa-project-diagram"></i> Projects
-              <% if params[:project].present? %>
-                <span class="badge bg-primary ms-1"><%= params[:project] %></span>
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item">
+              <%= link_to bonuses_path, class: "nav-link #{'active' if controller_name == 'bonuses'}" do %>
+                <i class="fas fa-gift"></i> Bonuses
               <% end %>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="projectsDropdown" data-projects-dropdown-target="menu">
-              <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
-              <li><hr class="dropdown-divider"></li>
-              <% Bonus::PROJECTS.each do |project| %>
-                <li>
-                  <%= link_to bonuses_path(project: project), class: "dropdown-item #{'active' if params[:project] == project}" do %>
-                    <%= project %>
-                  <% end %>
-                </li>
+            </li>
+          <% end %>
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item">
+              <%= link_to heatmap_path, class: "nav-link #{'active' if controller_name == 'heatmap'}" do %>
+                <i class="fas fa-fire"></i> Heatmap
               <% end %>
-              <% if params[:project].present? %>
+            </li>
+          <% end %>
+          <% if can?(:read, MarketingRequest) %>
+            <li class="nav-item">
+              <%= link_to marketing_index_path, class: "nav-link #{'active' if controller_name == 'marketing'}" do %>
+                <i class="fas fa-bullhorn"></i> Marketing
+              <% end %>
+            </li>
+          <% end %>
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item dropdown" data-controller="projects-dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
+                <i class="fas fa-project-diagram"></i> Projects
+                <% if params[:project].present? %>
+                  <span class="badge bg-primary ms-1"><%= params[:project] %></span>
+                <% end %>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="projectsDropdown" data-projects-dropdown-target="menu">
+                <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
                 <li><hr class="dropdown-divider"></li>
-                <li>
-                  <%= link_to bonuses_path, class: "dropdown-item text-danger" do %>
-                    <i class="fas fa-times"></i> Clear Project Filter
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
-          </li>
+                <% Bonus::PROJECTS.each do |project| %>
+                  <li>
+                    <%= link_to bonuses_path(project: project), class: "dropdown-item #{'active' if params[:project] == project}" do %>
+                      <%= project %>
+                    <% end %>
+                  </li>
+                <% end %>
+                <% if params[:project].present? %>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <%= link_to bonuses_path, class: "dropdown-item text-danger" do %>
+                      <i class="fas fa-times"></i> Clear Project Filter
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
           <% if can?(:access, :settings) %>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -119,7 +127,7 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <%= link_to destroy_user_session_path, class: "dropdown-item text-danger" do %>
+                  <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item text-danger border-0 bg-transparent text-start w-100", form_class: "d-inline" do %>
                     <i class="fas fa-sign-out-alt"></i> Выйти
                   <% end %>
                 </li>

@@ -6,8 +6,7 @@ Rails.application.routes.draw do
     sessions: "users/sessions"
   }
 
-  # Добавляем GET маршрут для выхода (для совместимости)
-  get "/users/sign_out", to: "users/sessions#destroy"
+
   ActiveAdmin.routes(self)
   # Marketing requests routes
   resources :marketing, path: "marketing" do

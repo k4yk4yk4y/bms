@@ -61,6 +61,29 @@ class Ability
       can :update, User, id: user.id
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
+    when "marketing_manager"
+      # Маркетинг-менеджер имеет полный доступ ТОЛЬКО к разделу marketing
+      can :manage, MarketingRequest
+      can :read, ActiveAdmin::Page, name: "Dashboard"
+      can :read, User, id: user.id
+      can :update, User, id: user.id
+      
+      # ПОЛНЫЙ ЗАПРЕТ доступа ко всем остальным разделам
+      cannot :access, :settings
+      cannot :manage, :settings
+      cannot :access, :api
+      cannot :manage, :api
+      cannot :read, Bonus     # ЗАПРЕТ на чтение бонусов
+      cannot :manage, Bonus
+      cannot :manage, BonusTemplate
+      cannot :manage, BonusReward
+      cannot :manage, FreespinReward
+      cannot :manage, BonusBuyReward
+      cannot :manage, FreechipReward
+      cannot :manage, BonusCodeReward
+      cannot :manage, MaterialPrizeReward
+      cannot :manage, CompPointReward
+
     when "support_agent"
       # Агент поддержки имеет ограниченный доступ - ТОЛЬКО ЧТЕНИЕ
       

@@ -8,7 +8,8 @@ class User < ApplicationRecord
     admin: 0,
     promo_manager: 1,
     shift_leader: 2,
-    support_agent: 3
+    support_agent: 3,
+    marketing_manager: 4
   }
 
   # Validations
@@ -23,6 +24,7 @@ class User < ApplicationRecord
   scope :promo_managers, -> { where(role: :promo_manager) }
   scope :shift_leaders, -> { where(role: :shift_leader) }
   scope :support_agents, -> { where(role: :support_agent) }
+  scope :marketing_managers, -> { where(role: :marketing_manager) }
 
   def self.ransackable_attributes(auth_object = nil)
     [ "created_at", "email", "first_name", "id", "last_name", "remember_created_at", "reset_password_sent_at", "role", "updated_at" ]
@@ -42,7 +44,11 @@ class User < ApplicationRecord
   end
 
   def can_view_marketing?
-    admin? || promo_manager? || shift_leader?
+    admin? || promo_manager? || shift_leader? || marketing_manager?
+  end
+
+  def can_manage_marketing?
+    admin? || marketing_manager?
   end
 
   def can_access_support?
