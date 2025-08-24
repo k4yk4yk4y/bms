@@ -3,6 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe MarketingController, type: :controller do
+  # Sign in a user for all tests since MarketingController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   # Test data setup
   let!(:pending_request) { create(:marketing_request, :pending, :promo_webs_50, :with_unique_stag, :with_unique_promo_code) }
   let!(:activated_request) { create(:marketing_request, :activated, :promo_no_link_100, :with_unique_stag, :with_unique_promo_code) }

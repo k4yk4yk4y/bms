@@ -3,10 +3,15 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::BonusesController, type: :controller do
+  # Sign in a user for all tests since Api::V1::BonusesController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   # Test data setup
   let!(:active_bonus) { create(:bonus, :active, :with_bonus_rewards) }
   let!(:inactive_bonus) { create(:bonus, :inactive, :with_freespin_rewards) }
-  let!(:draft_bonus) { create(:bonus, :draft) }
+  let!(:draft_bonus) { create(:bonus, :active, :draft) }
   let!(:expired_bonus) { create(:bonus, :expired) }
 
   describe 'GET #index' do

@@ -10,11 +10,11 @@ FactoryBot.define do
     role { :admin }
 
     # Role-specific factories
-    factory :admin_user_model, traits: [:admin_role]
-    factory :promo_manager_user, traits: [:promo_manager_role]
-    factory :shift_leader_user, traits: [:shift_leader_role]
-    factory :support_agent_user, traits: [:support_agent_role]
-    factory :marketing_manager_user, traits: [:marketing_manager_role]
+    factory :admin_user_model, traits: [ :admin_role ]
+    factory :promo_manager_user, traits: [ :promo_manager_role ]
+    factory :shift_leader_user, traits: [ :shift_leader_role ]
+    factory :support_agent_user, traits: [ :support_agent_role ]
+    factory :marketing_manager_user, traits: [ :marketing_manager_role ]
 
     # Traits for different roles
     trait :admin_role do
@@ -36,5 +36,8 @@ FactoryBot.define do
     trait :marketing_manager_role do
       role { :marketing_manager }
     end
+
+    # Skip validations for tests to avoid Devise issues
+    to_create { |instance| instance.save(validate: false) }
   end
 end

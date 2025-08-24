@@ -4,7 +4,9 @@ module AuthenticationHelpers
   # Create and sign in a user for controller specs
   def sign_in_user(user = nil, role: :admin)
     user ||= create(:user, role: role)
-    sign_in user, scope: :user
+    # В тестах отключаем аутентификацию полностью
+    allow(controller).to receive(:authenticate_user!).and_return(true)
+    allow(controller).to receive(:current_user).and_return(user)
     user
   end
 
@@ -17,7 +19,8 @@ module AuthenticationHelpers
 
   # Login user for request specs
   def login_as(user, scope: :user)
-    login_as(user, scope: scope)
+    # Для request specs используем sign_in
+    sign_in user, scope: scope
   end
 end
 

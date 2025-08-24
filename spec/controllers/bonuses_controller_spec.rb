@@ -3,6 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe BonusesController, type: :controller do
+  # Sign in a user for all tests since BonusesController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   # Test data setup
   let!(:bonus) { create(:bonus, :active) }
   let!(:draft_bonus) { create(:bonus, :draft) }

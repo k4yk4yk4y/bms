@@ -1,6 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe Settings::BonusTemplatesController, type: :controller do
+  # Sign in a user for all tests since BonusTemplatesController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   describe 'GET #index' do
     let!(:template1) { create(:bonus_template, project: 'VOLNA', dsl_tag: 'welcome_bonus') }
     let!(:template2) { create(:bonus_template, project: 'ROX', dsl_tag: 'reload_bonus') }
