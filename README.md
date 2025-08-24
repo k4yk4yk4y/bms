@@ -30,8 +30,8 @@ A comprehensive Rails application for managing casino bonuses with an interactiv
 
 1. Clone the repository:
    ```bash
-   git clone git@github.com:k4yk4yk4y/mbs_cbm.git
-   cd mbs_cbm
+   git clone git@github.com:k4yk4yk4y/bms.git
+   cd bms
    ```
 
 2. Install dependencies:
