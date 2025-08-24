@@ -14,7 +14,14 @@ ActiveAdmin.register User do
     column :first_name
     column :last_name
     column :role do |user|
-      status_tag user.display_role, class: role_status_class(user.role)
+      role_class = case user.role
+                   when "admin" then :error
+                   when "promo_manager" then :warning
+                   when "shift_leader" then :ok
+                   when "support_agent" then :default
+                   else :default
+                   end
+      status_tag user.display_role, class: role_class
     end
     column :created_at
     column :sign_in_count
@@ -31,7 +38,14 @@ ActiveAdmin.register User do
       row :first_name
       row :last_name
       row :role do |user|
-        status_tag user.display_role, class: role_status_class(user.role)
+        role_class = case user.role
+                     when "admin" then :error
+                     when "promo_manager" then :warning
+                     when "shift_leader" then :ok
+                     when "support_agent" then :default
+                     else :default
+                     end
+        status_tag user.display_role, class: role_class
       end
       row :created_at
       row :updated_at
@@ -117,20 +131,5 @@ ActiveAdmin.register User do
     end
 
     private
-
-    def role_status_class(role)
-      case role
-      when "admin"
-        :error
-      when "promo_manager"
-        :warning
-      when "shift_leader"
-        :ok
-      when "support_agent"
-        :default
-      else
-        :default
-      end
-    end
   end
 end
