@@ -1,6 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe BonusesController, type: :controller do
+  # Sign in a user for all tests since BonusesController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   describe 'Template integration in bonus creation' do
     describe 'GET #new with template_id parameter' do
       let(:template) { create(:bonus_template, :welcome_bonus) }

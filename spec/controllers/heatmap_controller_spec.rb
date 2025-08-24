@@ -3,6 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe HeatmapController, type: :controller do
+  # Sign in a user for all tests since HeatmapController requires authentication
+  before do
+    sign_in_user(role: :admin)
+  end
+
   # Create test bonuses with different events and dates
   let!(:current_month_deposit_bonus) do
     create(:bonus, :deposit_event,

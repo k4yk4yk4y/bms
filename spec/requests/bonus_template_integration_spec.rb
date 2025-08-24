@@ -1,6 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe 'Bonus Template Integration', type: :request do
+  # Sign in a user for all tests since controllers require authentication
+  before do
+    @user = create(:user, role: :admin)
+    # Используем Warden напрямую для request specs
+    Warden.test_mode!
+    login_as(@user, scope: :user)
+  end
+
+  after do
+    Warden.test_reset!
+  end
+
   describe 'Template creation and bonus creation workflow' do
     context 'when creating a template and then using it for bonus creation' do
       it 'successfully creates a template and applies it to a new bonus' do

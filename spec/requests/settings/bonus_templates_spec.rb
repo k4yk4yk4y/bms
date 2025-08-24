@@ -1,6 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe "Settings::BonusTemplates", type: :request do
+  # Sign in a user for all tests since BonusTemplatesController requires authentication
+  before do
+    @user = create(:user, role: :admin)
+    # Используем Warden напрямую для request specs
+    Warden.test_mode!
+    login_as(@user, scope: :user)
+  end
+
+  after do
+    Warden.test_reset!
+  end
+
   describe "GET /settings/templates" do
     it "displays the templates index page" do
       get settings_templates_path

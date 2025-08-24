@@ -87,7 +87,7 @@ class Ability
       cannot :destroy, Bonus
       cannot :duplicate, Bonus
 
-      # ЗАПРЕТЫ на создание, редактирование, удаление маркетинговых заявок  
+      # ЗАПРЕТЫ на создание, редактирование, удаление маркетинговых заявок
       cannot :create, MarketingRequest
       cannot :update, MarketingRequest
       cannot :destroy, MarketingRequest
