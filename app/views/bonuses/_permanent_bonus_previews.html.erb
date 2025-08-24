@@ -40,17 +40,21 @@
                         title: "View Details" do %>
                       <i class="fas fa-eye"></i>
                     <% end %>
-                    <%= link_to edit_bonus_path(bonus_preview[:existing_bonus]), 
-                        class: "btn btn-primary btn-sm",
-                        title: "Edit Bonus" do %>
-                      <i class="fas fa-edit"></i>
+                    <% if can?(:update, bonus_preview[:existing_bonus]) %>
+                      <%= link_to edit_bonus_path(bonus_preview[:existing_bonus]), 
+                          class: "btn btn-primary btn-sm",
+                          title: "Edit Bonus" do %>
+                        <i class="fas fa-edit"></i>
+                      <% end %>
                     <% end %>
                   </div>
                 <% else %>
-                  <%= link_to new_bonus_path(event: 'deposit', dsl_tag: bonus_preview[:dsl_tag], name: bonus_preview[:name]), 
-                      class: "btn btn-success btn-sm w-100",
-                      title: "Create #{bonus_preview[:name]}" do %>
-                    <i class="fas fa-plus"></i> Create
+                  <% if can?(:create, Bonus) %>
+                    <%= link_to new_bonus_path(event: 'deposit', dsl_tag: bonus_preview[:dsl_tag], name: bonus_preview[:name]), 
+                        class: "btn btn-success btn-sm w-100",
+                        title: "Create #{bonus_preview[:name]}" do %>
+                      <i class="fas fa-plus"></i> Create
+                    <% end %>
                   <% end %>
                 <% end %>
               </div>

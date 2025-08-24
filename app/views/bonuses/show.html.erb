@@ -15,9 +15,13 @@
           </div>
         </div>
         <div class="btn-group" role="group">
-          <%= link_to "Edit", edit_bonus_path(@bonus), class: "btn btn-primary" %>
-          <%= link_to "Delete", bonus_path(@bonus), 
-              class: "btn btn-danger", data: { "turbo-method": :delete, confirm: "Are you sure?" } %>
+          <% if can?(:update, @bonus) %>
+            <%= link_to "Edit", edit_bonus_path(@bonus), class: "btn btn-primary" %>
+          <% end %>
+          <% if can?(:destroy, @bonus) %>
+            <%= link_to "Delete", bonus_path(@bonus), 
+                class: "btn btn-danger", data: { "turbo-method": :delete, confirm: "Are you sure?" } %>
+          <% end %>
           <%= link_to "Back to List", bonuses_path, class: "btn btn-outline-secondary" %>
         </div>
       </div>

@@ -85,6 +85,7 @@ playwright/.cache/
 playwright/
 
 # Image and video files (screenshots, recordings from tests)
+*.md
 *.png
 *.jpg
 *.jpeg
