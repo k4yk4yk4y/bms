@@ -2,6 +2,7 @@ class MarketingController < ApplicationController
   before_action :set_marketing_request, only: [ :show, :edit, :update, :destroy, :activate, :reject, :transfer ]
 
   def index
+    authorize! :read, MarketingRequest
     @current_tab = params[:tab] || MarketingRequest::REQUEST_TYPES.first
 
     # Start with base query - filter by tab only if no search or status filter
@@ -35,9 +36,11 @@ class MarketingController < ApplicationController
   end
 
   def show
+    authorize! :read, @marketing_request
   end
 
   def new
+    authorize! :create, MarketingRequest
     @marketing_request = MarketingRequest.new
     if params[:request_type].present? && MarketingRequest::REQUEST_TYPES.include?(params[:request_type])
       @marketing_request.request_type = params[:request_type]
@@ -45,6 +48,7 @@ class MarketingController < ApplicationController
   end
 
   def create
+    authorize! :create, MarketingRequest
     @marketing_request = MarketingRequest.new(marketing_request_params)
 
     if @marketing_request.save
@@ -56,9 +60,11 @@ class MarketingController < ApplicationController
   end
 
   def edit
+    authorize! :update, @marketing_request
   end
 
   def update
+    authorize! :update, @marketing_request
     if @marketing_request.update(marketing_request_params)
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
                   notice: "Заявка успешно обновлена."
@@ -68,6 +74,7 @@ class MarketingController < ApplicationController
   end
 
   def destroy
+    authorize! :destroy, @marketing_request
     tab = @marketing_request.request_type
     @marketing_request.destroy
     redirect_to marketing_index_path(tab: tab),
@@ -75,6 +82,7 @@ class MarketingController < ApplicationController
   end
 
   def activate
+    authorize! :activate, @marketing_request
     @marketing_request.activate!
     redirect_to marketing_index_path(tab: @marketing_request.request_type),
                 notice: "Заявка активирована."
@@ -84,6 +92,7 @@ class MarketingController < ApplicationController
   end
 
   def reject
+    authorize! :reject, @marketing_request
     @marketing_request.reject!
     redirect_to marketing_index_path(tab: @marketing_request.request_type),
                 notice: "Заявка отклонена."
@@ -93,6 +102,7 @@ class MarketingController < ApplicationController
   end
 
   def transfer
+    authorize! :transfer, @marketing_request
     new_request_type = params[:new_request_type]
 
     unless MarketingRequest::REQUEST_TYPES.include?(new_request_type)

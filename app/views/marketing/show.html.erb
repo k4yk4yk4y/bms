@@ -9,8 +9,10 @@
           Заявка #<%= @marketing_request.id %>
         </h1>
         <div class="d-flex gap-2">
-          <%= link_to edit_marketing_path(@marketing_request), class: "btn btn-outline-warning" do %>
-            <i class="fas fa-edit"></i> Редактировать
+          <% if can?(:update, @marketing_request) %>
+            <%= link_to edit_marketing_path(@marketing_request), class: "btn btn-outline-warning" do %>
+              <i class="fas fa-edit"></i> Редактировать
+            <% end %>
           <% end %>
           <%= link_to marketing_index_path(tab: @marketing_request.request_type), class: "btn btn-outline-secondary" do %>
             <i class="fas fa-arrow-left"></i> Назад к списку
@@ -175,24 +177,28 @@
             <div class="card-body">
               <% if @marketing_request.pending? %>
                 <div class="d-grid gap-2 mb-3">
-                  <%= link_to activate_marketing_path(@marketing_request), 
-                              method: :patch,
-                              class: "btn btn-success",
-                              data: { 
-                                confirm: "Активировать заявку? Дата активации будет установлена автоматически.",
-                                turbo_method: :patch 
-                              } do %>
-                    <i class="fas fa-check"></i> Активировать
+                  <% if can?(:activate, @marketing_request) %>
+                    <%= link_to activate_marketing_path(@marketing_request), 
+                                method: :patch,
+                                class: "btn btn-success",
+                                data: { 
+                                  confirm: "Активировать заявку? Дата активации будет установлена автоматически.",
+                                  turbo_method: :patch 
+                                } do %>
+                      <i class="fas fa-check"></i> Активировать
+                    <% end %>
                   <% end %>
                   
-                  <%= link_to reject_marketing_path(@marketing_request), 
-                              method: :patch,
-                              class: "btn btn-danger",
-                              data: { 
-                                confirm: "Отклонить заявку?",
-                                turbo_method: :patch 
-                              } do %>
-                    <i class="fas fa-times"></i> Отклонить
+                  <% if can?(:reject, @marketing_request) %>
+                    <%= link_to reject_marketing_path(@marketing_request), 
+                                method: :patch,
+                                class: "btn btn-danger",
+                                data: { 
+                                  confirm: "Отклонить заявку?",
+                                  turbo_method: :patch 
+                                } do %>
+                      <i class="fas fa-times"></i> Отклонить
+                    <% end %>
                   <% end %>
                 </div>
               <% elsif @marketing_request.activated? %>
@@ -208,43 +214,49 @@
               <% end %>
 
               <div class="d-grid gap-2">
-                <%= link_to edit_marketing_path(@marketing_request), 
-                            class: "btn btn-outline-warning" do %>
-                  <i class="fas fa-edit"></i> Редактировать
+                <% if can?(:update, @marketing_request) %>
+                  <%= link_to edit_marketing_path(@marketing_request), 
+                              class: "btn btn-outline-warning" do %>
+                    <i class="fas fa-edit"></i> Редактировать
+                  <% end %>
                 <% end %>
 
                 <!-- Transfer to different type -->
-                <div class="dropdown">
-                  <button class="btn btn-outline-info dropdown-toggle" type="button" 
-                          data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-exchange-alt"></i> Перенести в другой тип
-                  </button>
-                  <ul class="dropdown-menu">
-                    <% MarketingRequest::REQUEST_TYPES.each do |request_type| %>
-                      <% next if request_type == @marketing_request.request_type %>
-                      <li>
-                        <%= link_to transfer_marketing_path(@marketing_request, new_request_type: request_type),
-                                    method: :patch,
-                                    class: "dropdown-item",
-                                    data: { 
-                                      confirm: "Перенести заявку в тип \"#{MarketingRequest::REQUEST_TYPE_LABELS[request_type]}\"? Статус заявки будет сброшен на \"Ожидает\".",
-                                      turbo_method: :patch 
-                                    } do %>
-                          <%= MarketingRequest::REQUEST_TYPE_LABELS[request_type] %>
-                        <% end %>
-                      </li>
-                    <% end %>
-                  </ul>
-                </div>
+                <% if can?(:transfer, @marketing_request) %>
+                  <div class="dropdown">
+                    <button class="btn btn-outline-info dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fas fa-exchange-alt"></i> Перенести в другой тип
+                    </button>
+                    <ul class="dropdown-menu">
+                      <% MarketingRequest::REQUEST_TYPES.each do |request_type| %>
+                        <% next if request_type == @marketing_request.request_type %>
+                        <li>
+                          <%= link_to transfer_marketing_path(@marketing_request, new_request_type: request_type),
+                                      method: :patch,
+                                      class: "dropdown-item",
+                                      data: { 
+                                        confirm: "Перенести заявку в тип \"#{MarketingRequest::REQUEST_TYPE_LABELS[request_type]}\"? Статус заявки будет сброшен на \"Ожидает\".",
+                                        turbo_method: :patch 
+                                      } do %>
+                            <%= MarketingRequest::REQUEST_TYPE_LABELS[request_type] %>
+                          <% end %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
                 
-                <%= link_to marketing_path(@marketing_request), 
-                            method: :delete,
-                            class: "btn btn-outline-danger",
-                            data: { 
-                              confirm: "Удалить заявку? Это действие нельзя отменить.",
-                              turbo_method: :delete 
-                            } do %>
-                  <i class="fas fa-trash"></i> Удалить
+                <% if can?(:destroy, @marketing_request) %>
+                  <%= link_to marketing_path(@marketing_request), 
+                              method: :delete,
+                              class: "btn btn-outline-danger",
+                              data: { 
+                                confirm: "Удалить заявку? Это действие нельзя отменить.",
+                                turbo_method: :delete 
+                              } do %>
+                    <i class="fas fa-trash"></i> Удалить
+                  <% end %>
                 <% end %>
               </div>
             </div>
