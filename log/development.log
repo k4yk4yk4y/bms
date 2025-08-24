@@ -8508,3 +8508,955 @@ Processing by MarketingController#index as HTML
 Completed 200 OK in 44ms (Views: 22.5ms | ActiveRecord: 6.6ms (12 queries, 1 cached) | GC: 1.8ms)
 
 
+Started DELETE "/users/sign_out" for ::1 at 2025-08-24 18:15:06 +0300
+Processing by Users::SessionsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 13 ORDER BY "users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+Redirected to http://localhost:3000/users/sign_in
+Completed 303 See Other in 11ms (ActiveRecord: 2.3ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:15:06 +0300
+Processing by Users::SessionsController#new as TURBO_STREAM
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 1.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.8ms | GC: 0.0ms)
+Completed 200 OK in 9ms (Views: 7.6ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-24 18:15:14 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' ORDER BY "users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+=== LOGIN ATTEMPT ===
+Email: p.rusakevich@jetmail.cc
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:10:in 'Users::SessionsController#create'
+User found: true
+Authenticity token from form: NDff6wlqsMee7QT82sZQyPdUPobudPQEwPLNwMu3tbai9RDHswRWdRspwswMH9MQ1irs1Rza1ryz3sdDFN5gjw
+Session token: 
+Form authenticity token valid: false
+Redirected to http://localhost:3000/bonuses
+Completed 303 See Other in 211ms (ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:15:15 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.2ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.3ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.4ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.3ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.2ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 56.3ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 58.3ms | GC: 0.0ms)
+Completed 200 OK in 65ms (Views: 42.6ms | ActiveRecord: 18.2ms (11 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:27:43 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.6ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.5ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.4ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.5ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.4ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.4ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.5ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.5ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 45.2ms | GC: 5.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 52.7ms | GC: 6.3ms)
+Completed 200 OK in 74ms (Views: 51.0ms | ActiveRecord: 8.7ms (11 queries, 0 cached) | GC: 7.9ms)
+
+
+Started GET "/admin/users" for ::1 at 2025-08-24 18:27:44 +0300
+Processing by Admin::UsersController#index as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+Completed 401 Unauthorized in 3ms (ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/login" for ::1 at 2025-08-24 18:27:44 +0300
+Processing by AdminUsers::SessionsController#new as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='new',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  Rendering layout layouts/application.html.erb
+  Rendering admin_users/sessions/new.html.erb within layouts/application
+  Rendered admin_users/sessions/new.html.erb within layouts/application (Duration: 1.5ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.2ms | GC: 0.8ms)
+Completed 200 OK in 15ms (Views: 6.5ms | ActiveRecord: 2.8ms (1 query, 0 cached) | GC: 1.4ms)
+
+
+Started DELETE "/users/sign_out" for ::1 at 2025-08-24 18:27:59 +0300
+Processing by Users::SessionsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+Redirected to http://localhost:3000/users/sign_in
+Completed 303 See Other in 11ms (ActiveRecord: 2.6ms (1 query, 0 cached) | GC: 0.9ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:27:59 +0300
+Processing by Users::SessionsController#new as TURBO_STREAM
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 1.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 6.5ms | GC: 0.8ms)
+Completed 200 OK in 9ms (Views: 8.3ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.8ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-24 18:28:18 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+  [1m[36mUser Load (0.9ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' ORDER BY "users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+=== LOGIN ATTEMPT ===
+Email: p.rusakevich@jetmail.cc
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:10:in 'Users::SessionsController#create'
+User found: true
+Authenticity token from form: Amc4yXlwOFBgHva6DPT6an8rw7kLneKqzoiOEW3zb55U95KYSB1-eXuZY4oGABlGfU-yVqNx3f3uiw8EcpoHTg
+Session token: 
+Form authenticity token valid: false
+Redirected to http://localhost:3000/bonuses
+Completed 303 See Other in 216ms (ActiveRecord: 1.1ms (2 queries, 0 cached) | GC: 0.6ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:28:18 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.1ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.1ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.1ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.2ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.2ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 49.3ms | GC: 2.5ms)
+  Rendered layout layouts/application.html.erb (Duration: 51.1ms | GC: 2.5ms)
+Completed 200 OK in 58ms (Views: 39.2ms | ActiveRecord: 14.4ms (11 queries, 0 cached) | GC: 2.7ms)
+
+
+Started GET "/admin" for ::1 at 2025-08-24 18:28:28 +0300
+Processing by Admin::DashboardController#index as HTML
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='dashboard'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+Completed 401 Unauthorized in 3ms (ActiveRecord: 0.6ms (1 query, 0 cached) | GC: 0.3ms)
+
+
+Started GET "/admin/login" for ::1 at 2025-08-24 18:28:28 +0300
+Processing by AdminUsers::SessionsController#new as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='new',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  Rendering layout layouts/application.html.erb
+  Rendering admin_users/sessions/new.html.erb within layouts/application
+  Rendered admin_users/sessions/new.html.erb within layouts/application (Duration: 1.7ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.3ms | GC: 0.0ms)
+Completed 200 OK in 12ms (Views: 5.1ms | ActiveRecord: 1.6ms (1 query, 0 cached) | GC: 0.2ms)
+
+
+Started POST "/admin/login" for ::1 at 2025-08-24 18:28:39 +0300
+Processing by AdminUsers::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "admin_user" => {"email" => "[FILTERED]", "password" => "[FILTERED]", "remember_me" => "0"}, "commit" => "Login to Admin Panel"}
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."email" = 'p.rusakevich@jetmail.cc' ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+=== ADMIN LOGIN ATTEMPT ===
+Email: p.rusakevich@jetmail.cc
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."email" = 'p.rusakevich@jetmail.cc' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/admin_users/sessions_controller.rb:11:in 'AdminUsers::SessionsController#create'
+AdminUser found: true
+Redirected to http://localhost:3000/admin
+Completed 303 See Other in 213ms (ActiveRecord: 0.7ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin" for ::1 at 2025-08-24 18:28:39 +0300
+Processing by Admin::DashboardController#index as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='dashboard'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/page/index.html.arb
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/page/index.html.arb (Duration: 4.0ms | GC: 0.2ms)
+Completed 200 OK in 8ms (Views: 5.2ms | ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.4ms)
+
+
+Started GET "/admin/bonuses" for ::1 at 2025-08-24 18:28:41 +0300
+Processing by Admin::BonusesController#index as HTML
+  [1m[36mAdminUser Load (0.8ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb
+  [1m[36mBonus Load (0.4ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" desc LIMIT 30 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb (Duration: 27.0ms | GC: 2.1ms)
+Completed 200 OK in 33ms (Views: 27.7ms | ActiveRecord: 1.1ms (2 queries, 0 cached) | GC: 2.1ms)
+
+
+Started GET "/admin/admin_users" for ::1 at 2025-08-24 18:28:41 +0300
+Processing by Admin::AdminUsersController#index as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='admin_users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" ORDER BY "admin_users"."id" desc LIMIT 30 OFFSET 0 /*action='index',application='BMS',controller='admin_users'*/[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb (Duration: 23.7ms | GC: 7.6ms)
+Completed 200 OK in 29ms (Views: 24.2ms | ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 7.9ms)
+
+
+Started GET "/admin/users" for ::1 at 2025-08-24 18:28:43 +0300
+Processing by Admin::UsersController#index as HTML
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" ORDER BY "users"."id" desc LIMIT 30 OFFSET 0 /*action='index',application='BMS',controller='users'*/[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb (Duration: 26.4ms | GC: 6.6ms)
+Completed 200 OK in 32ms (Views: 26.8ms | ActiveRecord: 0.8ms (2 queries, 0 cached) | GC: 7.8ms)
+
+
+Started DELETE "/users/sign_out" for ::1 at 2025-08-24 18:28:51 +0300
+Processing by Users::SessionsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+  [1m[36mUser Load (0.5ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+Can't verify CSRF token authenticity.
+Completed 422 Unprocessable Content in 9ms (ActiveRecord: 0.9ms (2 queries, 0 cached) | GC: 0.3ms)
+
+
+  
+ActionController::InvalidAuthenticityToken (Can't verify CSRF token authenticity.):
+  
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:314:in 'ActionController::RequestForgeryProtection::ProtectionMethods::Exception#handle_unverified_request'
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:408:in 'ActionController::RequestForgeryProtection#handle_unverified_request'
+devise (4.9.4) lib/devise/controllers/helpers.rb:257:in 'Devise::Controllers::Helpers#handle_unverified_request'
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:397:in 'ActionController::RequestForgeryProtection#verify_authenticity_token'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:361:in 'block in ActiveSupport::Callbacks::CallTemplate::MethodCall#make_lambda'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:178:in 'block in ActiveSupport::Callbacks::Filters::Before#call'
+actionpack (8.0.2.1) lib/abstract_controller/callbacks.rb:34:in 'block (2 levels) in <module:Callbacks>'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:179:in 'ActiveSupport::Callbacks::Filters::Before#call'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'block in ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'Array#each'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:118:in 'block in ActiveSupport::Callbacks#run_callbacks'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:140:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.0.2.1) lib/abstract_controller/callbacks.rb:260:in 'AbstractController::Callbacks#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/rescue.rb:27:in 'ActionController::Rescue#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/instrumentation.rb:76:in 'block in ActionController::Instrumentation#process_action'
+activesupport (8.0.2.1) lib/active_support/notifications.rb:210:in 'block in ActiveSupport::Notifications.instrument'
+activesupport (8.0.2.1) lib/active_support/notifications/instrumenter.rb:58:in 'ActiveSupport::Notifications::Instrumenter#instrument'
+activesupport (8.0.2.1) lib/active_support/notifications.rb:210:in 'ActiveSupport::Notifications.instrument'
+actionpack (8.0.2.1) lib/action_controller/metal/instrumentation.rb:75:in 'ActionController::Instrumentation#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/params_wrapper.rb:259:in 'ActionController::ParamsWrapper#process_action'
+activerecord (8.0.2.1) lib/active_record/railties/controller_runtime.rb:39:in 'ActiveRecord::Railties::ControllerRuntime#process_action'
+actionpack (8.0.2.1) lib/abstract_controller/base.rb:163:in 'AbstractController::Base#process'
+actionview (8.0.2.1) lib/action_view/rendering.rb:40:in 'ActionView::Rendering#process'
+actionpack (8.0.2.1) lib/action_controller/metal.rb:252:in 'ActionController::Metal#dispatch'
+actionpack (8.0.2.1) lib/action_controller/metal.rb:335:in 'ActionController::Metal.dispatch'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:67:in 'ActionDispatch::Routing::RouteSet::Dispatcher#dispatch'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:50:in 'ActionDispatch::Routing::RouteSet::Dispatcher#serve'
+actionpack (8.0.2.1) lib/action_dispatch/routing/mapper.rb:32:in 'block in <class:Constraints>'
+actionpack (8.0.2.1) lib/action_dispatch/routing/mapper.rb:62:in 'ActionDispatch::Routing::Mapper::Constraints#serve'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:53:in 'block in ActionDispatch::Journey::Router#serve'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:133:in 'block in ActionDispatch::Journey::Router#find_routes'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:126:in 'Array#each'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:126:in 'ActionDispatch::Journey::Router#find_routes'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:34:in 'ActionDispatch::Journey::Router#serve'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:908:in 'ActionDispatch::Routing::RouteSet#call'
+railties (8.0.2.1) lib/rails/engine/lazy_route_set.rb:68:in 'Rails::Engine::LazyRouteSet#call'
+warden (1.2.9) lib/warden/manager.rb:36:in 'block in Warden::Manager#call'
+warden (1.2.9) lib/warden/manager.rb:34:in 'Kernel#catch'
+warden (1.2.9) lib/warden/manager.rb:34:in 'Warden::Manager#call'
+rack (3.2.0) lib/rack/tempfile_reaper.rb:20:in 'Rack::TempfileReaper#call'
+rack (3.2.0) lib/rack/etag.rb:29:in 'Rack::ETag#call'
+rack (3.2.0) lib/rack/conditional_get.rb:44:in 'Rack::ConditionalGet#call'
+rack (3.2.0) lib/rack/head.rb:15:in 'Rack::Head#call'
+actionpack (8.0.2.1) lib/action_dispatch/http/permissions_policy.rb:38:in 'ActionDispatch::PermissionsPolicy::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/http/content_security_policy.rb:38:in 'ActionDispatch::ContentSecurityPolicy::Middleware#call'
+rack-session (2.1.1) lib/rack/session/abstract/id.rb:274:in 'Rack::Session::Abstract::Persisted#context'
+rack-session (2.1.1) lib/rack/session/abstract/id.rb:268:in 'Rack::Session::Abstract::Persisted#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/cookies.rb:706:in 'ActionDispatch::Cookies#call'
+activerecord (8.0.2.1) lib/active_record/migration.rb:671:in 'ActiveRecord::Migration::CheckPending#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/callbacks.rb:31:in 'block in ActionDispatch::Callbacks#call'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:100:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/callbacks.rb:30:in 'ActionDispatch::Callbacks#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/executor.rb:16:in 'ActionDispatch::Executor#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in 'ActionDispatch::ActionableExceptions#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/debug_exceptions.rb:31:in 'ActionDispatch::DebugExceptions#call'
+web-console (4.2.1) lib/web_console/middleware.rb:132:in 'WebConsole::Middleware#call_app'
+web-console (4.2.1) lib/web_console/middleware.rb:28:in 'block in WebConsole::Middleware#call'
+web-console (4.2.1) lib/web_console/middleware.rb:17:in 'Kernel#catch'
+web-console (4.2.1) lib/web_console/middleware.rb:17:in 'WebConsole::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/show_exceptions.rb:32:in 'ActionDispatch::ShowExceptions#call'
+railties (8.0.2.1) lib/rails/rack/logger.rb:41:in 'Rails::Rack::Logger#call_app'
+railties (8.0.2.1) lib/rails/rack/logger.rb:29:in 'Rails::Rack::Logger#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/remote_ip.rb:96:in 'ActionDispatch::RemoteIp#call'
+request_store (1.7.0) lib/request_store/middleware.rb:19:in 'RequestStore::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/request_id.rb:34:in 'ActionDispatch::RequestId#call'
+rack (3.2.0) lib/rack/method_override.rb:28:in 'Rack::MethodOverride#call'
+rack (3.2.0) lib/rack/runtime.rb:24:in 'Rack::Runtime#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:61:in 'block in ActionDispatch::ServerTiming#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:26:in 'ActionDispatch::ServerTiming::Subscriber#collect_events'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:60:in 'ActionDispatch::ServerTiming#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/executor.rb:16:in 'ActionDispatch::Executor#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/static.rb:27:in 'ActionDispatch::Static#call'
+rack (3.2.0) lib/rack/sendfile.rb:114:in 'Rack::Sendfile#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/host_authorization.rb:143:in 'ActionDispatch::HostAuthorization#call'
+railties (8.0.2.1) lib/rails/engine.rb:535:in 'Rails::Engine#call'
+puma (6.6.1) lib/puma/configuration.rb:279:in 'Puma::Configuration::ConfigMiddleware#call'
+puma (6.6.1) lib/puma/request.rb:99:in 'block in Puma::Request#handle_request'
+puma (6.6.1) lib/puma/thread_pool.rb:390:in 'Puma::ThreadPool#with_force_shutdown'
+puma (6.6.1) lib/puma/request.rb:98:in 'Puma::Request#handle_request'
+puma (6.6.1) lib/puma/server.rb:472:in 'Puma::Server#process_client'
+puma (6.6.1) lib/puma/server.rb:254:in 'block in Puma::Server#run'
+puma (6.6.1) lib/puma/thread_pool.rb:167:in 'block in Puma::ThreadPool#spawn_thread'
+Started GET "/bonuses" for ::1 at 2025-08-24 18:28:51 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  [1m[36mBonus Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.4ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.2ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.3ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.2ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.2ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.1ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 15.6ms | GC: 0.4ms)
+  Rendered layout layouts/application.html.erb (Duration: 17.5ms | GC: 0.4ms)
+Completed 200 OK in 23ms (Views: 15.9ms | ActiveRecord: 2.7ms (12 queries, 0 cached) | GC: 0.4ms)
+
+
+Started GET "/admin/users/5/edit" for ::1 at 2025-08-24 18:28:54 +0300
+Processing by Admin::UsersController#edit as HTML
+  Parameters: {"id" => "5"}
+  [1m[36mAdminUser Load (0.5ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='edit',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.5ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 LIMIT 1 /*action='edit',application='BMS',controller='users'*/[0m
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 LIMIT 1[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb (Duration: 14.7ms | GC: 0.5ms)
+Completed 200 OK in 23ms (Views: 15.8ms | ActiveRecord: 1.0ms (3 queries, 1 cached) | GC: 0.5ms)
+
+
+Started PATCH "/admin/users/5" for ::1 at 2025-08-24 18:29:01 +0300
+Processing by Admin::UsersController#update as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "first_name" => "Test", "last_name" => "User", "role" => "promo_manager", "password" => "[FILTERED]", "password_confirmation" => "[FILTERED]"}, "commit" => "Update User", "id" => "5"}
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb (Duration: 10.3ms | GC: 0.8ms)
+Completed 200 OK in 226ms (Views: 10.7ms | ActiveRecord: 4.1ms (2 queries, 0 cached) | GC: 1.1ms)
+
+
+Started PATCH "/admin/users/5" for ::1 at 2025-08-24 18:29:06 +0300
+Processing by Admin::UsersController#update as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "first_name" => "Test", "last_name" => "User", "role" => "promo_manager", "password" => "[FILTERED]", "password_confirmation" => "[FILTERED]"}, "commit" => "Update User", "id" => "5"}
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mUser Update (2.2ms)[0m  [1m[33mUPDATE "users" SET "encrypted_password" = '$2a$12$5b2.UFv5sCv.fU9hvwblG.pzDSHGSyhP3n5OKOTaIqcp4suDAjapW', "updated_at" = '2025-08-24 15:29:06.895766' WHERE "users"."id" = 5 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+Redirected to http://localhost:3000/admin/users/5
+Completed 302 Found in 219ms (ActiveRecord: 3.9ms (3 queries, 0 cached) | GC: 0.6ms)
+
+
+Started GET "/admin/users/5" for ::1 at 2025-08-24 18:29:06 +0300
+Processing by Admin::UsersController#show as HTML
+  Parameters: {"id" => "5"}
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='show',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 LIMIT 1 /*action='show',application='BMS',controller='users'*/[0m
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/show.html.arb
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/show.html.arb (Duration: 7.9ms | GC: 0.2ms)
+Completed 200 OK in 12ms (Views: 8.6ms | ActiveRecord: 0.4ms (2 queries, 0 cached) | GC: 0.2ms)
+
+
+Started DELETE "/users/sign_out" for ::1 at 2025-08-24 18:29:11 +0300
+Processing by Users::SessionsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mAdminUser Load (1.5ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+Redirected to http://localhost:3000/users/sign_in
+Completed 303 See Other in 8ms (ActiveRecord: 1.8ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:29:11 +0300
+Processing by Users::SessionsController#new as TURBO_STREAM
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 0.7ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.6ms | GC: 0.0ms)
+Completed 200 OK in 3ms (Views: 1.9ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-24 18:29:19 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'test@example.com' ORDER BY "users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+=== LOGIN ATTEMPT ===
+Email: test@example.com
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'test@example.com' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:10:in 'Users::SessionsController#create'
+User found: true
+Authenticity token from form: zBatS7CgKU5Tz2JcjBAKvnyUjXAaYbteeKWWqzSQ1JHFUAPIuAm_DVqazK0F3EL4wWuiMICoppRyzWnOuW9rgg
+Session token: 
+Form authenticity token valid: false
+Redirected to http://localhost:3000/bonuses
+Completed 303 See Other in 209ms (ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 0.1ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:29:19 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.5ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.2ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.4ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.1ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.2ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.3ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 14.0ms | GC: 0.1ms)
+  Rendered layout layouts/application.html.erb (Duration: 16.0ms | GC: 0.1ms)
+Completed 200 OK in 28ms (Views: 14.4ms | ActiveRecord: 2.8ms (11 queries, 0 cached) | GC: 0.3ms)
+
+
+Started GET "/heatmap" for ::1 at 2025-08-24 18:29:21 +0300
+Processing by HeatmapController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.5ms)[0m  [1m[34mSELECT COUNT(*) AS "count_all", DATE(availability_start_date) AS "date_availability_start_date" FROM "bonuses" WHERE "bonuses"."availability_start_date" BETWEEN '2025-08-01 00:00:00' AND '2025-08-31 23:59:59.999999' GROUP BY DATE(availability_start_date) /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:75:in 'HeatmapController#generate_heatmap_data'
+  [1m[36mBonus Pluck (0.2ms)[0m  [1m[34mSELECT DISTINCT "bonuses"."event" FROM "bonuses" /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:24:in 'HeatmapController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering heatmap/index.html.erb within layouts/application
+  Rendered heatmap/index.html.erb within layouts/application (Duration: 2.9ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.1ms | GC: 0.1ms)
+Completed 200 OK in 11ms (Views: 5.7ms | ActiveRecord: 1.1ms (3 queries, 0 cached) | GC: 0.1ms)
+
+
+Started GET "/heatmap" for ::1 at 2025-08-24 18:29:23 +0300
+Processing by HeatmapController#index as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.8ms)[0m  [1m[34mSELECT COUNT(*) AS "count_all", DATE(availability_start_date) AS "date_availability_start_date" FROM "bonuses" WHERE "bonuses"."availability_start_date" BETWEEN '2025-08-01 00:00:00' AND '2025-08-31 23:59:59.999999' GROUP BY DATE(availability_start_date) /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:75:in 'HeatmapController#generate_heatmap_data'
+  [1m[36mBonus Pluck (0.4ms)[0m  [1m[34mSELECT DISTINCT "bonuses"."event" FROM "bonuses" /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:24:in 'HeatmapController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering heatmap/index.html.erb within layouts/application
+  Rendered heatmap/index.html.erb within layouts/application (Duration: 1.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.6ms | GC: 0.1ms)
+Completed 200 OK in 11ms (Views: 4.9ms | ActiveRecord: 1.5ms (3 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/heatmap" for ::1 at 2025-08-24 18:29:28 +0300
+Processing by HeatmapController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) AS "count_all", DATE(availability_start_date) AS "date_availability_start_date" FROM "bonuses" WHERE "bonuses"."availability_start_date" BETWEEN '2025-08-01 00:00:00' AND '2025-08-31 23:59:59.999999' GROUP BY DATE(availability_start_date) /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:75:in 'HeatmapController#generate_heatmap_data'
+  [1m[36mBonus Pluck (0.2ms)[0m  [1m[34mSELECT DISTINCT "bonuses"."event" FROM "bonuses" /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:24:in 'HeatmapController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering heatmap/index.html.erb within layouts/application
+  Rendered heatmap/index.html.erb within layouts/application (Duration: 1.8ms | GC: 0.1ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.1ms | GC: 0.1ms)
+Completed 200 OK in 10ms (Views: 4.4ms | ActiveRecord: 0.8ms (3 queries, 0 cached) | GC: 0.1ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:29:30 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:14:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.3ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.2ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.1ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.3ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.1ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.1ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 13.4ms | GC: 0.2ms)
+  Rendered layout layouts/application.html.erb (Duration: 15.2ms | GC: 0.2ms)
+Completed 200 OK in 19ms (Views: 13.6ms | ActiveRecord: 2.4ms (11 queries, 0 cached) | GC: 0.3ms)
+
+
+Started DELETE "/users/sign_out" for ::1 at 2025-08-24 18:29:35 +0300
+Processing by Users::SessionsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 5 ORDER BY "users"."id" ASC LIMIT 1 /*action='destroy',application='BMS',controller='sessions'*/[0m
+Redirected to http://localhost:3000/users/sign_in
+Completed 303 See Other in 3ms (ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:29:35 +0300
+Processing by Users::SessionsController#new as TURBO_STREAM
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 0.7ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.5ms | GC: 0.0ms)
+Completed 200 OK in 3ms (Views: 1.8ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/users/10/edit" for ::1 at 2025-08-24 18:29:42 +0300
+Processing by Admin::UsersController#edit as HTML
+  Parameters: {"id" => "10"}
+Completed 401 Unauthorized in 1ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/login" for ::1 at 2025-08-24 18:29:42 +0300
+Processing by AdminUsers::SessionsController#new as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering admin_users/sessions/new.html.erb within layouts/application
+  Rendered admin_users/sessions/new.html.erb within layouts/application (Duration: 0.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.6ms | GC: 0.0ms)
+Completed 200 OK in 3ms (Views: 2.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/admin/login" for ::1 at 2025-08-24 18:29:48 +0300
+Processing by AdminUsers::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "admin_user" => {"email" => "[FILTERED]", "password" => "[FILTERED]", "remember_me" => "0"}, "commit" => "Login to Admin Panel"}
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."email" = 'p.rusakevich@jetmail.cc' ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+=== ADMIN LOGIN ATTEMPT ===
+Email: p.rusakevich@jetmail.cc
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."email" = 'p.rusakevich@jetmail.cc' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/admin_users/sessions_controller.rb:11:in 'AdminUsers::SessionsController#create'
+AdminUser found: true
+Redirected to http://localhost:3000/admin
+Completed 303 See Other in 210ms (ActiveRecord: 0.7ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin" for ::1 at 2025-08-24 18:29:48 +0300
+Processing by Admin::DashboardController#index as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='dashboard'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/page/index.html.arb
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/page/index.html.arb (Duration: 2.9ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 3.2ms | ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/users" for ::1 at 2025-08-24 18:29:50 +0300
+Processing by Admin::UsersController#index as HTML
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" ORDER BY "users"."id" desc LIMIT 30 OFFSET 0 /*action='index',application='BMS',controller='users'*/[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/index.html.arb (Duration: 19.5ms | GC: 0.0ms)
+Completed 200 OK in 24ms (Views: 19.5ms | ActiveRecord: 0.7ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/users/10/edit" for ::1 at 2025-08-24 18:29:59 +0300
+Processing by Admin::UsersController#edit as HTML
+  Parameters: {"id" => "10"}
+  [1m[36mAdminUser Load (0.8ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='edit',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 LIMIT 1 /*action='edit',application='BMS',controller='users'*/[0m
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 LIMIT 1[0m
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/edit.html.arb (Duration: 13.0ms | GC: 0.0ms)
+Completed 200 OK in 18ms (Views: 13.4ms | ActiveRecord: 1.0ms (3 queries, 1 cached) | GC: 0.0ms)
+
+
+Started PATCH "/admin/users/10" for ::1 at 2025-08-24 18:30:04 +0300
+Processing by Admin::UsersController#update as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "first_name" => "Shift", "last_name" => "Leader", "role" => "shift_leader", "password" => "[FILTERED]", "password_confirmation" => "[FILTERED]"}, "commit" => "Update User", "id" => "10"}
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 LIMIT 1 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mUser Update (1.0ms)[0m  [1m[33mUPDATE "users" SET "encrypted_password" = '$2a$12$OHt/vW9TR5zM8vUKbf2a4.erHFscM7D2eNk9JxbhpmAxY6ckgqLze', "updated_at" = '2025-08-24 15:30:04.885386' WHERE "users"."id" = 10 /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*action='update',application='BMS',controller='users'*/[0m
+  ↳ app/admin/users.rb:126:in 'Admin::UsersController#update'
+Redirected to http://localhost:3000/admin/users/10
+Completed 302 Found in 214ms (ActiveRecord: 2.6ms (3 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/admin/users/10" for ::1 at 2025-08-24 18:30:04 +0300
+Processing by Admin::UsersController#show as HTML
+  Parameters: {"id" => "10"}
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='show',application='BMS',controller='users'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 LIMIT 1 /*action='show',application='BMS',controller='users'*/[0m
+  Rendering /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/show.html.arb
+  Rendered /home/pasha/.rbenv/versions/3.4.2/lib/ruby/gems/3.4.0/gems/activeadmin-3.3.0/app/views/active_admin/resource/show.html.arb (Duration: 6.1ms | GC: 0.0ms)
+Completed 200 OK in 10ms (Views: 6.5ms | ActiveRecord: 0.5ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-24 18:30:10 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+Can't verify CSRF token authenticity.
+Completed 422 Unprocessable Content in 1ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+  
+ActionController::InvalidAuthenticityToken (Can't verify CSRF token authenticity.):
+  
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:314:in 'ActionController::RequestForgeryProtection::ProtectionMethods::Exception#handle_unverified_request'
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:408:in 'ActionController::RequestForgeryProtection#handle_unverified_request'
+devise (4.9.4) lib/devise/controllers/helpers.rb:257:in 'Devise::Controllers::Helpers#handle_unverified_request'
+actionpack (8.0.2.1) lib/action_controller/metal/request_forgery_protection.rb:397:in 'ActionController::RequestForgeryProtection#verify_authenticity_token'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:361:in 'block in ActiveSupport::Callbacks::CallTemplate::MethodCall#make_lambda'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:178:in 'block in ActiveSupport::Callbacks::Filters::Before#call'
+actionpack (8.0.2.1) lib/abstract_controller/callbacks.rb:34:in 'block (2 levels) in <module:Callbacks>'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:179:in 'ActiveSupport::Callbacks::Filters::Before#call'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'block in ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'Array#each'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:559:in 'ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:118:in 'block in ActiveSupport::Callbacks#run_callbacks'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:140:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.0.2.1) lib/abstract_controller/callbacks.rb:260:in 'AbstractController::Callbacks#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/rescue.rb:27:in 'ActionController::Rescue#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/instrumentation.rb:76:in 'block in ActionController::Instrumentation#process_action'
+activesupport (8.0.2.1) lib/active_support/notifications.rb:210:in 'block in ActiveSupport::Notifications.instrument'
+activesupport (8.0.2.1) lib/active_support/notifications/instrumenter.rb:58:in 'ActiveSupport::Notifications::Instrumenter#instrument'
+activesupport (8.0.2.1) lib/active_support/notifications.rb:210:in 'ActiveSupport::Notifications.instrument'
+actionpack (8.0.2.1) lib/action_controller/metal/instrumentation.rb:75:in 'ActionController::Instrumentation#process_action'
+actionpack (8.0.2.1) lib/action_controller/metal/params_wrapper.rb:259:in 'ActionController::ParamsWrapper#process_action'
+activerecord (8.0.2.1) lib/active_record/railties/controller_runtime.rb:39:in 'ActiveRecord::Railties::ControllerRuntime#process_action'
+actionpack (8.0.2.1) lib/abstract_controller/base.rb:163:in 'AbstractController::Base#process'
+actionview (8.0.2.1) lib/action_view/rendering.rb:40:in 'ActionView::Rendering#process'
+actionpack (8.0.2.1) lib/action_controller/metal.rb:252:in 'ActionController::Metal#dispatch'
+actionpack (8.0.2.1) lib/action_controller/metal.rb:335:in 'ActionController::Metal.dispatch'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:67:in 'ActionDispatch::Routing::RouteSet::Dispatcher#dispatch'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:50:in 'ActionDispatch::Routing::RouteSet::Dispatcher#serve'
+actionpack (8.0.2.1) lib/action_dispatch/routing/mapper.rb:32:in 'block in <class:Constraints>'
+actionpack (8.0.2.1) lib/action_dispatch/routing/mapper.rb:62:in 'ActionDispatch::Routing::Mapper::Constraints#serve'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:53:in 'block in ActionDispatch::Journey::Router#serve'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:133:in 'block in ActionDispatch::Journey::Router#find_routes'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:126:in 'Array#each'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:126:in 'ActionDispatch::Journey::Router#find_routes'
+actionpack (8.0.2.1) lib/action_dispatch/journey/router.rb:34:in 'ActionDispatch::Journey::Router#serve'
+actionpack (8.0.2.1) lib/action_dispatch/routing/route_set.rb:908:in 'ActionDispatch::Routing::RouteSet#call'
+railties (8.0.2.1) lib/rails/engine/lazy_route_set.rb:68:in 'Rails::Engine::LazyRouteSet#call'
+warden (1.2.9) lib/warden/manager.rb:36:in 'block in Warden::Manager#call'
+warden (1.2.9) lib/warden/manager.rb:34:in 'Kernel#catch'
+warden (1.2.9) lib/warden/manager.rb:34:in 'Warden::Manager#call'
+rack (3.2.0) lib/rack/tempfile_reaper.rb:20:in 'Rack::TempfileReaper#call'
+rack (3.2.0) lib/rack/etag.rb:29:in 'Rack::ETag#call'
+rack (3.2.0) lib/rack/conditional_get.rb:44:in 'Rack::ConditionalGet#call'
+rack (3.2.0) lib/rack/head.rb:15:in 'Rack::Head#call'
+actionpack (8.0.2.1) lib/action_dispatch/http/permissions_policy.rb:38:in 'ActionDispatch::PermissionsPolicy::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/http/content_security_policy.rb:38:in 'ActionDispatch::ContentSecurityPolicy::Middleware#call'
+rack-session (2.1.1) lib/rack/session/abstract/id.rb:274:in 'Rack::Session::Abstract::Persisted#context'
+rack-session (2.1.1) lib/rack/session/abstract/id.rb:268:in 'Rack::Session::Abstract::Persisted#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/cookies.rb:706:in 'ActionDispatch::Cookies#call'
+activerecord (8.0.2.1) lib/active_record/migration.rb:671:in 'ActiveRecord::Migration::CheckPending#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/callbacks.rb:31:in 'block in ActionDispatch::Callbacks#call'
+activesupport (8.0.2.1) lib/active_support/callbacks.rb:100:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/callbacks.rb:30:in 'ActionDispatch::Callbacks#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/executor.rb:16:in 'ActionDispatch::Executor#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in 'ActionDispatch::ActionableExceptions#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/debug_exceptions.rb:31:in 'ActionDispatch::DebugExceptions#call'
+web-console (4.2.1) lib/web_console/middleware.rb:132:in 'WebConsole::Middleware#call_app'
+web-console (4.2.1) lib/web_console/middleware.rb:28:in 'block in WebConsole::Middleware#call'
+web-console (4.2.1) lib/web_console/middleware.rb:17:in 'Kernel#catch'
+web-console (4.2.1) lib/web_console/middleware.rb:17:in 'WebConsole::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/show_exceptions.rb:32:in 'ActionDispatch::ShowExceptions#call'
+railties (8.0.2.1) lib/rails/rack/logger.rb:41:in 'Rails::Rack::Logger#call_app'
+railties (8.0.2.1) lib/rails/rack/logger.rb:29:in 'Rails::Rack::Logger#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/remote_ip.rb:96:in 'ActionDispatch::RemoteIp#call'
+request_store (1.7.0) lib/request_store/middleware.rb:19:in 'RequestStore::Middleware#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/request_id.rb:34:in 'ActionDispatch::RequestId#call'
+rack (3.2.0) lib/rack/method_override.rb:28:in 'Rack::MethodOverride#call'
+rack (3.2.0) lib/rack/runtime.rb:24:in 'Rack::Runtime#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:61:in 'block in ActionDispatch::ServerTiming#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:26:in 'ActionDispatch::ServerTiming::Subscriber#collect_events'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/server_timing.rb:60:in 'ActionDispatch::ServerTiming#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/executor.rb:16:in 'ActionDispatch::Executor#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/static.rb:27:in 'ActionDispatch::Static#call'
+rack (3.2.0) lib/rack/sendfile.rb:114:in 'Rack::Sendfile#call'
+actionpack (8.0.2.1) lib/action_dispatch/middleware/host_authorization.rb:143:in 'ActionDispatch::HostAuthorization#call'
+railties (8.0.2.1) lib/rails/engine.rb:535:in 'Rails::Engine#call'
+puma (6.6.1) lib/puma/configuration.rb:279:in 'Puma::Configuration::ConfigMiddleware#call'
+puma (6.6.1) lib/puma/request.rb:99:in 'block in Puma::Request#handle_request'
+puma (6.6.1) lib/puma/thread_pool.rb:390:in 'Puma::ThreadPool#with_force_shutdown'
+puma (6.6.1) lib/puma/request.rb:98:in 'Puma::Request#handle_request'
+puma (6.6.1) lib/puma/server.rb:472:in 'Puma::Server#process_client'
+puma (6.6.1) lib/puma/server.rb:254:in 'block in Puma::Server#run'
+puma (6.6.1) lib/puma/thread_pool.rb:167:in 'block in Puma::ThreadPool#spawn_thread'
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:30:14 +0300
+Processing by Users::SessionsController#new as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='new',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 0.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.6ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 2.0ms | ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.8ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-24 18:30:15 +0300
+Processing by Users::SessionsController#new as HTML
+  [1m[36mAdminUser Load (0.5ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='new',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 0.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.6ms | GC: 0.0ms)
+Completed 200 OK in 5ms (Views: 2.0ms | ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.5ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-24 18:30:20 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+  [1m[36mAdminUser Load (0.4ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+=== LOGIN ATTEMPT ===
+Email: shift@bms.com
+  [1m[36mUser Load (1.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'shift@bms.com' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:10:in 'Users::SessionsController#create'
+User found: true
+Authenticity token from form: lWW0ecLeAHjTtoadieLgcjIso4sG7Xp7Ji6ayMDvozoerr_DXMyYOo8AexSIQt14yWHuequ1xwErVCig4xuIDg
+Session token: 0EsnSEHAFhmG1sbPRuj5pQnyMWa-kumj_73KouNhFCY
+Form authenticity token valid: false
+  [1m[36mUser Load (0.7ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'shift@bms.com' ORDER BY "users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:14:in 'Users::SessionsController#create'
+Redirected to http://localhost:3000/bonuses
+Completed 303 See Other in 212ms (ActiveRecord: 2.1ms (3 queries, 0 cached) | GC: 0.4ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-24 18:30:21 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  [1m[36mBonus Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.3ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (0.2ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (0.2ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (0.1ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (0.1ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (0.1ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (0.1ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 14.1ms | GC: 0.9ms)
+  Rendered layout layouts/application.html.erb (Duration: 15.9ms | GC: 0.9ms)
+Completed 200 OK in 23ms (Views: 15.2ms | ActiveRecord: 2.3ms (12 queries, 0 cached) | GC: 2.1ms)
+
+
+Started GET "/marketing" for ::1 at 2025-08-24 18:30:26 +0300
+Processing by MarketingController#index as HTML
+  [1m[36mAdminUser Load (0.3ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  [1m[36mMarketingRequest Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_125' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_150' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'deposit_bonuses_partners' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering marketing/index.html.erb within layouts/application
+  [1m[36mCACHE MarketingRequest Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50'[0m
+  ↳ app/views/marketing/index.html.erb:72
+  [1m[36mMarketingRequest Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:81
+  [1m[36mMarketingRequest Load (0.3ms)[0m  [1m[34mSELECT "marketing_requests".* FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' ORDER BY "marketing_requests"."created_at" ASC /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:101
+  [1m[36mMarketingRequest Load (0.5ms)[0m  [1m[34mSELECT "marketing_requests".* FROM "marketing_requests" WHERE "marketing_requests"."stag" = '215512' AND "marketing_requests"."id" != 1 ORDER BY "marketing_requests"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/models/marketing_request.rb:118:in 'MarketingRequest#existing_partner_request'
+  Rendered marketing/index.html.erb within layouts/application (Duration: 12.8ms | GC: 1.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 15.8ms | GC: 1.0ms)
+Completed 200 OK in 30ms (Views: 14.7ms | ActiveRecord: 4.9ms (13 queries, 1 cached) | GC: 1.6ms)
+
+
+Started GET "/marketing?tab=promo_no_link_50" for ::1 at 2025-08-24 18:30:27 +0300
+Processing by MarketingController#index as HTML
+  Parameters: {"tab" => "promo_no_link_50"}
+  [1m[36mAdminUser Load (0.6ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  [1m[36mMarketingRequest Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.4ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_125' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_150' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'deposit_bonuses_partners' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering marketing/index.html.erb within layouts/application
+  [1m[36mCACHE MarketingRequest Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50'[0m
+  ↳ app/views/marketing/index.html.erb:72
+  [1m[36mMarketingRequest Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:81
+  Rendered marketing/index.html.erb within layouts/application (Duration: 3.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.0ms | GC: 0.0ms)
+Completed 200 OK in 19ms (Views: 5.7ms | ActiveRecord: 2.7ms (11 queries, 1 cached) | GC: 0.9ms)
+
+
+Started GET "/marketing" for ::1 at 2025-08-24 18:32:36 +0300
+Processing by MarketingController#index as HTML
+  [1m[36mAdminUser Load (0.2ms)[0m  [1m[34mSELECT "admin_users".* FROM "admin_users" WHERE "admin_users"."id" = 3 ORDER BY "admin_users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:12:in 'CurrentUserTracking#set_current_user'
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 10 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  [1m[36mMarketingRequest Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_50' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_100' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_125' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_no_link_150' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  [1m[36mMarketingRequest Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'deposit_bonuses_partners' /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/controllers/marketing_controller.rb:33:in 'block in MarketingController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering marketing/index.html.erb within layouts/application
+  [1m[36mCACHE MarketingRequest Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50'[0m
+  ↳ app/views/marketing/index.html.erb:72
+  [1m[36mMarketingRequest Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:81
+  [1m[36mMarketingRequest Load (0.3ms)[0m  [1m[34mSELECT "marketing_requests".* FROM "marketing_requests" WHERE "marketing_requests"."request_type" = 'promo_webs_50' ORDER BY "marketing_requests"."created_at" ASC /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/views/marketing/index.html.erb:101
+  [1m[36mMarketingRequest Load (0.5ms)[0m  [1m[34mSELECT "marketing_requests".* FROM "marketing_requests" WHERE "marketing_requests"."stag" = '215512' AND "marketing_requests"."id" != 1 ORDER BY "marketing_requests"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='marketing'*/[0m
+  ↳ app/models/marketing_request.rb:118:in 'MarketingRequest#existing_partner_request'
+  Rendered marketing/index.html.erb within layouts/application (Duration: 12.7ms | GC: 0.7ms)
+  Rendered layout layouts/application.html.erb (Duration: 17.1ms | GC: 0.7ms)
+Completed 200 OK in 50ms (Views: 16.0ms | ActiveRecord: 9.3ms (13 queries, 1 cached) | GC: 1.8ms)
+
+

@@ -14,6 +14,11 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
+  # Sign in a user for all tests since ApplicationController requires authentication
+  before do
+    sign_in_user
+  end
+
   describe 'browser compatibility' do
     context 'with modern browser' do
       it 'allows requests from modern browsers' do

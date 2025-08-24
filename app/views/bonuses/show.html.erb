@@ -277,10 +277,12 @@
                 <%= link_to "Preview", preview_bonus_path(@bonus), 
                     class: "btn btn-outline-info", 
                     data: { remote: true, toggle: "modal", target: "#previewModal" } %>
-                <%= button_to "Duplicate", duplicate_bonus_path(@bonus), 
-                    method: :post, 
-                    class: "btn btn-outline-secondary w-100",
-                    data: { confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." } %>
+                <% if can?(:duplicate, @bonus) %>
+                  <%= button_to "Duplicate", duplicate_bonus_path(@bonus), 
+                      method: :post, 
+                      class: "btn btn-outline-secondary w-100",
+                      data: { confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." } %>
+                <% end %>
                 <%= link_to "Export JSON", bonus_path(@bonus, format: :json), 
                     class: "btn btn-outline-primary", target: "_blank" %>
               </div>

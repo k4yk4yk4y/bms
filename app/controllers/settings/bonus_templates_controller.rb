@@ -1,20 +1,25 @@
 class Settings::BonusTemplatesController < ApplicationController
+  before_action :authorize_settings_access!
   before_action :set_bonus_template, only: [ :show, :edit, :update, :destroy ]
 
   def index
+    authorize! :read, BonusTemplate
     @bonus_templates = BonusTemplate.all.order(:project, :dsl_tag, :name)
     @projects = BonusTemplate::PROJECTS
     @dsl_tags = BonusTemplate.distinct.pluck(:dsl_tag).sort
   end
 
   def show
+    authorize! :read, @bonus_template
   end
 
   def new
+    authorize! :create, BonusTemplate
     @bonus_template = BonusTemplate.new
   end
 
   def create
+    authorize! :create, BonusTemplate
     @bonus_template = BonusTemplate.new(bonus_template_params)
 
     if @bonus_template.save
@@ -25,9 +30,11 @@ class Settings::BonusTemplatesController < ApplicationController
   end
 
   def edit
+    authorize! :update, @bonus_template
   end
 
   def update
+    authorize! :update, @bonus_template
     Rails.logger.info "Updating bonus template #{@bonus_template.id} with params: #{params[:bonus_template]}"
 
     if @bonus_template.update(bonus_template_params)
@@ -40,6 +47,7 @@ class Settings::BonusTemplatesController < ApplicationController
   end
 
   def destroy
+    authorize! :destroy, @bonus_template
     begin
       if @bonus_template.destroy
         redirect_to settings_templates_path, notice: "Шаблон бонуса успешно удален."
@@ -53,6 +61,10 @@ class Settings::BonusTemplatesController < ApplicationController
   end
 
   private
+
+  def authorize_settings_access!
+    authorize! :access, :settings
+  end
 
   def set_bonus_template
     @bonus_template = BonusTemplate.find(params[:id])

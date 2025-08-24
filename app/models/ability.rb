@@ -29,25 +29,46 @@ class Ability
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
     when "promo_manager"
-      # Промо-менеджер может управлять бонусами и просматривать маркетинг
-      can :manage, Bonus
-      can :manage, BonusTemplate
-      can :manage, BonusReward
-      can :manage, FreespinReward
-      can :manage, BonusBuyReward
-      can :manage, FreechipReward
-      can :manage, BonusCodeReward
-      can :manage, MaterialPrizeReward
-      can :manage, CompPointReward
-      can :read, MarketingRequest
-      can :read, User, id: user.id # Может читать только свой профиль
-      can :update, User, id: user.id # Может обновлять только свой профиль
+      # Промо-менеджер имеет ТОЛЬКО читательский доступ к бонусам (БЕЗ доступа к Marketing, Settings и API)
+      # ЧИТАТЕЛЬСКИЙ ДОСТУП к бонусам и связанным объектам
+      can :read, Bonus
+      can :read, BonusReward
+      can :read, FreespinReward
+      can :read, BonusBuyReward
+      can :read, FreechipReward
+      can :read, BonusCodeReward
+      can :read, MaterialPrizeReward
+      can :read, CompPointReward
+      can :read, User, id: user.id
+      can :update, User, id: user.id
       can :read, ActiveAdmin::Page, name: "Dashboard"
 
+      # ЗАПРЕТЫ на создание, редактирование, удаление бонусов
+      cannot :create, Bonus
+      cannot :update, Bonus
+      cannot :destroy, Bonus
+      cannot :duplicate, Bonus
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к Marketing
+      cannot :read, MarketingRequest
+      cannot :manage, MarketingRequest
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к Templates
+      cannot :manage, BonusTemplate
+      cannot :read, BonusTemplate
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
+      cannot :access, :settings
+      cannot :manage, :settings
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к API
+      cannot :access, :api
+      cannot :manage, :api
+
     when "shift_leader"
-      # Лидер смены может просматривать бонусы и маркетинг
+      # Лидер смены имеет ТОЛЬКО читательский доступ ко всем разделам кроме Settings и API
+      # ЧИТАТЕЛЬСКИЙ ДОСТУП к бонусам и связанным объектам
       can :read, Bonus
-      can :read, BonusTemplate
       can :read, BonusReward
       can :read, FreespinReward
       can :read, BonusBuyReward
@@ -56,10 +77,35 @@ class Ability
       can :read, MaterialPrizeReward
       can :read, CompPointReward
       can :read, MarketingRequest
-      can :manage, MarketingRequest # Может управлять маркетинговыми запросами
       can :read, User, id: user.id
       can :update, User, id: user.id
       can :read, ActiveAdmin::Page, name: "Dashboard"
+
+      # ЗАПРЕТЫ на создание, редактирование, удаление бонусов
+      cannot :create, Bonus
+      cannot :update, Bonus
+      cannot :destroy, Bonus
+      cannot :duplicate, Bonus
+
+      # ЗАПРЕТЫ на создание, редактирование, удаление маркетинговых заявок  
+      cannot :create, MarketingRequest
+      cannot :update, MarketingRequest
+      cannot :destroy, MarketingRequest
+      cannot :activate, MarketingRequest
+      cannot :reject, MarketingRequest
+      cannot :transfer, MarketingRequest
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к Templates
+      cannot :manage, BonusTemplate
+      cannot :read, BonusTemplate
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
+      cannot :access, :settings
+      cannot :manage, :settings
+
+      # ПОЛНЫЙ ЗАПРЕТ доступа к API
+      cannot :access, :api
+      cannot :manage, :api
 
     when "marketing_manager"
       # Маркетинг-менеджер имеет полный доступ ТОЛЬКО к разделу marketing

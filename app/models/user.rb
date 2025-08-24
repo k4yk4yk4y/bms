@@ -40,11 +40,11 @@ class User < ApplicationRecord
   end
 
   def can_manage_bonuses?
-    admin? || promo_manager?
+    admin?
   end
 
   def can_view_marketing?
-    admin? || promo_manager? || shift_leader? || marketing_manager?
+    admin? || shift_leader? || marketing_manager?
   end
 
   def can_manage_marketing?

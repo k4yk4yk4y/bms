@@ -84,7 +84,7 @@
                 <thead class="table-dark">
                   <tr>
                     <th>Менеджер</th>
-                    <% unless current_user.support_agent? %>
+                    <% unless current_user.support_agent? || current_user.shift_leader? %>
                       <th>Площадка</th>
                       <th>Почта партнёра</th>
                     <% end %>
@@ -103,7 +103,7 @@
                       <td>
                         <strong><%= request.manager %></strong>
                       </td>
-                      <% unless current_user.support_agent? %>
+                      <% unless current_user.support_agent? || current_user.shift_leader? %>
                         <td>
                           <% if request.platform.present? %>
                             <% if request.platform.match?(URI::DEFAULT_PARSER.make_regexp) %>
@@ -254,9 +254,11 @@
                   <% end %>
                 <% end %>
               </p>
-              <%= link_to new_marketing_path(request_type: @current_tab), 
-                          class: "btn btn-primary" do %>
-                <i class="fas fa-plus"></i> Создать первую заявку
+              <% if can?(:create, MarketingRequest) %>
+                <%= link_to new_marketing_path(request_type: @current_tab), 
+                            class: "btn btn-primary" do %>
+                  <i class="fas fa-plus"></i> Создать первую заявку
+                <% end %>
               <% end %>
             </div>
           <% end %>
