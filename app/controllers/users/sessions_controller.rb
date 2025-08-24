@@ -15,9 +15,8 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   def destroy
-    # Принимаем как GET, так и DELETE запросы для выхода
-    sign_out(current_user) if user_signed_in?
-    redirect_to new_user_session_path, notice: "Вы успешно вышли из системы."
+    # Используем стандартный Devise метод для выхода
+    super
   end
 
   # Отключаем восстановление пароля
@@ -33,8 +32,16 @@ class Users::SessionsController < Devise::SessionsController
   protected
 
   def after_sign_in_path_for(resource)
-    # После входа перенаправляем на страницу бонусов
-    bonuses_path
+    # Перенаправляем пользователей на разные страницы в зависимости от роли
+    case resource.role
+    when "marketing_manager"
+      marketing_index_path
+    when "admin", "promo_manager", "shift_leader", "support_agent"
+      bonuses_path
+    else
+      # Для неопределённых ролей перенаправляем на home
+      root_path
+    end
   end
 
   def after_sign_out_path_for(resource_or_scope)
