@@ -45,16 +45,16 @@ ActiveAdmin.register User do
     panel "Права доступа" do
       attributes_table_for user do
         row "Управление бонусами" do
-          user.can_manage_bonuses? ? status_tag("Да", :ok) : status_tag("Нет", :error)
+          user.can_manage_bonuses? ? status_tag("Да", class: :ok) : status_tag("Нет", class: :error)
         end
         row "Просмотр маркетинга" do
-          user.can_view_marketing? ? status_tag("Да", :ok) : status_tag("Нет", :error)
+          user.can_view_marketing? ? status_tag("Да", class: :ok) : status_tag("Нет", class: :error)
         end
         row "Доступ к поддержке" do
-          user.can_access_support? ? status_tag("Да", :ok) : status_tag("Нет", :error)
+          user.can_access_support? ? status_tag("Да", class: :ok) : status_tag("Нет", class: :error)
         end
         row "Админ доступ" do
-          user.can_access_admin? ? status_tag("Да", :ok) : status_tag("Нет", :error)
+          user.can_access_admin? ? status_tag("Да", class: :ok) : status_tag("Нет", class: :error)
         end
       end
     end
@@ -87,6 +87,13 @@ ActiveAdmin.register User do
     column :sign_in_count
   end
 
+  # Batch actions
+  batch_action :change_role, form: proc { User.roles.keys.map { |role| [ role.humanize, role ] } } do |ids, inputs|
+    role = inputs[:change_role]
+    User.where(id: ids).update_all(role: User.roles[role])
+    redirect_to collection_path, notice: "Роль изменена для #{ids.count} пользователей на #{role.humanize}"
+  end
+
   # Контроллер для дополнительной логики
   controller do
     def scoped_collection
@@ -108,50 +115,22 @@ ActiveAdmin.register User do
         end
       end
     end
-  end
 
-  # Batch actions
-  batch_action :change_role, form: proc { User.roles.keys.map { |role| [ role.humanize, role ] } } do |ids, inputs|
-    role = inputs[:change_role]
-    User.where(id: ids).update_all(role: User.roles[role])
-    redirect_to collection_path, notice: "Роль изменена для #{ids.count} пользователей на #{role.humanize}"
-  end
+    private
 
-  # Хелперы для стилизации
-  ActiveAdmin.register User do
-    controller do
-      private
-
-      def role_status_class(role)
-        case role
-        when "admin"
-          :error
-        when "promo_manager"
-          :warning
-        when "shift_leader"
-          :ok
-        when "support_agent"
-          :default
-        else
-          :default
-        end
+    def role_status_class(role)
+      case role
+      when "admin"
+        :error
+      when "promo_manager"
+        :warning
+      when "shift_leader"
+        :ok
+      when "support_agent"
+        :default
+      else
+        :default
       end
     end
-  end
-end
-
-# Хелпер метод для стилизации ролей
-def role_status_class(role)
-  case role
-  when "admin"
-    :error
-  when "promo_manager"
-    :warning
-  when "shift_leader"
-    :ok
-  when "support_agent"
-    :default
-  else
-    :default
   end
 end

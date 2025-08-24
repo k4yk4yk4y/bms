@@ -9,6 +9,7 @@ class Ability
       # AdminUser - администратор с полным доступом к Active Admin
       can :manage, :all
       can :read, ActiveAdmin::Page, name: "Dashboard"
+      can :access, :all # Добавляем явное разрешение на доступ ко всем ресурсам
     elsif user.is_a?(User)
       # User - пользователь приложения с ролевыми правами
       setup_user_abilities(user)

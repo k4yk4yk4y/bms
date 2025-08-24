@@ -1,0 +1,92 @@
+<% content_for :title, "Admin Login" %>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-lg border-0 login-card">
+        <div class="card-header bg-danger text-white text-center py-3">
+          <h4 class="mb-0">
+            <i class="fas fa-user-shield me-2"></i>
+            Admin Login
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          <%= form_with(model: resource, as: resource_name, url: session_path(resource_name), 
+              local: true, html: { class: "needs-validation", novalidate: true }, 
+              data: { turbo: false }) do |f| %>
+            <div class="mb-3">
+              <%= f.label :email, class: "form-label fw-bold" do %>
+                <i class="fas fa-envelope me-2"></i>Email
+              <% end %>
+              <%= f.email_field :email, autocomplete: "email", 
+                  class: "form-control form-control-lg #{'is-invalid' if resource.errors[:email].any?}",
+                  placeholder: "Enter admin email",
+                  required: true %>
+              <% if resource.errors[:email].any? %>
+                <div class="invalid-feedback">
+                  <%= resource.errors[:email].join(', ') %>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="mb-4">
+              <%= f.label :password, class: "form-label fw-bold" do %>
+                <i class="fas fa-lock me-2"></i>Password
+              <% end %>
+              <%= f.password_field :password, autocomplete: "current-password",
+                  class: "form-control form-control-lg #{'is-invalid' if resource.errors[:password].any?}",
+                  placeholder: "Enter admin password",
+                  required: true %>
+              <% if resource.errors[:password].any? %>
+                <div class="invalid-feedback">
+                  <%= resource.errors[:password].join(', ') %>
+                </div>
+              <% end %>
+            </div>
+
+            <% if devise_mapping.rememberable? %>
+              <div class="mb-3">
+                <div class="form-check">
+                  <%= f.check_box :remember_me, class: "form-check-input" %>
+                  <%= f.label :remember_me, class: "form-check-label" %>
+                </div>
+              </div>
+            <% end %>
+
+            <div class="d-grid">
+              <%= f.submit "Login to Admin Panel", class: "btn btn-danger btn-lg fw-bold" %>
+            </div>
+          <% end %>
+        </div>
+        <div class="card-footer bg-light text-center py-3">
+          <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Admin access only - Contact system administrator for access
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .login-card {
+    border-radius: 15px;
+  }
+  
+  .card-header {
+    border-radius: 15px 15px 0 0 !important;
+  }
+  
+  .card-footer {
+    border-radius: 0 0 15px 15px !important;
+  }
+  
+  .form-control-lg {
+    border-radius: 8px;
+  }
+  
+  .btn-lg {
+    border-radius: 8px;
+  }
+</style>

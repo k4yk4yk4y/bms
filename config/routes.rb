@@ -1,6 +1,13 @@
 Rails.application.routes.draw do
-  devise_for :admin_users, ActiveAdmin::Devise.config
-  devise_for :users
+  devise_for :admin_users, ActiveAdmin::Devise.config.merge(
+    controllers: { sessions: "admin_users/sessions" }
+  )
+  devise_for :users, controllers: {
+    sessions: "users/sessions"
+  }
+
+  # Добавляем GET маршрут для выхода (для совместимости)
+  get "/users/sign_out", to: "users/sessions#destroy"
   ActiveAdmin.routes(self)
   # Marketing requests routes
   resources :marketing, path: "marketing" do
@@ -54,5 +61,5 @@ Rails.application.routes.draw do
   end
 
   # Defines the root path route ("/")
-  root "bonuses#index"
+  root "home#index"
 end

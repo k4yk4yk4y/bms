@@ -1,5 +1,6 @@
 class Bonus < ApplicationRecord
   include CurrencyManagement
+  include Auditable
 
   # Explicitly set table name
   self.table_name = "bonuses"
@@ -8,6 +9,7 @@ class Bonus < ApplicationRecord
   STATUSES = %w[draft active inactive expired].freeze
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
   PROJECTS = %w[All VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
+  GROUPS = %w[VIP Platinum Gold Silver Bronze New Regular Premium Elite].freeze
 
   # Permanent bonus types for preview cards
   PERMANENT_BONUS_TYPES = [
@@ -30,6 +32,11 @@ class Bonus < ApplicationRecord
   has_many :bonus_code_rewards, dependent: :destroy
   has_many :freechip_rewards, dependent: :destroy
   has_many :material_prize_rewards, dependent: :destroy
+
+  # Audit associations
+  has_many :bonus_audit_logs, dependent: :destroy
+  belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
+  belongs_to :updater, class_name: "User", foreign_key: "updated_by", optional: true
 
 
   # Store JSON data
@@ -85,6 +92,11 @@ class Bonus < ApplicationRecord
     where(project: project, dsl_tag: dsl_tag).active.first
   end
 
+  # Class method for groups
+  def self.all_groups
+    GROUPS
+  end
+
   def self.permanent_bonus_previews_for_project(project)
     return [] if project.blank?
 
@@ -92,6 +104,15 @@ class Bonus < ApplicationRecord
       existing_bonus = find_permanent_bonus_for_project(project, bonus_type[:dsl_tag])
       bonus_type.merge(existing_bonus: existing_bonus)
     end
+  end
+
+  # Ransack configuration for ActiveAdmin
+  def self.ransackable_attributes(auth_object = nil)
+    [ "availability_end_date", "availability_start_date", "code", "country", "created_at", "created_by", "currencies", "currency_minimum_deposits", "description", "dsl_tag", "event", "groups", "id", "id_value", "maximum_winnings", "maximum_winnings_type", "minimum_deposit", "name", "no_more", "project", "status", "tags", "totally_no_more", "updated_at", "updated_by", "user_group", "wager", "wagering_strategy" ]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    [ "bonus_audit_logs", "creator", "updater" ]
   end
 
   # Instance methods
@@ -406,7 +427,63 @@ class Bonus < ApplicationRecord
     end
   end
 
+  # Audit methods
+  def log_creation(user)
+    return unless user
+
+    bonus_audit_logs.create!(
+      user: user,
+      action: "created",
+      changes_data: attributes.except("id", "created_at", "updated_at", "created_by", "updated_by"),
+      metadata: { ip_address: Current.request&.remote_ip }
+    )
+  end
+
+  def log_update(user, changes)
+    return unless user && changes.any?
+
+    bonus_audit_logs.create!(
+      user: user,
+      action: "updated",
+      changes_data: changes,
+      metadata: { ip_address: Current.request&.remote_ip }
+    )
+  end
+
+  def log_status_change(user, old_status, new_status)
+    return unless user && old_status != new_status
+
+    bonus_audit_logs.create!(
+      user: user,
+      action: new_status == "active" ? "activated" : "deactivated",
+      changes_data: { "status" => [ old_status, new_status ] },
+      metadata: { ip_address: Current.request&.remote_ip }
+    )
+  end
+
+  def log_deletion(user)
+    return unless user
+
+    bonus_audit_logs.create!(
+      user: user,
+      action: "deleted",
+      changes_data: attributes.except("id", "created_at", "updated_at", "created_by", "updated_by"),
+      metadata: { ip_address: Current.request&.remote_ip }
+    )
+  end
+
+  # Helper methods for audit
+  def creator_name
+    creator&.full_name || creator&.email || "System"
+  end
+
+  def updater_name
+    updater&.full_name || updater&.email || "System"
+  end
+
   def set_default_project
     self.project = "All" if project.blank?
   end
+
+  private
 end

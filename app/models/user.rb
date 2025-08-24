@@ -1,8 +1,7 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+  devise :database_authenticatable, :rememberable, :validatable
 
   # Define user roles using enum
   enum :role, {
@@ -52,6 +51,10 @@ class User < ApplicationRecord
 
   def can_access_admin?
     admin?
+  end
+
+  def full_name
+    "#{first_name} #{last_name}".strip
   end
 
   private

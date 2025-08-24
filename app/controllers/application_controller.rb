@@ -4,12 +4,13 @@ class ApplicationController < ActionController::Base
 
   # Include Devise helpers for all models (User and AdminUser)
   include Devise::Controllers::Helpers
+  include CurrentUserTracking
 
   # Protect from CSRF attacks
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, prepend: true
 
   # Devise authentication for regular app users only (admin controllers handle their own auth)
-  # before_action :authenticate_user!, unless: :admin_or_devise_controller?
+  before_action :authenticate_user!, unless: :admin_or_devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   # CanCanCan authorization
@@ -45,6 +46,9 @@ class ApplicationController < ActionController::Base
 
   # Active Admin unauthorized access handler
   def redirect_to_admin_login
-    redirect_to new_admin_user_session_path
+    # Only redirect if not already on login page and not authenticated
+    unless request.path == new_admin_user_session_path || current_admin_user
+      redirect_to new_admin_user_session_path
+    end
   end
 end

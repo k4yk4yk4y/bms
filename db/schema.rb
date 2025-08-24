@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_23_215528) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,6 +38,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_215528) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
+  create_table "bonus_audit_logs", force: :cascade do |t|
+    t.bigint "bonus_id", null: false
+    t.bigint "user_id", null: false
+    t.string "action"
+    t.text "changes_data"
+    t.text "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bonus_id"], name: "index_bonus_audit_logs_on_bonus_id"
+    t.index ["user_id"], name: "index_bonus_audit_logs_on_user_id"
   end
 
   create_table "bonus_buy_rewards", force: :cascade do |t|
@@ -319,6 +331,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_215528) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "bonus_audit_logs", "bonuses"
+  add_foreign_key "bonus_audit_logs", "users"
   add_foreign_key "bonus_buy_rewards", "bonuses"
   add_foreign_key "bonus_code_rewards", "bonuses"
   add_foreign_key "bonus_rewards", "bonuses"
