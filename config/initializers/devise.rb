@@ -263,7 +263,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  # config.navigational_formats = ['*/*', :html, :turbo_stream]
+  config.navigational_formats = [ "*/*", :html, :turbo_stream ]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -277,16 +277,16 @@ Devise.setup do |config|
   # If you want to use other strategies, that are not supported by Devise, or
   # change the failure app, you can configure them inside the config.warden block.
   #
-  config.warden do |manager|
-    # Custom failure app to redirect admin users to correct login page
-    manager.failure_app = lambda do |env|
-      if env["PATH_INFO"].start_with?("/admin")
-        [ 302, { "Location" => "/admin/login" }, [ "" ] ]
-      else
-        Devise::FailureApp.call(env)
-      end
-    end
-  end
+  # config.warden do |manager|
+  #   # Custom failure app to redirect admin users to correct login page
+  #   manager.failure_app = lambda do |env|
+  #     if env["PATH_INFO"].start_with?("/admin")
+  #       [ 302, { "Location" => "/admin/login" }, [ "" ] ]
+  #     else
+  #       Devise::FailureApp.call(env)
+  #     end
+  #   end
+  # end
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine

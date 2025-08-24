@@ -49,3 +49,4 @@ User.roles.keys.each do |role|
   user = User.find_by(role: role)
   puts "- #{role.humanize}: #{user&.email || 'Not created'}"
 end
+AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?

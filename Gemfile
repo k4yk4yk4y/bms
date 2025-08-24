@@ -87,3 +87,4 @@ end
 gem "devise", "~> 4.9"
 gem "activeadmin", "~> 3.3"
 gem "cancancan", "~> 3.6"
+gem "paper_trail", "~> 15.0"
