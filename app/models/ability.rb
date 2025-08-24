@@ -67,7 +67,7 @@ class Ability
       can :read, ActiveAdmin::Page, name: "Dashboard"
       can :read, User, id: user.id
       can :update, User, id: user.id
-      
+
       # ПОЛНЫЙ ЗАПРЕТ доступа ко всем остальным разделам
       cannot :access, :settings
       cannot :manage, :settings
@@ -86,7 +86,7 @@ class Ability
 
     when "support_agent"
       # Агент поддержки имеет ограниченный доступ - ТОЛЬКО ЧТЕНИЕ
-      
+
       # 1. Может просматривать бонусы и связанные объекты (только в основном разделе)
       can :read, Bonus
       can :read, BonusReward
@@ -100,26 +100,26 @@ class Ability
       can :read, ActiveAdmin::Page, name: "Dashboard"
       can :read, User, id: user.id
       can :update, User, id: user.id
-      
+
       # 2. ПОЛНЫЙ ЗАПРЕТ всех действий создания, редактирования и удаления
       cannot :create, Bonus
       cannot :update, Bonus
       cannot :destroy, Bonus
       cannot :duplicate, Bonus
-      
+
       cannot :manage, BonusTemplate  # Полный запрет на работу с шаблонами
-      
+
       cannot :create, MarketingRequest
       cannot :update, MarketingRequest
       cannot :destroy, MarketingRequest
       cannot :activate, MarketingRequest
       cannot :reject, MarketingRequest
       cannot :transfer, MarketingRequest
-      
+
       # 3. ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
       cannot :access, :settings
       cannot :manage, :settings
-      
+
       # 4. ПОЛНЫЙ ЗАПРЕТ доступа к API
       cannot :access, :api
       cannot :manage, :api

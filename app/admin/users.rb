@@ -15,12 +15,12 @@ ActiveAdmin.register User do
     column :last_name
     column :role do |user|
       role_class = case user.role
-                   when "admin" then :error
-                   when "promo_manager" then :warning
-                   when "shift_leader" then :ok
-                   when "support_agent" then :default
-                   else :default
-                   end
+      when "admin" then :error
+      when "promo_manager" then :warning
+      when "shift_leader" then :ok
+      when "support_agent" then :default
+      else :default
+      end
       status_tag user.display_role, class: role_class
     end
     column :created_at
@@ -39,12 +39,12 @@ ActiveAdmin.register User do
       row :last_name
       row :role do |user|
         role_class = case user.role
-                     when "admin" then :error
-                     when "promo_manager" then :warning
-                     when "shift_leader" then :ok
-                     when "support_agent" then :default
-                     else :default
-                     end
+        when "admin" then :error
+        when "promo_manager" then :warning
+        when "shift_leader" then :ok
+        when "support_agent" then :default
+        else :default
+        end
         status_tag user.display_role, class: role_class
       end
       row :created_at
