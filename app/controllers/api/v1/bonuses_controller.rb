@@ -1,5 +1,6 @@
 class Api::V1::BonusesController < ApplicationController
   before_action :set_bonus, only: [ :show, :update, :destroy ]
+  before_action :authorize_api_access!
 
   # Skip CSRF protection for API endpoints
   skip_before_action :verify_authenticity_token
@@ -102,6 +103,10 @@ class Api::V1::BonusesController < ApplicationController
   end
 
   private
+
+  def authorize_api_access!
+    authorize! :access, :api
+  end
 
   def set_bonus
     @bonus = Bonus.find(params[:id])

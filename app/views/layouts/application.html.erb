@@ -82,26 +82,30 @@
               <% end %>
             </ul>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-cog"></i> Settings
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
-              <li>
-                <%= link_to settings_templates_path, class: "dropdown-item #{'active' if controller_name == 'bonus_templates' && controller.class.name.include?('Settings')}" do %>
-                  <i class="fas fa-layer-group"></i> Templates
-                <% end %>
-              </li>
-            </ul>
-          </li>
+          <% if can?(:access, :settings) %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-cog"></i> Settings
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                <li>
+                  <%= link_to settings_templates_path, class: "dropdown-item #{'active' if controller_name == 'bonus_templates' && controller.class.name.include?('Settings')}" do %>
+                    <i class="fas fa-layer-group"></i> Templates
+                  <% end %>
+                </li>
+              </ul>
+            </li>
+          <% end %>
         </ul>
         
         <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="/api/v1/bonuses" target="_blank">
-              <i class="fas fa-code"></i> API
-            </a>
-          </li>
+          <% if can?(:access, :api) %>
+            <li class="nav-item">
+              <a class="nav-link" href="/api/v1/bonuses" target="_blank">
+                <i class="fas fa-code"></i> API
+              </a>
+            </li>
+          <% end %>
           <% if user_signed_in? %>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

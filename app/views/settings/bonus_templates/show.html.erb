@@ -106,20 +106,26 @@
             </div>
             <div class="card-body">
               <div class="d-grid gap-2">
-                <%= link_to new_bonus_path(template_id: @bonus_template.id), class: "btn btn-success" do %>
-                  <i class="fas fa-plus"></i> Create Bonus from Template
+                <% if can?(:create, Bonus) %>
+                  <%= link_to new_bonus_path(template_id: @bonus_template.id), class: "btn btn-success" do %>
+                    <i class="fas fa-plus"></i> Create Bonus from Template
+                  <% end %>
                 <% end %>
                 
-                <%= link_to edit_settings_template_path(@bonus_template), class: "btn btn-warning" do %>
-                  <i class="fas fa-edit"></i> Edit Template
+                <% if can?(:update, @bonus_template) %>
+                  <%= link_to edit_settings_template_path(@bonus_template), class: "btn btn-warning" do %>
+                    <i class="fas fa-edit"></i> Edit Template
+                  <% end %>
                 <% end %>
                 
-                <%= button_to settings_template_path(@bonus_template), 
-                    method: :delete, 
-                    data: { confirm: "Are you sure you want to delete this template?" },
-                    class: "btn btn-danger w-100",
-                    form: { style: "display: inline; width: 100%;" } do %>
-                  <i class="fas fa-trash"></i> Delete Template
+                <% if can?(:destroy, @bonus_template) %>
+                  <%= button_to settings_template_path(@bonus_template), 
+                      method: :delete, 
+                      data: { confirm: "Are you sure you want to delete this template?" },
+                      class: "btn btn-danger w-100",
+                      form: { style: "display: inline; width: 100%;" } do %>
+                    <i class="fas fa-trash"></i> Delete Template
+                  <% end %>
                 <% end %>
               </div>
             </div>
