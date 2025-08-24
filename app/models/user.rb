@@ -26,7 +26,7 @@ class User < ApplicationRecord
   scope :support_agents, -> { where(role: :support_agent) }
 
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "email", "first_name", "id", "last_name", "remember_created_at", "reset_password_sent_at", "role", "updated_at"]
+    [ "created_at", "email", "first_name", "id", "last_name", "remember_created_at", "reset_password_sent_at", "role", "updated_at" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
