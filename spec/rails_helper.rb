@@ -51,7 +51,7 @@ RSpec.configure do |config|
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
   ]
-  
+
   # Disable JavaScript in tests to avoid importmap issues
   config.before(:each) do
     ActionView::Base.default_form_builder = ActionView::Helpers::FormBuilder
