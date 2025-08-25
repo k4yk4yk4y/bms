@@ -725,4 +725,27 @@ function submitBulkAction() {
       margin-bottom: 0.25rem;
     }
   }
+
+  /* Simple modal backdrop fix */
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
 </style>
+
+<script>
+  // Simple modal backdrop fix
+  document.addEventListener('DOMContentLoaded', function() {
+    const bonusTypeModal = document.getElementById('bonusTypeModal');
+    if (bonusTypeModal) {
+      bonusTypeModal.addEventListener('show.bs.modal', function() {
+        setTimeout(() => {
+          const backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop) {
+            backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          }
+        }, 10);
+      });
+    }
+  });
+</script>
+

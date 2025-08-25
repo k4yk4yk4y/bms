@@ -1,14 +1,14 @@
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has()
   allow_browser versions: :modern
-  
+
   # Use test layout in test environment to avoid JavaScript issues
   layout :choose_layout
-  
+
   private
-  
+
   def choose_layout
-    Rails.env.test? ? 'test' : 'application'
+    Rails.env.test? ? "test" : "application"
   end
 
   # Include Devise helpers for all models (User and AdminUser)

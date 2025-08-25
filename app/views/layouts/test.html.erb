@@ -89,11 +89,11 @@
             </li>
           <% end %>
           <% if can?(:access, :settings) %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="nav-item dropdown" data-controller="settings-dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-settings-dropdown-target="dropdown" aria-expanded="false">
                 <i class="fas fa-cog"></i> Settings
               </a>
-              <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+              <ul class="dropdown-menu" aria-labelledby="settingsDropdown" data-settings-dropdown-target="menu">
                 <li>
                   <%= link_to settings_templates_path, class: "dropdown-item #{'active' if controller_name == 'bonus_templates' && controller.class.name.include?('Settings')}" do %>
                     <i class="fas fa-layer-group"></i> Templates
