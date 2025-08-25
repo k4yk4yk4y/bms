@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) ? "#{content_for(:title)} - BMS" : "Bonus Management System" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <meta name="turbo-cache-control" content="no-cache">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    
+    <!-- JavaScript disabled in test environment -->
+  </head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <%= link_to "BMS", root_path, class: "navbar-brand" %>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item">
+              <%= link_to bonuses_path, class: "nav-link #{'active' if controller_name == 'bonuses'}" do %>
+                <i class="fas fa-gift"></i> Bonuses
+              <% end %>
+            </li>
+          <% end %>
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item">
+              <%= link_to heatmap_path, class: "nav-link #{'active' if controller_name == 'heatmap'}" do %>
+                <i class="fas fa-fire"></i> Heatmap
+              <% end %>
+            </li>
+          <% end %>
+          <% if can?(:read, MarketingRequest) %>
+            <li class="nav-item">
+              <%= link_to marketing_index_path, class: "nav-link #{'active' if controller_name == 'marketing'}" do %>
+                <i class="fas fa-bullhorn"></i> Marketing
+              <% end %>
+            </li>
+          <% end %>
+          <% if can?(:read, Bonus) %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false">
+                <i class="fas fa-project-diagram"></i> Projects
+                <% if params[:project].present? %>
+                  <span class="badge bg-primary ms-1"><%= params[:project] %></span>
+                <% end %>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
+                <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
+                <li><hr class="dropdown-divider"></li>
+                <% Bonus::PROJECTS.each do |project| %>
+                  <li>
+                    <%= link_to bonuses_path(project: project), class: "dropdown-item #{'active' if params[:project] == project}" do %>
+                      <%= project %>
+                    <% end %>
+                  </li>
+                <% end %>
+                <% if params[:project].present? %>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <%= link_to bonuses_path, class: "dropdown-item text-danger" do %>
+                      <i class="fas fa-times"></i> Clear Project Filter
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+          <% if can?(:access, :settings) %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-cog"></i> Settings
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                <li>
+                  <%= link_to settings_templates_path, class: "dropdown-item #{'active' if controller_name == 'bonus_templates' && controller.class.name.include?('Settings')}" do %>
+                    <i class="fas fa-layer-group"></i> Templates
+                  <% end %>
+                </li>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+        
+        <ul class="navbar-nav">
+          <% if can?(:access, :api) %>
+            <li class="nav-item">
+              <a class="nav-link" href="/api/v1/bonuses" target="_blank">
+                <i class="fas fa-code"></i> API
+              </a>
+            </li>
+          <% end %>
+          <% if user_signed_in? %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user"></i> <%= current_user.full_name.presence || current_user.email %>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li>
+                  <span class="dropdown-item-text">
+                    <small class="text-muted">Роль: <%= current_user.display_role %></small>
+                  </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item text-danger border-0 bg-transparent text-start w-100", form_class: "d-inline" do %>
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                  <% end %>
+                </li>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  <% if notice %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="fas fa-check-circle"></i> <%= notice %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% end %>
+
+  <% if alert %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="fas fa-exclamation-circle"></i> <%= alert %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% end %>
+
+  <!-- Main Content -->
+  <main class="py-4 flex-grow-1">
+    <%= yield %>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-light py-3 mt-auto">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 text-center">
+          <p class="mb-0">&copy; <%= Date.current.year %> Bonus Management System</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
