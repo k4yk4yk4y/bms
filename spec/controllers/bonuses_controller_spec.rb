@@ -1113,6 +1113,112 @@ RSpec.describe BonusesController, type: :controller do
     end
   end
 
+  describe "freespin rewards creation logic" do
+    let(:bonus) { create(:bonus) }
+    let(:valid_bonus_params) do
+      {
+        name: "Test Freespin Bonus",
+        code: "FREESPIN123",
+        event: "deposit",
+        status: "draft",
+        availability_start_date: Date.current,
+        availability_end_date: Date.current + 30.days,
+        currencies: ["USD", "EUR"],
+        minimum_deposit: 50.0,
+        maximum_winnings_type: "fixed",
+        maximum_winnings: 1000.0
+      }
+    end
+
+    it "creates both single and multiple freespin rewards when both are provided" do
+      expect {
+        post :create, params: {
+          bonus: valid_bonus_params,
+          freespin_reward: {
+            spins_count: "25",
+            bet_level: "0.05",
+            games: "slots"
+          },
+          freespin_rewards: {
+            "0" => {
+              spins_count: "50",
+              bet_level: "0.1",
+              games: "table_games"
+            },
+            "1" => {
+              spins_count: "100",
+              bet_level: "0.2",
+              games: "live_games"
+            }
+          }
+        }
+      }.to change(Bonus, :count).by(1)
+
+      bonus = Bonus.last
+      expect(bonus).to be_present
+      
+      # Should have both single and multiple freespin rewards
+      expect(bonus.freespin_rewards.count).to eq(3)
+      
+      # Check that all rewards were created with correct data
+      spins_counts = bonus.freespin_rewards.pluck(:spins_count)
+      expect(spins_counts).to contain_exactly(25, 50, 100)
+      
+      bet_levels = bonus.freespin_rewards.pluck(:bet_level)
+      expect(bet_levels).to contain_exactly(0.05, 0.1, 0.2)
+      
+      games = bonus.freespin_rewards.pluck(:games).flatten
+      expect(games).to contain_exactly("slots", "table_games", "live_games")
+    end
+
+    it "creates only single freespin reward when only single is provided" do
+      expect {
+        post :create, params: {
+          bonus: valid_bonus_params,
+          freespin_reward: {
+            spins_count: "25",
+            bet_level: "0.05",
+            games: "slots"
+          }
+        }
+      }.to change(Bonus, :count).by(1)
+
+      bonus = Bonus.last
+      expect(bonus.freespin_rewards.count).to eq(1)
+      
+      reward = bonus.freespin_rewards.first
+      expect(reward.spins_count).to eq(25)
+      expect(reward.bet_level).to eq(0.05)
+      expect(reward.games).to eq(["slots"])
+    end
+
+    it "creates only multiple freespin rewards when only multiple are provided" do
+      expect {
+        post :create, params: {
+          bonus: valid_bonus_params,
+          freespin_rewards: {
+            "0" => {
+              spins_count: "50",
+              bet_level: "0.1",
+              games: "table_games"
+            },
+            "1" => {
+              spins_count: "100",
+              bet_level: "0.2",
+              games: "live_games"
+            }
+          }
+        }
+      }.to change(Bonus, :count).by(1)
+
+      bonus = Bonus.last
+      expect(bonus.freespin_rewards.count).to eq(2)
+      
+      spins_counts = bonus.freespin_rewards.pluck(:spins_count)
+      expect(spins_counts).to contain_exactly(50, 100)
+    end
+  end
+
   private
 
   def valid_attributes

@@ -147,10 +147,12 @@ class BonusesController < ApplicationController
         # Create bonus rewards if provided (singular or multiple)
         create_bonus_reward_if_provided
         create_multiple_bonus_rewards_if_provided
-        # Create freespin rewards if provided (singular or multiple) - only one should be called
+        # Create freespin rewards if provided (singular or multiple) - separate handling
         if params[:freespin_rewards].present? || params.dig(:bonus, :freespin_rewards).present?
           create_multiple_freespin_rewards_if_provided
-        elsif params[:freespin_reward].present? || params.dig(:bonus, :freespin_reward).present?
+        end
+
+        if params[:freespin_reward].present? || params.dig(:bonus, :freespin_reward).present?
           create_freespin_reward_if_provided
         end
         # Create multiple bonus_buy rewards if provided
@@ -160,7 +162,9 @@ class BonusesController < ApplicationController
         # Create comp_point rewards if provided (singular or multiple)
         if params[:comp_point_rewards].present? || params.dig(:bonus, :comp_point_rewards).present?
           create_multiple_comp_point_rewards_if_provided
-        elsif params[:comp_point_reward].present? || params.dig(:bonus, :comp_point_reward).present?
+        end
+
+        if params[:comp_point_reward].present? || params.dig(:bonus, :comp_point_reward).present?
           create_comp_point_reward_if_provided
         end
         # Create multiple bonus_code rewards if provided
@@ -207,10 +211,12 @@ class BonusesController < ApplicationController
         # Update or create bonus rewards if provided (singular or multiple)
         update_bonus_reward_if_provided
         update_multiple_bonus_rewards_if_provided
-        # Update or create freespin rewards if provided (singular or multiple) - only one should be called
+        # Update or create freespin rewards if provided (singular or multiple) - separate handling
         if params[:freespin_rewards].present? || params.dig(:bonus, :freespin_rewards).present?
           update_multiple_freespin_rewards_if_provided
-        elsif params[:freespin_reward].present? || params.dig(:bonus, :freespin_reward).present?
+        end
+
+        if params[:freespin_reward].present? || params.dig(:bonus, :freespin_reward).present?
           update_freespin_reward_if_provided
         end
         # Update or create bonus_buy rewards if provided (singular or multiple)
