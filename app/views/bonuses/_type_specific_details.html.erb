@@ -38,8 +38,9 @@
         <% if bonus.all_rewards.any? %>
           <% if bonus.bonus_rewards.any? %>
             <h6>Cash Bonuses:</h6>
-            <% bonus.bonus_rewards.each do |reward| %>
+            <% bonus.bonus_rewards.each_with_index do |reward, index| %>
               <div class="mb-2">
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
                 <%= reward.reward_type.humanize %>: 
                 <% if reward.has_currency_amounts? %>
                   <%= reward.formatted_currency_amounts %>
@@ -51,9 +52,11 @@
           <% end %>
           
           <% if bonus.freespin_rewards.any? %>
-            <% bonus.freespin_rewards.each do |reward| %>
+            <h6>Free Spins:</h6>
+            <% bonus.freespin_rewards.each_with_index do |reward, index| %>
               <div class="mb-3">
                 <div class="mb-2">
+                  <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
                   <strong>Количество фриспинов: <%= reward.spins_count %></strong>
                 </div>
                 
@@ -82,11 +85,49 @@
             <% end %>
           <% end %>
           
+          <% if bonus.bonus_buy_rewards.any? %>
+            <h6>Bonus Buy:</h6>
+            <% bonus.bonus_buy_rewards.each_with_index do |reward, index| %>
+              <div class="mb-2">
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                Покупка бонуса: <%= reward.formatted_buy_amount %>
+                <% if reward.multiplier.present? %>
+                  (x<%= reward.multiplier %>)
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+          
+          <% if bonus.freechip_rewards.any? %>
+            <h6>Free Chips:</h6>
+            <% bonus.freechip_rewards.each_with_index do |reward, index| %>
+              <div class="mb-2">
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                Фричипы: <%= reward.chips_count %> x <%= reward.formatted_chip_value %>
+                <span class="text-muted">(Итого: <%= reward.formatted_total_value %>)</span>
+              </div>
+            <% end %>
+          <% end %>
+          
+          <% if bonus.material_prize_rewards.any? %>
+            <h6>Material Prizes:</h6>
+            <% bonus.material_prize_rewards.each_with_index do |reward, index| %>
+              <div class="mb-2">
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                <strong><%= reward.prize_name %></strong>
+                <% if reward.has_monetary_value? %>
+                  <span class="text-muted">(<%= reward.formatted_prize_value %>)</span>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+          
           <% if bonus.comp_point_rewards.any? %>
             <h6>Comp Points:</h6>
-            <% bonus.comp_point_rewards.each do |reward| %>
+            <% bonus.comp_point_rewards.each_with_index do |reward, index| %>
               <div class="mb-2">
-                <%= reward.formatted_points %>
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                <%= reward.formatted_points_amount %>
                 <% if reward.multiplier.present? %>
                   (x<%= reward.multiplier %>)
                 <% end %>
@@ -96,10 +137,13 @@
           
           <% if bonus.bonus_code_rewards.any? %>
             <h6>Bonus Codes:</h6>
-            <% bonus.bonus_code_rewards.each do |reward| %>
+            <% bonus.bonus_code_rewards.each_with_index do |reward, index| %>
               <div class="mb-2">
-                <code><%= reward.code %></code>
-                <span class="badge bg-secondary"><%= reward.formatted_code_type %></span>
+                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                <strong><%= reward.title %></strong>
+                <% if reward.set_bonus_code.present? %>
+                  <code><%= reward.set_bonus_code %></code>
+                <% end %>
               </div>
             <% end %>
           <% end %>
