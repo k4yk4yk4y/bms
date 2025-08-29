@@ -55,7 +55,7 @@ class MarketingController < ApplicationController
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
                   notice: "Заявка успешно создана."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -69,7 +69,7 @@ class MarketingController < ApplicationController
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
                   notice: "Заявка успешно обновлена."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

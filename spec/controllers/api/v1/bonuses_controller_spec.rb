@@ -277,7 +277,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
       it 'returns error response with validation errors' do
         post :create, params: { bonus: invalid_api_attributes }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
         expect(json_response).to have_key('errors')
         expect(json_response['errors']).to be_present
@@ -382,7 +382,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
       it 'returns error response with validation errors' do
         patch :update, params: { id: active_bonus.id, bonus: invalid_attributes }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
         expect(json_response).to have_key('errors')
       end
@@ -748,7 +748,7 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
       }
 
       post :create, params: { bonus: complex_invalid_params }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
 
       json_response = JSON.parse(response.body)
       expect(json_response['errors']).to have_key('name')

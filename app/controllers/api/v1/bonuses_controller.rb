@@ -48,10 +48,10 @@ class Api::V1::BonusesController < ApplicationController
       update_type_specific_attributes
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ]), status: :created
     else
-      render json: { errors: @bonus.errors }, status: :unprocessable_entity
+      render json: { errors: @bonus.errors }, status: :unprocessable_content
     end
   rescue ActiveRecord::RecordInvalid => e
-    render json: { errors: e.record.errors }, status: :unprocessable_entity unless performed?
+    render json: { errors: e.record.errors }, status: :unprocessable_content unless performed?
   end
 
   # PATCH/PUT /api/v1/bonuses/1
@@ -64,7 +64,7 @@ class Api::V1::BonusesController < ApplicationController
       update_type_specific_attributes
       render json: @bonus.as_json(include: bonus_includes, except: [ :currency ])
     else
-      render json: { errors: @bonus.errors }, status: :unprocessable_entity
+      render json: { errors: @bonus.errors }, status: :unprocessable_content
     end
   end
 

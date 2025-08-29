@@ -25,7 +25,7 @@ class SettingsController < ApplicationController
     if @bonus_template.save
       redirect_to settings_templates_path, notice: "Шаблон бонуса успешно создан."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -38,7 +38,7 @@ class SettingsController < ApplicationController
     if @bonus_template.update(bonus_template_params)
       redirect_to settings_templates_path, notice: "Шаблон бонуса успешно обновлен."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

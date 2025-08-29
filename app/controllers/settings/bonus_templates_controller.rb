@@ -25,7 +25,7 @@ class Settings::BonusTemplatesController < ApplicationController
     if @bonus_template.save
       redirect_to settings_templates_path, notice: "Шаблон бонуса успешно создан."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -42,7 +42,7 @@ class Settings::BonusTemplatesController < ApplicationController
       redirect_to settings_templates_path, notice: "Шаблон бонуса успешно обновлен."
     else
       Rails.logger.error "Failed to update bonus template #{@bonus_template.id}: #{@bonus_template.errors.full_messages}"
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

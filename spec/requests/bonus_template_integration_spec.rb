@@ -161,7 +161,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             }
         }
 
-        puts "Debug: bonus_params = #{bonus_params.inspect}"
+
         post bonuses_path, params: bonus_params
         expect(response).to redirect_to(bonus_path(Bonus.last))
 
@@ -292,7 +292,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         }
 
         post settings_templates_path, params: template_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
         expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('не должно быть установлено для события manual')
       end
@@ -312,7 +312,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         }
 
         post settings_templates_path, params: template_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
         expect(assigns(:bonus_template).errors[:wager]).to include('must be greater than or equal to 0')
         expect(assigns(:bonus_template).errors[:maximum_winnings]).to include('must be greater than or equal to 0')
@@ -333,7 +333,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         }
 
         post settings_templates_path, params: template_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
         expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('содержит валюты, которые не указаны в списке поддерживаемых валют: EUR')
       end
