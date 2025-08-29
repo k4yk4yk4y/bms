@@ -11351,3 +11351,45 @@ Processing by HeatmapController#index as HTML
 Completed 200 OK in 11ms (Views: 5.2ms | ActiveRecord: 1.1ms (3 queries, 0 cached) | GC: 0.0ms)
 
 
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (1.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (1.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('test_marketing@test.com', '$2a$12$jFlRRPWLaAOeXtTVIVJMU.K90lc/trx805ZM.1ml718NL5CK4oy4e', NULL, NULL, NULL, '2025-08-29 10:23:48.733302', '2025-08-29 10:23:48.733302', 4, 'Test', 'Marketing') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (1.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('test_admin@test.com', '$2a$12$UoBWbrXvsoRDfxgHA3JZXOguPcpRSuBagz0dp8wmjBdcsS7Y4bzPC', NULL, NULL, NULL, '2025-08-29 10:23:48.952123', '2025-08-29 10:23:48.952123', 0, 'Test', 'Admin') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Destroy (3.0ms)[0m  [1m[31mDELETE FROM "users" WHERE "users"."id" = 16 /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Destroy (1.8ms)[0m  [1m[31mDELETE FROM "users" WHERE "users"."id" = 17 /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (20.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('test_marketing@test.com', '$2a$12$3p3s1rd14Js0P1B9RIIKF.ujeN/hmBwr77eqxCVy9WQcr4ndszUX2', NULL, NULL, NULL, '2025-08-29 10:24:23.407410', '2025-08-29 10:24:23.407410', 4, 'Test', 'Marketing') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (1.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'test_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('test_admin@test.com', '$2a$12$J3O/EYy5RA4Mr0SfEAkeOulY0HGa8Y/TStYTrmTfETxtQdKjj2uN.', NULL, NULL, NULL, '2025-08-29 10:24:23.618991', '2025-08-29 10:24:23.618991', 0, 'Test', 'Admin') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Destroy (1.8ms)[0m  [1m[31mDELETE FROM "users" WHERE "users"."id" = 18 /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Destroy (1.1ms)[0m  [1m[31mDELETE FROM "users" WHERE "users"."id" = 19 /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.8ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (19.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'debug_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'debug_marketing@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('debug_marketing@test.com', '$2a$12$naZQk9tTawbLyY3FijehMeh3MDso55SK96FwzRIe7.n9B1S/86zXu', NULL, NULL, NULL, '2025-08-29 10:26:58.216449', '2025-08-29 10:26:58.216449', 4, 'Debug', 'Marketing') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.8ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mUser Exists? (1.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'debug_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = 'debug_admin@test.com' LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "created_at", "updated_at", "role", "first_name", "last_name") VALUES ('debug_admin@test.com', '$2a$12$bkQOdhZVUblO5PPKPT5OgeosbWMgDKk8Tv8kcm6eRF6uqAq/.BxQ.', NULL, NULL, NULL, '2025-08-29 10:26:58.430615', '2025-08-29 10:26:58.430615', 0, 'Debug', 'Admin') RETURNING "id" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m

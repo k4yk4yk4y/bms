@@ -108,11 +108,13 @@ class Ability
       cannot :manage, :api
 
     when "marketing_manager"
-      # Маркетинг-менеджер имеет полный доступ ТОЛЬКО к разделу marketing
-      can :manage, MarketingRequest
+      # Маркетинг-менеджер имеет доступ ТОЛЬКО к своим маркетинговым заявкам
+      can :manage, MarketingRequest do |marketing_request|
+        marketing_request.manager == user.email
+      end
       can :read, ActiveAdmin::Page, name: "Dashboard"
-      can :read, User, id: user.id
-      can :update, User, id: user.id
+      can :read, User  # Может просматривать всех пользователей
+      can :update, User, id: user.id  # Может редактировать только свой профиль
 
       # ПОЛНЫЙ ЗАПРЕТ доступа ко всем остальным разделам
       cannot :access, :settings
@@ -184,8 +186,13 @@ class Ability
       can :manage, User
       can :create, User
       can :destroy, User
+    elsif user.marketing_manager?
+      # Маркетинг менеджер уже имеет настроенные права выше
+      # Добавляем только основные ограничения
+      cannot :create, User
+      cannot :destroy, User
     else
-      # Ограничения для не-админов
+      # Ограничения для не-админов (кроме marketing_manager)
       cannot :create, User
       cannot :destroy, User
       cannot :manage, User

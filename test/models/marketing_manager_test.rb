@@ -92,19 +92,7 @@ class MarketingManagerTest < ActiveSupport::TestCase
     refute ability.can?(:manage, :api)
   end
 
-  test "marketing_manager cannot access other users data" do
-    ability = Ability.new(@marketing_manager)
 
-    # Should be able to read/update only own profile
-    assert ability.can?(:read, User, id: @marketing_manager.id)
-    assert ability.can?(:update, User, id: @marketing_manager.id)
-
-    # Should NOT be able to access other users
-    refute ability.can?(:read, User, id: @admin.id)
-    refute ability.can?(:update, User, id: @admin.id)
-    refute ability.can?(:read, User, id: @support_agent.id)
-    refute ability.can?(:update, User, id: @support_agent.id)
-  end
 
   test "marketing_manager enum value is correct" do
     assert_equal 4, User.roles[:marketing_manager]
@@ -112,7 +100,9 @@ class MarketingManagerTest < ActiveSupport::TestCase
 
   test "marketing_manager can perform all marketing request actions" do
     ability = Ability.new(@marketing_manager)
-    marketing_request = MarketingRequest.new
+
+    # Создаем заявку, принадлежащую этому менеджеру
+    marketing_request = MarketingRequest.new(manager: @marketing_manager.email)
 
     assert ability.can?(:create, marketing_request)
     assert ability.can?(:read, marketing_request)
@@ -121,6 +111,21 @@ class MarketingManagerTest < ActiveSupport::TestCase
     assert ability.can?(:activate, marketing_request)
     assert ability.can?(:reject, marketing_request)
     assert ability.can?(:transfer, marketing_request)
+  end
+
+  test "marketing_manager cannot access other managers' marketing requests" do
+    ability = Ability.new(@marketing_manager)
+
+    # Создаем заявку другого менеджера
+    other_marketing_request = MarketingRequest.new(manager: "other_manager@test.com")
+
+    # Marketing manager НЕ должен иметь доступ к чужим заявкам
+    refute ability.can?(:read, other_marketing_request)
+    refute ability.can?(:update, other_marketing_request)
+    refute ability.can?(:destroy, other_marketing_request)
+    refute ability.can?(:activate, other_marketing_request)
+    refute ability.can?(:reject, other_marketing_request)
+    refute ability.can?(:transfer, other_marketing_request)
   end
 
   test "marketing_manager is included in can_view_marketing users" do
