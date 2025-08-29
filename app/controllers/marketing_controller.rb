@@ -5,11 +5,18 @@ class MarketingController < ApplicationController
     authorize! :read, MarketingRequest
     @current_tab = params[:tab] || MarketingRequest::REQUEST_TYPES.first
 
-    # Start with base query - filter by tab only if no search or status filter
-    if params[:search].present? || params[:status].present?
-      @marketing_requests = MarketingRequest.all.order(:created_at)
+    # Start with base query - filter by manager for marketing_manager
+    base_scope = if current_user&.marketing_manager?
+                   MarketingRequest.where(manager: current_user.email)
     else
-      @marketing_requests = MarketingRequest.by_request_type(@current_tab).order(:created_at)
+                   MarketingRequest.all
+    end
+
+    # Filter by tab only if no search or status filter
+    if params[:search].present? || params[:status].present?
+      @marketing_requests = base_scope.order(:created_at)
+    else
+      @marketing_requests = base_scope.by_request_type(@current_tab).order(:created_at)
     end
 
     # Filter by status if provided
@@ -26,11 +33,17 @@ class MarketingController < ApplicationController
       )
     end
 
+    # Count tabs based on user scope
     @tabs = MarketingRequest::REQUEST_TYPES.map do |type|
+      count = if current_user&.marketing_manager?
+                base_scope.by_request_type(type).count
+      else
+                MarketingRequest.by_request_type(type).count
+      end
       {
         key: type,
         label: MarketingRequest::REQUEST_TYPE_LABELS[type],
-        count: MarketingRequest.by_request_type(type).count
+        count: count
       }
     end
   end
@@ -45,11 +58,21 @@ class MarketingController < ApplicationController
     if params[:request_type].present? && MarketingRequest::REQUEST_TYPES.include?(params[:request_type])
       @marketing_request.request_type = params[:request_type]
     end
+
+    # Автоматически заполняем поле manager email'ом текущего пользователя
+    if current_user&.marketing_manager?
+      @marketing_request.manager = current_user.email
+    end
   end
 
   def create
     authorize! :create, MarketingRequest
     @marketing_request = MarketingRequest.new(marketing_request_params)
+
+    # Автоматически устанавливаем manager email для marketing_manager
+    if current_user&.marketing_manager?
+      @marketing_request.manager = current_user.email
+    end
 
     if @marketing_request.save
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
@@ -65,7 +88,14 @@ class MarketingController < ApplicationController
 
   def update
     authorize! :update, @marketing_request
-    if @marketing_request.update(marketing_request_params)
+    params_to_update = marketing_request_params
+
+    # Marketing manager не может изменить поле manager - оно должно оставаться его email
+    if current_user&.marketing_manager?
+      params_to_update = params_to_update.except(:manager)
+    end
+
+    if @marketing_request.update(params_to_update)
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
                   notice: "Заявка успешно обновлена."
     else

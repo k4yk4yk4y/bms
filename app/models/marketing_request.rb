@@ -122,6 +122,18 @@ class MarketingRequest < ApplicationRecord
     existing_partner_request.present?
   end
 
+  # Получение пользователя по email менеджера
+  def user
+    return nil if manager.blank?
+    User.find_by(email: manager)
+  end
+
+  # Проверка, принадлежит ли заявка указанному пользователю
+  def belongs_to_user?(user)
+    return false if user.nil? || manager.blank?
+    manager == user.email
+  end
+
   private
 
   def normalize_promo_code_and_stag

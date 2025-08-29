@@ -70,9 +70,19 @@
 
                   <div class="col-md-6 mb-3">
                     <%= form.label :manager, "Менеджер", class: "form-label" %>
-                    <%= form.text_field :manager, 
-                                        class: "form-control", 
-                                        required: true %>
+                    <% if current_user&.marketing_manager? %>
+                      <%= form.text_field :manager, 
+                                          class: "form-control", 
+                                          readonly: true %>
+                      <div class="form-text">
+                        Поле недоступно для редактирования
+                      </div>
+                    <% else %>
+                      <%= form.text_field :manager, 
+                                          class: "form-control", 
+                                          placeholder: "Email менеджера",
+                                          required: true %>
+                    <% end %>
                   </div>
                 </div>
 
