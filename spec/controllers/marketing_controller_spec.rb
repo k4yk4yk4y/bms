@@ -280,7 +280,7 @@ RSpec.describe MarketingController, type: :controller do
 
       it 'renders new template with error status' do
         post :create, params: { marketing_request: invalid_attributes }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
       end
 
@@ -295,7 +295,7 @@ RSpec.describe MarketingController, type: :controller do
         post :create, params: {
           marketing_request: valid_attributes.merge(stag: pending_request.stag)
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:stag]).to include(/уже используется/)
       end
 
@@ -303,7 +303,7 @@ RSpec.describe MarketingController, type: :controller do
         post :create, params: {
           marketing_request: valid_attributes.merge(promo_code: pending_request.promo_code)
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:promo_code]).to include(/уже используется/)
       end
 
@@ -311,7 +311,7 @@ RSpec.describe MarketingController, type: :controller do
         post :create, params: {
           marketing_request: valid_attributes.merge(partner_email: 'invalid.email')
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:partner_email]).to include(/должен быть валидным email/)
       end
 
@@ -319,7 +319,7 @@ RSpec.describe MarketingController, type: :controller do
         post :create, params: {
           marketing_request: valid_attributes.merge(promo_code: 'INVALID@CODE')
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:promo_code]).to include(/недопустимыми символами/)
       end
 
@@ -327,7 +327,7 @@ RSpec.describe MarketingController, type: :controller do
         post :create, params: {
           marketing_request: valid_attributes.merge(promo_code: 'CODE WITH SPACES')
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:promo_code]).to include(/содержит коды с пробелами/)
       end
     end
@@ -416,7 +416,7 @@ RSpec.describe MarketingController, type: :controller do
 
       it 'renders edit template with error status' do
         patch :update, params: { id: pending_request.id, marketing_request: invalid_attributes }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:edit)
       end
 
@@ -441,7 +441,7 @@ RSpec.describe MarketingController, type: :controller do
           id: pending_request.id,
           marketing_request: { stag: other_request.stag }
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:stag]).to include(/уже используется/)
       end
 
@@ -451,7 +451,7 @@ RSpec.describe MarketingController, type: :controller do
           id: pending_request.id,
           marketing_request: { promo_code: other_request.promo_code }
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(assigns(:marketing_request).errors[:promo_code]).to include(/уже используется/)
       end
 
@@ -875,7 +875,7 @@ RSpec.describe MarketingController, type: :controller do
           id: pending_request.id,
           marketing_request: { manager: 'M' * 256 }
         }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 

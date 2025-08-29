@@ -134,8 +134,8 @@ class BonusesController < ApplicationController
         # Don't save the bonus if validation fails
         respond_to do |format|
           @event_type = @bonus.event
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @bonus.errors, status: :unprocessable_entity }
+          format.html { render :new, status: :unprocessable_content }
+          format.json { render json: @bonus.errors, status: :unprocessable_content }
         end
         return
       end
@@ -186,7 +186,7 @@ class BonusesController < ApplicationController
         @event_type = @bonus.event
 
         format.html { render :new }
-        format.json { render json: @bonus.errors, status: :unprocessable_entity }
+        format.json { render json: @bonus.errors, status: :unprocessable_content }
       end
     end
   end
@@ -236,7 +236,7 @@ class BonusesController < ApplicationController
       else
         Rails.logger.debug "Bonus update failed. Errors: #{@bonus.errors.full_messages}"
         format.html { render :edit }
-        format.json { render json: @bonus.errors, status: :unprocessable_entity }
+        format.json { render json: @bonus.errors, status: :unprocessable_content }
       end
     end
   end

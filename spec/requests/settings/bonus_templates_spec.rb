@@ -60,7 +60,7 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
         post settings_templates_path, params: { bonus_template: invalid_attributes }
       }.not_to change(BonusTemplate, :count)
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include("New Bonus Template")
     end
   end
@@ -107,7 +107,7 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
 
       patch settings_template_path(template), params: { bonus_template: invalid_attributes }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include("Edit Bonus Template")
     end
   end

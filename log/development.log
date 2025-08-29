@@ -11272,3 +11272,82 @@ Processing by BonusesController#index as HTML
 Completed 200 OK in 27ms (Views: 20.8ms | ActiveRecord: 2.2ms (11 queries, 0 cached) | GC: 0.0ms)
 
 
+Started GET "/" for ::1 at 2025-08-29 13:08:32 +0300
+  [1m[36mActiveRecord::SchemaMigration Load (1.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+Processing by HomeController#index as HTML
+Completed 401 Unauthorized in 11ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/users/sign_in" for ::1 at 2025-08-29 13:08:33 +0300
+Processing by Users::SessionsController#new as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering devise/sessions/new.html.erb within layouts/application
+  Rendered devise/sessions/new.html.erb within layouts/application (Duration: 8.7ms | GC: 4.8ms)
+  Rendered layout layouts/application.html.erb (Duration: 34.2ms | GC: 23.6ms)
+Completed 200 OK in 111ms (Views: 42.5ms | ActiveRecord: 22.7ms (0 queries, 0 cached) | GC: 52.9ms)
+
+
+Started POST "/users/sign_in" for ::1 at 2025-08-29 13:08:39 +0300
+Processing by Users::SessionsController#create as HTML
+  Parameters: {"authenticity_token" => "[FILTERED]", "user" => {"email" => "[FILTERED]", "password" => "[FILTERED]"}, "commit" => "Войти"}
+  [1m[36mUser Load (2.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' ORDER BY "users"."id" ASC LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:16:in 'CurrentUserTracking#set_current_user'
+=== LOGIN ATTEMPT ===
+Email: p.rusakevich@jetmail.cc
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."email" = 'p.rusakevich@jetmail.cc' LIMIT 1 /*action='create',application='BMS',controller='sessions'*/[0m
+  ↳ app/controllers/users/sessions_controller.rb:10:in 'Users::SessionsController#create'
+User found: true
+Authenticity token from form: ZTU_waO-PAdftMC7xgG-8rrRsX9L0pZ5A2JUKNyNPIji4SGVXhbGB53hf4ylGyguovWJ-3sCFJ_CXgXRi8I8vg
+Session token: 
+Form authenticity token valid: false
+Redirected to http://localhost:3000/bonuses
+Completed 303 See Other in 224ms (ActiveRecord: 2.6ms (2 queries, 0 cached) | GC: 0.9ms)
+
+
+Started GET "/bonuses" for ::1 at 2025-08-29 13:08:39 +0300
+Processing by BonusesController#index as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:16:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (4.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "bonuses" /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/controllers/bonuses_controller.rb:66:in 'BonusesController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering bonuses/index.html.erb within layouts/application
+  Rendered bonuses/_permanent_bonus_previews.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  [1m[36mBonus Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "bonuses" LIMIT 1 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:169
+  [1m[36mBonus Load (0.4ms)[0m  [1m[34mSELECT "bonuses".* FROM "bonuses" ORDER BY "bonuses"."id" DESC LIMIT 25 OFFSET 0 /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusReward Load (1.0ms)[0m  [1m[34mSELECT "bonus_rewards".* FROM "bonus_rewards" WHERE "bonus_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreespinReward Load (1.5ms)[0m  [1m[34mSELECT "freespin_rewards".* FROM "freespin_rewards" WHERE "freespin_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusBuyReward Load (3.3ms)[0m  [1m[34mSELECT "bonus_buy_rewards".* FROM "bonus_buy_rewards" WHERE "bonus_buy_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mFreechipReward Load (3.3ms)[0m  [1m[34mSELECT "freechip_rewards".* FROM "freechip_rewards" WHERE "freechip_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mBonusCodeReward Load (1.4ms)[0m  [1m[34mSELECT "bonus_code_rewards".* FROM "bonus_code_rewards" WHERE "bonus_code_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mMaterialPrizeReward Load (1.2ms)[0m  [1m[34mSELECT "material_prize_rewards".* FROM "material_prize_rewards" WHERE "material_prize_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  [1m[36mCompPointReward Load (1.0ms)[0m  [1m[34mSELECT "comp_point_rewards".* FROM "comp_point_rewards" WHERE "comp_point_rewards"."bonus_id" IN (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3) /*action='index',application='BMS',controller='bonuses'*/[0m
+  ↳ app/views/bonuses/index.html.erb:188
+  Rendered bonuses/index.html.erb within layouts/application (Duration: 106.2ms | GC: 1.3ms)
+  Rendered layout layouts/application.html.erb (Duration: 108.5ms | GC: 1.3ms)
+Completed 200 OK in 119ms (Views: 80.0ms | ActiveRecord: 34.6ms (11 queries, 0 cached) | GC: 1.4ms)
+
+
+Started GET "/heatmap" for ::1 at 2025-08-29 13:11:47 +0300
+Processing by HeatmapController#index as HTML
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = 9 ORDER BY "users"."id" ASC LIMIT 1 /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/concerns/current_user_tracking.rb:16:in 'CurrentUserTracking#set_current_user'
+  [1m[36mBonus Count (0.5ms)[0m  [1m[34mSELECT COUNT(*) AS "count_all", DATE(availability_start_date) AS "date_availability_start_date" FROM "bonuses" WHERE "bonuses"."availability_start_date" BETWEEN '2025-08-01 00:00:00' AND '2025-08-31 23:59:59.999999' GROUP BY DATE(availability_start_date) /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:75:in 'HeatmapController#generate_heatmap_data'
+  [1m[36mBonus Pluck (0.2ms)[0m  [1m[34mSELECT DISTINCT "bonuses"."event" FROM "bonuses" /*action='index',application='BMS',controller='heatmap'*/[0m
+  ↳ app/controllers/heatmap_controller.rb:24:in 'HeatmapController#index'
+  Rendering layout layouts/application.html.erb
+  Rendering heatmap/index.html.erb within layouts/application
+  Rendered heatmap/index.html.erb within layouts/application (Duration: 3.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.8ms | GC: 0.0ms)
+Completed 200 OK in 11ms (Views: 5.2ms | ActiveRecord: 1.1ms (3 queries, 0 cached) | GC: 0.0ms)
+
+
