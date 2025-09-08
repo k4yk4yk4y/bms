@@ -14,9 +14,5 @@
  *= require_self
  */
 
-/* Import component styles */
-@import "components/_navbar";
-@import "components/_navigation";
-@import "components/_reward_forms";
-@import "components/_login";
+/* Component styles are automatically included via require_tree */
 
