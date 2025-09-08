@@ -15,6 +15,6 @@
  */
 
 /* Import component styles */
-@import "components/navbar";
-@import "components/navigation";
-@import "components/reward_forms";
+@import "components/_navbar";
+@import "components/_navigation";
+@import "components/_reward_forms";
