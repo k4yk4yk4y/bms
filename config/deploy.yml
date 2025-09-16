@@ -7,7 +7,7 @@ image: k4yk4yk4y/bms
 # Deploy to these servers.
 servers:
   web:
-    - 165.22.206.225
+    - 174.138.14.95
   # job:
   #   hosts:
   #     - 192.168.0.1
