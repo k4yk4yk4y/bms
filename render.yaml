@@ -18,6 +18,6 @@ services:
           name: bms_production
           property: connectionString
       - key: RAILS_MASTER_KEY
-        sync: false
+        value: ef887a04b6d61adef7855bddf635a3270fcae09f8df0aac57284c8794ae5a8f8a4031c947780a8f699dadc7ea437682ac609d66972e8bbed6951f8083003baf1
       - key: WEB_CONCURRENCY
         value: 2 # sensible default
