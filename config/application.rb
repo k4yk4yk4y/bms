@@ -8,6 +8,7 @@ Bundler.require(*Rails.groups)
 
 module BMS
   class Application < Rails::Application
+    config.encoding = "utf-8"
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
