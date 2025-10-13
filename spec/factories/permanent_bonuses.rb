@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :permanent_bonus do
-    project { "Test Project" }
+    association :project
     association :bonus
   end
 end

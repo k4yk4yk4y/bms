@@ -4,12 +4,10 @@ export default class extends Controller {
   static targets = ["dropdown", "menu"]
 
   connect() {
-    console.log("Projects dropdown controller connected")
     this.initializeDropdown()
   }
 
   disconnect() {
-    console.log("Projects dropdown controller disconnected")
     this.destroyDropdown()
   }
 
@@ -34,15 +32,11 @@ export default class extends Controller {
         // Create new Bootstrap dropdown instance
         this.bootstrapDropdown = new window.bootstrap.Dropdown(this.dropdownTarget, {
           autoClose: true,
-          boundary: 'viewport'
         })
-        console.log("Bootstrap dropdown initialized")
         
-        // Add click event listener to the dropdown button
         this.dropdownTarget.addEventListener('click', this.boundDropdownClick)
         
       } catch (error) {
-        console.error("Error initializing Bootstrap dropdown:", error)
       }
     }
     
@@ -93,9 +87,7 @@ export default class extends Controller {
       try {
         this.bootstrapDropdown.dispose()
         this.bootstrapDropdown = null
-        console.log("Bootstrap dropdown destroyed")
       } catch (error) {
-        console.error("Error destroying Bootstrap dropdown:", error)
       }
     }
     
@@ -106,16 +98,23 @@ export default class extends Controller {
   }
 
   refreshDropdown() {
-    console.log("Refreshing dropdown")
     this.initializeDropdown()
   }
 
   highlightCurrentProject() {
-    const currentProject = new URLSearchParams(window.location.search).get('project')
-    if (currentProject) {
-      const projectLinks = this.menuTarget.querySelectorAll('a[href*="project="]')
+    const urlParams = new URLSearchParams(window.location.search)
+    const currentProjectId = urlParams.get('project_id')
+    const currentProject = urlParams.get('project')
+    
+    if (currentProjectId || currentProject) {
+      const projectLinks = this.menuTarget.querySelectorAll('a[href*="project"]')
       projectLinks.forEach(link => {
-        if (link.href.includes(`project=${currentProject}`)) {
+        const linkParams = new URLSearchParams(link.search)
+        const linkProjectId = linkParams.get('project_id')
+        const linkProject = linkParams.get('project')
+        
+        if ((currentProjectId && linkProjectId === currentProjectId) || 
+            (currentProject && linkProject === currentProject)) {
           link.classList.add('active', 'fw-bold')
         }
       })
@@ -139,7 +138,7 @@ export default class extends Controller {
   }
 
   addLoadingIndicators() {
-    const projectLinks = this.menuTarget.querySelectorAll('a[href*="project="]')
+    const projectLinks = this.menuTarget.querySelectorAll('a[href*="project"]')
     projectLinks.forEach(link => {
       // Remove existing click listeners to prevent duplicates
       link.removeEventListener('click', this.handleProjectLinkClick)
@@ -156,17 +155,14 @@ export default class extends Controller {
 
   // Turbo event handlers
   handleTurboLoad() {
-    console.log("Turbo load event - reinitializing dropdown")
     this.initializeDropdown()
   }
 
   handleTurboRender() {
-    console.log("Turbo render event - reinitializing dropdown")
     this.initializeDropdown()
   }
 
   handleTurboBeforeRender() {
-    console.log("Turbo before render event - destroying dropdown")
     this.destroyDropdown()
   }
 }

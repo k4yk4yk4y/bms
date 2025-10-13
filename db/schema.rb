@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_13_182120) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -53,7 +53,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   end
 
   create_table "bonus_buy_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.decimal "buy_amount", precision: 15, scale: 2
     t.decimal "multiplier", precision: 5, scale: 2
     t.text "config"
@@ -71,7 +71,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   end
 
   create_table "bonus_code_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.string "code", null: false
     t.string "code_type", null: false
     t.text "config"
@@ -84,7 +84,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   end
 
   create_table "bonus_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.string "reward_type", null: false
     t.decimal "amount", precision: 15, scale: 2
     t.decimal "percentage", precision: 5, scale: 2
@@ -144,10 +144,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
     t.string "project"
     t.string "dsl_tag"
     t.string "event", null: false
-    t.text "currencies"
-    t.text "groups"
-    t.text "no_more"
-    t.integer "totally_no_more"
+    t.text "currencies", comment: "JSON array of supported currencies"
+    t.text "groups", comment: "JSON array of target user groups"
+    t.text "no_more", comment: "Usage limitation string (e.g., \"1 per day\", \"3 per week\")"
+    t.integer "totally_no_more", comment: "Total limit of activations across all players"
     t.text "currency_minimum_deposits"
     t.text "description"
     t.string "maximum_winnings_type", default: "multiplier", null: false
@@ -162,22 +162,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
     t.index ["user_group"], name: "index_bonuses_on_user_group"
   end
 
-  create_table "collect_bonuses", force: :cascade do |t|
-    t.bigint "bonus_id", null: false
-    t.string "collection_type", null: false
-    t.decimal "collection_amount", precision: 15, scale: 2
-    t.string "collection_frequency", default: "daily"
-    t.integer "collection_limit", default: 1
-    t.integer "collected_count", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["bonus_id"], name: "index_collect_bonuses_on_bonus_id"
-    t.index ["collection_frequency"], name: "index_collect_bonuses_on_collection_frequency"
-    t.index ["collection_type"], name: "index_collect_bonuses_on_collection_type"
-  end
-
   create_table "comp_point_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.integer "points_amount", null: false
     t.decimal "multiplier", precision: 5, scale: 2
     t.text "config"
@@ -188,20 +174,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
     t.index ["points_amount"], name: "index_comp_point_rewards_on_points_amount"
   end
 
-  create_table "deposit_bonuses", force: :cascade do |t|
-    t.bigint "bonus_id", null: false
-    t.decimal "deposit_amount_required", precision: 10, scale: 2
-    t.decimal "bonus_percentage", precision: 5, scale: 2
-    t.decimal "max_bonus_amount", precision: 15, scale: 2
-    t.boolean "first_deposit_only", default: false
-    t.boolean "recurring_eligible", default: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["bonus_id"], name: "index_deposit_bonuses_on_bonus_id"
-  end
-
   create_table "freechip_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.decimal "chip_value", precision: 15, scale: 2, null: false
     t.integer "chips_count", null: false
     t.text "config"
@@ -212,7 +186,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   end
 
   create_table "freespin_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.integer "spins_count", null: false
     t.text "game_restrictions"
     t.text "config"
@@ -229,52 +203,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
     t.index ["spins_count"], name: "index_freespin_rewards_on_spins_count"
   end
 
-  create_table "groups_update_bonuses", force: :cascade do |t|
-    t.bigint "bonus_id", null: false
-    t.text "target_groups", null: false
-    t.string "update_type", null: false
-    t.text "update_parameters"
-    t.integer "batch_size", default: 100
-    t.string "processing_status", default: "pending"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["bonus_id"], name: "index_groups_update_bonuses_on_bonus_id"
-    t.index ["processing_status"], name: "index_groups_update_bonuses_on_processing_status"
-    t.index ["update_type"], name: "index_groups_update_bonuses_on_update_type"
-  end
-
-  create_table "input_coupon_bonuses", force: :cascade do |t|
-    t.bigint "bonus_id", null: false
-    t.string "coupon_code", null: false
-    t.integer "usage_limit", default: 1
-    t.integer "usage_count", default: 0
-    t.datetime "expires_at"
-    t.boolean "single_use", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["bonus_id"], name: "index_input_coupon_bonuses_on_bonus_id"
-    t.index ["coupon_code"], name: "index_input_coupon_bonuses_on_coupon_code", unique: true
-    t.index ["expires_at"], name: "index_input_coupon_bonuses_on_expires_at"
-  end
-
-  create_table "manual_bonuses", force: :cascade do |t|
-    t.bigint "bonus_id", null: false
-    t.text "admin_notes"
-    t.boolean "approval_required", default: true
-    t.boolean "auto_apply", default: false
-    t.text "conditions"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["approval_required"], name: "index_manual_bonuses_on_approval_required"
-    t.index ["auto_apply"], name: "index_manual_bonuses_on_auto_apply"
-    t.index ["bonus_id"], name: "index_manual_bonuses_on_bonus_id"
-  end
-
   create_table "marketing_requests", force: :cascade do |t|
     t.string "manager", null: false
     t.text "platform"
     t.string "partner_email", null: false
-    t.text "promo_code"
+    t.text "promo_code", null: false
     t.string "stag", null: false
     t.datetime "activation_date"
     t.string "status", default: "pending", null: false
@@ -289,7 +222,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   end
 
   create_table "material_prize_rewards", force: :cascade do |t|
-    t.integer "bonus_id", null: false
+    t.bigint "bonus_id", null: false
     t.string "prize_name", null: false
     t.decimal "prize_value", precision: 15, scale: 2
     t.text "config"
@@ -299,33 +232,38 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
     t.index ["prize_name"], name: "index_material_prize_rewards_on_prize_name"
   end
 
-  create_table "scheduler_bonuses", force: :cascade do |t|
+  create_table "permanent_bonuses", force: :cascade do |t|
     t.bigint "bonus_id", null: false
-    t.string "schedule_type", null: false
-    t.string "cron_expression"
-    t.datetime "next_run_at"
-    t.datetime "last_run_at"
-    t.integer "execution_count", default: 0
-    t.integer "max_executions"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["bonus_id"], name: "index_scheduler_bonuses_on_bonus_id"
-    t.index ["last_run_at"], name: "index_scheduler_bonuses_on_last_run_at"
-    t.index ["next_run_at"], name: "index_scheduler_bonuses_on_next_run_at"
-    t.index ["schedule_type"], name: "index_scheduler_bonuses_on_schedule_type"
+    t.bigint "project_id"
+    t.index ["bonus_id"], name: "index_permanent_bonuses_on_bonus_id"
+    t.index ["project_id"], name: "index_permanent_bonuses_on_project_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.integer "role", default: 3
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "role", default: 3, null: false
-    t.string "first_name"
-    t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
@@ -340,4 +278,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_120142) do
   add_foreign_key "freechip_rewards", "bonuses"
   add_foreign_key "freespin_rewards", "bonuses"
   add_foreign_key "material_prize_rewards", "bonuses"
+  add_foreign_key "permanent_bonuses", "bonuses"
+  add_foreign_key "permanent_bonuses", "projects"
 end

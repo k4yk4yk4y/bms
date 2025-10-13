@@ -21,8 +21,12 @@ RSpec.describe Settings::BonusTemplatesController, type: :controller do
     end
 
     it 'assigns @projects' do
+      # Create test projects
+      project1 = create(:project, name: 'Test Project 1')
+      project2 = create(:project, name: 'Test Project 2')
+
       get :index
-      expect(assigns(:projects)).to eq(BonusTemplate::PROJECTS)
+      expect(assigns(:projects)).to include(project1.name, project2.name)
     end
 
     it 'assigns @dsl_tags' do

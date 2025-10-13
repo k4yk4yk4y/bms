@@ -3,7 +3,6 @@ class BonusTemplate < ApplicationRecord
 
   # Status and type constants
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
-  PROJECTS = %w[All VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
 
   # Store JSON data
   serialize :currencies, coder: JSON
@@ -13,9 +12,8 @@ class BonusTemplate < ApplicationRecord
   # Validations
   validates :name, presence: true, length: { maximum: 255 }
   validates :dsl_tag, presence: true, length: { maximum: 255 }
-  validates :project, presence: true, inclusion: { in: PROJECTS }
+  validates :project, presence: true
   validates :event, presence: true, inclusion: { in: EVENT_TYPES }
-  # Currency validation removed - now using currencies array
   validates :description, length: { maximum: 1000 }, allow_blank: true
   validates :dsl_tag, uniqueness: { scope: [ :project, :name ], message: "комбинация dsl_tag, project и name должна быть уникальной" }
 

@@ -16,7 +16,7 @@ FactoryBot.define do
     user_group { Faker::Company.name }
     tags { "#{Faker::Lorem.word}, #{Faker::Lorem.word}" }
     country { Faker::Address.country_code }
-    project { Bonus::PROJECTS.sample }
+    project { %w[VOLNA ROX FRESH SOL JET].sample }
     dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
     description { Faker::Lorem.paragraph }
     groups { [ user_group ] }
@@ -93,7 +93,7 @@ FactoryBot.define do
     end
 
     trait :permanent do
-      dsl_tag { Bonus::PERMANENT_BONUS_TYPES.sample[:dsl_tag] }
+      dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
       status { 'active' }
     end
 

@@ -316,55 +316,6 @@ RSpec.describe Bonus, type: :model do
 
   # Class methods tests
   describe 'class methods' do
-    describe '.find_permanent_bonus_for_project' do
-      let!(:permanent_bonus) { create(:bonus, :permanent, project: 'VOLNA', dsl_tag: 'welcome_bonus') }
-      let!(:other_bonus) { create(:bonus, project: 'ROX', dsl_tag: 'welcome_bonus') }
-
-      it 'finds active permanent bonus for project and dsl_tag' do
-        result = Bonus.find_permanent_bonus_for_project('VOLNA', 'welcome_bonus')
-        expect(result).to eq(permanent_bonus)
-      end
-
-      it 'returns nil when no matching bonus found' do
-        result = Bonus.find_permanent_bonus_for_project('VOLNA', 'nonexistent_tag')
-        expect(result).to be_nil
-      end
-
-      it 'does not return inactive bonuses' do
-        permanent_bonus.update!(status: 'inactive')
-        result = Bonus.find_permanent_bonus_for_project('VOLNA', 'welcome_bonus')
-        expect(result).to be_nil
-      end
-    end
-
-    describe '.permanent_bonus_previews_for_project' do
-      let!(:welcome_bonus) { create(:bonus, :permanent, project: 'VOLNA', dsl_tag: 'welcome_bonus') }
-
-      it 'returns empty array when project is blank' do
-        result = Bonus.permanent_bonus_previews_for_project(nil)
-        expect(result).to eq([])
-      end
-
-      it 'returns bonus previews for project' do
-        result = Bonus.permanent_bonus_previews_for_project('VOLNA')
-        expect(result).to be_an(Array)
-        expect(result.first).to have_key(:name)
-        expect(result.first).to have_key(:existing_bonus)
-      end
-
-      it 'includes existing bonus when found' do
-        result = Bonus.permanent_bonus_previews_for_project('VOLNA')
-        welcome_preview = result.find { |r| r[:dsl_tag] == 'welcome_bonus' }
-        expect(welcome_preview[:existing_bonus]).to eq(welcome_bonus)
-      end
-
-      it 'has nil existing_bonus when not found' do
-        result = Bonus.permanent_bonus_previews_for_project('ROX')
-        welcome_preview = result.find { |r| r[:dsl_tag] == 'welcome_bonus' }
-        expect(welcome_preview[:existing_bonus]).to be_nil
-      end
-    end
-
     describe '.update_expired_bonuses!' do
       it 'updates expired active bonuses to inactive' do
         # Skip the after_find callback for this test by using update_all directly

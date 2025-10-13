@@ -5,7 +5,6 @@ export default class extends Controller {
   static targets = ["checkbox", "minimumDeposit"]
   
   connect() {
-    console.log("Currency controller connected")
     this.setupEventListeners()
   }
 
@@ -59,15 +58,11 @@ export default class extends Controller {
 
   // Method called when currency checkboxes change
   updateAllCurrencyFields() {
-    console.log("Updating all currency fields...")
     
     // Get selected currencies
     const selectedCurrencies = this.getSelectedCurrencies()
     const minimumDepositCurrencies = this.getMinimumDepositCurrencies()
     
-    console.log("Selected currencies:", selectedCurrencies)
-    console.log("Minimum deposit currencies:", minimumDepositCurrencies)
-
     // Update minimum deposits fields
     this.updateCurrencyMinimumDepositsFields()
     
@@ -135,7 +130,6 @@ export default class extends Controller {
     if (!container) return;
     
     const selectedCurrencies = this.getSelectedCurrencies();
-    const allCurrencies = ["RUB", "EUR", "USD", "UAH", "KZT", "NOK", "PLN", "TRY", "CAD", "AUD", "AZN", "NZD", "BRL", "INR", "ARS", "MXN", "PEN", "NGN", "ZAR", "CLP", "DKK", "SEK", "RON", "HUF", "JPY", "UZS", "GBP", "BTC", "ETH", "LTC", "BCH", "XRP", "TRX", "DOGE", "USDT"];
     const cryptoCurrencies = ["BTC", "ETH", "LTC", "BCH", "XRP", "TRX", "DOGE", "USDT"];
     
     // Show only selected currencies (not all)

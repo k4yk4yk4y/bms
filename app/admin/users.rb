@@ -9,24 +9,12 @@ ActiveAdmin.register User do
   # Настройка индексной страницы
   index do
     selectable_column
-    id_column
+    column :id
     column :email
     column :first_name
     column :last_name
-    column :role do |user|
-      role_class = case user.role
-      when "admin" then :error
-      when "promo_manager" then :warning
-      when "shift_leader" then :ok
-      when "support_agent" then :default
-      else :default
-      end
-      status_tag user.display_role, class: role_class
-    end
+    column :role
     column :created_at
-    column :sign_in_count
-    column :current_sign_in_at
-    column :last_sign_in_at
     actions
   end
 

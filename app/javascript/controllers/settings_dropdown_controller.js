@@ -4,12 +4,10 @@ export default class extends Controller {
   static targets = ["dropdown", "menu"]
 
   connect() {
-    console.log("Settings dropdown controller connected")
     this.initializeDropdown()
   }
 
   disconnect() {
-    console.log("Settings dropdown controller disconnected")
     this.destroyDropdown()
   }
 
@@ -36,13 +34,11 @@ export default class extends Controller {
           autoClose: true,
           boundary: 'viewport'
         })
-        console.log("Settings Bootstrap dropdown initialized")
         
         // Add click event listener to the dropdown button
         this.dropdownTarget.addEventListener('click', this.boundDropdownClick)
         
       } catch (error) {
-        console.error("Error initializing Settings Bootstrap dropdown:", error)
       }
     }
     
@@ -87,9 +83,7 @@ export default class extends Controller {
       try {
         this.bootstrapDropdown.dispose()
         this.bootstrapDropdown = null
-        console.log("Settings Bootstrap dropdown destroyed")
       } catch (error) {
-        console.error("Error destroying Settings Bootstrap dropdown:", error)
       }
     }
     
@@ -100,7 +94,6 @@ export default class extends Controller {
   }
 
   refreshDropdown() {
-    console.log("Refreshing settings dropdown")
     this.initializeDropdown()
   }
 
@@ -122,17 +115,14 @@ export default class extends Controller {
 
   // Turbo event handlers - ключевые для решения проблемы
   handleTurboLoad() {
-    console.log("Turbo load event - reinitializing settings dropdown")
     this.initializeDropdown()
   }
 
   handleTurboRender() {
-    console.log("Turbo render event - reinitializing settings dropdown")
     this.initializeDropdown()
   }
 
   handleTurboBeforeRender() {
-    console.log("Turbo before render event - destroying settings dropdown")
     this.destroyDropdown()
   }
 }

@@ -196,9 +196,14 @@ RSpec.describe BonusesHelper, type: :helper do
 
   describe '#project_options' do
     it 'returns array of project options' do
+      # Create some test projects
+      create(:project, name: 'Test Project 1')
+      create(:project, name: 'Test Project 2')
+      create(:project, name: 'Test Project 3')
+
       options = helper.project_options
       expect(options).to be_an(Array)
-      expect(options.length).to be > 10
+      expect(options.length).to be >= 4 # At least "All" + 3 test projects
     end
 
     it 'returns options in correct format [label, value]' do
@@ -211,13 +216,16 @@ RSpec.describe BonusesHelper, type: :helper do
       end
     end
 
-    it 'includes all projects from Bonus model' do
+    it 'includes all projects from Project model' do
+      # Create test projects
+      project1 = create(:project, name: 'Test Project 1')
+      project2 = create(:project, name: 'Test Project 2')
+
       options = helper.project_options
       values = options.map { |option| option[1] }
 
-      Bonus::PROJECTS.each do |project|
-        expect(values).to include(project)
-      end
+      expect(values).to include(project1.name)
+      expect(values).to include(project2.name)
     end
 
     it 'has labels matching values for projects' do
@@ -228,10 +236,15 @@ RSpec.describe BonusesHelper, type: :helper do
     end
 
     it 'includes specific expected projects' do
+      # Create specific test projects
+      create(:project, name: 'VOLNA')
+      create(:project, name: 'ROX')
+      create(:project, name: 'FRESH')
+
       options = helper.project_options
       values = options.map { |option| option[1] }
 
-      expect(values).to include('VOLNA', 'ROX', 'FRESH', 'SOL', 'JET')
+      expect(values).to include('All', 'VOLNA', 'ROX', 'FRESH')
     end
   end
 

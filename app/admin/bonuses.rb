@@ -12,7 +12,7 @@ ActiveAdmin.register Bonus do
   filter :code
   filter :status, as: :select, collection: Bonus::STATUSES
   filter :event, as: :select, collection: Bonus::EVENT_TYPES
-  filter :project, as: :select, collection: Bonus::PROJECTS
+  filter :project, as: :select, collection: -> { Project.order(:name).pluck(:name) }
   filter :created_by
   filter :updated_by
   filter :created_at
@@ -202,7 +202,7 @@ ActiveAdmin.register Bonus do
       f.input :code
       f.input :status, as: :select, collection: Bonus::STATUSES
       f.input :event, as: :select, collection: Bonus::EVENT_TYPES
-      f.input :project, as: :select, collection: Bonus::PROJECTS
+      f.input :project, as: :select, collection: Project.order(:name).pluck(:name)
       f.input :dsl_tag
       f.input :description
     end

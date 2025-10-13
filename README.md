@@ -66,6 +66,16 @@ rails heatmap:create_test_data
 
 This will create 82 test bonuses for July 2025 with various distributions.
 
+### Architectural Analysis
+
+To run a static analysis of the bonus system for vulnerabilities and code quality issues:
+
+```bash
+bundle exec rake bonus_system:analyze
+```
+
+This task executes Brakeman, RuboCop, and ESLint to analyze the Ruby and JavaScript codebases. A detailed JSON report will be generated at `tmp/analysis_reports/bonus_system_report.json`, summarizing identified issues, their severity, and refactoring proposals.
+
 ### Heatmap Features
 
 - **Calendar View**: Monthly calendar showing bonus distribution

@@ -37,8 +37,13 @@ class BonusesController < ApplicationController
     # Filter by country if specified
     @bonuses = @bonuses.by_country(params[:country]) if params[:country].present?
 
-    # Filter by project if specified
-    @bonuses = @bonuses.by_project(params[:project]) if params[:project].present?
+    # Filter by project if specified (support both old string and new project_id)
+    if params[:project_id].present?
+      project = Project.find_by(id: params[:project_id])
+      @bonuses = @bonuses.by_project(project.name) if project
+    elsif params[:project].present?
+      @bonuses = @bonuses.by_project(params[:project])
+    end
 
     # Filter by dsl_tag if specified
     @bonuses = @bonuses.by_dsl_tag(params[:dsl_tag]) if params[:dsl_tag].present?
@@ -54,8 +59,21 @@ class BonusesController < ApplicationController
 
     @bonuses = @bonuses.order(id: :desc)
 
-    # Get permanent bonus previews for current project
-    @permanent_bonus_previews = Bonus.permanent_bonus_previews_for_project(params[:project])
+    # Get permanent bonuses for the current project
+    if params[:project_id].present?
+      @current_project = Project.find_by(id: params[:project_id])
+      if @current_project
+        @permanent_bonuses = @current_project.permanent_bonuses.includes(:bonus).map(&:bonus).compact
+        @permanent_bonus_ids = @permanent_bonuses.map(&:id)
+      else
+        @permanent_bonuses = []
+        @permanent_bonus_ids = []
+      end
+    else
+      @current_project = nil
+      @permanent_bonuses = []
+      @permanent_bonus_ids = []
+    end
 
     # Pagination with 50 bonuses per page
     page = (params[:page] || 1).to_i

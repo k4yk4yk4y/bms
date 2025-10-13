@@ -54,6 +54,9 @@ group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 6.1"
 
+  # JSON Schema validation
+  gem "json-schema"
+
   # Factory Bot for test data [https://github.com/thoughtbot/factory_bot_rails]
   gem "factory_bot_rails", "~> 6.4"
 

@@ -5,7 +5,7 @@ class Settings::BonusTemplatesController < ApplicationController
   def index
     authorize! :read, BonusTemplate
     @bonus_templates = BonusTemplate.all.order(:project, :dsl_tag, :name)
-    @projects = BonusTemplate::PROJECTS
+    @projects = Project.order(:name).pluck(:name)
     @dsl_tags = BonusTemplate.distinct.pluck(:dsl_tag).sort
   end
 

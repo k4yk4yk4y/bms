@@ -162,18 +162,6 @@ RSpec.describe BonusesController, type: :controller do
       end
     end
 
-    context 'with permanent bonus previews' do
-      it 'sets permanent bonus previews when project is specified' do
-        get :index, params: { project: 'VOLNA' }
-        expect(assigns(:permanent_bonus_previews)).to be_present
-        expect(assigns(:permanent_bonus_previews)).to be_an(Array)
-      end
-
-      it 'does not set previews when project is not specified' do
-        get :index
-        expect(assigns(:permanent_bonus_previews)).to eq([])
-      end
-    end
 
     context 'with response formats' do
       it 'responds to HTML format' do

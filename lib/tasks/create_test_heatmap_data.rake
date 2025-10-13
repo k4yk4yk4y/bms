@@ -54,23 +54,24 @@ namespace :heatmap do
       puts "Creating #{count} bonuses for #{date.strftime('%Y-%m-%d')}"
 
       count.times do |i|
-        bonus_type = types[i % types.length]
+        event_type = types[i % types.length]
 
         # Создаем основной бонус
         bonus = Bonus.create!(
-          name: "Test #{bonus_type.humanize} Bonus #{date.strftime('%m%d')}-#{i+1}",
-          bonus_type: bonus_type,
+          name: "Test #{event_type.humanize} Bonus #{date.strftime('%m%d')}-#{i+1}",
+          event: event_type,
           status: "active",
           availability_start_date: date.beginning_of_day + i.minutes,
           availability_end_date: date.end_of_day,
-          currency: "USD",
+          currencies: [ "USD" ],
           country: "US",
           user_group: "test_users",
-          tags: "heatmap_test, july_2025"
+          tags: "heatmap_test, july_2025",
+          maximum_winnings_type: "fixed"
         )
 
         # Создаем связанную запись в зависимости от типа бонуса
-        case bonus_type
+        case event_type
         when "deposit"
           DepositBonus.create!(
             bonus: bonus,

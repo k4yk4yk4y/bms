@@ -4,8 +4,6 @@ export default class extends Controller {
   static targets = ["name", "dslTag", "project", "status", "form"]
   
   connect() {
-    console.log("Bonus template controller connected")
-    console.log("Controller element:", this.element)
     this.initializeEventListeners()
     this.initializeMaximumWinningsHandler()
     this.initializePageLoad()
@@ -45,7 +43,6 @@ export default class extends Controller {
     // Initialize type-specific fields if event is already selected
     const bonusTypeSelect = document.querySelector('select[name="bonus[event]"]')
     if (bonusTypeSelect && bonusTypeSelect.value) {
-      console.log('Initializing with event type:', bonusTypeSelect.value)
       // Create a mock event object for initialization
       const mockEvent = { target: { value: bonusTypeSelect.value } }
       this.toggleTypeSpecificFields(mockEvent)
@@ -82,7 +79,6 @@ export default class extends Controller {
 
     // Only search if ALL three parameters are provided
     if (!name || !dslTag || !project) {
-      console.log('Not all parameters provided, skipping search:', { name, dslTag, project })
       // Hide any existing status
       this.showTemplateStatus('none')
       return
@@ -90,8 +86,6 @@ export default class extends Controller {
 
     // Debounce the search (wait 500ms after user stops typing)
     this.templateSearchTimeout = setTimeout(async () => {
-      console.log('Searching for template with all three params:', { name, dslTag, project })
-      
       // Show loading state
       this.showTemplateStatus('loading')
 
@@ -99,29 +93,23 @@ export default class extends Controller {
         // Build API URL with all three parameters
         const apiUrl = `/bonuses/find_template?dsl_tag=${encodeURIComponent(dslTag)}&name=${encodeURIComponent(name)}&project=${encodeURIComponent(project)}`
 
-        console.log('API URL:', apiUrl)
-
         // Make request to find template
         const response = await fetch(apiUrl)
         const data = await response.json()
 
         if (response.ok && data.template) {
-          console.log('Template found:', data)
           this.applyTemplate(data.template)
           this.showTemplateStatus('found', `Template "${data.template.name}" applied (${data.found_by})`)
         } else {
-          console.log('Template not found:', data)
           this.showTemplateStatus('not-found')
         }
       } catch (error) {
-        console.error('Error searching for template:', error)
         this.showTemplateStatus('not-found')
       }
     }, 500)
   }
   
   applyTemplate(template) {
-    console.log('Applying template:', template)
 
     // Apply template values to form fields
     if (template.dsl_tag && this.hasDslTagTarget && !this.dslTagTarget.value) {
@@ -310,7 +298,6 @@ export default class extends Controller {
       }
     }
     
-    console.log('Selected bonus type:', bonusType)
   }
   
   // Properties

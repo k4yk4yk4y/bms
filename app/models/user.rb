@@ -36,7 +36,7 @@ class User < ApplicationRecord
 
   # Role helper methods
   def display_role
-    role.humanize
+    role.humanize.force_encoding("UTF-8")
   end
 
   def can_manage_bonuses?
@@ -60,7 +60,7 @@ class User < ApplicationRecord
   end
 
   def full_name
-    "#{first_name} #{last_name}".strip
+    "#{first_name} #{last_name}".strip.force_encoding("UTF-8")
   end
 
   private
