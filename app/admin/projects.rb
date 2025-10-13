@@ -1,9 +1,45 @@
-ActiveAdmin.register_page "Projects" do
-  content do
-    panel "Projects" do
-      table_for Bonus.select(:project).distinct.pluck(:project) do
-        column :project do |project|
-          link_to project, admin_permanent_bonuses_path(q: { project_eq: project }) # This is a temporary link, will be improved
+ActiveAdmin.register Project do
+  permit_params :name
+
+  index do
+    selectable_column
+    column :id
+    column :name
+    column :permanent_bonuses_count do |project|
+      project.permanent_bonuses.count
+    end
+    column :created_at
+    column :updated_at
+    actions
+  end
+
+  filter :name
+  filter :created_at
+  filter :updated_at
+
+  form do |f|
+    f.inputs do
+      f.input :name, hint: "Unique project name"
+    end
+    f.actions
+  end
+
+  show do
+    attributes_table do
+      row :id
+      row :name
+      row :created_at
+      row :updated_at
+    end
+
+    panel "Permanent Bonuses" do
+      table_for project.permanent_bonuses do
+        column :bonus do |pb|
+          link_to pb.bonus.name, admin_bonus_path(pb.bonus) if pb.bonus
+        end
+        column :created_at
+        column "Actions" do |pb|
+          link_to "View", admin_permanent_bonus_path(pb)
         end
       end
     end

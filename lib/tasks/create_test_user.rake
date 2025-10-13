@@ -26,7 +26,7 @@ namespace :users do
   desc "Create a test admin user for testing"
   task create_test_admin: :environment do
     email = "admin@test.com"
-    password = "password123"
+    password = "123456"
 
     if User.exists?(email: email)
       puts "Admin user with email #{email} already exists!"

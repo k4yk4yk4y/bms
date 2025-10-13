@@ -1,23 +1,21 @@
 class SetupController < ApplicationController
   # Отключаем аутентификацию для setup страницы
-  skip_before_action :authenticate_user!, only: [:index, :create_admin]
-  skip_before_action :verify_authenticity_token, only: [:create_admin]
-  
+  skip_before_action :authenticate_user!, only: [ :index, :create_admin ]
+  skip_before_action :verify_authenticity_token, only: [ :create_admin ]
   def index
     # Проверяем, есть ли уже админы
     @has_admin = User.where(role: :admin).exists?
     @admin_count = User.where(role: :admin).count
-    
     # Если админ уже есть, перенаправляем на главную
     if @has_admin
-      redirect_to root_path, notice: 'Admin user already exists. Please log in.'
+      redirect_to root_path, notice: "Admin user already exists. Please log in."
     end
   end
 
   def create_admin
     # Проверяем, есть ли уже админы
     if User.where(role: :admin).exists?
-      redirect_to setup_index_path, alert: 'Admin user already exists!'
+      redirect_to setup_index_path, alert: "Admin user already exists!"
       return
     end
 
@@ -30,12 +28,12 @@ class SetupController < ApplicationController
 
     # Валидация
     if password != password_confirmation
-      redirect_to setup_index_path, alert: 'Passwords do not match!'
+      redirect_to setup_index_path, alert: "Passwords do not match!"
       return
     end
 
     if password.blank? || password.length < 6
-      redirect_to setup_index_path, alert: 'Password must be at least 6 characters long!'
+      redirect_to setup_index_path, alert: "Password must be at least 6 characters long!"
       return
     end
 
@@ -51,7 +49,7 @@ class SetupController < ApplicationController
 
       redirect_to root_path, notice: "Admin user created successfully! Email: #{user.email}"
     rescue ActiveRecord::RecordInvalid => e
-      error_message = e.record.errors.full_messages.join(', ')
+      error_message = e.record.errors.full_messages.join(", ")
       redirect_to setup_index_path, alert: "Failed to create admin user: #{error_message}"
     end
   end

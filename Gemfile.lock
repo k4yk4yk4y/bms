@@ -184,6 +184,9 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (2.13.2)
+    json-schema (6.0.0)
+      addressable (~> 2.8)
+      bigdecimal (~> 3.1)
     kamal (2.7.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -495,6 +498,7 @@ DEPENDENCIES
   faker (~> 3.2)
   importmap-rails
   jbuilder
+  json-schema
   kamal
   paper_trail (~> 16.0)
   pg (~> 1.1)

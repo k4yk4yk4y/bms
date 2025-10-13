@@ -60,24 +60,25 @@
             </li>
           <% end %>
           <% if can?(:read, Bonus) %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false">
+            <li class="nav-item dropdown" data-controller="projects-dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
                 <i class="fas fa-project-diagram"></i> Projects
-                <% if params[:project].present? %>
-                  <span class="badge bg-primary ms-1"><%= params[:project] %></span>
+                <% if params[:project_id].present? %>
+                  <% current_project = Project.find_by(id: params[:project_id]) %>
+                  <span class="badge bg-primary ms-1"><%= current_project&.name %></span>
                 <% end %>
               </a>
-              <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
+              <ul class="dropdown-menu" aria-labelledby="projectsDropdown" data-projects-dropdown-target="menu">
                 <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
                 <li><hr class="dropdown-divider"></li>
-                <% Bonus::PROJECTS.each do |project| %>
+                <% Project.order(:name).each do |project| %>
                   <li>
-                    <%= link_to bonuses_path(project: project), class: "dropdown-item #{'active' if params[:project] == project}" do %>
-                      <%= project %>
+                    <%= link_to bonuses_path(project_id: project.id), class: "dropdown-item #{'active' if params[:project_id]&.to_i == project.id}" do %>
+                      <%= project.name %>
                     <% end %>
                   </li>
                 <% end %>
-                <% if params[:project].present? %>
+                <% if params[:project_id].present? %>
                   <li><hr class="dropdown-divider"></li>
                   <li>
                     <%= link_to bonuses_path, class: "dropdown-item text-danger" do %>

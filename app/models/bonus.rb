@@ -8,21 +8,8 @@ class Bonus < ApplicationRecord
   # Status and type constants
   STATUSES = %w[draft active inactive expired].freeze
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
-  PROJECTS = %w[All VOLNA ROX FRESH SOL JET IZZI LEGZO STARDA DRIP MONRO 1GO LEX GIZBO IRWIN FLAGMAN MARTIN P17 ANJUAN NAMASTE].freeze
   GROUPS = %w[VIP Platinum Gold Silver Bronze New Regular Premium Elite].freeze
 
-  # Permanent bonus types for preview cards
-  PERMANENT_BONUS_TYPES = [
-    { name: "Welcome Bonus", slug: "welcome_bonus", dsl_tag: "welcome_bonus" },
-    { name: "Second Bonus", slug: "second_bonus", dsl_tag: "second" },
-    { name: "Third Bonus", slug: "third_bonus", dsl_tag: "third" },
-    { name: "Fourth Bonus", slug: "fourth_bonus", dsl_tag: "fourth" },
-    { name: "Reload Cash", slug: "reload_cash", dsl_tag: "reload_cash" },
-    { name: "Reload Freespins", slug: "reload_freespins", dsl_tag: "reload_freespins" },
-    { name: "Happy Birthday Bonus", slug: "happy_birthday", dsl_tag: "birthday" },
-    { name: "Cashback Bonus", slug: "cashback", dsl_tag: "cashback" },
-    { name: "Live Cashback Bonus", slug: "live_cashback", dsl_tag: "live_cashback" }
-  ].freeze
 
   # New reward associations
   has_many :bonus_rewards, dependent: :destroy
@@ -52,8 +39,6 @@ class Bonus < ApplicationRecord
   validates :availability_start_date, presence: true
   validates :availability_end_date, presence: true
   validates :maximum_winnings_type, presence: true, inclusion: { in: %w[fixed multiplier] }
-  # Currency validation removed - now using currencies array
-  validates :project, inclusion: { in: PROJECTS }, allow_blank: true
   validates :dsl_tag, length: { maximum: 255 }
   validates :description, length: { maximum: 1000 }, allow_blank: true
 
@@ -87,23 +72,9 @@ class Bonus < ApplicationRecord
   before_validation :set_default_project, if: -> { project.blank? }
   after_find :check_and_update_expired_status!
 
-  # Class methods for permanent bonuses
-  def self.find_permanent_bonus_for_project(project, dsl_tag)
-    where(project: project, dsl_tag: dsl_tag).active.first
-  end
-
   # Class method for groups
   def self.all_groups
     GROUPS
-  end
-
-  def self.permanent_bonus_previews_for_project(project)
-    return [] if project.blank?
-
-    PERMANENT_BONUS_TYPES.map do |bonus_type|
-      existing_bonus = find_permanent_bonus_for_project(project, bonus_type[:dsl_tag])
-      bonus_type.merge(existing_bonus: existing_bonus)
-    end
   end
 
   # Ransack configuration for ActiveAdmin

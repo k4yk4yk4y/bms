@@ -63,7 +63,7 @@ Rails.application.routes.draw do
           get :expired
         end
       end
-      
+
       # Setup routes for initial configuration
       namespace :setup do
         post :create_admin

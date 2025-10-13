@@ -14,17 +14,6 @@ RSpec.describe Bonus, type: :model do
     it 'has valid EVENT_TYPES' do
       expect(Bonus::EVENT_TYPES).to eq(%w[deposit input_coupon manual collection groups_update scheduler])
     end
-
-    it 'has valid PROJECTS' do
-      expect(Bonus::PROJECTS).to include('VOLNA', 'ROX', 'FRESH', 'SOL')
-    end
-
-    it 'has PERMANENT_BONUS_TYPES' do
-      expect(Bonus::PERMANENT_BONUS_TYPES).to be_an(Array)
-      expect(Bonus::PERMANENT_BONUS_TYPES.first).to have_key(:name)
-      expect(Bonus::PERMANENT_BONUS_TYPES.first).to have_key(:slug)
-      expect(Bonus::PERMANENT_BONUS_TYPES.first).to have_key(:dsl_tag)
-    end
   end
 
   # Associations tests
@@ -71,7 +60,6 @@ RSpec.describe Bonus, type: :model do
     describe 'inclusion validations' do
       it { is_expected.to validate_inclusion_of(:event).in_array(Bonus::EVENT_TYPES) }
       it { is_expected.to validate_inclusion_of(:status).in_array(Bonus::STATUSES) }
-      it { is_expected.to validate_inclusion_of(:project).in_array(Bonus::PROJECTS) }
     end
 
 
@@ -627,53 +615,6 @@ RSpec.describe Bonus, type: :model do
 
   # Class methods tests
   describe 'class methods' do
-    describe '.find_permanent_bonus_for_project' do
-      let!(:permanent_bonus) { create(:bonus, :active, project: 'VOLNA', dsl_tag: 'welcome_bonus') }
-
-      it 'finds permanent bonus by project and dsl_tag' do
-        result = Bonus.find_permanent_bonus_for_project('VOLNA', 'welcome_bonus')
-        expect(result).to eq(permanent_bonus)
-      end
-
-      it 'returns nil when no matching bonus found' do
-        result = Bonus.find_permanent_bonus_for_project('ROX', 'welcome_bonus')
-        expect(result).to be_nil
-      end
-
-      it 'only returns active bonuses' do
-        permanent_bonus.update!(status: 'inactive')
-        result = Bonus.find_permanent_bonus_for_project('VOLNA', 'welcome_bonus')
-        expect(result).to be_nil
-      end
-    end
-
-    describe '.permanent_bonus_previews_for_project' do
-      it 'returns empty array for blank project' do
-        expect(Bonus.permanent_bonus_previews_for_project('')).to eq([])
-        expect(Bonus.permanent_bonus_previews_for_project(nil)).to eq([])
-      end
-
-      it 'returns preview data for valid project' do
-        previews = Bonus.permanent_bonus_previews_for_project('VOLNA')
-        expect(previews).to be_an(Array)
-        expect(previews.length).to eq(Bonus::PERMANENT_BONUS_TYPES.length)
-
-        preview = previews.first
-        expect(preview).to have_key(:name)
-        expect(preview).to have_key(:slug)
-        expect(preview).to have_key(:dsl_tag)
-        expect(preview).to have_key(:existing_bonus)
-      end
-
-      it 'includes existing bonus when found' do
-        permanent_bonus = create(:bonus, :active, project: 'VOLNA', dsl_tag: 'welcome_bonus')
-        previews = Bonus.permanent_bonus_previews_for_project('VOLNA')
-
-        welcome_preview = previews.find { |p| p[:dsl_tag] == 'welcome_bonus' }
-        expect(welcome_preview[:existing_bonus]).to eq(permanent_bonus)
-      end
-    end
-
     describe '.update_expired_bonuses!' do
       let!(:expired_active_bonus) { create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago) }
       let!(:expired_inactive_bonus) { create(:bonus, :inactive, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago) }
@@ -852,24 +793,6 @@ RSpec.describe Bonus, type: :model do
 
       expect(duplicate_bonus).to be_valid
       expect(duplicate_bonus.save).to be_truthy
-    end
-  end
-
-  describe 'project validation' do
-    it 'accepts "All" as a valid project' do
-      bonus = build(:bonus, project: 'All')
-      expect(bonus).to be_valid
-    end
-
-    it 'accepts other valid projects' do
-      bonus = build(:bonus, project: 'VOLNA')
-      expect(bonus).to be_valid
-    end
-
-    it 'rejects invalid projects' do
-      bonus = build(:bonus, project: 'INVALID_PROJECT')
-      expect(bonus).not_to be_valid
-      expect(bonus.errors[:project]).to include('is not included in the list')
     end
   end
 end

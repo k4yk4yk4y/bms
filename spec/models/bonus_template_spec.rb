@@ -15,7 +15,11 @@ RSpec.describe BonusTemplate, type: :model do
     # Currency length validation removed - now using currencies array
     it { should validate_length_of(:description).is_at_most(1000) }
 
-    it { should validate_inclusion_of(:project).in_array(BonusTemplate::PROJECTS) }
+    it 'validates project presence' do
+      template = build(:bonus_template, project: nil)
+      expect(template).not_to be_valid
+      expect(template.errors[:project]).to include("can't be blank")
+    end
     it { should validate_inclusion_of(:event).in_array(BonusTemplate::EVENT_TYPES) }
 
     it 'validates uniqueness of dsl_tag scoped to project and name' do

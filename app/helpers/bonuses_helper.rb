@@ -67,28 +67,15 @@ module BonusesHelper
   end
 
   def project_options
-    [
-      [ "All", "All" ],
-      [ "VOLNA", "VOLNA" ],
-      [ "ROX", "ROX" ],
-      [ "FRESH", "FRESH" ],
-      [ "SOL", "SOL" ],
-      [ "JET", "JET" ],
-      [ "IZZI", "IZZI" ],
-      [ "LEGZO", "LEGZO" ],
-      [ "STARDA", "STARDA" ],
-      [ "DRIP", "DRIP" ],
-      [ "MONRO", "MONRO" ],
-      [ "1GO", "1GO" ],
-      [ "LEX", "LEX" ],
-      [ "GIZBO", "GIZBO" ],
-      [ "IRWIN", "IRWIN" ],
-      [ "FLAGMAN", "FLAGMAN" ],
-      [ "MARTIN", "MARTIN" ],
-      [ "P17", "P17" ],
-      [ "ANJUAN", "ANJUAN" ],
-      [ "NAMASTE", "NAMASTE" ]
-    ]
+    # Start with "All" option
+    options = [ [ "All", "All" ] ]
+
+    # Add all projects from database
+    Project.order(:name).each do |project|
+      options << [ project.name, project.name ]
+    end
+
+    options
   end
 
   def wagering_strategy_options

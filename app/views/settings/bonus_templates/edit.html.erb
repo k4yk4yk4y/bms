@@ -49,7 +49,7 @@
               <div class="col-md-6">
                 <div class="mb-3">
                   <%= form.label :project, class: "form-label" %>
-                  <%= form.select :project, BonusTemplate::PROJECTS, { prompt: "Select project" }, { class: "form-select" } %>
+                  <%= form.select :project, Project.order(:name).pluck(:name), { prompt: "Select project" }, { class: "form-select" } %>
                   <small class="form-text text-muted">Select "All" to create a template that applies to all projects</small>
                 </div>
               </div>

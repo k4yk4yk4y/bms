@@ -84,6 +84,13 @@ test-results/
 playwright/.cache/
 playwright/
 
+# Spec kit and Gemini CLI files
+.gemini/
+.specify/
+specs/
+eslint.config.js
+.eslintrc.js
+
 # Image and video files (screenshots, recordings from tests)
 *.md
 *.png

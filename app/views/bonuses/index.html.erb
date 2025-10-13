@@ -15,8 +15,8 @@
         <% end %>
       </div>
 
-      <!-- Permanent Bonus Previews -->
-      <%= render 'permanent_bonus_previews' %>
+      <!-- Permanent Bonuses -->
+      <%= render 'permanent_bonuses' %>
 
       <!-- Filters -->
       <div class="card mb-4">
@@ -54,29 +54,11 @@
                   class: "form-control" %>
             </div>
             <div class="col-md-2">
-              <%= form.select :project, 
-                  options_for_select([
-                    ['All Projects', ''],
-                    ['VOLNA', 'VOLNA'],
-                    ['ROX', 'ROX'],
-                    ['FRESH', 'FRESH'],
-                    ['SOL', 'SOL'],
-                    ['JET', 'JET'],
-                    ['IZZI', 'IZZI'],
-                    ['LEGZO', 'LEGZO'],
-                    ['STARDA', 'STARDA'],
-                    ['DRIP', 'DRIP'],
-                    ['MONRO', 'MONRO'],
-                    ['1GO', '1GO'],
-                    ['LEX', 'LEX'],
-                    ['GIZBO', 'GIZBO'],
-                    ['IRWIN', 'IRWIN'],
-                    ['FLAGMAN', 'FLAGMAN'],
-                    ['MARTIN', 'MARTIN'],
-                    ['P17', 'P17'],
-                    ['ANJUAN', 'ANJUAN'],
-                    ['NAMASTE', 'NAMASTE']
-                  ], params[:project]), 
+              <%= form.select :project_id, 
+                  options_for_select(
+                    [['All Projects', '']] + Project.order(:name).map { |p| [p.name, p.id] },
+                    params[:project_id]
+                  ), 
                   {}, 
                   { class: "form-select" } %>
             </div>
@@ -195,6 +177,11 @@ function submitBulkAction() {
                       </td>
                       <td>
                         <%= link_to bonus.name, bonus_path(bonus), class: "text-decoration-none" %>
+                        <% if @permanent_bonus_ids.include?(bonus.id) %>
+                          <span class="badge bg-warning text-dark ms-2" title="Permanent bonus for <%= @current_project&.name %>">
+                            <i class="fas fa-star"></i> Permanent
+                          </span>
+                        <% end %>
                         <% if bonus.description.present? %>
                           <div class="small text-muted mt-1" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= h(bonus.description) %>">
                             <%= truncate(bonus.description, length: 50) %>
@@ -287,7 +274,7 @@ function submitBulkAction() {
               <div>
                 <% current_page = (params[:page] || 1).to_i %>
                 <% if current_page > 1 %>
-                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :project, :dsl_tag).merge(page: current_page - 1)), 
+                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :project, :project_id, :dsl_tag).merge(page: current_page - 1)), 
                       class: "btn btn-outline-secondary me-2" %>
                 <% end %>
                 
@@ -296,7 +283,7 @@ function submitBulkAction() {
                 <span>
                 
                 <% if current_page < @total_pages %>
-                  <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :project, :dsl_tag).merge(page: current_page + 1)), 
+                  <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :project, :project_id, :dsl_tag).merge(page: current_page + 1)), 
                       class: "btn btn-outline-secondary" %>
                 <% end %>
               </div>
