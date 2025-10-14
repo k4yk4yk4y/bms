@@ -109,12 +109,17 @@ class Ability
 
     when "marketing_manager"
       # Маркетинг-менеджер имеет доступ ТОЛЬКО к своим маркетинговым заявкам
-      can :manage, MarketingRequest do |marketing_request|
+      can [ :read, :create, :update ], MarketingRequest do |marketing_request|
         marketing_request.manager == user.email
       end
       can :read, ActiveAdmin::Page, name: "Dashboard"
       can :read, User  # Может просматривать всех пользователей
       can :update, User, id: user.id  # Может редактировать только свой профиль
+
+      # ЗАПРЕТЫ на активацию, отклонение и удаление заявок
+      cannot :activate, MarketingRequest
+      cannot :reject, MarketingRequest
+      cannot :destroy, MarketingRequest
 
       # ПОЛНЫЙ ЗАПРЕТ доступа ко всем остальным разделам
       cannot :access, :settings
