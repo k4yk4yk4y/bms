@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_13_182120) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_20_121817) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -203,6 +203,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_182120) do
     t.index ["spins_count"], name: "index_freespin_rewards_on_spins_count"
   end
 
+  create_table "heatmap_comments", force: :cascade do |t|
+    t.date "start_date"
+    t.date "end_date"
+    t.text "text"
+    t.bigint "user_id", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_heatmap_comments_on_user_id"
+  end
+
   create_table "marketing_requests", force: :cascade do |t|
     t.string "manager", null: false
     t.text "platform"
@@ -277,6 +288,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_182120) do
   add_foreign_key "comp_point_rewards", "bonuses"
   add_foreign_key "freechip_rewards", "bonuses"
   add_foreign_key "freespin_rewards", "bonuses"
+  add_foreign_key "heatmap_comments", "users"
   add_foreign_key "material_prize_rewards", "bonuses"
   add_foreign_key "permanent_bonuses", "bonuses"
   add_foreign_key "permanent_bonuses", "projects"
