@@ -1,0 +1,15 @@
+<h3>Переименовать DSL тег: <%= @tag_name %></h3>
+
+<%= form_with url: admin_dsl_tags_update_tag_path, method: :post, local: true do |form| %>
+  <%= form.hidden_field :old_tag, value: @tag_name %>
+  
+  <div class="form_field">
+    <%= form.label :new_tag, "Новое имя тега:" %>
+    <%= form.text_field :new_tag, value: @tag_name, required: true, class: "form-control" %>
+  </div>
+  
+  <div class="form_actions">
+    <%= form.submit "Переименовать", class: "button primary" %>
+    <%= link_to "Отмена", admin_dsl_tags_path, class: "button" %>
+  </div>
+<% end %>
