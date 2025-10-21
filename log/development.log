@@ -19887,3 +19887,57 @@ Processing by BonusesController#index as HTML
 Completed 200 OK in 26ms (Views: 14.7ms | ActiveRecord: 1.3ms (6 queries, 1 cached) | GC: 12.0ms)
 
 
+  [1m[36mActiveRecord::SchemaMigration Load (1.0ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+Migrating to SeedProjectsFromBonuses (20251013182120)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Destroy (1.7ms)[0m  [1m[31mDELETE FROM "schema_migrations" WHERE "schema_migrations"."version" = '20251013182120' /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT pg_advisory_unlock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.6ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.4ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='BMS'*/[0m
+Migrating to CreatePermanentBonuses (20251013180322)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[35m (6.3ms)[0m  [1m[35mCREATE TABLE "permanent_bonuses" ("id" bigserial primary key, "bonus_id" bigint NOT NULL, "project_id" bigint, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_919acdc46a"
+FOREIGN KEY ("bonus_id")
+  REFERENCES "bonuses" ("id")
+, CONSTRAINT "fk_rails_9a71c52a89"
+FOREIGN KEY ("project_id")
+  REFERENCES "projects" ("id")
+) /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK /*application='BMS'*/[0m
+  [1m[35m (2.9ms)[0m  [1m[34mSELECT pg_advisory_unlock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (27.2ms)[0m  [1m[32mINSERT INTO schema_migrations (version) VALUES ('20251013180322') /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.4ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='BMS'*/[0m
+Migrating to SeedProjectsFromBonuses (20251013182120)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='BMS'*/[0m
+  [1m[35m (7.1ms)[0m  [1m[34mSELECT DISTINCT project FROM bonuses WHERE project IS NOT NULL AND project != '' /*application='BMS'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[34mSELECT DISTINCT project FROM bonus_templates WHERE project IS NOT NULL AND project != '' AND project != 'All' /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20251013182120') RETURNING "version" /*application='BMS'*/[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*application='BMS'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(7882410825468817470) /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[35m (7.2ms)[0m  [1m[31mDELETE FROM schema_migrations WHERE version = '20251013171802' /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='BMS'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='BMS'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='BMS'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='BMS'*/[0m
+  [1m[35m (52.6ms)[0m  [1m[35mDROP DATABASE IF EXISTS "bms_test" /*application='BMS'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE DATABASE "bms_test" ENCODING = 'utf8' TEMPLATE = "template0" /*application='BMS'*/[0m
+  [1m[36mProject Count (8.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "projects" /*application='BMS'*/[0m
+  [1m[36mPermanentBonus Count (0.9ms)[0m  [1m[34mSELECT COUNT(*) FROM "permanent_bonuses" /*application='BMS'*/[0m
