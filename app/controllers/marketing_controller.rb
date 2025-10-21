@@ -88,14 +88,8 @@ class MarketingController < ApplicationController
 
   def update
     authorize! :update, @marketing_request
-    params_to_update = marketing_request_params
 
-    # Marketing manager не может изменить поле manager - оно должно оставаться его email
-    if current_user&.marketing_manager?
-      params_to_update = params_to_update.except(:manager)
-    end
-
-    if @marketing_request.update(params_to_update)
+    if @marketing_request.update(marketing_request_params)
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
                   notice: "Заявка успешно обновлена."
     else
@@ -165,7 +159,7 @@ class MarketingController < ApplicationController
 
   def marketing_request_params
     params.require(:marketing_request).permit(
-      :manager, :platform, :partner_email, :promo_code,
+      :platform, :partner_email, :promo_code,
       :stag, :activation_date, :status, :request_type
     )
   end
