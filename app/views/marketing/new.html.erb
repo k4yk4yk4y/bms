@@ -55,26 +55,6 @@
                     </div>
                   </div>
 
-                  <div class="col-md-6 mb-3">
-                    <%= form.label :manager, "Менеджер", class: "form-label" %>
-                    <% if current_user&.marketing_manager? %>
-                      <%= form.text_field :manager, 
-                                          class: "form-control", 
-                                          value: current_user.email,
-                                          readonly: true %>
-                      <div class="form-text">
-                        Автоматически заполняется вашим email
-                      </div>
-                    <% else %>
-                      <%= form.text_field :manager, 
-                                          class: "form-control", 
-                                          placeholder: "Email менеджера",
-                                          required: true %>
-                      <div class="invalid-feedback">
-                        Пожалуйста, введите email менеджера.
-                      </div>
-                    <% end %>
-                  </div>
                 </div>
 
                 <div class="mb-3">

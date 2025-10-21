@@ -23,9 +23,11 @@ end
 
 # Create sample users for each role if they don't exist
 roles = {
+  admin: { email: 'pasha@bms.com', first_name: 'Super1', last_name: 'Admin1' },
   promo_manager: { email: 'promo@bms.com', first_name: 'Promo', last_name: 'Manager' },
   shift_leader: { email: 'shift@bms.com', first_name: 'Shift', last_name: 'Leader' },
-  support_agent: { email: 'support@bms.com', first_name: 'Support', last_name: 'Agent' }
+  support_agent: { email: 'support@bms.com', first_name: 'Support', last_name: 'Agent' },
+  marketing_manager: { email: 'marketing@bms.com', first_name: 'Marketing', last_name: 'Manager' }
 }
 
 roles.each do |role, attrs|
