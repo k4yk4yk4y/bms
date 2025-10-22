@@ -24,6 +24,7 @@ class Bonus < ApplicationRecord
   has_many :bonus_audit_logs, dependent: :destroy
   belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
   belongs_to :updater, class_name: "User", foreign_key: "updated_by", optional: true
+  belongs_to :dsl_tag, optional: true
 
 
   # Store JSON data
@@ -57,7 +58,12 @@ class Bonus < ApplicationRecord
   scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
-  scope :by_dsl_tag, ->(dsl_tag) { where("dsl_tag LIKE ?", "%#{dsl_tag}%") }
+  scope :by_dsl_tag, ->(dsl_tag) { 
+    left_joins(:dsl_tag).where(
+      "dsl_tags.name ILIKE ? OR bonuses.dsl_tag ILIKE ?", 
+      "%#{dsl_tag}%", "%#{dsl_tag}%"
+    )
+  }
   scope :available_now, -> { where("availability_start_date <= ? AND availability_end_date >= ?", Time.current, Time.current) }
 
   scope :deposit_event, -> { where(event: "deposit") }
@@ -254,7 +260,11 @@ class Bonus < ApplicationRecord
   def formatted_currency_minimum_deposits
     return "No minimum deposits specified" if currency_minimum_deposits.empty?
 
-    currency_minimum_deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
+    # Handle case where currency_minimum_deposits is a string
+    deposits = currency_minimum_deposits.is_a?(String) ? JSON.parse(currency_minimum_deposits) : currency_minimum_deposits
+    return "No minimum deposits specified" unless deposits.is_a?(Hash) && deposits.any?
+
+    deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
   end
 
   def minimum_deposit_for_currency(currency)
@@ -339,7 +349,11 @@ class Bonus < ApplicationRecord
   def validate_currency_minimum_deposits_precision
     return unless currency_minimum_deposits.present?
 
-    currency_minimum_deposits.each do |currency, amount|
+    # Handle case where currency_minimum_deposits is a string
+    deposits = currency_minimum_deposits.is_a?(String) ? JSON.parse(currency_minimum_deposits) : currency_minimum_deposits
+    return unless deposits.is_a?(Hash)
+
+    deposits.each do |currency, amount|
       next if amount.nil?
 
       unless self.class.valid_amount_for_currency?(amount, currency)
@@ -374,16 +388,20 @@ class Bonus < ApplicationRecord
   def valid_currency_minimum_deposits
     return if currency_minimum_deposits.blank?
 
+    # Handle case where currency_minimum_deposits is a string
+    deposits = currency_minimum_deposits.is_a?(String) ? JSON.parse(currency_minimum_deposits) : currency_minimum_deposits
+    return unless deposits.is_a?(Hash)
+
     # Проверяем, что currency_minimum_deposits не должно быть установлено для событий, которые не требуют депозита
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
-    if non_deposit_events.include?(event) && currency_minimum_deposits.any?
+    if non_deposit_events.include?(event) && deposits.any?
       errors.add(:currency_minimum_deposits, "не должно быть установлено для события #{event}")
       return
     end
 
     # Проверяем, что все значения являются положительными числами
-    currency_minimum_deposits.each do |currency, amount|
+    deposits.each do |currency, amount|
       if amount.blank? || amount.to_f <= 0
         errors.add(:currency_minimum_deposits, "для валюты #{currency} должно быть положительным числом")
       end
@@ -391,7 +409,7 @@ class Bonus < ApplicationRecord
 
     # Проверяем, что указанные валюты есть в списке поддерживаемых валют
     if currencies.present?
-      invalid_currencies = currency_minimum_deposits.keys - currencies
+      invalid_currencies = deposits.keys - currencies
       if invalid_currencies.any?
         errors.add(:currency_minimum_deposits, "содержит валюты, которые не указаны в списке поддерживаемых валют: #{invalid_currencies.join(', ')}")
       end
