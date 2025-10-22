@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_20_121817) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_22_170001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -151,11 +151,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121817) do
     t.text "currency_minimum_deposits"
     t.text "description"
     t.string "maximum_winnings_type", default: "multiplier", null: false
+    t.bigint "dsl_tag_id"
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["code"], name: "index_bonuses_on_code"
     t.index ["country"], name: "index_bonuses_on_country"
     t.index ["dsl_tag"], name: "index_bonuses_on_dsl_tag"
+    t.index ["dsl_tag_id"], name: "index_bonuses_on_dsl_tag_id"
     t.index ["event"], name: "index_bonuses_on_event"
     t.index ["project"], name: "index_bonuses_on_project"
     t.index ["status"], name: "index_bonuses_on_status"
@@ -172,6 +174,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121817) do
     t.string "title"
     t.index ["bonus_id"], name: "index_comp_point_rewards_on_bonus_id"
     t.index ["points_amount"], name: "index_comp_point_rewards_on_points_amount"
+  end
+
+  create_table "dsl_tags", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_dsl_tags_on_name", unique: true
   end
 
   create_table "freechip_rewards", force: :cascade do |t|
@@ -285,6 +295,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121817) do
   add_foreign_key "bonus_buy_rewards", "bonuses"
   add_foreign_key "bonus_code_rewards", "bonuses"
   add_foreign_key "bonus_rewards", "bonuses"
+  add_foreign_key "bonuses", "dsl_tags"
   add_foreign_key "comp_point_rewards", "bonuses"
   add_foreign_key "freechip_rewards", "bonuses"
   add_foreign_key "freespin_rewards", "bonuses"

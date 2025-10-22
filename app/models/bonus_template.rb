@@ -3,6 +3,11 @@ class BonusTemplate < ApplicationRecord
 
   # Status and type constants
   EVENT_TYPES = %w[deposit input_coupon manual collection groups_update scheduler].freeze
+  GROUPS = %w[VIP Platinum Gold Silver Bronze New Regular Premium Elite].freeze
+
+  def self.all_groups
+    GROUPS
+  end
 
   # Store JSON data
   serialize :currencies, coder: JSON
@@ -62,6 +67,14 @@ class BonusTemplate < ApplicationRecord
     end
 
     specific_templates + filtered_all_templates
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["created_at", "currencies", "currency_minimum_deposits", "description", "dsl_tag", "event", "groups", "id", "maximum_winnings", "minimum_deposit", "name", "no_more", "project", "totally_no_more", "updated_at", "wager"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
   end
 
   # Instance methods

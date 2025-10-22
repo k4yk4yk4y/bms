@@ -1,7 +1,7 @@
 ActiveAdmin.register Bonus do
   permit_params :name, :code, :status, :minimum_deposit, :wager, :maximum_winnings,
                 :wagering_strategy, :availability_start_date, :availability_end_date,
-                :user_group, :tags, :country, :project, :dsl_tag, :event,
+                :user_group, :tags, :country, :project, :dsl_tag_id, :event,
                 :currencies, :groups, :no_more, :totally_no_more,
                 :currency_minimum_deposits, :description, :maximum_winnings_type
 
@@ -19,6 +19,7 @@ ActiveAdmin.register Bonus do
   filter :updated_at
   filter :availability_start_date
   filter :availability_end_date
+  # filter :dsl_tag, as: :select, collection: -> { DslTag.order(:name).pluck(:name, :id) }
 
   # Настройка индексной страницы
   index do
@@ -77,7 +78,13 @@ ActiveAdmin.register Bonus do
       end
       row :event
       row :project
-      row :dsl_tag
+      row :dsl_tag do |bonus|
+        if bonus.dsl_tag
+          link_to bonus.dsl_tag.name, admin_dsl_tag_path(bonus.dsl_tag)
+        else
+          bonus.dsl_tag || "Не указан"
+        end
+      end
       row :description
       row :minimum_deposit
       row :wager
@@ -196,14 +203,14 @@ ActiveAdmin.register Bonus do
   end
 
   # Форма создания/редактирования
-  form do |f|
+  form data: { controller: "bonus-form" } do |f|
     f.inputs "Основная информация" do
-      f.input :name
+      f.input :name, input_html: { data: { "bonus-form-target": "name", action: "change->bonus-form#nameChanged" } }
       f.input :code
       f.input :status, as: :select, collection: Bonus::STATUSES
       f.input :event, as: :select, collection: Bonus::EVENT_TYPES
-      f.input :project, as: :select, collection: Project.order(:name).pluck(:name)
-      f.input :dsl_tag
+      f.input :project, as: :select, collection: Project.order(:name).pluck(:name, :id), input_html: { id: 'bonus_project_id', data: { "bonus-form-target": "project", action: "change->bonus-form#projectChanged" } }
+      f.input :dsl_tag_id, as: :select, collection: DslTag.order(:name).pluck(:name, :id), input_html: { id: 'bonus_dsl_tag_id', style: 'max-height: 200px; overflow-y: auto;', data: { "bonus-form-target": "dslTag", action: "change->bonus-form#dslTagChanged" } }
       f.input :description
     end
 

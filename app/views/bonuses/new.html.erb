@@ -85,9 +85,8 @@
                 </div>
 
                 <div class="mb-3">
-                  <%= form.label :dsl_tag, class: "form-label" %>
-                  <%= form.text_field :dsl_tag, class: "form-control", 
-                      data: { "bonus-template-target": "dslTag" } %>
+                  <%= form.label :dsl_tag_id, "DSL Tag", class: "form-label" %>
+                  <%= form.select :dsl_tag_id, dsl_tag_options, {}, { class: "form-select max-h-60 overflow-y-auto", data: { "bonus-template-target": "dslTag" } } %>
                 </div>
 
                 <div class="mb-3">

@@ -78,6 +78,18 @@ module BonusesHelper
     options
   end
 
+  def dsl_tag_options
+    # Start with empty option
+    options = [ [ "Select DSL Tag", "" ] ]
+
+    # Add all DSL tags from database
+    DslTag.order(:name).each do |dsl_tag|
+      options << [ dsl_tag.name, dsl_tag.id ]
+    end
+
+    options
+  end
+
   def wagering_strategy_options
     [
       [ "Wager", "wager" ],
