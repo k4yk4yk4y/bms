@@ -1,143 +1,128 @@
-ActiveAdmin.register_page "DSL Tags" do
-  # Application Settings - DSL Tags Management
-  menu label: "DSL Tags", parent: "Application Settings", priority: 3
+ActiveAdmin.register DslTag do
+  menu parent: "Application Settings"
+  permit_params :name, :description
 
-  content title: "DSL Tags Management" do
-    # Получаем все уникальные DSL теги с статистикой
-    dsl_tags_data = BonusTemplate.group(:dsl_tag)
-                                 .select("dsl_tag, COUNT(*) as usage_count, 
-                                         COUNT(DISTINCT project) as projects_count,
-                                         MIN(created_at) as first_used,
-                                         MAX(updated_at) as last_updated")
-                                 .order(:dsl_tag)
+  # Фильтры
+  filter :name
+  filter :description
+  filter :created_at
+  filter :updated_at
 
-    # Основная информация
-    div class: "panel" do
-      h3 "DSL Tags Overview"
-      para "Управление DSL тегами для шаблонов бонусов. DSL теги используются для идентификации и группировки шаблонов бонусов."
+  # Настройка индексной страницы
+  index do
+    selectable_column
+    id_column
+
+    column :name
+    column :description do |dsl_tag|
+      truncate(dsl_tag.description, length: 50) if dsl_tag.description.present?
+    end
+    column :usage_count do |dsl_tag|
+      dsl_tag.usage_count
+    end
+    column :active_bonuses_count do |dsl_tag|
+      dsl_tag.active_bonuses_count
+    end
+    column :created_at
+    column :updated_at
+
+    actions
+  end
+
+  # Детальная страница DSL тега
+  show do
+    attributes_table do
+      row :id
+      row :name
+      row :description
+      row :usage_count do |dsl_tag|
+        dsl_tag.usage_count
+      end
+      row :active_bonuses_count do |dsl_tag|
+        dsl_tag.active_bonuses_count
+      end
+      row :created_at
+      row :updated_at
     end
 
-    # Статистика
-    div class: "panel" do
-      h3 "Статистика"
-      div class: "stats_grid" do
-        div class: "stat_item" do
-          h4 dsl_tags_data.count
-          p "Всего DSL тегов"
+    # Панель с бонусами, использующими этот DSL тег
+    if dsl_tag.bonuses.any?
+      panel "Бонусы с этим DSL тегом" do
+        table_for dsl_tag.bonuses.limit(20) do
+          column :id
+          column :name
+          column :code
+          column :status do |bonus|
+            status_class = case bonus.status
+            when "active"
+                            :ok
+            when "inactive"
+                            :error
+            when "draft"
+                            :warning
+            when "expired"
+                            :default
+            else
+                            :default
+            end
+            status_tag bonus.status, class: status_class
+          end
+          column :event
+          column :project
+          column :created_at
         end
-        div class: "stat_item" do
-          h4 BonusTemplate.count
-          p "Всего шаблонов"
-        end
-        div class: "stat_item" do
-          h4 Project.count
-          p "Всего проектов"
+
+        if dsl_tag.bonuses.count > 20
+          div class: "view-all-link" do
+            link_to "Показать все бонусы (#{dsl_tag.bonuses.count})", 
+                    admin_bonuses_path(q: { dsl_tag_id_eq: dsl_tag.id }), 
+                    class: "button"
+          end
         end
       end
     end
+  end
 
-    # Таблица DSL тегов
-    div class: "panel" do
-      h3 "Все DSL теги"
+  # Форма создания/редактирования
+  form do |f|
+    f.inputs "DSL Tag" do
+      f.input :name, hint: "Уникальное имя DSL тега"
+      f.input :description, as: :text, hint: "Описание назначения DSL тега"
+    end
+
+    f.actions
+  end
+
+  # Batch actions
+  batch_action :destroy, confirm: "Удалить выбранные DSL теги?" do |ids|
+    DslTag.where(id: ids).find_each do |dsl_tag|
+      if dsl_tag.bonuses.any?
+        redirect_to collection_path, alert: "DSL тег '#{dsl_tag.name}' используется в бонусах и не может быть удален"
+        return
+      end
+      dsl_tag.destroy
+    end
+    redirect_to collection_path, notice: "Удалено #{ids.count} DSL тегов"
+  end
+
+  # Контроллер
+  controller do
+    def destroy
+      @dsl_tag = DslTag.find(params[:id])
       
-      if dsl_tags_data.any?
-        table class: "index_table" do
-          thead do
-            tr do
-              th "DSL Tag"
-              th "Использований"
-              th "Проектов"
-              th "Первый раз использован"
-              th "Последнее обновление"
-              th "Действия"
-            end
-          end
-          tbody do
-            dsl_tags_data.each do |tag_data|
-              tr do
-                td do
-                  status_tag tag_data.dsl_tag, class: :info
-                end
-                td do
-                  strong tag_data.usage_count
-                end
-                td do
-                  strong tag_data.projects_count
-                end
-                td do
-                  tag_data.first_used&.strftime("%d.%m.%Y %H:%M")
-                end
-                td do
-                  tag_data.last_updated&.strftime("%d.%m.%Y %H:%M")
-                end
-                td do
-                  div class: "action_items" do
-                    link_to "Просмотр шаблонов", admin_bonus_templates_path(q: { dsl_tag_eq: tag_data.dsl_tag }),
-                            class: "member_link"
-                    link_to "Переименовать", admin_dsl_tags_rename_tag_path(tag_name: tag_data.dsl_tag),
-                            class: "member_link", method: :get
-                    if tag_data.usage_count == 0
-                      link_to "Удалить", admin_dsl_tags_delete_tag_path(tag_name: tag_data.dsl_tag),
-                              class: "member_link delete_link", method: :delete,
-                              confirm: "Вы уверены, что хотите удалить DSL тег '#{tag_data.dsl_tag}'?"
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      else
-        div class: "blank_slate_container" do
-          span class: "blank_slate" do
-            span "Нет DSL тегов"
-          end
-        end
-      end
-    end
-
-  end
-
-
-  page_action :rename_tag, method: :get do
-    @tag_name = params[:tag_name]
-    render layout: false
-  end
-
-  page_action :update_tag, method: :post do
-    old_tag = params[:old_tag]
-    new_tag = params[:new_tag]
-    
-    begin
-      # Проверяем, что новый тег не существует
-      if BonusTemplate.where(dsl_tag: new_tag).exists?
-        redirect_to admin_dsl_tags_path, alert: "DSL тег '#{new_tag}' уже существует"
+      if @dsl_tag.bonuses.any?
+        redirect_to admin_dsl_tags_path, alert: "DSL тег используется в бонусах и не может быть удален"
         return
       end
       
-      # Переименовываем все шаблоны с этим тегом
-      updated_count = BonusTemplate.where(dsl_tag: old_tag).update_all(dsl_tag: new_tag)
-      
-      redirect_to admin_dsl_tags_path, notice: "DSL тег успешно переименован. Обновлено #{updated_count} шаблонов."
-    rescue => e
-      redirect_to admin_dsl_tags_path, alert: "Ошибка при переименовании: #{e.message}"
+      @dsl_tag.destroy
+      redirect_to admin_dsl_tags_path, notice: "DSL тег успешно удален"
     end
-  end
 
-  page_action :delete_tag, method: :delete do
-    tag_name = params[:tag_name]
-    
-    begin
-      # Проверяем, что тег не используется
-      if BonusTemplate.where(dsl_tag: tag_name).exists?
-        redirect_to admin_dsl_tags_path, alert: "DSL тег используется в шаблонах и не может быть удален"
-        return
-      end
-      
-      redirect_to admin_dsl_tags_path, notice: "DSL тег '#{tag_name}' удален (не использовался)"
-    rescue => e
-      redirect_to admin_dsl_tags_path, alert: "Ошибка при удалении: #{e.message}"
+    private
+
+    def current_user
+      current_admin_user
     end
   end
 end
-

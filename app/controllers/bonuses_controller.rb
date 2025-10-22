@@ -1300,7 +1300,7 @@ class BonusesController < ApplicationController
       :name, :code, :event, :status, :wager,
       :maximum_winnings, :maximum_winnings_type, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country,
-      :project, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
+      :project, :dsl_tag_id, :created_by, :updated_by, :no_more, :totally_no_more,
       :description,
       currencies: [], groups: [], currency_minimum_deposits: {}
     )

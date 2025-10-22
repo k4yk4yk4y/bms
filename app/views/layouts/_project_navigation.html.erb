@@ -1,0 +1,10 @@
+<%# app/views/layouts/_project_navigation.html.erb %>
+
+<div class="project-dropdown">
+  <a href="#" class="project-dropdown-toggle">Projects</a>
+  <div class="project-dropdown-menu">
+    <% Project.order(id: :desc).each do |project|
+      link_to project.name, admin_bonuses_path(project_id: project.id)
+    end %>
+  </div>
+</div>

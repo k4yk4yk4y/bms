@@ -123,7 +123,7 @@ db/                      # Database migrations and schema
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Ensure your changes are covered by tests
 5. Submit a pull request
 
 ## License
