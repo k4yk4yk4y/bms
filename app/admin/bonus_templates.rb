@@ -62,7 +62,6 @@ ActiveAdmin.register BonusTemplate do
       row :minimum_deposit
       row :wager
       row :maximum_winnings
-      row :maximum_winnings_type
       row :no_more
       row :totally_no_more
       row :currencies do |template|
@@ -132,8 +131,6 @@ ActiveAdmin.register BonusTemplate do
       f.input :minimum_deposit, hint: "Минимальный депозит"
       f.input :wager, hint: "Вейджер (множитель отыгрыша)"
       f.input :maximum_winnings, hint: "Максимальный выигрыш"
-      f.input :maximum_winnings_type, as: :select, collection: %w[fixed multiplier],
-              hint: "Тип максимального выигрыша"
       f.input :no_more, hint: "Больше нельзя использовать"
       f.input :totally_no_more, hint: "Полностью больше нельзя использовать"
     end

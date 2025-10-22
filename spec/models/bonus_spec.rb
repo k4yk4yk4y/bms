@@ -25,6 +25,7 @@ RSpec.describe Bonus, type: :model do
     it { is_expected.to have_many(:bonus_code_rewards).dependent(:destroy) }
     it { is_expected.to have_many(:freechip_rewards).dependent(:destroy) }
     it { is_expected.to have_many(:material_prize_rewards).dependent(:destroy) }
+    it { is_expected.to belong_to(:dsl_tag).optional }
   end
 
   # Validations tests
