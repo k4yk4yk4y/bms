@@ -60,7 +60,7 @@ class MarketingController < ApplicationController
     end
 
     # Автоматически заполняем поле manager email'ом текущего пользователя
-    if current_user&.marketing_manager?
+    if current_user
       @marketing_request.manager = current_user.email
     end
   end
@@ -70,7 +70,7 @@ class MarketingController < ApplicationController
     @marketing_request = MarketingRequest.new(marketing_request_params)
 
     # Автоматически устанавливаем manager email для marketing_manager
-    if current_user&.marketing_manager?
+    if current_user
       @marketing_request.manager = current_user.email
     end
 
