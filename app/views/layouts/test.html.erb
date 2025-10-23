@@ -71,13 +71,15 @@
               <ul class="dropdown-menu" aria-labelledby="projectsDropdown" data-projects-dropdown-target="menu">
                 <li><%= link_to "All Projects", bonuses_path, class: "dropdown-item" %></li>
                 <li><hr class="dropdown-divider"></li>
-                <% Project.order(:name).each do |project| %>
+                <div style="max-height: 300px; overflow-y: auto;">
+                <% Project.order(id: :desc).each do |project| %>
                   <li>
                     <%= link_to bonuses_path(project_id: project.id), class: "dropdown-item #{'active' if params[:project_id]&.to_i == project.id}" do %>
                       <%= project.name %>
                     <% end %>
                   </li>
                 <% end %>
+                </div>
                 <% if params[:project_id].present? %>
                   <li><hr class="dropdown-divider"></li>
                   <li>
