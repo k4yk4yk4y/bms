@@ -58,7 +58,7 @@ group :development, :test do
   gem "json-schema"
 
   # Factory Bot for test data [https://github.com/thoughtbot/factory_bot_rails]
-  gem "factory_bot_rails", "~> 6.4"
+  gem "factory_bot_rails", "~> 6.5"
 
   # Faker for generating fake data [https://github.com/faker-ruby/faker]
   gem "faker", "~> 3.2"
