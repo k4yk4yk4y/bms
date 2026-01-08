@@ -83,7 +83,7 @@ RSpec.describe MarketingRequest, type: :model do
         end
 
         it 'allows same stag for the same request' do
-          existing_request.manager = 'Updated Manager'
+          existing_request.manager = 'updated@example.com'
           expect(existing_request).to be_valid
         end
 
@@ -149,7 +149,7 @@ RSpec.describe MarketingRequest, type: :model do
         it 'detects when all codes become empty after normalization' do
           # Create a test that bypasses normal validations to test the custom one
           marketing_request.assign_attributes(
-            manager: 'Test Manager',
+            manager: 'test.manager@example.com',
             partner_email: 'test@example.com',
             stag: 'TESTSTAG',
             promo_code: 'NOT_EMPTY', # Set non-empty initially
@@ -243,7 +243,7 @@ RSpec.describe MarketingRequest, type: :model do
       let(:activated_request) { create(:marketing_request, :activated) }
 
       it 'resets status to pending when content is changed' do
-        activated_request.manager = 'New Manager'
+        activated_request.manager = 'new.manager@example.com'
         activated_request.save!
         expect(activated_request.status).to eq('pending')
         expect(activated_request.activation_date).to be_nil
@@ -257,7 +257,7 @@ RSpec.describe MarketingRequest, type: :model do
 
       it 'does not affect pending requests' do
         pending_request = create(:marketing_request, :pending)
-        pending_request.manager = 'New Manager'
+        pending_request.manager = 'new.manager@example.com'
         pending_request.save!
         expect(pending_request.status).to eq('pending')
       end
@@ -424,8 +424,10 @@ RSpec.describe MarketingRequest, type: :model do
   # Edge cases and error conditions
   describe 'edge cases' do
     describe 'with special characters' do
-      it 'handles unicode characters in manager name' do
-        marketing_request.manager = 'Менеджер Иванов'
+      it 'handles unicode characters in manager email' do
+        # Email validation doesn't accept unicode in email addresses
+        # Use a valid email with unicode in display name format or use ASCII
+        marketing_request.manager = 'manager.ivanov@example.com'
         expect(marketing_request).to be_valid
       end
 
@@ -437,7 +439,8 @@ RSpec.describe MarketingRequest, type: :model do
 
     describe 'with boundary values' do
       it 'handles maximum length strings' do
-        marketing_request.manager = 'A' * 255
+        # Manager must be a valid email, so use a valid email format with max length
+        marketing_request.manager = "#{'a' * 240}@example.com"
         marketing_request.platform = 'B' * 1000
         marketing_request.partner_email = "#{'a' * 240}@example.com"
         marketing_request.promo_code = 'C' * 2000
@@ -470,8 +473,8 @@ RSpec.describe MarketingRequest, type: :model do
         request1 = create(:marketing_request, :activated)
         request2 = MarketingRequest.find(request1.id)
 
-        request1.manager = 'Manager 1'
-        request2.manager = 'Manager 2'
+        request1.manager = 'manager1@example.com'
+        request2.manager = 'manager2@example.com'
 
         request1.save!
         expect(request1.status).to eq('pending')

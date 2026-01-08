@@ -26,6 +26,15 @@ class Bonus < ApplicationRecord
   belongs_to :updater, class_name: "User", foreign_key: "updated_by", optional: true
   belongs_to :dsl_tag, optional: true
 
+  # Override dsl_tag getter to return string if association is nil, otherwise return association
+  def dsl_tag
+    if dsl_tag_id.present?
+      super # Return the association object
+    else
+      read_attribute(:dsl_tag) # Return the string attribute
+    end
+  end
+
 
   # Store JSON data
   serialize :currencies, coder: JSON
@@ -58,9 +67,9 @@ class Bonus < ApplicationRecord
   scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
-  scope :by_dsl_tag, ->(dsl_tag) { 
+  scope :by_dsl_tag, ->(dsl_tag) {
     left_joins(:dsl_tag).where(
-      "dsl_tags.name ILIKE ? OR bonuses.dsl_tag ILIKE ?", 
+      "dsl_tags.name ILIKE ? OR bonuses.dsl_tag ILIKE ?",
       "%#{dsl_tag}%", "%#{dsl_tag}%"
     )
   }

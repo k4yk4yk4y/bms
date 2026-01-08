@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_22_170001) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_08_111418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -235,8 +235,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_22_170001) do
     t.string "request_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["manager"], name: "index_marketing_requests_on_manager"
     t.index ["partner_email"], name: "index_marketing_requests_on_partner_email"
-    t.index ["promo_code"], name: "index_marketing_requests_on_promo_code", unique: true
+    t.index ["promo_code"], name: "index_marketing_requests_on_promo_code"
     t.index ["request_type"], name: "index_marketing_requests_on_request_type"
     t.index ["stag"], name: "index_marketing_requests_on_stag", unique: true
     t.index ["status"], name: "index_marketing_requests_on_status"

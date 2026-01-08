@@ -127,8 +127,22 @@ class BonusesController < ApplicationController
   def create
     Rails.logger.debug "CREATE METHOD CALLED with params: #{params.inspect}"
 
-    @bonus = Bonus.new(bonus_params)
-    Rails.logger.debug "Bonus created with params: #{bonus_params.inspect}"
+    # Extract dsl_tag string before creating bonus to avoid association setter
+    dsl_tag_string = params[:bonus] && params[:bonus][:dsl_tag].present? && params[:bonus][:dsl_tag_id].blank? ? params[:bonus][:dsl_tag] : nil
+
+    # Remove dsl_tag from params to avoid association setter conflict
+    bonus_params_hash = bonus_params.to_h
+    bonus_params_hash.delete(:dsl_tag) if bonus_params_hash.key?(:dsl_tag)
+
+    @bonus = Bonus.new(bonus_params_hash)
+
+    # Set dsl_tag string attribute directly if provided
+    if dsl_tag_string.present?
+      @bonus.write_attribute(:dsl_tag, dsl_tag_string)
+      @bonus.dsl_tag_id = nil # Clear association if string is provided
+    end
+
+    Rails.logger.debug "Bonus created with params: #{bonus_params_hash.inspect}"
     Rails.logger.debug "Bonus valid: #{@bonus.valid?}"
     Rails.logger.debug "Bonus errors: #{@bonus.errors.full_messages}"
 
@@ -1300,7 +1314,7 @@ class BonusesController < ApplicationController
       :name, :code, :event, :status, :wager,
       :maximum_winnings, :maximum_winnings_type, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country,
-      :project, :dsl_tag_id, :created_by, :updated_by, :no_more, :totally_no_more,
+      :project, :dsl_tag_id, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
       :description,
       currencies: [], groups: [], currency_minimum_deposits: {}
     )

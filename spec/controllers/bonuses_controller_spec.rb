@@ -83,7 +83,7 @@ RSpec.describe BonusesController, type: :controller do
       let!(:de_bonus) { create(:bonus, country: 'DE') }
       let!(:volna_bonus) { create(:bonus, project: 'VOLNA') }
       let!(:rox_bonus) { create(:bonus, project: 'ROX') }
-      let!(:tagged_bonus) { create(:bonus, dsl_tag: 'welcome_bonus') }
+      let!(:tagged_bonus) { create(:bonus, dsl_tag_string: 'welcome_bonus') }
 
       it 'filters by currency' do
         get :index, params: { currencies: [ 'USD' ] }
@@ -249,7 +249,7 @@ RSpec.describe BonusesController, type: :controller do
             event: 'deposit',
             status: 'active',
             project: 'All',
-            dsl_tag: 'test_tag',
+            dsl_tag_string: 'test_tag',
             availability_start_date: 1.day.from_now,
             availability_end_date: 1.week.from_now,
             groups: 'VIP,Regular',

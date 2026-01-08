@@ -21,7 +21,7 @@ class BonusTemplatesController < ApplicationController
     )
 
     if template
-      render json: template.as_json(only: [:minimum_deposit, :wager]) # Return relevant fields
+      render json: template.as_json(only: [ :minimum_deposit, :wager ]) # Return relevant fields
     else
       render json: { error: "Template not found" }, status: :not_found
     end

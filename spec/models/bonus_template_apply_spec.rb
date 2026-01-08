@@ -41,7 +41,7 @@ RSpec.describe BonusTemplate, type: :model do
 
       it 'overwrites existing bonus attributes' do
         # Set some existing attributes on bonus
-        bonus.dsl_tag = 'old_tag'
+        bonus.write_attribute(:dsl_tag, 'old_tag')
         bonus.project = 'ROX'
         bonus.event = 'manual'
         bonus.wager = 50.0
@@ -301,7 +301,7 @@ RSpec.describe BonusTemplate, type: :model do
 
       it 'works with existing bonus instance' do
         template = create(:bonus_template, :welcome_bonus)
-        existing_bonus = create(:bonus, dsl_tag: 'old_tag', project: 'ROX')
+        existing_bonus = create(:bonus, dsl_tag_string: 'old_tag', project: 'ROX')
 
         template.apply_to_bonus(existing_bonus)
 

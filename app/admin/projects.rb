@@ -1,7 +1,7 @@
 ActiveAdmin.register Project do
   # Application Settings - Projects Management
   menu label: "Projects", parent: "Application Settings", priority: 1
-  
+
   permit_params :name
 
   index do

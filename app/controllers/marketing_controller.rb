@@ -14,9 +14,9 @@ class MarketingController < ApplicationController
 
     # Filter by tab only if no search or status filter
     if params[:search].present? || params[:status].present?
-      @marketing_requests = base_scope.order(:created_at)
+      @marketing_requests = base_scope.order(created_at: :desc)
     else
-      @marketing_requests = base_scope.by_request_type(@current_tab).order(:created_at)
+      @marketing_requests = base_scope.by_request_type(@current_tab).order(created_at: :desc)
     end
 
     # Filter by status if provided
@@ -24,22 +24,28 @@ class MarketingController < ApplicationController
       @marketing_requests = @marketing_requests.by_status(params[:status])
     end
 
-    # Search functionality
+    # Search functionality - optimized with ILIKE for PostgreSQL (case-insensitive)
     if params[:search].present?
-      search_term = params[:search].strip.downcase
+      search_term = "%#{params[:search].strip}%"
       @marketing_requests = @marketing_requests.where(
-        "LOWER(promo_code) LIKE ? OR LOWER(stag) LIKE ? OR LOWER(manager) LIKE ? OR LOWER(partner_email) LIKE ?",
-        "%#{search_term}%", "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        "promo_code ILIKE ? OR stag ILIKE ? OR manager ILIKE ? OR partner_email ILIKE ?",
+        search_term, search_term, search_term, search_term
       )
     end
 
-    # Count tabs based on user scope
+    # Pagination
+    page = [ (params[:page] || 1).to_i, 1 ].max
+    per_page = 25
+    offset = [ (page - 1) * per_page, 0 ].max
+
+    @total_requests = @marketing_requests.count
+    @total_pages = (@total_requests.to_f / per_page).ceil
+    @current_page = page
+    @marketing_requests = @marketing_requests.limit(per_page).offset(offset)
+
+    # Count tabs based on user scope - optimize with single query
     @tabs = MarketingRequest::REQUEST_TYPES.map do |type|
-      count = if current_user&.marketing_manager?
-                base_scope.by_request_type(type).count
-      else
-                MarketingRequest.by_request_type(type).count
-      end
+      count = base_scope.by_request_type(type).count
       {
         key: type,
         label: MarketingRequest::REQUEST_TYPE_LABELS[type],
@@ -107,21 +113,39 @@ class MarketingController < ApplicationController
 
   def activate
     authorize! :activate, @marketing_request
-    @marketing_request.activate!
-    redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                notice: "Заявка активирована."
+
+    if @marketing_request.activate!
+      redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                  notice: "Заявка активирована."
+    else
+      redirect_to marketing_path(@marketing_request),
+                  alert: "Ошибка при активации: #{@marketing_request.errors.full_messages.join(', ')}"
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to marketing_path(@marketing_request),
+                alert: "Ошибка при активации: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
-    redirect_to marketing_index_path(tab: @marketing_request.request_type),
+    Rails.logger.error "Marketing activation error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
+    redirect_to marketing_path(@marketing_request),
                 alert: "Ошибка при активации: #{e.message}"
   end
 
   def reject
     authorize! :reject, @marketing_request
-    @marketing_request.reject!
-    redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                notice: "Заявка отклонена."
+
+    if @marketing_request.reject!
+      redirect_to marketing_index_path(tab: @marketing_request.request_type),
+                  notice: "Заявка отклонена."
+    else
+      redirect_to marketing_path(@marketing_request),
+                  alert: "Ошибка при отклонении: #{@marketing_request.errors.full_messages.join(', ')}"
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to marketing_path(@marketing_request),
+                alert: "Ошибка при отклонении: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
-    redirect_to marketing_index_path(tab: @marketing_request.request_type),
+    Rails.logger.error "Marketing rejection error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
+    redirect_to marketing_path(@marketing_request),
                 alert: "Ошибка при отклонении: #{e.message}"
   end
 
@@ -136,17 +160,23 @@ class MarketingController < ApplicationController
     end
 
     old_type = @marketing_request.request_type_label
-    old_request_type = @marketing_request.request_type
 
-    @marketing_request.update!(
+    if @marketing_request.update(
       request_type: new_request_type,
       status: "pending",  # Всегда возвращаем в pending при переносе
       activation_date: nil
     )
-
-    redirect_to marketing_index_path(tab: new_request_type),
-                notice: "Заявка перенесена из \"#{old_type}\" в \"#{@marketing_request.request_type_label}\"."
+      redirect_to marketing_index_path(tab: new_request_type),
+                  notice: "Заявка перенесена из \"#{old_type}\" в \"#{@marketing_request.request_type_label}\"."
+    else
+      redirect_to marketing_path(@marketing_request),
+                  alert: "Ошибка при переносе: #{@marketing_request.errors.full_messages.join(', ')}"
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to marketing_path(@marketing_request),
+                alert: "Ошибка при переносе: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
+    Rails.logger.error "Marketing transfer error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     redirect_to marketing_path(@marketing_request),
                 alert: "Ошибка при переносе: #{e.message}"
   end
@@ -158,9 +188,17 @@ class MarketingController < ApplicationController
   end
 
   def marketing_request_params
-    params.require(:marketing_request).permit(
+    permitted = params.require(:marketing_request).permit(
       :platform, :partner_email, :promo_code,
       :stag, :activation_date, :status, :request_type
     )
+
+    # Only allow status and activation_date changes for admins
+    unless current_user&.admin?
+      permitted.delete(:status)
+      permitted.delete(:activation_date)
+    end
+
+    permitted
   end
 end

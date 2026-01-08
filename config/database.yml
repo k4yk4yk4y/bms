@@ -6,7 +6,12 @@ default: &default
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   # Use template0 to avoid encoding conflicts and force UTF-8
+  # template0 ensures consistent encoding regardless of system locale settings
   template: template0
+  # Optional: Explicitly set locale for consistent sorting (C = byte-order sorting, no locale-specific rules)
+  # This prevents conflicts when databases are created on different systems with different locales
+  # Uncomment below if you need locale-aware sorting (e.g., for internationalization):
+  # locale: en_US.UTF-8
 
 development:
   <<: *default

@@ -74,20 +74,27 @@ RSpec.describe "DslTags", type: :request do
 
   describe "DELETE /admin/dsl_tags/:id" do
     context "when dsl_tag has no bonuses" do
+      let!(:dsl_tag_without_bonuses) { create(:dsl_tag) }
+
+      before do
+        # Ensure no bonuses are associated with this dsl_tag
+        Bonus.where(dsl_tag_id: dsl_tag_without_bonuses.id).update_all(dsl_tag_id: nil)
+      end
+
       it "destroys the requested dsl_tag" do
         expect {
-          delete admin_dsl_tag_path(dsl_tag)
+          delete admin_dsl_tag_path(dsl_tag_without_bonuses)
         }.to change(DslTag, :count).by(-1)
       end
 
       it "redirects to the dsl_tags list" do
-        delete admin_dsl_tag_path(dsl_tag)
+        delete admin_dsl_tag_path(dsl_tag_without_bonuses)
         expect(response).to redirect_to(admin_dsl_tags_path)
       end
     end
 
     context "when dsl_tag has bonuses" do
-      let!(:bonus) { create(:bonus, dsl_tag: dsl_tag) }
+      let!(:bonus) { create(:bonus, dsl_tag_id: dsl_tag.id) }
 
       it "does not destroy the dsl_tag" do
         expect {

@@ -6,11 +6,11 @@ class DslTag < ApplicationRecord
 
   # Ransack configuration for ActiveAdmin
   def self.ransackable_attributes(auth_object = nil)
-    ["name", "description", "created_at", "updated_at"]
+    [ "name", "description", "created_at", "updated_at" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
-    ["bonuses"]
+    [ "bonuses" ]
   end
 
   # Scopes
