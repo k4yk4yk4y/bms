@@ -54,7 +54,12 @@ RSpec.describe Bonus, type: :model do
       it { is_expected.to validate_length_of(:name).is_at_most(255) }
       it { is_expected.to validate_length_of(:code).is_at_most(50) }
       # Currency length validation removed - now using currencies array
-      it { is_expected.to validate_length_of(:dsl_tag).is_at_most(255) }
+      it 'validates length of dsl_tag string attribute' do
+        bonus = build(:bonus)
+        bonus.write_attribute(:dsl_tag, 'x' * 256)
+        expect(bonus).not_to be_valid
+        expect(bonus.errors[:dsl_tag]).to be_present
+      end
       it { is_expected.to validate_length_of(:description).is_at_most(1000) }
     end
 
@@ -765,7 +770,7 @@ RSpec.describe Bonus, type: :model do
       it 'handles very long attribute values' do
         bonus = build(:bonus,
                       name: 'A' * 255,  # Maximum length
-                      dsl_tag: 'B' * 255,  # Maximum length
+                      dsl_tag_string: 'B' * 255,  # Maximum length
                       description: 'C' * 1000)  # Maximum length
 
         expect(bonus).to be_valid

@@ -70,7 +70,7 @@ class BonusTemplate < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "currencies", "currency_minimum_deposits", "description", "dsl_tag", "event", "groups", "id", "maximum_winnings", "minimum_deposit", "name", "no_more", "project", "totally_no_more", "updated_at", "wager"]
+    [ "created_at", "currencies", "currency_minimum_deposits", "description", "dsl_tag", "event", "groups", "id", "maximum_winnings", "minimum_deposit", "name", "no_more", "project", "totally_no_more", "updated_at", "wager" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
@@ -80,7 +80,7 @@ class BonusTemplate < ApplicationRecord
   # Instance methods
   def apply_to_bonus(bonus)
     bonus.assign_attributes(
-                                  dsl_tag: dsl_tag,
+                                  dsl_tag_id: nil, # Clear association first
               project: project == "All" ? bonus.project : project,
               event: event,
               wager: wager,
@@ -92,6 +92,8 @@ class BonusTemplate < ApplicationRecord
               currency_minimum_deposits: currency_minimum_deposits,
               description: description
     )
+    # Set dsl_tag string attribute directly to bypass the association setter
+    bonus.write_attribute(:dsl_tag, dsl_tag)
   end
 
   # Check if template is for all projects

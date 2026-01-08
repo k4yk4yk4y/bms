@@ -74,8 +74,8 @@ ActiveAdmin.register DslTag do
 
         if dsl_tag.bonuses.count > 20
           div class: "view-all-link" do
-            link_to "Показать все бонусы (#{dsl_tag.bonuses.count})", 
-                    admin_bonuses_path(q: { dsl_tag_id_eq: dsl_tag.id }), 
+            link_to "Показать все бонусы (#{dsl_tag.bonuses.count})",
+                    admin_bonuses_path(q: { dsl_tag_id_eq: dsl_tag.id }),
                     class: "button"
           end
         end
@@ -109,12 +109,12 @@ ActiveAdmin.register DslTag do
   controller do
     def destroy
       @dsl_tag = DslTag.find(params[:id])
-      
+
       if @dsl_tag.bonuses.any?
         redirect_to admin_dsl_tags_path, alert: "DSL тег используется в бонусах и не может быть удален"
         return
       end
-      
+
       @dsl_tag.destroy
       redirect_to admin_dsl_tags_path, notice: "DSL тег успешно удален"
     end

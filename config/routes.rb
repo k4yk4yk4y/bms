@@ -41,7 +41,7 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Route for fetching bonus template data
-  get '/bonus_templates/find', to: 'bonus_templates#find'
+  get "/bonus_templates/find", to: "bonus_templates#find"
 
   # Bonus management routes
   resources :bonuses do

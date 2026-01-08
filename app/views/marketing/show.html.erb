@@ -306,15 +306,36 @@
 
 <script>
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-      // Показываем уведомление об успешном копировании
+    // Fallback for older browsers
+    const fallbackCopy = function(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return successful;
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return false;
+      }
+    };
+
+    const showToast = function(message, isSuccess) {
       const toast = document.createElement('div');
-      toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+      toast.className = 'toast align-items-center text-white border-0 position-fixed top-0 end-0 m-3';
+      toast.className += isSuccess ? ' bg-success' : ' bg-danger';
       toast.style.zIndex = '9999';
       toast.innerHTML = `
         <div class="d-flex">
           <div class="toast-body">
-            <i class="fas fa-check"></i> Скопировано в буфер обмена
+            <i class="fas fa-${isSuccess ? 'check' : 'exclamation-triangle'}"></i> ${message}
           </div>
           <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
@@ -324,12 +345,31 @@
       const bsToast = new bootstrap.Toast(toast);
       bsToast.show();
       
-      // Удаляем элемент после скрытия
       toast.addEventListener('hidden.bs.toast', function() {
         toast.remove();
       });
-    }).catch(function(err) {
-      console.error('Ошибка при копировании: ', err);
-    });
+    };
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Скопировано в буфер обмена', true);
+      }).catch(function(err) {
+        console.error('Ошибка при копировании: ', err);
+        // Fallback to older method
+        if (fallbackCopy(text)) {
+          showToast('Скопировано в буфер обмена', true);
+        } else {
+          showToast('Не удалось скопировать. Попробуйте выделить и скопировать вручную.', false);
+        }
+      });
+    } else {
+      // Use fallback for older browsers
+      if (fallbackCopy(text)) {
+        showToast('Скопировано в буфер обмена', true);
+      } else {
+        showToast('Не удалось скопировать. Попробуйте выделить и скопировать вручную.', false);
+      }
+    }
   }
 </script>

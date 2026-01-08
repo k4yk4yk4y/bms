@@ -3,8 +3,8 @@ namespace :admin do
   task create_default: :environment do
     # Убедитесь, что модель AdminUser существует, иначе Active Admin не будет работать.
     if defined?(AdminUser)
-      email = ENV['ADMIN_EMAIL']
-      password = ENV['ADMIN_PASSWORD']
+      email = ENV["ADMIN_EMAIL"]
+      password = ENV["ADMIN_PASSWORD"]
 
       unless email.present? && password.present?
         puts "🚨 ОШИБКА: Пожалуйста, задайте переменные окружения ADMIN_EMAIL и ADMIN_PASSWORD."

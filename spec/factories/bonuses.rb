@@ -2,6 +2,10 @@
 
 FactoryBot.define do
   factory :bonus do
+    transient do
+      dsl_tag_string { nil } # Allow setting dsl_tag string via transient attribute
+    end
+
     name { Faker::Commerce.product_name }
     code { "BONUS_#{Faker::Alphanumeric.alpha(number: 8).upcase}" }
     event { 'deposit' } # Default to deposit event to avoid validation issues
@@ -17,12 +21,19 @@ FactoryBot.define do
     tags { "#{Faker::Lorem.word}, #{Faker::Lorem.word}" }
     country { Faker::Address.country_code }
     project { %w[VOLNA ROX FRESH SOL JET].sample }
-    dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
     description { Faker::Lorem.paragraph }
     groups { [ user_group ] }
 
-    after(:build) do |bonus|
+    after(:build) do |bonus, evaluator|
       bonus.currency_minimum_deposits ||= bonus.currencies.index_with { |_| bonus.minimum_deposit || 0.0 }
+      # Set dsl_tag string attribute directly to bypass the association setter
+      # Only set if dsl_tag_string is provided and dsl_tag_id is not already set (via association)
+      if evaluator.dsl_tag_string.present? && bonus.dsl_tag_id.nil?
+        bonus.write_attribute(:dsl_tag, evaluator.dsl_tag_string)
+      elsif bonus.dsl_tag_id.nil? && bonus.read_attribute(:dsl_tag).blank?
+        # Default value only if neither association nor string is set
+        bonus.write_attribute(:dsl_tag, %w[welcome_bonus reload_cash birthday cashback].sample)
+      end
     end
 
     trait :draft do
@@ -93,8 +104,10 @@ FactoryBot.define do
     end
 
     trait :permanent do
-      dsl_tag { %w[welcome_bonus reload_cash birthday cashback].sample }
       status { 'active' }
+      after(:build) do |bonus|
+        bonus.write_attribute(:dsl_tag, %w[welcome_bonus reload_cash birthday cashback].sample)
+      end
     end
 
     trait :available_now do

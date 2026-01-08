@@ -209,8 +209,8 @@ ActiveAdmin.register Bonus do
       f.input :code
       f.input :status, as: :select, collection: Bonus::STATUSES
       f.input :event, as: :select, collection: Bonus::EVENT_TYPES
-      f.input :project, as: :select, collection: Project.order(:name).pluck(:name, :id), input_html: { id: 'bonus_project_id', data: { "bonus-form-target": "project", action: "change->bonus-form#projectChanged" } }
-      f.input :dsl_tag_id, as: :select, collection: DslTag.order(:name).pluck(:name, :id), input_html: { id: 'bonus_dsl_tag_id', style: 'max-height: 200px; overflow-y: auto;', data: { "bonus-form-target": "dslTag", action: "change->bonus-form#dslTagChanged" } }
+      f.input :project, as: :select, collection: Project.order(:name).pluck(:name, :id), input_html: { id: "bonus_project_id", data: { "bonus-form-target": "project", action: "change->bonus-form#projectChanged" } }
+      f.input :dsl_tag_id, as: :select, collection: DslTag.order(:name).pluck(:name, :id), input_html: { id: "bonus_dsl_tag_id", style: "max-height: 200px; overflow-y: auto;", data: { "bonus-form-target": "dslTag", action: "change->bonus-form#dslTagChanged" } }
       f.input :description
     end
 

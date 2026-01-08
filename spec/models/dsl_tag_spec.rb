@@ -25,7 +25,7 @@ RSpec.describe DslTag, type: :model do
     end
 
     describe '.with_bonuses' do
-      let!(:bonus) { create(:bonus, dsl_tag: dsl_tag1) }
+      let!(:bonus) { create(:bonus, dsl_tag_id: dsl_tag1.id) }
 
       it 'returns DSL tags that have bonuses' do
         expect(DslTag.with_bonuses).to include(dsl_tag1)
@@ -34,7 +34,7 @@ RSpec.describe DslTag, type: :model do
     end
 
     describe '.without_bonuses' do
-      let!(:bonus) { create(:bonus, dsl_tag: dsl_tag1) }
+      let!(:bonus) { create(:bonus, dsl_tag_id: dsl_tag1.id) }
 
       it 'returns DSL tags that have no bonuses' do
         expect(DslTag.without_bonuses).to include(dsl_tag2, dsl_tag3)
@@ -45,9 +45,9 @@ RSpec.describe DslTag, type: :model do
 
   describe 'instance methods' do
     let(:dsl_tag) { create(:dsl_tag) }
-    let!(:bonus1) { create(:bonus, dsl_tag: dsl_tag, status: 'active') }
-    let!(:bonus2) { create(:bonus, dsl_tag: dsl_tag, status: 'inactive') }
-    let!(:bonus3) { create(:bonus, dsl_tag: dsl_tag, status: 'active') }
+    let!(:bonus1) { create(:bonus, dsl_tag_id: dsl_tag.id, status: 'active') }
+    let!(:bonus2) { create(:bonus, dsl_tag_id: dsl_tag.id, status: 'inactive') }
+    let!(:bonus3) { create(:bonus, dsl_tag_id: dsl_tag.id, status: 'active') }
 
     describe '#usage_count' do
       it 'returns the number of bonuses using this DSL tag' do

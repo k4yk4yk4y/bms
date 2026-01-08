@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :marketing_request do
-    manager { Faker::Name.name }
+    manager { Faker::Internet.email }
     platform { Faker::Internet.domain_name }
     partner_email { Faker::Internet.email }
     promo_code { "PROMO#{Faker::Alphanumeric.alpha(number: 6).upcase}" }
@@ -109,7 +109,7 @@ FactoryBot.define do
     end
 
     trait :valid_data do
-      manager { 'John Manager' }
+      manager { 'manager@example.com' }
       platform { 'example.com' }
       partner_email { 'partner@example.com' }
       promo_code { 'VALIDCODE123' }

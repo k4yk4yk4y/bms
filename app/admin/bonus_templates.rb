@@ -1,7 +1,7 @@
 ActiveAdmin.register BonusTemplate do
   # Application Settings - Bonus Templates Management
   menu label: "Bonus Templates", parent: "Application Settings", priority: 2
-  
+
   permit_params :name, :dsl_tag, :project, :event, :currency, :minimum_deposit,
                 :wager, :maximum_winnings, :no_more, :totally_no_more,
                 :description, currencies: [], groups: [], currency_minimum_deposits: {}
@@ -18,7 +18,7 @@ ActiveAdmin.register BonusTemplate do
   index do
     selectable_column
     id_column
-    
+
     column :name
     column :dsl_tag do |template|
       status_tag template.dsl_tag, class: :info
@@ -120,9 +120,9 @@ ActiveAdmin.register BonusTemplate do
     f.inputs "Основная информация" do
       f.input :name, hint: "Уникальное имя шаблона"
       f.input :dsl_tag, hint: "DSL тег для идентификации шаблона"
-      f.input :project, as: :select, collection: Project.order(:name).pluck(:name), 
+      f.input :project, as: :select, collection: Project.order(:name).pluck(:name),
               hint: "Проект, для которого предназначен шаблон"
-      f.input :event, as: :select, collection: BonusTemplate::EVENT_TYPES.map { |e| [e.humanize, e] },
+      f.input :event, as: :select, collection: BonusTemplate::EVENT_TYPES.map { |e| [ e.humanize, e ] },
               hint: "Тип события бонуса"
       f.input :description, as: :text, hint: "Описание шаблона (максимум 1000 символов)"
     end
@@ -140,7 +140,7 @@ ActiveAdmin.register BonusTemplate do
               hint: "Валюты, для которых действует шаблон"
       f.input :groups, as: :check_boxes, collection: BonusTemplate.all_groups,
               hint: "Группы пользователей, для которых действует шаблон"
-      f.input :currency_minimum_deposits, as: :text, 
+      f.input :currency_minimum_deposits, as: :text,
               hint: "Минимальные депозиты по валютам (JSON формат: {\"USD\": 10, \"EUR\": 8})"
     end
 
@@ -160,13 +160,13 @@ ActiveAdmin.register BonusTemplate do
   batch_action :export, confirm: "Экспортировать выбранные шаблоны?" do |ids|
     templates = BonusTemplate.where(id: ids)
     csv_data = CSV.generate do |csv|
-      csv << ["Name", "DSL Tag", "Project", "Event", "Description", "Minimum Deposit", "Wager", "Maximum Winnings"]
+      csv << [ "Name", "DSL Tag", "Project", "Event", "Description", "Minimum Deposit", "Wager", "Maximum Winnings" ]
       templates.each do |template|
-        csv << [template.name, template.dsl_tag, template.project, template.event, 
-                template.description, template.minimum_deposit, template.wager, template.maximum_winnings]
+        csv << [ template.name, template.dsl_tag, template.project, template.event,
+                template.description, template.minimum_deposit, template.wager, template.maximum_winnings ]
       end
     end
-    
+
     send_data csv_data, filename: "bonus_templates_#{Time.current.strftime('%Y%m%d_%H%M%S')}.csv"
   end
 

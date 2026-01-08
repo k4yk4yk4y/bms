@@ -28,7 +28,9 @@ class MarketingRequest < ApplicationRecord
   }.freeze
 
   # Validations
-  validates :manager, presence: true, length: { maximum: 255 }
+  validates :manager, presence: true,
+            format: { with: URI::MailTo::EMAIL_REGEXP, message: "должен быть валидным email" },
+            length: { maximum: 255 }
   validates :platform, length: { maximum: 1000 }, allow_blank: true
   validates :partner_email, presence: true,
             format: { with: URI::MailTo::EMAIL_REGEXP, message: "должен быть валидным email" },
@@ -50,6 +52,15 @@ class MarketingRequest < ApplicationRecord
   scope :pending, -> { where(status: "pending") }
   scope :activated, -> { where(status: "activated") }
   scope :rejected, -> { where(status: "rejected") }
+
+  # Ransack configuration for ActiveAdmin
+  def self.ransackable_attributes(auth_object = nil)
+    [ "activation_date", "created_at", "id", "manager", "partner_email", "platform", "promo_code", "request_type", "stag", "status", "updated_at" ]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
+  end
 
   # Callbacks
   before_validation :normalize_promo_code_and_stag
@@ -123,9 +134,10 @@ class MarketingRequest < ApplicationRecord
   end
 
   # Получение пользователя по email менеджера
+  # Use memoization to avoid N+1 queries
   def user
     return nil if manager.blank?
-    User.find_by(email: manager)
+    @user ||= User.find_by(email: manager)
   end
 
   # Проверка, принадлежит ли заявка указанному пользователю
@@ -150,8 +162,12 @@ class MarketingRequest < ApplicationRecord
   def reset_to_pending_if_changed
     # При любом редактировании заявки возвращаем в статус "Ожидает"
     # Исключение - изменение только статуса или activation_date
-    changed_attrs = changed_attributes.keys - [ "status", "activation_date", "updated_at" ]
+    return if new_record?
 
+    # Get all changed attributes except status, activation_date, and updated_at
+    changed_attrs = changed - [ "status", "activation_date", "updated_at" ]
+
+    # If any other attributes changed and status is not pending, reset to pending
     if changed_attrs.any? && !pending?
       self.status = "pending"
       self.activation_date = nil
@@ -176,18 +192,20 @@ class MarketingRequest < ApplicationRecord
     current_codes = promo_codes_array
     return if current_codes.empty?
 
+    # Optimize: fetch all relevant requests once instead of per code
+    scope = self.class.where.not(id: id || 0)
+    all_other_requests = scope.select(:id, :promo_code, :request_type).to_a
+
     # Check each code for uniqueness across all requests
     current_codes.each do |code|
-      # Find all requests that contain this code (excluding current request)
-      # Use LIKE with UPPER for PostgreSQL compatibility
-      conflicting_requests = self.class.where.not(id: id).where(
-        "UPPER(promo_code) LIKE ?", "%#{code.upcase}%"
-      ).select do |request|
-        request.promo_codes_array.map(&:upcase).include?(code.upcase)
+      code_upper = code.upcase
+
+      # Check if any other request contains this exact code
+      conflicting_request = all_other_requests.find do |request|
+        request.promo_codes_array.map(&:upcase).include?(code_upper)
       end
 
-      if conflicting_requests.any?
-        conflicting_request = conflicting_requests.first
+      if conflicting_request
         errors.add(:promo_code, "содержит код \"#{code}\", который уже используется в заявке " \
                                 "типа \"#{conflicting_request.request_type_label}\" (ID: #{conflicting_request.id})")
       end
