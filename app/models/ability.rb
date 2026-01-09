@@ -22,12 +22,6 @@ class Ability
   private
 
   def setup_user_abilities(user)
-    if user.role == "admin"
-      can :manage, :all
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-      return
-    end
-
     apply_role_permissions(user)
     apply_self_profile_permissions(user)
   end
