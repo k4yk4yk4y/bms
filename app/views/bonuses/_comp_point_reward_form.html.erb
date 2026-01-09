@@ -1,48 +1,53 @@
-<div class="border p-3 mb-3 comp-point-reward-form">
+<%
+  reward ||= nil
+  index ||= 0
+  existing_comp_point = reward || (bonus.persisted? ? bonus.comp_point_rewards.first : nil)
+  field_prefix = "comp_point_rewards[#{index}]"
+%>
+
+<div class="border p-3 mb-3 comp-point-reward-form" id="comp-point-reward-<%= index %>">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="mb-0">Comp Point Reward #<span class="reward-index"></span></h6>
+    <h6 class="mb-0">Comp Point Reward #<%= index + 1 %></h6>
     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCompPointReward(this)">
       <i class="bi bi-trash"></i> Remove
     </button>
   </div>
 
+  <% if existing_comp_point&.id %>
+    <%= hidden_field_tag "#{field_prefix}[id]", existing_comp_point.id %>
+  <% end %>
+
   <div class="main-params-container">
-    <!-- Title -->
     <div class="reward-param-field mb-3 full-width">
-      <label for="comp_point_reward_title" class="form-label">Название награды (title) *</label>
-      <input type="text" class="form-control" name="comp_point_reward[title]" id="comp_point_reward_title"
-              value="<%= existing_comp_point&.title %>" required>
+      <label for="comp_point_reward_title_<%= index %>" class="form-label">Название награды (title) *</label>
+      <input type="text" class="form-control" name="<%= field_prefix %>[title]" id="comp_point_reward_title_<%= index %>"
+             value="<%= existing_comp_point&.title %>" required>
     </div>
 
-    <!-- Issue Chargeable Award -->
     <div class="reward-param-field mb-3">
-      <label for="comp_point_reward_issue_chargeable_award" class="form-label">Расходуемые баллы (issue_chargeable_award)</label>
-      <input type="number" class="form-control" name="comp_point_reward[issue_chargeable_award]"
-             id="comp_point_reward_issue_chargeable_award" min="0"
-             value="<%= existing_comp_point&.issue_chargeable_award %>">
+      <label for="comp_point_reward_points_amount_<%= index %>" class="form-label">Количество очков (points_amount) *</label>
+      <input type="number" class="form-control" name="<%= field_prefix %>[points_amount]"
+             id="comp_point_reward_points_amount_<%= index %>" min="0"
+             value="<%= existing_comp_point&.points_amount %>" required>
     </div>
 
-    <!-- Issue Persistent Award -->
     <div class="reward-param-field mb-3">
-      <label for="comp_point_reward_issue_persistent_award" class="form-label">Статусные баллы (issue_persistent_award)</label>
-      <input type="number" class="form-control" name="comp_point_reward[issue_persistent_award]"
-             id="comp_point_reward_issue_persistent_award" min="0"
-             value="<%= existing_comp_point&.issue_persistent_award %>">
+      <label for="comp_point_reward_multiplier_<%= index %>" class="form-label">Множитель (multiplier)</label>
+      <input type="number" class="form-control" name="<%= field_prefix %>[multiplier]"
+             id="comp_point_reward_multiplier_<%= index %>" min="0" step="0.01"
+             value="<%= existing_comp_point&.multiplier %>">
     </div>
   </div>
 
-  <!-- Advanced Parameters Toggle -->
   <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAdvancedParams(this)">
     <span class="toggle-text">+ Показать дополнительные параметры</span>
   </button>
 
-  <!-- Advanced Parameters (Hidden by default) -->
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
-      <!-- Custom Config Fields -->
       <div class="reward-param-field mb-3 full-width">
         <label class="form-label">Дополнительные параметры (JSON)</label>
-        <textarea class="form-control" name="comp_point_reward[config_json]" rows="3"
+        <textarea class="form-control" name="<%= field_prefix %>[config_json]" rows="3"
                   ><%= existing_comp_point&.config&.to_json %></textarea>
       </div>
     </div>

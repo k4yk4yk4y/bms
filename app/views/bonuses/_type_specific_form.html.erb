@@ -954,7 +954,7 @@
           <div class="input-group">
             <span class="input-group-text">${currency}</span>
             <input type="number" 
-                   name="bonus_buy_rewards[${index}][bonus_buy_bet_levels][${currency}]"
+                   name="bonus_buy_rewards[${index}][currency_bet_levels][${currency}]"
                    class="form-control currency-input"
                    step="${step}"
                    min="0"
@@ -979,9 +979,13 @@
     if (type === 'fixed') {
       amountField.style.display = 'block';
       percentageField.style.display = 'none';
+      amountField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
+      percentageField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
     } else {
       amountField.style.display = 'none';
       percentageField.style.display = 'block';
+      amountField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+      percentageField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
     }
   }
 
@@ -1157,18 +1161,18 @@
               <!--Описательное название для награды-->
             </div>
 
-            <!-- Issue Chargeable Award -->
+            <!-- Points Amount -->
             <div class="reward-param-field">
-              <label class="form-label">Расходуемые баллы (issue_chargeable_award)</label>
-              <input type="number" class="form-control" name="comp_point_rewards[${index}][issue_chargeable_award]" min="0" >
-              <!--Количество расходуемых баллов, которые получит игрок-->
+              <label class="form-label">Количество очков (points_amount) *</label>
+              <input type="number" class="form-control" name="comp_point_rewards[${index}][points_amount]" min="0" required>
+              <!--Количество очков, которые получит игрок-->
             </div>
 
-            <!-- Issue Persistent Award -->
+            <!-- Multiplier -->
             <div class="reward-param-field">
-              <label class="form-label">Статусные баллы (issue_persistent_award)</label>
-              <input type="number" class="form-control" name="comp_point_rewards[${index}][issue_persistent_award]" min="0" >
-              <!--Количество статусных баллов, которые получит игрок-->
+              <label class="form-label">Множитель (multiplier)</label>
+              <input type="number" class="form-control" name="comp_point_rewards[${index}][multiplier]" min="0" step="0.01">
+              <!--Опциональный множитель очков-->
             </div>
 
             <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->

@@ -18,6 +18,9 @@
     </button>
   </div>
   <div class="card-body">
+    <% if existing_bonus_buy&.id %>
+      <%= hidden_field_tag "#{field_prefix}[id]", existing_bonus_buy.id %>
+    <% end %>
 
 <!-- Основные часто используемые параметры для bonus_buy -->
 <div class="main-params-container">
@@ -79,7 +82,7 @@
       bonus_buy_currencies = @bonus.currencies
     end
   %>
-  <%= render "currency_bonus_buy_bet_levels", bonus: @bonus, existing_bonus_buy: existing_bonus_buy, currencies: bonus_buy_currencies %>
+  <%= render "currency_bonus_buy_bet_levels", bonus: @bonus, existing_bonus_buy: existing_bonus_buy, currencies: bonus_buy_currencies, index: index %>
 </div>
 
 <!-- Дополнительные параметры -->

@@ -4,6 +4,9 @@
     <i class="bi bi-coin"></i>
     Размер ставки по валютам *
   </label>
+  <%
+    field_prefix = "bonus_buy_rewards[#{index}]"
+  %>
   <div id="currency-bonus-buy-bet-levels-container">
     <div class="currency-bet-levels-grid">
         <% 
@@ -28,7 +31,7 @@
           <div class="currency-bet-level-item">
             <div class="input-group">
               <span class="input-group-text"><%= currency %></span>
-              <%= number_field_tag "bonus_buy_rewards[#{bonus_buy_reward&.id || index}][currency_bet_levels][#{currency}]",
+              <%= number_field_tag "#{field_prefix}[currency_bet_levels][#{currency}]",
                   bonus_buy_reward&.currency_bet_levels&.dig(currency),
                   class: "form-control currency-input",
                   step: Bonus.currency_step(currency),

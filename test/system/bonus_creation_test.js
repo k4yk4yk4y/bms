@@ -1,6 +1,17 @@
 // Playwright test for bonus creation functionality
 const { test, expect } = require('@playwright/test');
 
+async function checkCurrency(page, currency) {
+  const uncheckAllButton = page.locator('#uncheck-all-currencies-btn');
+  if (await uncheckAllButton.isVisible().catch(() => false)) {
+    await uncheckAllButton.click();
+    await page.waitForTimeout(100);
+  }
+  const checkbox = page.locator(`input.currency-checkbox[value="${currency}"]`);
+  await checkbox.scrollIntoViewIfNeeded();
+  await checkbox.check();
+}
+
 test.describe('Bonus Creation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to bonuses page
@@ -44,6 +55,9 @@ test.describe('Bonus Creation', () => {
     // Check availability dates
     await expect(page.locator('input[name="bonus[availability_start_date]"]')).toBeVisible();
     await expect(page.locator('input[name="bonus[availability_end_date]"]')).toBeVisible();
+
+    // Check currency checkboxes
+    await expect(page.locator('input.currency-checkbox').first()).toBeVisible();
     
     // Check the create button
     await expect(page.locator('input[type="submit"][value="Create Bonus"]')).toBeVisible();
@@ -78,7 +92,7 @@ test.describe('Bonus Creation', () => {
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
     
     // Set at least one valid currency (this fixes our previous issue)
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     
     // Set currency minimum deposits
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
@@ -110,7 +124,7 @@ test.describe('Bonus Creation', () => {
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
     
     // Set currency
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     // Add a bonus reward by clicking "Add Cash Bonus" button
@@ -119,9 +133,8 @@ test.describe('Bonus Creation', () => {
       await addBonusButton.click();
       
       // Fill reward details
-      await page.fill('input[name="bonus_rewards[0][amount]"]', '100');
-      await page.fill('input[name="bonus_rewards[0][wager]"]', '35');
-      await page.fill('input[name="bonus_rewards[0][available]"]', '1');
+      await page.waitForSelector('input[name="bonus_rewards[0][currency_amounts][USD]"]', { state: 'visible' });
+      await page.fill('input[name="bonus_rewards[0][currency_amounts][USD]"]', '100');
     }
     
     // Submit the form
@@ -161,7 +174,7 @@ test.describe('Bonus Creation', () => {
     await page.selectOption('select[name="bonus[event]"]', 'deposit');
     await page.selectOption('select[name="bonus[status]"]', 'draft');
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     // Submit the form
@@ -179,7 +192,7 @@ test.describe('Bonus Creation', () => {
     await page.selectOption('select[name="bonus[event]"]', 'deposit');
     await page.selectOption('select[name="bonus[status]"]', 'draft');
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     // Set end date before start date (should cause validation error)
@@ -202,7 +215,7 @@ test.describe('Bonus Creation', () => {
     await expect(page).toHaveURL(/.*\/bonuses\/new/);
     
     // Check if validation error is displayed
-    const form = page.locator('form');
+    const form = page.locator('form.needs-validation');
     await expect(form).toBeVisible();
   });
 
@@ -220,11 +233,11 @@ test.describe('Bonus Creation', () => {
       
       // For deposit events, need currencies and currency_minimum_deposits
       if (eventType === 'deposit') {
-        await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+        await checkCurrency(page, 'USD');
         await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
       } else {
         // For non-deposit events, just select a currency
-        await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+        await checkCurrency(page, 'USD');
       }
       
       // Submit the form
@@ -255,7 +268,7 @@ test.describe('Bonus Creation', () => {
     await expect(page).toHaveURL(/.*\/bonuses\/new/);
     
     // Verify the form is still present (indicates validation failure)
-    await expect(page.locator('form')).toBeVisible();
+    await expect(page.locator('form.needs-validation')).toBeVisible();
     await expect(page.locator('input[type="submit"][value="Create Bonus"]')).toBeVisible();
     
     // Verify we're still on the creation page
@@ -273,7 +286,7 @@ test.describe('Bonus Creation', () => {
     await page.selectOption('select[name="bonus[event]"]', 'deposit');
     await page.selectOption('select[name="bonus[status]"]', 'draft');
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     // Submit form
@@ -296,7 +309,7 @@ test.describe('Bonus Creation - Edge Cases', () => {
     await page.selectOption('select[name="bonus[event]"]', 'deposit');
     await page.selectOption('select[name="bonus[status]"]', 'draft');
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     await page.click('input[type="submit"][value="Create Bonus"]');
@@ -314,7 +327,7 @@ test.describe('Bonus Creation - Edge Cases', () => {
     await page.selectOption('select[name="bonus[event]"]', 'deposit');
     await page.selectOption('select[name="bonus[status]"]', 'draft');
     await page.selectOption('select[name="bonus[project]"]', 'VOLNA');
-    await page.selectOption('select[name="bonus[currencies][]"]', 'USD');
+    await checkCurrency(page, 'USD');
     await page.fill('input[name="bonus[currency_minimum_deposits][USD]"]', '10');
     
     await page.click('input[type="submit"][value="Create Bonus"]');

@@ -99,11 +99,10 @@ test.describe('Marketing Section', () => {
     await expect(page.locator('h1')).toContainText('Новая заявка');
     
     // Проверяем наличие формы
-    await expect(page.locator('form')).toBeVisible();
+    await expect(page.locator('form.needs-validation')).toBeVisible();
     
     // Проверяем основные поля формы
     await expect(page.locator('select[name="marketing_request[request_type]"]')).toBeVisible();
-    await expect(page.locator('input[name="marketing_request[manager]"]')).toBeVisible();
     await expect(page.locator('input[name="marketing_request[partner_email]"]')).toBeVisible();
     await expect(page.locator('textarea[name="marketing_request[promo_code]"]')).toBeVisible();
     await expect(page.locator('input[name="marketing_request[stag]"]')).toBeVisible();
@@ -117,7 +116,6 @@ test.describe('Marketing Section', () => {
     
     // Заполняем форму
     await page.selectOption('select[name="marketing_request[request_type]"]', 'promo_webs_50');
-    await page.fill('input[name="marketing_request[manager]"]', 'Тестовый менеджер');
     await page.fill('textarea[name="marketing_request[platform]"]', 'https://test-platform.com');
     await page.fill('input[name="marketing_request[partner_email]"]', 'test@partner.com');
     await page.fill('textarea[name="marketing_request[promo_code]"]', 'testpromo123');
@@ -148,7 +146,6 @@ test.describe('Marketing Section', () => {
     
     // Заполняем форму с существующим промокодом
     await page.selectOption('select[name="marketing_request[request_type]"]', 'promo_webs_50');
-    await page.fill('input[name="marketing_request[manager]"]', 'Тестовый менеджер');
     await page.fill('input[name="marketing_request[partner_email]"]', 'test@partner.com');
     await page.fill('textarea[name="marketing_request[promo_code]"]', 'PROMO_WEBS_50_00'); // Существующий код из тестовых данных
     await page.fill('input[name="marketing_request[stag]"]', 'unique_test_stag_new');
@@ -221,8 +218,8 @@ test.describe('Marketing Section', () => {
     await expect(page).toHaveURL(/.*\/marketing\/\d+\/edit/);
     await expect(page.locator('h1')).toContainText('Редактирование заявки');
     
-    // Изменяем менеджера
-    await page.fill('input[name="marketing_request[manager]"]', 'Обновленный менеджер');
+    // Изменяем почту партнера
+    await page.fill('input[name="marketing_request[partner_email]"]', 'updated@partner.com');
     
     // Сохраняем изменения
     await page.click('input[type="submit"]');

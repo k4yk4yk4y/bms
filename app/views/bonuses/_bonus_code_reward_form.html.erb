@@ -1,40 +1,46 @@
-<div class="border p-3 mb-3 bonus-code-reward-form">
+<%
+  reward ||= nil
+  index ||= 0
+  existing_bonus_code = reward || (bonus.persisted? ? bonus.bonus_code_rewards.first : nil)
+  field_prefix = "bonus_code_rewards[#{index}]"
+%>
+
+<div class="border p-3 mb-3 bonus-code-reward-form" id="bonus-code-reward-<%= index %>">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="mb-0">Bonus Code Reward #<span class="reward-index"></span></h6>
+    <h6 class="mb-0">Bonus Code Reward #<%= index + 1 %></h6>
     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBonusCodeReward(this)">
       <i class="bi bi-trash"></i> Remove
     </button>
   </div>
 
+  <% if existing_bonus_code&.id %>
+    <%= hidden_field_tag "#{field_prefix}[id]", existing_bonus_code.id %>
+  <% end %>
+
   <div class="main-params-container">
-    <!-- Title -->
     <div class="reward-param-field mb-3 full-width">
-      <label for="bonus_code_reward_title" class="form-label">Название награды (title) *</label>
-      <input type="text" class="form-control" name="bonus_code_reward[title]" id="bonus_code_reward_title"
-              value="<%= existing_bonus_code&.title %>" required>
+      <label for="bonus_code_reward_title_<%= index %>" class="form-label">Название награды (title) *</label>
+      <input type="text" class="form-control" name="<%= field_prefix %>[title]" id="bonus_code_reward_title_<%= index %>"
+             value="<%= existing_bonus_code&.title %>" required>
     </div>
 
-    <!-- Set Bonus Code -->
     <div class="reward-param-field mb-3 full-width">
-      <label for="bonus_code_reward_set_bonus_code" class="form-label">Бонус-код (set_bonus_code) *</label>
-      <input type="text" class="form-control" name="bonus_code_reward[set_bonus_code]"
-             id="bonus_code_reward_set_bonus_code"
-             value="<%= existing_bonus_code&.set_bonus_code %>" required>
+      <label for="bonus_code_reward_set_bonus_code_<%= index %>" class="form-label">Бонус-код (set_bonus_code) *</label>
+      <input type="text" class="form-control" name="<%= field_prefix %>[set_bonus_code]"
+             id="bonus_code_reward_set_bonus_code_<%= index %>"
+             value="<%= existing_bonus_code&.code %>" required>
     </div>
   </div>
 
-  <!-- Advanced Parameters Toggle -->
   <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAdvancedParams(this)">
     <span class="toggle-text">+ Показать дополнительные параметры</span>
   </button>
 
-  <!-- Advanced Parameters (Hidden by default) -->
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
-      <!-- Custom Config Fields -->
       <div class="reward-param-field mb-3 full-width">
         <label class="form-label">Дополнительные параметры (JSON)</label>
-        <textarea class="form-control" name="bonus_code_reward[config_json]" rows="3"
+        <textarea class="form-control" name="<%= field_prefix %>[config_json]" rows="3"
                   ><%= existing_bonus_code&.config&.to_json %></textarea>
       </div>
     </div>
