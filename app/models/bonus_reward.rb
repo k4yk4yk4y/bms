@@ -4,8 +4,11 @@ class BonusReward < ApplicationRecord
   belongs_to :bonus
 
   validates :reward_type, presence: true
-  validates :amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :amount, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, allow_nil: true
+
+  validate :amount_percentage_or_currency_amounts_present
+  validate :validate_currency_amounts
 
 
   scope :by_type, ->(type) { where(reward_type: type) }
@@ -112,5 +115,12 @@ class BonusReward < ApplicationRecord
     end
   end
 
-  validate :validate_currency_amounts
+  private
+
+  def amount_percentage_or_currency_amounts_present
+    return if amount.present? || percentage.present?
+    return if currency_amounts.present? && currency_amounts.values.any? { |value| value.present? }
+
+    errors.add(:base, "Нужно указать сумму, процент или суммы по валютам")
+  end
 end

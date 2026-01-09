@@ -18,6 +18,9 @@
     </button>
   </div>
   <div class="card-body">
+    <% if existing_freespin&.id %>
+      <%= hidden_field_tag "#{field_prefix}[id]", existing_freespin.id %>
+    <% end %>
 
 
 
@@ -66,7 +69,7 @@
       freespin_currencies = @bonus.currencies
     end
   %>
-  <%= render "currency_freespin_bet_levels", bonus: @bonus, existing_freespin: existing_freespin, currencies: freespin_currencies %>
+  <%= render "currency_freespin_bet_levels", bonus: @bonus, existing_freespin: existing_freespin, currencies: freespin_currencies, index: index %>
 </div>
 
 <!-- Дополнительные параметры -->

@@ -13,10 +13,26 @@ RSpec.describe BonusReward, type: :model do
   # Validations tests
   describe 'validations' do
     it { is_expected.to validate_presence_of(:reward_type) }
-    it { is_expected.to validate_presence_of(:amount) }
     it { is_expected.to validate_numericality_of(:amount).is_greater_than_or_equal_to(0) }
+    it { is_expected.to allow_value(nil).for(:amount) }
     it { is_expected.to validate_numericality_of(:percentage).is_greater_than_or_equal_to(0).is_less_than_or_equal_to(100) }
     it { is_expected.to allow_value(nil).for(:percentage) }
+
+    it 'is valid with percentage and without amount' do
+      bonus_reward = build(:bonus_reward, amount: nil, percentage: 25)
+      expect(bonus_reward).to be_valid
+    end
+
+    it 'is valid with currency_amounts and without amount' do
+      bonus_reward = build(:bonus_reward, amount: nil, percentage: nil, currency_amounts: { "USD" => 50 })
+      expect(bonus_reward).to be_valid
+    end
+
+    it 'is invalid without amount, percentage, or currency_amounts' do
+      bonus_reward = build(:bonus_reward, amount: nil, percentage: nil, currency_amounts: {})
+      expect(bonus_reward).not_to be_valid
+      expect(bonus_reward.errors[:base]).to include("Нужно указать сумму, процент или суммы по валютам")
+    end
   end
 
   # Scopes tests

@@ -88,7 +88,7 @@ test.describe('Currency Dynamic Update Test', () => {
     }
     
     // Add a bonus reward
-    const addBonusRewardBtn = page.locator('button:has-text("Add Bonus Reward")');
+    const addBonusRewardBtn = page.locator('button:has-text("Add Cash Bonus")');
     if (await addBonusRewardBtn.isVisible()) {
       await addBonusRewardBtn.click();
     }

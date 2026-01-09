@@ -828,6 +828,20 @@ RSpec.describe BonusesController, type: :controller do
         expect(bonus.bonus_rewards.pluck(:amount)).to contain_exactly(100, 200)
       end
 
+      it "persists currency_amounts for bonus rewards" do
+        expect {
+          post :create, params: {
+            bonus: valid_bonus_params,
+            bonus_rewards: {
+              "0" => { currency_amounts: { "USD" => "50", "EUR" => "40" } }
+            }
+          }
+        }.to change(BonusReward, :count).by(1)
+
+        reward = Bonus.last.bonus_rewards.first
+        expect(reward.currency_amounts).to eq({ "USD" => 50.0, "EUR" => 40.0 })
+      end
+
       it "updates existing bonus rewards" do
         bonus = create(:bonus)
         reward1 = create(:bonus_reward, bonus: bonus, amount: 100)
@@ -902,6 +916,22 @@ RSpec.describe BonusesController, type: :controller do
         reward2.reload
         expect(reward1.spins_count).to eq(75)
         expect(reward2.spins_count).to eq(125)
+      end
+
+      it "updates currency freespin bet levels" do
+        bonus = create(:bonus)
+        reward = create(:freespin_reward, bonus: bonus, currency_freespin_bet_levels: { "USD" => 0.1 })
+
+        params = valid_bonus_params.merge(
+          freespin_rewards: {
+            "0" => { id: reward.id, spins_count: "75", currency_freespin_bet_levels: { "USD" => "0.25", "EUR" => "0.2" } }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward.reload
+        expect(reward.currency_freespin_bet_levels).to eq({ "USD" => 0.25, "EUR" => 0.2 })
       end
     end
 

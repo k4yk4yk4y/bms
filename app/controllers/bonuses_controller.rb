@@ -586,7 +586,7 @@ class BonusesController < ApplicationController
     puts "reward_params.empty?: #{reward_params.empty?}"
     puts "reward_params[:amount].blank?: #{reward_params[:amount].blank?}"
     puts "reward_params[:percentage].blank?: #{reward_params[:percentage].blank?}"
-    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
+    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?)
 
     reward = @bonus.bonus_rewards.build(
       reward_type: reward_params[:reward_type] || "bonus",
@@ -702,13 +702,14 @@ class BonusesController < ApplicationController
         :affiliates_user, :balance, :cashout, :chargeable_comp_points,
         :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
         :registered, :social_networks, :hold_min, :hold_max,
-        currencies: []
+        currencies: [], currency_amounts: {}
       )
 
       # Handle array fields properly
       permitted[:groups] = permitted[:groups].split(",").map(&:strip) if permitted[:groups].is_a?(String)
       permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
       permitted[:currencies] = permitted[:currencies].compact.reject(&:blank?) if permitted[:currencies].is_a?(Array)
+      permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
 
       permitted
     end.compact
@@ -757,7 +758,7 @@ class BonusesController < ApplicationController
 
     rewards_params.each do |reward_params|
       Rails.logger.debug "Processing reward_params: #{reward_params.inspect}"
-      next if reward_params[:amount].blank? && reward_params[:percentage].blank?
+      next if reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?
 
       reward = @bonus.bonus_rewards.build(
         reward_type: "bonus",
@@ -765,9 +766,11 @@ class BonusesController < ApplicationController
         percentage: reward_params[:percentage]
       )
 
+      reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+
       # Set all additional parameters through the config field
       config = {}
-      reward_params.except(:amount, :percentage).each do |key, value|
+      reward_params.except(:amount, :percentage, :currency_amounts).each do |key, value|
         next if value.blank?
         config[key.to_s] = value
       end
@@ -799,7 +802,7 @@ class BonusesController < ApplicationController
     rewards_params.each do |reward_params|
       # Prepare currency freespin bet levels first
       currency_bet_levels = if reward_params[:currency_freespin_bet_levels].present?
-        reward_params[:currency_freespin_bet_levels]
+        normalize_currency_hash(reward_params[:currency_freespin_bet_levels])
       elsif @bonus.currencies.present?
         default_levels = {}
         bet_level_value = reward_params[:bet_level] || 0.1  # Use bet_level or default to 0.1
@@ -831,7 +834,7 @@ class BonusesController < ApplicationController
       # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
       # Set currency freespin bet levels
-      reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.present?
+      reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
       # Set advanced parameters
       config = reward.config || {}  # Preserve existing config
@@ -863,10 +866,11 @@ class BonusesController < ApplicationController
         # Update basic attributes
         reward.amount = reward_params[:amount] if reward_params[:amount].present?
         reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
+        reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
 
         # Update config with all other parameters
         config = reward.config || {}
-        reward_params.except(:id, :amount, :percentage).each do |key, value|
+        reward_params.except(:id, :amount, :percentage, :currency_amounts).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -883,7 +887,7 @@ class BonusesController < ApplicationController
         reward.save
       else
         # Create new reward
-        next if reward_params[:amount].blank? && reward_params[:percentage].blank?
+        next if reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?
 
         reward = @bonus.bonus_rewards.build(
           reward_type: "bonus",
@@ -891,9 +895,11 @@ class BonusesController < ApplicationController
           percentage: reward_params[:percentage]
         )
 
+        reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+
         # Set all additional parameters through the config field
         config = {}
-        reward_params.except(:amount, :percentage).each do |key, value|
+        reward_params.except(:amount, :percentage, :currency_amounts).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -941,8 +947,10 @@ class BonusesController < ApplicationController
         reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
         # Set currency bet levels
-        if reward_params[:currency_bet_levels].present?
-          reward.currency_bet_levels = reward_params[:currency_bet_levels]
+        if reward_params[:currency_freespin_bet_levels].present?
+          reward.currency_freespin_bet_levels = normalize_currency_hash(reward_params[:currency_freespin_bet_levels])
+        elsif reward_params[:currency_bet_levels].present?
+          reward.currency_freespin_bet_levels = normalize_currency_hash(reward_params[:currency_bet_levels])
         end
 
         # Set advanced parameters and common bonus parameters
@@ -1345,13 +1353,15 @@ class BonusesController < ApplicationController
 
   def create_bonus_reward_if_provided
     reward_params = bonus_reward_params
-    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank?)
+    return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?)
 
     reward = @bonus.bonus_rewards.build(
       reward_type: reward_params[:reward_type] || "bonus",
       amount: reward_params[:amount],
       percentage: reward_params[:percentage]
     )
+
+    reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
 
     # Set new direct attributes
 
@@ -1361,7 +1371,7 @@ class BonusesController < ApplicationController
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -1382,6 +1392,7 @@ class BonusesController < ApplicationController
     # Update amount/percentage
     reward.amount = reward_params[:amount] if reward_params[:amount].present?
     reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
+    reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
 
     # Update new direct attributes
 
@@ -1391,7 +1402,7 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -1411,7 +1422,7 @@ class BonusesController < ApplicationController
 
     # Prepare currency freespin bet levels first
     currency_bet_levels = if reward_params[:currency_freespin_bet_levels].present?
-      reward_params[:currency_freespin_bet_levels]
+      normalize_currency_hash(reward_params[:currency_freespin_bet_levels])
     elsif @bonus.currencies.present?
       default_levels = {}
       bet_level_value = reward_params[:bet_level] || 0.1  # Use bet_level or default to 0.1
@@ -1433,7 +1444,7 @@ class BonusesController < ApplicationController
     )
 
     # Set currency freespin bet levels
-    reward.currency_freespin_bet_levels = currency_bet_levels if currency_bet_levels.present?
+    reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
     # Set advanced parameters
     config = reward.config || {}  # Preserve existing config
@@ -2044,6 +2055,30 @@ class BonusesController < ApplicationController
 
     reward_data = params[:bonus_code_reward] || params.dig(:bonus, :bonus_code_reward) || {}
     reward_data.permit(:code, :set_bonus_code, :code_type, :title)
+  end
+
+  def normalize_currency_hash(value)
+    return {} if value.blank?
+
+    if value.is_a?(ActionController::Parameters)
+      value = value.permitted? ? value.to_h : value.to_unsafe_h
+    elsif value.respond_to?(:to_h)
+      value = value.to_h
+    end
+
+    return {} unless value.is_a?(Hash)
+
+    value.each_with_object({}) do |(currency, amount), result|
+      next if amount.blank?
+      result[currency] = amount
+    end
+  end
+
+  def normalize_currency_amounts(value)
+    amounts = normalize_currency_hash(value)
+    amounts.each_with_object({}) do |(currency, amount), result|
+      result[currency] = amount.to_f
+    end
   end
 
 
