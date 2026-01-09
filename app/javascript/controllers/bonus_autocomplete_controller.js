@@ -8,7 +8,27 @@ export default class extends Controller {
 
   connect() {
     this.debounceId = null
+    this.handleFocus = this.handleFocus.bind(this)
     this.ensureSelectedCache()
+    if (this.hasInputTarget) {
+      this.inputTarget.addEventListener("focus", this.handleFocus)
+    }
+
+    if (this.hasUrlValue && this.hasInputTarget && !this.inputTarget.disabled) {
+      this.fetchOptions("")
+    }
+  }
+
+  disconnect() {
+    if (this.hasInputTarget) {
+      this.inputTarget.removeEventListener("focus", this.handleFocus)
+    }
+  }
+
+  handleFocus() {
+    if (this.hasUrlValue && !this.inputTarget.disabled) {
+      this.fetchOptions(this.inputTarget.value.trim())
+    }
   }
 
   search() {

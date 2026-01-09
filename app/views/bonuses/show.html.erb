@@ -254,14 +254,14 @@
                 <dt class="col-sm-5">Updated:</dt>
                 <dd class="col-sm-7"><%= @bonus.updated_at.strftime("%Y-%m-%d %H:%M") %></dd>
                 
-                <% if @bonus.created_by %>
+                <% if can_read_users? && @bonus.creator.present? %>
                   <dt class="col-sm-5">Created By:</dt>
-                  <dd class="col-sm-7">User #<%= @bonus.created_by %></dd>
+                  <dd class="col-sm-7"><%= user_profile_link(@bonus.creator) %></dd>
                 <% end %>
-                
-                <% if @bonus.updated_by %>
+
+                <% if can_read_users? && @bonus.updater.present? %>
                   <dt class="col-sm-5">Updated By:</dt>
-                  <dd class="col-sm-7">User #<%= @bonus.updated_by %></dd>
+                  <dd class="col-sm-7"><%= user_profile_link(@bonus.updater) %></dd>
                 <% end %>
               </dl>
             </div>

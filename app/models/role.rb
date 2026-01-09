@@ -1,20 +1,14 @@
 class Role < ApplicationRecord
-  PERMISSION_LEVELS = %w[none read manage].freeze
-  PERMISSION_LEVEL_LABELS = {
-    "none" => "Нет",
-    "read" => "Чтение",
-    "manage" => "Полный доступ"
-  }.freeze
+  PERMISSION_LEVELS = PermissionsCatalog::PERMISSION_LEVELS
+  PERMISSION_LEVEL_LABELS = PermissionsCatalog::PERMISSION_LEVEL_LABELS
 
-  SECTION_DEFINITIONS = [
-    { key: "dashboard", label: "Dashboard" },
-    { key: "bonuses", label: "Bonuses" },
-    { key: "bonus_templates", label: "Bonus templates" },
-    { key: "marketing_requests", label: "Marketing requests" },
-    { key: "permanent_bonuses", label: "Permanent bonuses" },
-    { key: "users", label: "Users" },
-    { key: "retention", label: "Retention" }
-  ].freeze
+  SECTION_DEFINITIONS = PermissionsCatalog::FRONTEND_SECTIONS
+  SECTION_HINTS = {
+    "users" => "Доступ к профилям пользователей во фронте.",
+    "self_profile" => "Доступ только к собственному профилю.",
+    "settings" => "Доступ к разделу настроек во фронте.",
+    "api" => "Доступ к внутренним API эндпоинтам."
+  }.freeze
 
   SECTION_DEFINITIONS.each do |section|
     define_method(section[:key]) do
@@ -29,7 +23,7 @@ class Role < ApplicationRecord
   before_validation :normalize_permissions
 
   def self.ransackable_attributes(auth_object = nil)
-    [ "created_at", "id", "key", "name", "updated_at" ]
+    [ "admin_panel_access", "created_at", "id", "key", "name", "updated_at" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
@@ -37,7 +31,7 @@ class Role < ApplicationRecord
   end
 
   def self.section_keys
-    SECTION_DEFINITIONS.map { |section| section[:key] }
+    PermissionsCatalog.section_keys(SECTION_DEFINITIONS)
   end
 
   def self.permission_level_options
@@ -48,6 +42,10 @@ class Role < ApplicationRecord
     SECTION_DEFINITIONS.find { |section| section[:key] == key.to_s }&.fetch(:label, key.to_s.humanize) || key.to_s.humanize
   end
 
+  def self.section_hint(key)
+    SECTION_HINTS[key.to_s]
+  end
+
   def self.default_permissions_for(role_key)
     defaults = DEFAULT_PERMISSIONS.fetch(role_key.to_s, {})
     normalize_permissions_hash(defaults)
@@ -55,16 +53,14 @@ class Role < ApplicationRecord
 
   def self.permissions_for(role_key)
     role = find_by(key: role_key.to_s)
-    role ? normalize_permissions_hash(role.permissions) : default_permissions_for(role_key)
+    return default_permissions_for(role_key) unless role
+
+    defaults = default_permissions_for(role_key)
+    normalize_permissions_hash(defaults.merge(role.permissions.to_h))
   end
 
   def self.normalize_permissions_hash(source)
-    normalized = {}
-    section_keys.each do |section_key|
-      level = source.to_h[section_key].to_s
-      normalized[section_key] = PERMISSION_LEVELS.include?(level) ? level : "none"
-    end
-    normalized
+    PermissionsCatalog.normalize_permissions_hash(source, section_keys)
   end
 
   def permission_level_for(section_key)
@@ -89,38 +85,46 @@ class Role < ApplicationRecord
       "marketing_requests" => "manage",
       "permanent_bonuses" => "manage",
       "users" => "read",
-      "retention" => "manage"
+      "retention" => "manage",
+      "settings" => "manage",
+      "api" => "manage",
+      "self_profile" => "write"
     },
     "promo_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "users" => "read",
-      "retention" => "read"
+      "retention" => "read",
+      "self_profile" => "write"
     },
     "shift_leader" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "marketing_requests" => "read",
       "users" => "read",
-      "retention" => "read"
+      "retention" => "read",
+      "self_profile" => "write"
     },
     "marketing_manager" => {
       "dashboard" => "read",
       "marketing_requests" => "manage",
-      "users" => "read"
+      "users" => "read",
+      "self_profile" => "write"
     },
     "retention_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "users" => "read",
-      "retention" => "manage"
+      "retention" => "manage",
+      "self_profile" => "write"
     },
     "support_agent" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "marketing_requests" => "read",
       "users" => "read",
-      "retention" => "read"
+      "retention" => "read",
+      "self_profile" => "write"
     }
   }.freeze
 

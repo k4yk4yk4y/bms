@@ -18,7 +18,10 @@ class RetentionEmailsController < ApplicationController
 
     if @retention_email.save
       respond_to do |format|
-        format.html { redirect_to retention_chain_path(@retention_chain), notice: "Retention email created." }
+        format.html do
+          redirect_to retention_chain_retention_email_path(@retention_chain, @retention_email),
+                      notice: "Retention email created."
+        end
         format.json { render json: autosave_payload(@retention_email), status: :created }
       end
     else
@@ -40,7 +43,10 @@ class RetentionEmailsController < ApplicationController
 
     if @retention_email.update(retention_email_params)
       respond_to do |format|
-        format.html { redirect_to retention_chain_path(@retention_chain), notice: "Retention email updated." }
+        format.html do
+          redirect_to retention_chain_retention_email_path(@retention_chain, @retention_email),
+                      notice: "Retention email updated."
+        end
         format.json { render json: autosave_payload(@retention_email), status: :ok }
       end
     else

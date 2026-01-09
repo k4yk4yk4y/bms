@@ -1,0 +1,33 @@
+.retention-bonus-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  background: #212529;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.2px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.retention-bonus-link:hover {
+  background: #2c3034;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 37, 41, 0.35);
+}
+
+.retention-bonus-link:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .retention-bonus-link {
+    min-width: 130px;
+    padding: 0.35rem 0.85rem;
+  }
+}

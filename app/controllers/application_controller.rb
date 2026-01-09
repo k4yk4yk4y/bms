@@ -5,6 +5,14 @@ class ApplicationController < ActionController::Base
   # Use test layout in test environment to avoid JavaScript issues
   layout :choose_layout
 
+  # Active Admin unauthorized access handler
+  def redirect_to_admin_login
+    # Only redirect if not already on login page and not authenticated
+    unless request.path == new_admin_user_session_path || current_admin_user
+      redirect_to new_admin_user_session_path
+    end
+  end
+
   private
 
   def choose_layout
@@ -53,11 +61,4 @@ class ApplicationController < ActionController::Base
   # Note: authenticate_admin_user! and current_admin_user methods
   # are automatically provided by Devise when we have 'devise_for :admin_users'
 
-  # Active Admin unauthorized access handler
-  def redirect_to_admin_login
-    # Only redirect if not already on login page and not authenticated
-    unless request.path == new_admin_user_session_path || current_admin_user
-      redirect_to new_admin_user_session_path
-    end
-  end
 end

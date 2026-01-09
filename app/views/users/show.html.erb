@@ -1,0 +1,23 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">User profile</h1>
+    <%= link_to "Back", request.referer || root_path, class: "btn btn-outline-secondary" %>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9"><%= @user.email %></dd>
+        <dt class="col-sm-3">First name</dt>
+        <dd class="col-sm-9"><%= @user.first_name.presence || "—" %></dd>
+        <dt class="col-sm-3">Last name</dt>
+        <dd class="col-sm-9"><%= @user.last_name.presence || "—" %></dd>
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9"><%= @user.display_role.presence || @user.role.presence || "—" %></dd>
+        <dt class="col-sm-3">Created at</dt>
+        <dd class="col-sm-9"><%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
+      </dl>
+    </div>
+  </div>
+</div>

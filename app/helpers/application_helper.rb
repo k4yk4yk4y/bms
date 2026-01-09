@@ -30,4 +30,15 @@ module ApplicationHelper
       :default
     end
   end
+
+  def can_read_users?
+    can?(:read, User)
+  end
+
+  def user_profile_link(user)
+    return unless can_read_users?
+    return unless user&.email.present?
+
+    link_to user.email, user_path(user)
+  end
 end

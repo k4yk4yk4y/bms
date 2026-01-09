@@ -54,7 +54,9 @@
               <th>Project</th>
               <th>Emails</th>
               <th>Created at</th>
-              <th>Created by</th>
+              <% if can_read_users? %>
+                <th>Created by</th>
+              <% end %>
               <th class="text-end">Actions</th>
             </tr>
           </thead>
@@ -65,7 +67,11 @@
                 <td><%= chain.project&.name || "—" %></td>
                 <td><%= chain.retention_emails_count %></td>
                 <td><%= chain.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-                <td><%= chain.creator&.full_name.presence || chain.creator&.email || "—" %></td>
+                <% if can_read_users? %>
+                  <td>
+                    <%= user_profile_link(chain.creator) || "—" %>
+                  </td>
+                <% end %>
                 <td class="text-end">
                   <div class="btn-group btn-group-sm" role="group">
                     <%= link_to retention_chain_path(chain), class: "btn btn-outline-info", title: "View" do %>

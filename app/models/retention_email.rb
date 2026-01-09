@@ -58,7 +58,9 @@ class RetentionEmail < ApplicationRecord
       return
     end
 
-    invalid_bonus = bonuses.detect { |bonus| bonus.project != chain_project.name }
+    invalid_bonus = bonuses.detect do |bonus|
+      bonus.project.to_s.casecmp?(chain_project.name.to_s) == false
+    end
     return unless invalid_bonus
 
     errors.add(:bonuses, "must match chain project")

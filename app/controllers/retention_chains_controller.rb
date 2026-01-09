@@ -1,5 +1,5 @@
 class RetentionChainsController < ApplicationController
-  before_action :set_retention_chain, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_retention_chain, only: [ :show, :edit, :update, :destroy, :bonuses ]
 
   def index
     authorize! :read, RetentionChain
@@ -141,6 +141,6 @@ class RetentionChainsController < ApplicationController
   def bonuses_scope_for_chain
     return Bonus.none unless @retention_chain.project
 
-    Bonus.where(project: @retention_chain.project.name)
+    Bonus.where("bonuses.project ILIKE ?", @retention_chain.project.name)
   end
 end
