@@ -49,9 +49,19 @@
       <% if @retention_email.images.attached? %>
         <div class="d-flex flex-wrap gap-2">
           <% @retention_email.images.each do |image| %>
-            <%= link_to url_for(image), target: "_blank" do %>
-              <%= image_tag url_for(image), class: "img-thumbnail", style: "max-width: 240px;" %>
-            <% end %>
+            <div class="d-flex flex-column align-items-start gap-2">
+              <%= link_to url_for(image), target: "_blank" do %>
+                <%= image_tag url_for(image), class: "img-thumbnail", style: "max-width: 240px;" %>
+              <% end %>
+              <% if can?(:update, @retention_email) %>
+                <%= button_to image_retention_chain_retention_email_path(@retention_chain, @retention_email, image),
+                              method: :delete,
+                              data: { confirm: "Delete this image?" },
+                              class: "btn btn-sm btn-outline-danger" do %>
+                  <i class="fas fa-trash"></i> Remove
+                <% end %>
+              <% end %>
+            </div>
           <% end %>
         </div>
       <% else %>

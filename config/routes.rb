@@ -61,6 +61,9 @@ Rails.application.routes.draw do
       get :bonuses
     end
     resources :retention_emails, path: "emails" do
+      member do
+        delete "images/:attachment_id", action: :destroy_image, as: :image
+      end
       collection do
         patch :reorder
       end
