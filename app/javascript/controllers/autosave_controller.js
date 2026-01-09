@@ -10,13 +10,16 @@ export default class extends Controller {
   connect() {
     this.handleInput = this.handleInput.bind(this)
     this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
     this.element.addEventListener("input", this.handleInput)
     this.element.addEventListener("change", this.handleChange)
+    this.element.addEventListener("submit", this.handleSubmit)
   }
 
   disconnect() {
     this.element.removeEventListener("input", this.handleInput)
     this.element.removeEventListener("change", this.handleChange)
+    this.element.removeEventListener("submit", this.handleSubmit)
     if (this.timeoutId) {
       clearTimeout(this.timeoutId)
     }
@@ -35,14 +38,29 @@ export default class extends Controller {
     this.handleInput()
   }
 
+  handleSubmit() {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId)
+    }
+    this.setStatus("Saving...")
+  }
+
   submit() {
     const formData = new FormData(this.element)
+    const csrfToken = document.querySelector("meta[name=\"csrf-token\"]")?.content
+    let method = (this.methodValue || "post").toUpperCase()
+
+    if (method !== "POST") {
+      formData.set("_method", method.toLowerCase())
+      method = "POST"
+    }
 
     fetch(this.urlValue, {
-      method: this.methodValue.toUpperCase(),
+      method,
       headers: {
         Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest"
+        "X-Requested-With": "XMLHttpRequest",
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {})
       },
       body: formData
     })

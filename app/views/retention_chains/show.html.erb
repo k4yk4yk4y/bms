@@ -24,10 +24,12 @@
         <dd class="col-sm-9"><%= @retention_chain.created_at.strftime("%Y-%m-%d %H:%M") %></dd>
         <dt class="col-sm-3">Updated at</dt>
         <dd class="col-sm-9"><%= @retention_chain.updated_at.strftime("%Y-%m-%d %H:%M") %></dd>
-        <dt class="col-sm-3">Created by</dt>
-        <dd class="col-sm-9"><%= @retention_chain.creator&.full_name.presence || @retention_chain.creator&.email || "—" %></dd>
-        <dt class="col-sm-3">Updated by</dt>
-        <dd class="col-sm-9"><%= @retention_chain.updater&.full_name.presence || @retention_chain.updater&.email || "—" %></dd>
+        <% if can_read_users? %>
+          <dt class="col-sm-3">Created by</dt>
+          <dd class="col-sm-9"><%= user_profile_link(@retention_chain.creator) || "—" %></dd>
+          <dt class="col-sm-3">Updated by</dt>
+          <dd class="col-sm-9"><%= user_profile_link(@retention_chain.updater) || "—" %></dd>
+        <% end %>
       </dl>
     </div>
   </div>
@@ -73,11 +75,13 @@
                 <td><%= email.send_timing.presence || "—" %></td>
                 <td>
                   <% if email.bonuses.any? %>
-                    <% email.bonuses.each do |bonus| %>
-                      <% label = bonus.name.presence || "Bonus ##{bonus.id}" %>
-                      <% label = bonus.code.present? ? "#{label} (#{bonus.code})" : label %>
-                      <%= link_to label, bonus_path(bonus), class: "badge bg-info text-dark me-1" %>
-                    <% end %>
+                    <div class="d-flex flex-wrap gap-2">
+                      <% email.bonuses.each do |bonus| %>
+                        <% label = bonus.name.presence || "Bonus ##{bonus.id}" %>
+                        <% label = bonus.code.present? ? "#{label} (#{bonus.code})" : label %>
+                        <%= link_to label, bonus_path(bonus), class: "retention-bonus-link" %>
+                      <% end %>
+                    </div>
                   <% else %>
                     <span class="text-muted">—</span>
                   <% end %>

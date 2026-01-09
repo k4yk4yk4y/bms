@@ -30,11 +30,13 @@
         <dt class="col-sm-3">Bonuses</dt>
         <dd class="col-sm-9">
           <% if @retention_email.bonuses.any? %>
-            <% @retention_email.bonuses.each do |bonus| %>
-              <% label = bonus.name.presence || "Bonus ##{bonus.id}" %>
-              <% label = bonus.code.present? ? "#{label} (#{bonus.code})" : label %>
-              <%= link_to label, bonus_path(bonus), class: "badge bg-info text-dark me-1" %>
-            <% end %>
+            <div class="d-flex flex-wrap gap-2">
+              <% @retention_email.bonuses.each do |bonus| %>
+                <% label = bonus.name.presence || "Bonus ##{bonus.id}" %>
+                <% label = bonus.code.present? ? "#{label} (#{bonus.code})" : label %>
+                <%= link_to label, bonus_path(bonus), class: "retention-bonus-link" %>
+              <% end %>
+            </div>
           <% else %>
             <span class="text-muted">—</span>
           <% end %>

@@ -69,6 +69,10 @@ class User < ApplicationRecord
     admin?
   end
 
+  def admin_panel_access?
+    Role.find_by(key: role)&.admin_panel_access?
+  end
+
   def full_name
     "#{first_name} #{last_name}".strip.force_encoding("UTF-8")
   end

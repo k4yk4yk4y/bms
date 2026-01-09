@@ -6,10 +6,7 @@ class Ability
   def initialize(user)
     # Проверяем тип пользователя и устанавливаем соответствующие права
     if user.is_a?(AdminUser)
-      # AdminUser - администратор с полным доступом к Active Admin
-      can :manage, :all
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-      can :access, :all # Добавляем явное разрешение на доступ ко всем ресурсам
+      setup_admin_abilities(user)
     elsif user.is_a?(User)
       # User - пользователь приложения с ролевыми правами
       setup_user_abilities(user)
@@ -22,8 +19,43 @@ class Ability
   private
 
   def setup_user_abilities(user)
-    apply_role_permissions(user)
-    apply_self_profile_permissions(user)
+    permissions = apply_role_permissions(user)
+    apply_self_profile_permissions(user, permissions["self_profile"])
+  end
+
+  def setup_admin_abilities(admin_user)
+    permissions = AdminRole.normalize_permissions_hash(admin_user.admin_role&.permissions)
+
+    permissions.each do |section_key, level|
+      next if level == "none"
+
+      case section_key
+      when "dashboard"
+        can :read, ActiveAdmin::Page, name: "Dashboard"
+      when "bonuses"
+        apply_level(level, bonuses_resources)
+      when "bonus_templates"
+        apply_level(level, [ BonusTemplate ])
+      when "marketing_requests"
+        apply_level(level, [ MarketingRequest ])
+      when "bonus_audit_logs"
+        apply_level(level, [ BonusAuditLog ])
+      when "dsl_tags"
+        apply_level(level, [ DslTag ])
+      when "permanent_bonuses"
+        apply_level(level, [ PermanentBonus ])
+      when "projects"
+        apply_level(level, [ Project ])
+      when "users"
+        apply_level(level, [ User ])
+      when "admin_users"
+        apply_level(level, [ AdminUser ])
+      when "roles"
+        apply_level(level, [ Role ])
+      when "admin_roles"
+        apply_level(level, [ AdminRole ])
+      end
+    end
   end
 
   def apply_role_permissions(user)
@@ -47,12 +79,8 @@ class Ability
         apply_level(level, [ DslTag ])
       when "permanent_bonuses"
         apply_level(level, [ PermanentBonus ])
-      when "projects"
-        apply_level(level, [ Project ])
       when "users"
         apply_level(level, [ User ])
-      when "admin_users"
-        apply_level(level, [ AdminUser ])
       when "retention"
         apply_level(level, [ RetentionChain, RetentionEmail, RetentionEmailBonus ])
       when "settings"
@@ -61,20 +89,30 @@ class Ability
         apply_api_permissions(level)
       end
     end
+
+    permissions
   end
 
   def apply_level(level, resources)
-    action = level == "manage" ? :manage : :read
-    resources.each { |resource| can action, resource }
+    actions = case level
+              when "manage" then :manage
+              when "write" then [ :read, :create, :update ]
+              else :read
+              end
+    resources.each { |resource| can actions, resource }
   end
 
   def apply_marketing_permissions(user, level)
-    action = level == "manage" ? :manage : :read
+    actions = case level
+              when "manage" then :manage
+              when "write" then [ :read, :create, :update ]
+              else :read
+              end
 
     if user.marketing_manager?
-      can action, MarketingRequest, manager: user.email
+      can actions, MarketingRequest, manager: user.email
     else
-      can action, MarketingRequest
+      can actions, MarketingRequest
     end
   end
 
@@ -94,11 +132,15 @@ class Ability
     end
   end
 
-  def apply_self_profile_permissions(user)
+  def apply_self_profile_permissions(user, level)
     return unless user.persisted?
+    return if level == "none"
 
-    can :read, User, id: user.id
-    can :update, User, id: user.id
+    actions = case level
+              when "manage", "write" then [ :read, :update ]
+              else :read
+              end
+    can actions, User, id: user.id
   end
 
   def bonuses_resources

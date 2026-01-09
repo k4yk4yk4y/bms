@@ -1,14 +1,13 @@
-ActiveAdmin.register Role do
-  permit_params :key, :name, :admin_panel_access, permissions: Role.section_keys
+ActiveAdmin.register AdminRole do
+  permit_params :key, :name, permissions: AdminRole.section_keys
 
-  menu priority: 30, label: "Roles"
+  menu priority: 31, label: "Admin roles"
 
   index do
     selectable_column
     id_column
     column :key
     column :name
-    column :admin_panel_access
     column "Доступы" do |role|
       role.permissions_summary
     end
@@ -22,7 +21,7 @@ ActiveAdmin.register Role do
       row :permissions do |role|
         ul do
           role.permissions.to_h.each do |section_key, level|
-            li "#{Role.section_label(section_key)}: #{Role::PERMISSION_LEVEL_LABELS[level] || level}"
+            li "#{AdminRole.section_label(section_key)}: #{AdminRole::PERMISSION_LEVEL_LABELS[level] || level}"
           end
         end
       end
@@ -34,19 +33,18 @@ ActiveAdmin.register Role do
   form do |f|
     f.semantic_errors
     f.inputs "Основное" do
-      f.input :key, as: :select, collection: User.roles.keys.map { |role| [ role.humanize, role ] }
+      f.input :key
       f.input :name
-      f.input :admin_panel_access, as: :boolean, label: "Доступ в ActiveAdmin"
     end
     f.inputs "Доступы" do
-      Role::SECTION_DEFINITIONS.each do |section|
+      AdminRole::SECTION_DEFINITIONS.each do |section|
         f.input section[:key],
           label: section[:label],
           as: :select,
-          collection: Role.permission_level_options,
+          collection: AdminRole.permission_level_options,
           selected: f.object.permission_level_for(section[:key]),
-          hint: Role.section_hint(section[:key]),
-          input_html: { name: "role[permissions][#{section[:key]}]" }
+          hint: AdminRole.section_hint(section[:key]),
+          input_html: { name: "admin_role[permissions][#{section[:key]}]" }
       end
     end
     f.actions

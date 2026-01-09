@@ -20,6 +20,8 @@ development:
 test:
   <<: *default
   database: bms_test
+  collation: C
+  ctype: C
 
 production:
   primary:
