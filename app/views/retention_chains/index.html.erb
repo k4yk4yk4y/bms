@@ -1,0 +1,102 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Retention chains</h1>
+    <% if can?(:create, RetentionChain) %>
+      <%= link_to "New chain", new_retention_chain_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <%= form_with url: retention_chains_path, method: :get, local: true, class: "row g-3" do |form| %>
+        <div class="col-md-3">
+          <%= form.label :project_id, "Project", class: "form-label" %>
+          <%= form.select :project_id,
+                          options_from_collection_for_select(@projects, :id, :name, params[:project_id]),
+                          { include_blank: "All projects" },
+                          class: "form-select" %>
+        </div>
+        <div class="col-md-3">
+          <%= form.label :bonus_code, "Bonus code", class: "form-label" %>
+          <%= form.text_field :bonus_code, value: params[:bonus_code], class: "form-control" %>
+        </div>
+        <div class="col-md-3">
+          <%= form.label :subject, "Email subject", class: "form-label" %>
+          <%= form.text_field :subject, value: params[:subject], class: "form-control" %>
+        </div>
+        <div class="col-md-3">
+          <%= form.label :header, "Email header", class: "form-label" %>
+          <%= form.text_field :header, value: params[:header], class: "form-control" %>
+        </div>
+        <div class="col-md-3">
+          <%= form.label :start_date, "Launch date from", class: "form-label" %>
+          <%= form.date_field :start_date, value: params[:start_date], class: "form-control" %>
+        </div>
+        <div class="col-md-3">
+          <%= form.label :end_date, "Launch date to", class: "form-label" %>
+          <%= form.date_field :end_date, value: params[:end_date], class: "form-control" %>
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <%= form.submit "Filter", class: "btn btn-primary" %>
+          <%= link_to "Clear", retention_chains_path, class: "btn btn-outline-secondary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Project</th>
+              <th>Emails</th>
+              <th>Created at</th>
+              <th>Created by</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @retention_chains.each do |chain| %>
+              <tr>
+                <td><%= link_to chain.display_name, retention_chain_path(chain) %></td>
+                <td><%= chain.project&.name || "—" %></td>
+                <td><%= chain.retention_emails_count %></td>
+                <td><%= chain.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                <td><%= chain.creator&.full_name.presence || chain.creator&.email || "—" %></td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <%= link_to retention_chain_path(chain), class: "btn btn-outline-info", title: "View" do %>
+                      <i class="fas fa-eye"></i>
+                    <% end %>
+                    <% if can?(:update, chain) %>
+                      <%= link_to edit_retention_chain_path(chain), class: "btn btn-outline-primary", title: "Edit" do %>
+                        <i class="fas fa-edit"></i>
+                      <% end %>
+                    <% end %>
+                    <% if can?(:destroy, chain) %>
+                      <%= button_to retention_chain_path(chain),
+                                    method: :delete,
+                                    data: { confirm: "Delete retention chain?" },
+                                    class: "btn btn-outline-danger",
+                                    title: "Delete" do %>
+                        <i class="fas fa-trash"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+            <% if @retention_chains.empty? %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">No retention chains found.</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

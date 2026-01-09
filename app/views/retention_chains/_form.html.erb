@@ -1,0 +1,54 @@
+<%= form_with model: retention_chain,
+              url: autosave_url,
+              method: autosave_method,
+              data: {
+                controller: "autosave",
+                autosave_url_value: autosave_url,
+                autosave_method_value: autosave_method
+              },
+              local: true do |form| %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <% if retention_chain.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% retention_chain.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= form.label :name, "Chain name", class: "form-label" %>
+          <%= form.text_field :name, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= form.label :project_id, "Project", class: "form-label" %>
+          <%= form.collection_select :project_id, Project.order(:name), :id, :name,
+                                     { include_blank: true }, class: "form-select" %>
+        </div>
+        <div class="col-md-4">
+          <%= form.label :status, "Status", class: "form-label" %>
+          <%= form.select :status, RetentionChain::STATUSES.map { |status| [ status.humanize, status ] },
+                          {}, class: "form-select" %>
+        </div>
+        <div class="col-md-4">
+          <%= form.label :launch_date, "Launch date", class: "form-label" %>
+          <%= form.datetime_local_field :launch_date,
+                                        value: retention_chain.launch_date&.strftime("%Y-%m-%dT%H:%M"),
+                                        class: "form-control" %>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div data-autosave-target="status" class="text-muted small"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= form.submit "Save", class: "btn btn-primary" %>
+    <%= link_to "Back", retention_chains_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

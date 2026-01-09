@@ -1,0 +1,10 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Edit retention chain</h1>
+    <%= link_to "View", retention_chain_path(@retention_chain), class: "btn btn-outline-secondary" %>
+  </div>
+  <%= render "form",
+             retention_chain: @retention_chain,
+             autosave_url: retention_chain_path(@retention_chain),
+             autosave_method: :patch %>
+</div>

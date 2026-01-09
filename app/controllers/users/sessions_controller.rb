@@ -36,6 +36,8 @@ class Users::SessionsController < Devise::SessionsController
     case resource.role
     when "marketing_manager"
       marketing_index_path
+    when "retention_manager"
+      retention_chains_path
     when "admin", "promo_manager", "shift_leader", "support_agent"
       bonuses_path
     else

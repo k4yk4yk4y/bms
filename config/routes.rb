@@ -56,6 +56,17 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :retention_chains, path: "retention" do
+    member do
+      get :bonuses
+    end
+    resources :retention_emails, path: "emails" do
+      collection do
+        patch :reorder
+      end
+    end
+  end
+
   # API routes for bonus management
   namespace :api do
     namespace :v1 do

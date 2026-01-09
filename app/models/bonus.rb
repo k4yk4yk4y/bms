@@ -20,6 +20,9 @@ class Bonus < ApplicationRecord
   has_many :freechip_rewards, dependent: :destroy
   has_many :material_prize_rewards, dependent: :destroy
 
+  has_many :retention_email_bonuses, dependent: :destroy
+  has_many :retention_emails, through: :retention_email_bonuses
+
   # Audit associations
   has_many :bonus_audit_logs, dependent: :destroy
   belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
