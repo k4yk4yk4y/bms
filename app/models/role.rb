@@ -11,15 +11,9 @@ class Role < ApplicationRecord
     { key: "bonuses", label: "Bonuses" },
     { key: "bonus_templates", label: "Bonus templates" },
     { key: "marketing_requests", label: "Marketing requests" },
-    { key: "bonus_audit_logs", label: "Bonus audit logs" },
-    { key: "dsl_tags", label: "DSL tags" },
     { key: "permanent_bonuses", label: "Permanent bonuses" },
-    { key: "projects", label: "Projects" },
     { key: "users", label: "Users" },
-    { key: "admin_users", label: "Admin users" },
-    { key: "retention", label: "Retention" },
-    { key: "settings", label: "Settings" },
-    { key: "api", label: "API" }
+    { key: "retention", label: "Retention" }
   ].freeze
 
   SECTION_DEFINITIONS.each do |section|
@@ -61,7 +55,7 @@ class Role < ApplicationRecord
 
   def self.permissions_for(role_key)
     role = find_by(key: role_key.to_s)
-    role ? role.permissions : default_permissions_for(role_key)
+    role ? normalize_permissions_hash(role.permissions) : default_permissions_for(role_key)
   end
 
   def self.normalize_permissions_hash(source)
@@ -93,25 +87,21 @@ class Role < ApplicationRecord
       "bonuses" => "manage",
       "bonus_templates" => "manage",
       "marketing_requests" => "manage",
-      "bonus_audit_logs" => "manage",
-      "dsl_tags" => "manage",
       "permanent_bonuses" => "manage",
-      "projects" => "manage",
-      "users" => "manage",
-      "admin_users" => "manage",
-      "retention" => "manage",
-      "settings" => "manage",
-      "api" => "manage"
+      "users" => "read",
+      "retention" => "manage"
     },
     "promo_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "users" => "read",
       "retention" => "read"
     },
     "shift_leader" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "marketing_requests" => "read",
+      "users" => "read",
       "retention" => "read"
     },
     "marketing_manager" => {
@@ -122,12 +112,14 @@ class Role < ApplicationRecord
     "retention_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "users" => "read",
       "retention" => "manage"
     },
     "support_agent" => {
       "dashboard" => "read",
       "bonuses" => "read",
       "marketing_requests" => "read",
+      "users" => "read",
       "retention" => "read"
     }
   }.freeze
