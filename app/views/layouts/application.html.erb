@@ -61,6 +61,13 @@
               <% end %>
             </li>
           <% end %>
+          <% if can?(:read, RetentionChain) %>
+            <li class="nav-item">
+              <%= link_to retention_chains_path, class: "nav-link #{'active' if controller_name == 'retention_chains'}" do %>
+                <i class="fas fa-retweet"></i> Retention
+              <% end %>
+            </li>
+          <% end %>
           <% if can?(:read, Bonus) %>
             <li class="nav-item dropdown" data-controller="projects-dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">

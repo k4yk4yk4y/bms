@@ -1,0 +1,9 @@
+<div class="container-fluid">
+  <h1 class="h3 mb-4">New retention email</h1>
+  <%= render "form",
+             retention_chain: @retention_chain,
+             retention_email: @retention_email,
+             selected_bonuses: @selected_bonuses,
+             autosave_url: retention_chain_retention_emails_path(@retention_chain),
+             autosave_method: :post %>
+</div>

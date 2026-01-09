@@ -1,0 +1,7 @@
+<div class="container-fluid">
+  <h1 class="h3 mb-4">New retention chain</h1>
+  <%= render "form",
+             retention_chain: @retention_chain,
+             autosave_url: retention_chains_path,
+             autosave_method: :post %>
+</div>

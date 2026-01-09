@@ -83,6 +83,10 @@ playwright-report/
 test-results/
 playwright/.cache/
 playwright/
+test/system/.auth/
+
+# VS Code workspace settings
+.vscode/
 
 # Spec kit and Gemini CLI files
 .gemini/

@@ -136,6 +136,17 @@ class Ability
       cannot :manage, BonusCodeReward
       cannot :manage, MaterialPrizeReward
       cannot :manage, CompPointReward
+      cannot :read, RetentionChain
+      cannot :read, RetentionEmail
+
+    when "retention_manager"
+      can :manage, RetentionChain
+      can :manage, RetentionEmail
+      can :manage, RetentionEmailBonus
+      can :read, Bonus
+      can :read, ActiveAdmin::Page, name: "Dashboard"
+      can :read, User, id: user.id
+      can :update, User, id: user.id
 
     when "support_agent"
       # Агент поддержки имеет ограниченный доступ - ТОЛЬКО ЧТЕНИЕ
@@ -184,6 +195,11 @@ class Ability
     # Дополнительные правила для пользователей приложения
     if user.persisted?
       can :read, ActiveAdmin::Page, name: "Dashboard"
+    end
+
+    unless user.marketing_manager?
+      can :read, RetentionChain
+      can :read, RetentionEmail
     end
 
     # Особые правила для админов среди пользователей приложения

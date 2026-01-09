@@ -31,6 +31,7 @@ ActiveAdmin.register User do
         when "promo_manager" then :warning
         when "shift_leader" then :ok
         when "support_agent" then :default
+        when "retention_manager" then :ok
         else :default
         end
         status_tag user.display_role, class: role_class

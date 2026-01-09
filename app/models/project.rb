@@ -1,5 +1,6 @@
 class Project < ApplicationRecord
   has_many :permanent_bonuses, dependent: :destroy
+  has_many :retention_chains, dependent: :nullify
 
   validates :name, presence: true, uniqueness: true
 

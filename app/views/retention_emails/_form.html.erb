@@ -1,0 +1,108 @@
+<%= form_with model: [retention_chain, retention_email],
+              url: autosave_url,
+              method: autosave_method,
+              multipart: true,
+              data: {
+                controller: "autosave",
+                autosave_url_value: autosave_url,
+                autosave_method_value: autosave_method
+              },
+              local: true do |form| %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <% if retention_email.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% retention_email.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <%= form.label :subject, "Subject", class: "form-label" %>
+          <%= form.text_field :subject, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= form.label :header, "Header", class: "form-label" %>
+          <%= form.text_field :header, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= form.label :preheader, "Preheader", class: "form-label" %>
+          <%= form.text_field :preheader, class: "form-control" %>
+        </div>
+        <div class="col-md-6">
+          <%= form.label :send_timing, "Send timing", class: "form-label" %>
+          <%= form.text_field :send_timing, class: "form-control" %>
+        </div>
+        <div class="col-md-4">
+          <%= form.label :status, "Status", class: "form-label" %>
+          <%= form.select :status, RetentionEmail::STATUSES.map { |status| [ status.humanize, status ] },
+                          {}, class: "form-select" %>
+        </div>
+        <div class="col-md-4">
+          <%= form.label :launch_date, "Launch date", class: "form-label" %>
+          <%= form.datetime_local_field :launch_date,
+                                        value: retention_email.launch_date&.strftime("%Y-%m-%dT%H:%M"),
+                                        class: "form-control" %>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div data-autosave-target="status" class="text-muted small"></div>
+        </div>
+        <div class="col-md-12">
+          <%= form.label :description, "Description (internal)", class: "form-label" %>
+          <%= form.text_area :description, rows: 3, class: "form-control" %>
+        </div>
+        <div class="col-md-12">
+          <%= form.label :body, "Email text", class: "form-label" %>
+          <%= form.text_area :body, rows: 6, class: "form-control" %>
+        </div>
+        <% project_missing = retention_chain.project.nil? %>
+        <div class="col-md-12"
+             data-controller="bonus-autocomplete"
+             data-bonus-autocomplete-url-value="<%= bonuses_retention_chain_path(retention_chain) %>">
+          <%= form.label :bonus_ids, "Bonuses", class: "form-label" %>
+          <input type="text"
+                 class="form-control mb-2"
+                 placeholder="Search bonuses by name or code"
+                 data-bonus-autocomplete-target="input"
+                 data-action="input->bonus-autocomplete#search"
+                 <%= "disabled" if project_missing %>>
+          <% bonus_options = selected_bonuses.map do |bonus| %>
+            <% label = bonus.name.presence || "Bonus ##{bonus.id}" %>
+            <% label = bonus.code.present? ? "#{label} (#{bonus.code})" : label %>
+            <% [ label, bonus.id ] %>
+          <% end %>
+          <%= form.select :bonus_ids, options_for_select(bonus_options, retention_email.bonus_ids),
+                          { include_hidden: false },
+                          { multiple: true,
+                            class: "form-select",
+                            data: { bonus_autocomplete_target: "select" },
+                            disabled: project_missing } %>
+          <div class="form-text">Hold Ctrl/Cmd to select multiple bonuses.</div>
+          <% if project_missing %>
+            <div class="form-text text-warning">Select a project on the chain to attach bonuses.</div>
+          <% end %>
+        </div>
+        <div class="col-md-12">
+          <%= form.label :images, "Email images", class: "form-label" %>
+          <%= form.file_field :images, multiple: true, class: "form-control" %>
+          <% if retention_email.images.attached? %>
+            <div class="mt-2">
+              <% retention_email.images.each do |image| %>
+                <%= link_to image.filename.to_s, url_for(image), target: "_blank", class: "badge bg-light text-dark me-2" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= form.submit "Save", class: "btn btn-primary" %>
+    <%= link_to "Back", retention_chain_path(retention_chain), class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>
