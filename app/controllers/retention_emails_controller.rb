@@ -58,6 +58,14 @@ class RetentionEmailsController < ApplicationController
     redirect_to retention_chain_path(@retention_chain), notice: "Retention email deleted."
   end
 
+  def destroy_image
+    authorize! :update, @retention_email
+    attachment = @retention_email.images.attachments.find(params[:attachment_id])
+    attachment.purge
+    redirect_back fallback_location: edit_retention_chain_retention_email_path(@retention_chain, @retention_email),
+                  notice: "Image removed."
+  end
+
   def reorder
     authorize! :update, RetentionEmail
     order = params[:order].to_a.map(&:to_i)

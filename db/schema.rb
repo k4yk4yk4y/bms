@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_08_120003) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_09_150121) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -343,6 +343,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_08_120003) do
     t.index ["retention_chain_id", "position"], name: "index_retention_emails_on_retention_chain_id_and_position"
     t.index ["retention_chain_id"], name: "index_retention_emails_on_retention_chain_id"
     t.index ["status"], name: "index_retention_emails_on_status"
+  end
+
+  create_table "roles", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.jsonb "permissions", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_roles_on_key", unique: true
   end
 
   create_table "users", force: :cascade do |t|

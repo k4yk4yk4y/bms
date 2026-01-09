@@ -22,203 +22,101 @@ class Ability
   private
 
   def setup_user_abilities(user)
-    case user.role
-    when "admin"
-      # Администратор имеет полный доступ ко всему
+    if user.role == "admin"
       can :manage, :all
       can :read, ActiveAdmin::Page, name: "Dashboard"
+      return
+    end
 
-    when "promo_manager"
-      # Промо-менеджер имеет ТОЛЬКО читательский доступ к бонусам (БЕЗ доступа к Marketing, Settings и API)
-      # ЧИТАТЕЛЬСКИЙ ДОСТУП к бонусам и связанным объектам
-      can :read, Bonus
-      can :read, BonusReward
-      can :read, FreespinReward
-      can :read, BonusBuyReward
-      can :read, FreechipReward
-      can :read, BonusCodeReward
-      can :read, MaterialPrizeReward
-      can :read, CompPointReward
-      can :read, User, id: user.id
-      can :update, User, id: user.id
-      can :read, ActiveAdmin::Page, name: "Dashboard"
+    apply_role_permissions(user)
+    apply_self_profile_permissions(user)
+  end
 
-      # ЗАПРЕТЫ на создание, редактирование, удаление бонусов
-      cannot :create, Bonus
-      cannot :update, Bonus
-      cannot :destroy, Bonus
-      cannot :duplicate, Bonus
+  def apply_role_permissions(user)
+    permissions = Role.permissions_for(user.role)
 
-      # ПОЛНЫЙ ЗАПРЕТ доступа к Marketing
-      cannot :read, MarketingRequest
-      cannot :manage, MarketingRequest
+    permissions.each do |section_key, level|
+      next if level == "none"
 
-      # ПОЛНЫЙ ЗАПРЕТ доступа к Templates
-      cannot :manage, BonusTemplate
-      cannot :read, BonusTemplate
-
-      # ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
-      cannot :access, :settings
-      cannot :manage, :settings
-
-      # ПОЛНЫЙ ЗАПРЕТ доступа к API
-      cannot :access, :api
-      cannot :manage, :api
-
-    when "shift_leader"
-      # Лидер смены имеет ТОЛЬКО читательский доступ ко всем разделам кроме Settings и API
-      # ЧИТАТЕЛЬСКИЙ ДОСТУП к бонусам и связанным объектам
-      can :read, Bonus
-      can :read, BonusReward
-      can :read, FreespinReward
-      can :read, BonusBuyReward
-      can :read, FreechipReward
-      can :read, BonusCodeReward
-      can :read, MaterialPrizeReward
-      can :read, CompPointReward
-      can :read, MarketingRequest
-      can :read, User, id: user.id
-      can :update, User, id: user.id
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-
-      # ЗАПРЕТЫ на создание, редактирование, удаление бонусов
-      cannot :create, Bonus
-      cannot :update, Bonus
-      cannot :destroy, Bonus
-      cannot :duplicate, Bonus
-
-      # ЗАПРЕТЫ на создание, редактирование, удаление маркетинговых заявок
-      cannot :create, MarketingRequest
-      cannot :update, MarketingRequest
-      cannot :destroy, MarketingRequest
-      cannot :activate, MarketingRequest
-      cannot :reject, MarketingRequest
-      cannot :transfer, MarketingRequest
-
-      # ПОЛНЫЙ ЗАПРЕТ доступа к Templates
-      cannot :manage, BonusTemplate
-      cannot :read, BonusTemplate
-
-      # ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
-      cannot :access, :settings
-      cannot :manage, :settings
-
-      # ПОЛНЫЙ ЗАПРЕТ доступа к API
-      cannot :access, :api
-      cannot :manage, :api
-
-    when "marketing_manager"
-      # Маркетинг-менеджер имеет доступ ТОЛЬКО к своим маркетинговым заявкам
-      can [ :read, :create, :update ], MarketingRequest do |marketing_request|
-        marketing_request.manager == user.email
+      case section_key
+      when "dashboard"
+        can :read, ActiveAdmin::Page, name: "Dashboard"
+      when "bonuses"
+        apply_level(level, bonuses_resources)
+      when "bonus_templates"
+        apply_level(level, [ BonusTemplate ])
+      when "marketing_requests"
+        apply_marketing_permissions(user, level)
+      when "bonus_audit_logs"
+        apply_level(level, [ BonusAuditLog ])
+      when "dsl_tags"
+        apply_level(level, [ DslTag ])
+      when "permanent_bonuses"
+        apply_level(level, [ PermanentBonus ])
+      when "projects"
+        apply_level(level, [ Project ])
+      when "users"
+        apply_level(level, [ User ])
+      when "admin_users"
+        apply_level(level, [ AdminUser ])
+      when "retention"
+        apply_level(level, [ RetentionChain, RetentionEmail, RetentionEmailBonus ])
+      when "settings"
+        apply_settings_permissions(level)
+      when "api"
+        apply_api_permissions(level)
       end
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-      can :read, User  # Может просматривать всех пользователей
-      can :update, User, id: user.id  # Может редактировать только свой профиль
+    end
+  end
 
-      # ЗАПРЕТЫ на активацию, отклонение и удаление заявок
-      cannot :activate, MarketingRequest
-      cannot :reject, MarketingRequest
-      cannot :destroy, MarketingRequest
+  def apply_level(level, resources)
+    action = level == "manage" ? :manage : :read
+    resources.each { |resource| can action, resource }
+  end
 
-      # ПОЛНЫЙ ЗАПРЕТ доступа ко всем остальным разделам
-      cannot :access, :settings
-      cannot :manage, :settings
-      cannot :access, :api
-      cannot :manage, :api
-      cannot :read, Bonus     # ЗАПРЕТ на чтение бонусов
-      cannot :manage, Bonus
-      cannot :manage, BonusTemplate
-      cannot :manage, BonusReward
-      cannot :manage, FreespinReward
-      cannot :manage, BonusBuyReward
-      cannot :manage, FreechipReward
-      cannot :manage, BonusCodeReward
-      cannot :manage, MaterialPrizeReward
-      cannot :manage, CompPointReward
-      cannot :read, RetentionChain
-      cannot :read, RetentionEmail
+  def apply_marketing_permissions(user, level)
+    action = level == "manage" ? :manage : :read
 
-    when "retention_manager"
-      can :manage, RetentionChain
-      can :manage, RetentionEmail
-      can :manage, RetentionEmailBonus
-      can :read, Bonus
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-      can :read, User, id: user.id
-      can :update, User, id: user.id
-
-    when "support_agent"
-      # Агент поддержки имеет ограниченный доступ - ТОЛЬКО ЧТЕНИЕ
-
-      # 1. Может просматривать бонусы и связанные объекты (только в основном разделе)
-      can :read, Bonus
-      can :read, BonusReward
-      can :read, FreespinReward
-      can :read, BonusBuyReward
-      can :read, FreechipReward
-      can :read, BonusCodeReward
-      can :read, MaterialPrizeReward
-      can :read, CompPointReward
-      can :read, MarketingRequest
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-      can :read, User, id: user.id
-      can :update, User, id: user.id
-
-      # 2. ПОЛНЫЙ ЗАПРЕТ всех действий создания, редактирования и удаления
-      cannot :create, Bonus
-      cannot :update, Bonus
-      cannot :destroy, Bonus
-      cannot :duplicate, Bonus
-
-      cannot :manage, BonusTemplate  # Полный запрет на работу с шаблонами
-
-      cannot :create, MarketingRequest
-      cannot :update, MarketingRequest
-      cannot :destroy, MarketingRequest
-      cannot :activate, MarketingRequest
-      cannot :reject, MarketingRequest
-      cannot :transfer, MarketingRequest
-
-      # 3. ПОЛНЫЙ ЗАПРЕТ доступа к Settings разделу
-      cannot :access, :settings
-      cannot :manage, :settings
-
-      # 4. ПОЛНЫЙ ЗАПРЕТ доступа к API
-      cannot :access, :api
-      cannot :manage, :api
-
+    if user.marketing_manager?
+      can action, MarketingRequest, manager: user.email
     else
-      # Пользователи без определённой роли не имеют доступа
+      can action, MarketingRequest
     end
+  end
 
-    # Дополнительные правила для пользователей приложения
-    if user.persisted?
-      can :read, ActiveAdmin::Page, name: "Dashboard"
-    end
-
-    unless user.marketing_manager?
-      can :read, RetentionChain
-      can :read, RetentionEmail
-    end
-
-    # Особые правила для админов среди пользователей приложения
-    if user.admin?
-      can :manage, User
-      can :create, User
-      can :destroy, User
-    elsif user.marketing_manager?
-      # Маркетинг менеджер уже имеет настроенные права выше
-      # Добавляем только основные ограничения
-      cannot :create, User
-      cannot :destroy, User
+  def apply_settings_permissions(level)
+    if level == "manage"
+      can :manage, :settings
     else
-      # Ограничения для не-админов (кроме marketing_manager)
-      cannot :create, User
-      cannot :destroy, User
-      cannot :manage, User
-      can :read, User, id: user.id # Может читать только свой профиль
-      can :update, User, id: user.id # Может обновлять только свой профиль
+      can :access, :settings
     end
+  end
+
+  def apply_api_permissions(level)
+    if level == "manage"
+      can :manage, :api
+    else
+      can :access, :api
+    end
+  end
+
+  def apply_self_profile_permissions(user)
+    return unless user.persisted?
+
+    can :read, User, id: user.id
+    can :update, User, id: user.id
+  end
+
+  def bonuses_resources
+    [
+      Bonus,
+      BonusReward,
+      FreespinReward,
+      BonusBuyReward,
+      FreechipReward,
+      BonusCodeReward,
+      MaterialPrizeReward,
+      CompPointReward
+    ]
   end
 end
