@@ -95,19 +95,19 @@ class Ability
 
   def apply_level(level, resources)
     actions = case level
-              when "manage" then :manage
-              when "write" then [ :read, :create, :update ]
-              else :read
-              end
+    when "manage" then :manage
+    when "write" then [ :read, :create, :update ]
+    else :read
+    end
     resources.each { |resource| can actions, resource }
   end
 
   def apply_marketing_permissions(user, level)
     actions = case level
-              when "manage" then :manage
-              when "write" then [ :read, :create, :update ]
-              else :read
-              end
+    when "manage" then :manage
+    when "write" then [ :read, :create, :update ]
+    else :read
+    end
 
     if user.marketing_manager?
       can actions, MarketingRequest, manager: user.email
@@ -137,9 +137,9 @@ class Ability
     return if level == "none"
 
     actions = case level
-              when "manage", "write" then [ :read, :update ]
-              else :read
-              end
+    when "manage", "write" then [ :read, :update ]
+    else :read
+    end
     can actions, User, id: user.id
   end
 
