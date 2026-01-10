@@ -70,7 +70,7 @@
           <% end %>
           <% if can?(:read, Bonus) %>
             <li class="nav-item dropdown" data-controller="projects-dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown" data-action="click->projects-dropdown#handleDropdownClick keydown->projects-dropdown#handleKeydown">
                 <i class="fas fa-project-diagram"></i> Projects
                 <% if params[:project_id].present? %>
                   <% current_project = Project.find_by(id: params[:project_id]) %>
@@ -104,22 +104,27 @@
         
         <ul class="navbar-nav">
           <% if user_signed_in? %>
-            <li class="nav-item dropdown d-flex align-items-center gap-2">
+            <li class="nav-item dropdown d-flex align-items-center gap-2" data-controller="settings-dropdown">
               <% if current_user.admin_panel_access? %>
                 <%= link_to "/admin", class: "nav-link admin-panel-link", title: "ActiveAdmin", target: "_blank", rel: "noopener" do %>
                   <i class="fas fa-shield-alt"></i>
                 <% end %>
               <% end %>
-              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-settings-dropdown-target="dropdown" aria-expanded="false" data-action="click->settings-dropdown#handleDropdownClick keydown->settings-dropdown#handleKeydown">
                 <i class="fas fa-user"></i> <%= current_user.full_name.presence || current_user.email %>
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" data-settings-dropdown-target="menu">
                 <li>
                   <span class="dropdown-item-text">
                     <small class="text-muted">Роль: <%= current_user.display_role %></small>
                   </span>
                 </li>
                 <li><hr class="dropdown-divider"></li>
+                <li>
+                  <%= link_to user_path(current_user), class: "dropdown-item" do %>
+                    <i class="fas fa-id-badge"></i> Профиль
+                  <% end %>
+                </li>
                 <li>
                   <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item text-danger border-0 bg-transparent text-start w-100", form_class: "d-inline" do %>
                     <i class="fas fa-sign-out-alt"></i> Выйти

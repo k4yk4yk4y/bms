@@ -4,11 +4,13 @@ export default class extends Controller {
   static targets = ["dropdown", "menu"]
 
   connect() {
+    this.setupTurboListeners()
     this.initializeDropdown()
   }
 
   disconnect() {
     this.destroyDropdown()
+    this.removeTurboListeners()
   }
 
   initializeDropdown() {
@@ -16,38 +18,13 @@ export default class extends Controller {
     this.destroyDropdown()
     
     // Store bound function references for proper cleanup
-    this.boundDropdownClick = this.handleDropdownClick.bind(this)
     this.boundClickOutside = this.clickOutside.bind(this)
-    this.boundKeydown = this.handleKeydown.bind(this)
-    
-    // Initialize Bootstrap dropdown manually after Turbo navigation
-    if (window.bootstrap && window.bootstrap.Dropdown) {
-      try {
-        // Check if dropdown already has an instance
-        const existingInstance = window.bootstrap.Dropdown.getInstance(this.dropdownTarget)
-        if (existingInstance) {
-          existingInstance.dispose()
-        }
-        
-        // Create new Bootstrap dropdown instance
-        this.bootstrapDropdown = new window.bootstrap.Dropdown(this.dropdownTarget, {
-          autoClose: true,
-        })
-        
-        this.dropdownTarget.addEventListener('click', this.boundDropdownClick)
-        
-      } catch (error) {
-      }
-    }
     
     // Highlight current project in dropdown
     this.highlightCurrentProject()
     
     // Add click outside listener
     document.addEventListener('click', this.boundClickOutside)
-    
-    // Add keyboard navigation
-    this.dropdownTarget.addEventListener('keydown', this.boundKeydown)
     
     // Add loading indicator for project links
     this.addLoadingIndicators()
@@ -56,49 +33,51 @@ export default class extends Controller {
   handleDropdownClick(event) {
     event.preventDefault()
     event.stopPropagation()
-    
-    if (this.bootstrapDropdown) {
-      // Toggle dropdown manually
-      const isShown = this.dropdownTarget.classList.contains('show')
-      if (isShown) {
-        this.bootstrapDropdown.hide()
-      } else {
-        this.bootstrapDropdown.show()
-      }
-    }
+    this.toggleDropdown()
   }
 
   destroyDropdown() {
     // Remove event listeners using stored bound functions
-    if (this.dropdownTarget && this.boundDropdownClick) {
-      this.dropdownTarget.removeEventListener('click', this.boundDropdownClick)
-    }
-    
     if (this.boundClickOutside) {
       document.removeEventListener('click', this.boundClickOutside)
     }
-    
-    if (this.dropdownTarget && this.boundKeydown) {
-      this.dropdownTarget.removeEventListener('keydown', this.boundKeydown)
-    }
-    
-    // Destroy Bootstrap dropdown instance
-    if (this.bootstrapDropdown) {
-      try {
-        this.bootstrapDropdown.dispose()
-        this.bootstrapDropdown = null
-      } catch (error) {
-      }
-    }
-    
+
+    this.hideDropdown()
+
     // Clear bound function references
-    this.boundDropdownClick = null
     this.boundClickOutside = null
-    this.boundKeydown = null
   }
 
   refreshDropdown() {
     this.initializeDropdown()
+  }
+
+  setupTurboListeners() {
+    this.boundTurboLoad = this.handleTurboLoad.bind(this)
+    this.boundTurboRender = this.handleTurboRender.bind(this)
+    this.boundTurboBeforeCache = this.handleTurboBeforeCache.bind(this)
+
+    document.addEventListener('turbo:load', this.boundTurboLoad)
+    document.addEventListener('turbo:render', this.boundTurboRender)
+    document.addEventListener('turbo:before-cache', this.boundTurboBeforeCache)
+  }
+
+  removeTurboListeners() {
+    if (this.boundTurboLoad) {
+      document.removeEventListener('turbo:load', this.boundTurboLoad)
+    }
+
+    if (this.boundTurboRender) {
+      document.removeEventListener('turbo:render', this.boundTurboRender)
+    }
+
+    if (this.boundTurboBeforeCache) {
+      document.removeEventListener('turbo:before-cache', this.boundTurboBeforeCache)
+    }
+
+    this.boundTurboLoad = null
+    this.boundTurboRender = null
+    this.boundTurboBeforeCache = null
   }
 
   highlightCurrentProject() {
@@ -123,17 +102,43 @@ export default class extends Controller {
 
   clickOutside(event) {
     if (!this.element.contains(event.target)) {
-      if (this.bootstrapDropdown) {
-        this.bootstrapDropdown.hide()
-      }
+      this.hideDropdown()
     }
   }
 
   handleKeydown(event) {
     if (event.key === 'Escape') {
-      if (this.bootstrapDropdown) {
-        this.bootstrapDropdown.hide()
-      }
+      this.hideDropdown()
+    }
+  }
+
+  isOpen() {
+    return this.menuTarget.classList.contains('show')
+  }
+
+  showDropdown() {
+    this.element.classList.add('show')
+    this.dropdownTarget.classList.add('show')
+    this.menuTarget.classList.add('show')
+    this.dropdownTarget.setAttribute('aria-expanded', 'true')
+  }
+
+  hideDropdown() {
+    if (!this.dropdownTarget || !this.menuTarget) {
+      return
+    }
+
+    this.element.classList.remove('show')
+    this.dropdownTarget.classList.remove('show')
+    this.menuTarget.classList.remove('show')
+    this.dropdownTarget.setAttribute('aria-expanded', 'false')
+  }
+
+  toggleDropdown() {
+    if (this.isOpen()) {
+      this.hideDropdown()
+    } else {
+      this.showDropdown()
     }
   }
 
@@ -162,7 +167,7 @@ export default class extends Controller {
     this.initializeDropdown()
   }
 
-  handleTurboBeforeRender() {
+  handleTurboBeforeCache() {
     this.destroyDropdown()
   }
 }
