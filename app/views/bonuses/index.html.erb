@@ -1,6 +1,6 @@
 <% content_for :title, "Bonus Management" %>
 
-<div class="container-fluid">
+<div class="container-fluid bonuses-page">
   <div class="row">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -163,7 +163,7 @@ function submitBulkAction() {
                     <th>DSL Tag</th>
                     <th>Start Date</th>
                     <th>End Date</th>
-                    <th>Actions <small class="text-muted">(View, Edit, Duplicate, Delete)</small></th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -228,10 +228,9 @@ function submitBulkAction() {
                             <% end %>
                           <% end %>
                           <% if can?(:create, Bonus) %>
-                            <%= button_to duplicate_bonus_path(bonus), 
-                                method: :post, 
+                            <%= link_to duplicate_bonus_path(bonus),
                                 class: "btn btn-outline-secondary",
-                                data: { confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." },
+                                data: { "turbo-method": :post, confirm: "Are you sure you want to duplicate this bonus? A new draft bonus will be created." },
                                 title: "Duplicate" do %>
                               <i class="fas fa-copy"></i>
                             <% end %>
@@ -482,46 +481,6 @@ function submitBulkAction() {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 
-  /* Force exact same color for navbar and table header */
-  .navbar-dark.bg-dark {
-    background-color: #212529 !important;
-    background-image: none !important;
-    box-shadow: none !important;
-  }
-  
-  /* Force navbar to match table header exactly */
-  nav.navbar.navbar-expand-lg.navbar-dark.bg-dark {
-    background-color: #212529 !important;
-    background-image: none !important;
-    box-shadow: none !important;
-  }
-  
-  .table-dark {
-    background-color: #212529 !important;
-  }
-  
-  .table-dark th {
-    background-color: #212529 !important;
-    border-color: #495057 !important;
-  }
-  
-  /* Ensure all navbar elements have the same dark background */
-  .navbar-dark.bg-dark,
-  .navbar-dark.bg-dark .navbar-brand,
-  .navbar-dark.bg-dark .navbar-nav .nav-link {
-    background-color: #212529 !important;
-    background-image: none !important;
-  }
-  
-  /* Override any Bootstrap gradients or effects */
-  .navbar-dark.bg-dark,
-  .navbar-dark.bg-dark .navbar-brand,
-  .navbar-dark.bg-dark .navbar-nav,
-  .navbar-dark.bg-dark .navbar-nav .nav-link {
-    background-image: none !important;
-    background: #212529 !important;
-  }
-  
   /* Ensure consistent text color for code elements */
   code.text-dark {
     color: #212529 !important;
@@ -669,8 +628,16 @@ function submitBulkAction() {
   }
   
   /* Improve button group styling */
-  .btn-group-sm .btn {
-    padding: 0.25rem 0.5rem;
+  .bonuses-page .btn-group-sm .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    line-height: 1;
     font-size: 0.875rem;
     border-radius: 0.2rem;
   }
@@ -735,4 +702,3 @@ function submitBulkAction() {
     }
   });
 </script>
-

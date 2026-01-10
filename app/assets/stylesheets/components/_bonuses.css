@@ -1,0 +1,19 @@
+.bonuses-page .btn.btn-primary {
+  background-color: #212529;
+  background-image: none;
+  border-color: #212529;
+  box-shadow: none;
+}
+
+.bonuses-page .btn.btn-primary:hover,
+.bonuses-page .btn.btn-primary:focus {
+  background-color: #1a1e21;
+  border-color: #1a1e21;
+  box-shadow: 0 4px 12px rgba(33, 37, 41, 0.35);
+}
+
+.bonuses-page .btn.btn-primary:active {
+  background-color: #212529;
+  border-color: #212529;
+  box-shadow: none;
+}
