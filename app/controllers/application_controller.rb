@@ -60,5 +60,4 @@ class ApplicationController < ActionController::Base
 
   # Note: authenticate_admin_user! and current_admin_user methods
   # are automatically provided by Devise when we have 'devise_for :admin_users'
-
 end
