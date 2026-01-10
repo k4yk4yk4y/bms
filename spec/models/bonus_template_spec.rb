@@ -26,7 +26,7 @@ RSpec.describe BonusTemplate, type: :model do
       create(:bonus_template, dsl_tag: 'test_tag', project: 'VOLNA', name: 'Test Template')
       duplicate = build(:bonus_template, dsl_tag: 'test_tag', project: 'VOLNA', name: 'Test Template')
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:dsl_tag]).to include('комбинация dsl_tag, project и name должна быть уникальной')
+      expect(duplicate.errors[:dsl_tag]).to include('the combination of dsl_tag, project, and name must be unique')
     end
 
     it 'allows same dsl_tag with different project' do
@@ -319,7 +319,7 @@ RSpec.describe BonusTemplate, type: :model do
       it 'is invalid with currency_minimum_deposits' do
         template.currency_minimum_deposits = { 'USD' => 10.0 }
         expect(template).not_to be_valid
-        expect(template.errors[:currency_minimum_deposits]).to include('не должно быть установлено для события manual')
+        expect(template.errors[:currency_minimum_deposits]).to include('must not be set for event manual')
       end
     end
 
@@ -356,14 +356,14 @@ RSpec.describe BonusTemplate, type: :model do
     it 'is invalid with non-positive values' do
       template.currency_minimum_deposits = { 'USD' => 0, 'EUR' => -5 }
       expect(template).not_to be_valid
-      expect(template.errors[:currency_minimum_deposits]).to include('для валюты USD должно быть положительным числом')
-      expect(template.errors[:currency_minimum_deposits]).to include('для валюты EUR должно быть положительным числом')
+      expect(template.errors[:currency_minimum_deposits]).to include('for currency USD must be a positive number')
+      expect(template.errors[:currency_minimum_deposits]).to include('for currency EUR must be a positive number')
     end
 
     it 'is invalid with currencies not in supported currencies list' do
       template.currency_minimum_deposits = { 'GBP' => 10.0 }
       expect(template).not_to be_valid
-      expect(template.errors[:currency_minimum_deposits]).to include('содержит валюты, которые не указаны в списке поддерживаемых валют: GBP')
+      expect(template.errors[:currency_minimum_deposits]).to include('contains currencies not listed as supported: GBP')
     end
   end
 end

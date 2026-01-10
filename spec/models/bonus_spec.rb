@@ -126,7 +126,7 @@ RSpec.describe Bonus, type: :model do
             bonus.minimum_deposit = 50.0
             bonus.currency_minimum_deposits = {}
             expect(bonus).not_to be_valid
-            expect(bonus.errors[:minimum_deposit]).to include("не должно быть установлено для события #{event_type}")
+            expect(bonus.errors[:minimum_deposit]).to include("must not be set for event #{event_type}")
           end
 
           it "allows nil minimum_deposit for #{event_type} event" do
@@ -149,14 +149,14 @@ RSpec.describe Bonus, type: :model do
           bonus.event = 'input_coupon'
           bonus.currency_minimum_deposits = { 'USD' => 50.0 }
           expect(bonus).not_to be_valid
-          expect(bonus.errors[:currency_minimum_deposits]).to include('не должно быть установлено для события input_coupon')
+          expect(bonus.errors[:currency_minimum_deposits]).to include('must not be set for event input_coupon')
         end
 
         it 'validates positive amounts' do
           bonus.event = 'deposit'
           bonus.currency_minimum_deposits = { 'USD' => 0 }
           expect(bonus).not_to be_valid
-          expect(bonus.errors[:currency_minimum_deposits]).to include('для валюты USD должно быть положительным числом')
+          expect(bonus.errors[:currency_minimum_deposits]).to include('for currency USD must be a positive number')
         end
 
         it 'validates currencies are in supported list' do
@@ -164,7 +164,7 @@ RSpec.describe Bonus, type: :model do
           bonus.currencies = [ 'USD' ]
           bonus.currency_minimum_deposits = { 'EUR' => 50.0 }
           expect(bonus).not_to be_valid
-          expect(bonus.errors[:currency_minimum_deposits]).to include('содержит валюты, которые не указаны в списке поддерживаемых валют: EUR')
+          expect(bonus.errors[:currency_minimum_deposits]).to include('contains currencies not listed as supported: EUR')
         end
 
         it 'allows valid currency_minimum_deposits for deposit event' do
@@ -671,8 +671,8 @@ RSpec.describe Bonus, type: :model do
         }
 
         expect(bonus).not_to be_valid
-        expect(bonus.errors[:currency_minimum_deposits]).to include(/EUR.*положительным числом/)
-        expect(bonus.errors[:currency_minimum_deposits]).to include(/содержит валюты.*GBP/)
+        expect(bonus.errors[:currency_minimum_deposits]).to include(/EUR.*positive number/)
+        expect(bonus.errors[:currency_minimum_deposits]).to include(/contains currencies.*GBP/)
       end
     end
 

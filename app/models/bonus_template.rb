@@ -20,7 +20,7 @@ class BonusTemplate < ApplicationRecord
   validates :project, presence: true
   validates :event, presence: true, inclusion: { in: EVENT_TYPES }
   validates :description, length: { maximum: 1000 }, allow_blank: true
-  validates :dsl_tag, uniqueness: { scope: [ :project, :name ], message: "комбинация dsl_tag, project и name должна быть уникальной" }
+  validates :dsl_tag, uniqueness: { scope: [ :project, :name ], message: "the combination of dsl_tag, project, and name must be unique" }
 
   validate :valid_decimal_fields
   # minimum_deposit validation removed
@@ -221,14 +221,14 @@ class BonusTemplate < ApplicationRecord
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
     if non_deposit_events.include?(event) && currency_minimum_deposits.any?
-      errors.add(:currency_minimum_deposits, "не должно быть установлено для события #{event}")
+      errors.add(:currency_minimum_deposits, "must not be set for event #{event}")
       return
     end
 
     # Проверяем, что все значения являются положительными числами
     currency_minimum_deposits.each do |currency, amount|
       if amount.blank? || amount.to_f <= 0
-        errors.add(:currency_minimum_deposits, "для валюты #{currency} должно быть положительным числом")
+        errors.add(:currency_minimum_deposits, "for currency #{currency} must be a positive number")
       end
     end
 
@@ -236,7 +236,7 @@ class BonusTemplate < ApplicationRecord
     if currencies.present?
       invalid_currencies = currency_minimum_deposits.keys - currencies
       if invalid_currencies.any?
-        errors.add(:currency_minimum_deposits, "содержит валюты, которые не указаны в списке поддерживаемых валют: #{invalid_currencies.join(', ')}")
+        errors.add(:currency_minimum_deposits, "contains currencies not listed as supported: #{invalid_currencies.join(', ')}")
       end
     end
   end

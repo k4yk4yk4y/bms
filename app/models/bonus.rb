@@ -370,9 +370,9 @@ class Bonus < ApplicationRecord
 
       unless self.class.valid_amount_for_currency?(amount, currency)
         precision = self.class.currency_precision(currency)
-        currency_type = self.class.crypto_currency?(currency) ? "криптовалюты" : "фиатной валюты"
+        currency_type = self.class.crypto_currency?(currency) ? "cryptocurrency" : "fiat currency"
         errors.add(:currency_minimum_deposits,
-          "для #{currency} (#{currency_type}) максимум #{precision} знаков после запятой")
+          "for #{currency} (#{currency_type}) maximum #{precision} decimal places")
       end
     end
   end
@@ -388,7 +388,7 @@ class Bonus < ApplicationRecord
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
     if non_deposit_events.include?(event) && minimum_deposit.present?
-      errors.add(:minimum_deposit, "не должно быть установлено для события #{event}")
+      errors.add(:minimum_deposit, "must not be set for event #{event}")
     end
 
     # Для депозитных событий minimum_deposit может использоваться как базовое требование
@@ -408,14 +408,14 @@ class Bonus < ApplicationRecord
     non_deposit_events = %w[input_coupon manual collection groups_update scheduler]
 
     if non_deposit_events.include?(event) && deposits.any?
-      errors.add(:currency_minimum_deposits, "не должно быть установлено для события #{event}")
+      errors.add(:currency_minimum_deposits, "must not be set for event #{event}")
       return
     end
 
     # Проверяем, что все значения являются положительными числами
     deposits.each do |currency, amount|
       if amount.blank? || amount.to_f <= 0
-        errors.add(:currency_minimum_deposits, "для валюты #{currency} должно быть положительным числом")
+        errors.add(:currency_minimum_deposits, "for currency #{currency} must be a positive number")
       end
     end
 
@@ -423,7 +423,7 @@ class Bonus < ApplicationRecord
     if currencies.present?
       invalid_currencies = deposits.keys - currencies
       if invalid_currencies.any?
-        errors.add(:currency_minimum_deposits, "содержит валюты, которые не указаны в списке поддерживаемых валют: #{invalid_currencies.join(', ')}")
+        errors.add(:currency_minimum_deposits, "contains currencies not listed as supported: #{invalid_currencies.join(', ')}")
       end
     end
   end

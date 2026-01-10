@@ -12,28 +12,28 @@ class MarketingRequest < ApplicationRecord
   ].freeze
 
   REQUEST_TYPE_LABELS = {
-    "promo_webs_50" => "ПРОМО ВЕБОВ 50",
-    "promo_webs_100" => "ПРОМО ВЕБОВ 100",
-    "promo_no_link_50" => "ПРОМО БЕЗ ССЫЛКИ 50",
-    "promo_no_link_100" => "ПРОМО БЕЗ ССЫЛКИ 100",
-    "promo_no_link_125" => "ПРОМО БЕЗ ССЫЛКИ 125",
-    "promo_no_link_150" => "ПРОМО БЕЗ ССЫЛКИ 150",
-    "deposit_bonuses_partners" => "ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ"
+    "promo_webs_50" => "PROMO WEBS 50",
+    "promo_webs_100" => "PROMO WEBS 100",
+    "promo_no_link_50" => "PROMO NO LINK 50",
+    "promo_no_link_100" => "PROMO NO LINK 100",
+    "promo_no_link_125" => "PROMO NO LINK 125",
+    "promo_no_link_150" => "PROMO NO LINK 150",
+    "deposit_bonuses_partners" => "PARTNER DEPOSIT BONUSES"
   }.freeze
 
   STATUS_LABELS = {
-    "pending" => "Ожидает",
-    "activated" => "Активирован",
-    "rejected" => "Отклонён"
+    "pending" => "Pending",
+    "activated" => "Activated",
+    "rejected" => "Rejected"
   }.freeze
 
   # Validations
   validates :manager, presence: true,
-            format: { with: URI::MailTo::EMAIL_REGEXP, message: "должен быть валидным email" },
+            format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email" },
             length: { maximum: 255 }
   validates :platform, length: { maximum: 1000 }, allow_blank: true
   validates :partner_email, presence: true,
-            format: { with: URI::MailTo::EMAIL_REGEXP, message: "должен быть валидным email" },
+            format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email" },
             length: { maximum: 255 }
   validates :promo_code, presence: true, length: { maximum: 2000 }
   validates :stag, presence: true, length: { maximum: 50 }
@@ -180,9 +180,9 @@ class MarketingRequest < ApplicationRecord
 
     existing_request = self.class.where(stag: stag).where.not(id: id).first
     if existing_request
-      errors.add(:stag, "уже используется в заявке типа \"#{existing_request.request_type_label}\" (ID: #{existing_request.id}). " \
-                        "Согласно правилам, для одного партнера может быть только одна заявка. " \
-                        "Удалите существующую заявку или измените STAG.")
+      errors.add(:stag, "is already used in a request of type \"#{existing_request.request_type_label}\" (ID: #{existing_request.id}). " \
+                        "According to the rules, a partner can only have one request. " \
+                        "Delete the existing request or change the STAG.")
     end
   end
 
@@ -206,21 +206,21 @@ class MarketingRequest < ApplicationRecord
       end
 
       if conflicting_request
-        errors.add(:promo_code, "содержит код \"#{code}\", который уже используется в заявке " \
-                                "типа \"#{conflicting_request.request_type_label}\" (ID: #{conflicting_request.id})")
+        errors.add(:promo_code, "contains code \"#{code}\", which is already used in a request " \
+                                "of type \"#{conflicting_request.request_type_label}\" (ID: #{conflicting_request.id})")
       end
     end
   end
 
   def no_spaces_in_stag_and_codes
     if stag.present? && stag.include?(" ")
-      errors.add(:stag, "не должен содержать пробелы")
+      errors.add(:stag, "must not contain spaces")
     end
 
     if promo_code.present?
       codes_with_spaces = promo_codes_array.select { |code| code.include?(" ") }
       if codes_with_spaces.any?
-        errors.add(:promo_code, "содержит коды с пробелами: #{codes_with_spaces.join(', ')}")
+        errors.add(:promo_code, "contains codes with spaces: #{codes_with_spaces.join(', ')}")
       end
     end
   end
@@ -230,15 +230,15 @@ class MarketingRequest < ApplicationRecord
 
     codes = promo_codes_array
     if codes.empty?
-      errors.add(:promo_code, "должен содержать хотя бы один валидный код")
+      errors.add(:promo_code, "must contain at least one valid code")
       return
     end
 
     # Check for valid code format (alphanumeric and underscores only)
     invalid_codes = codes.select { |code| code !~ /\A[A-Z0-9_]+\z/i }
     if invalid_codes.any?
-      errors.add(:promo_code, "содержит коды с недопустимыми символами: #{invalid_codes.join(', ')}. " \
-                              "Разрешены только буквы, цифры и подчеркивания.")
+      errors.add(:promo_code, "contains codes with invalid characters: #{invalid_codes.join(', ')}. " \
+                              "Only letters, digits, and underscores are allowed.")
     end
   end
 end

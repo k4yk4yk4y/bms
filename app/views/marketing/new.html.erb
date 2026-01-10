@@ -1,4 +1,4 @@
-<% content_for(:title, "Новая заявка") %>
+<% content_for(:title, "New request") %>
 
 <div class="container-fluid">
   <div class="row">
@@ -6,10 +6,10 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 mb-0">
           <i class="fas fa-plus text-primary"></i>
-          Новая заявка
+          New request
         </h1>
         <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
-          <i class="fas fa-arrow-left"></i> Назад к списку
+          <i class="fas fa-arrow-left"></i> Back to list
         <% end %>
       </div>
 
@@ -19,7 +19,7 @@
             <div class="card-header">
               <h5 class="card-title mb-0">
                 <i class="fas fa-bullhorn"></i>
-                Заявка на бонус за регистрацию
+                Registration bonus request
               </h5>
             </div>
             <div class="card-body">
@@ -29,7 +29,7 @@
                 
                 <% if @marketing_request.errors.any? %>
                   <div class="alert alert-danger" role="alert">
-                    <h6><i class="fas fa-exclamation-triangle"></i> Исправьте следующие ошибки:</h6>
+                    <h6><i class="fas fa-exclamation-triangle"></i> Fix the following errors:</h6>
                     <ul class="mb-0">
                       <% @marketing_request.errors.full_messages.each do |message| %>
                         <li><%= message %></li>
@@ -40,7 +40,7 @@
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <%= form.label :request_type, "Тип заявки", class: "form-label" %>
+                    <%= form.label :request_type, "Request type", class: "form-label" %>
                     <%= form.select :request_type, 
                                     options_for_select(
                                       MarketingRequest::REQUEST_TYPES.map { |type| 
@@ -48,40 +48,40 @@
                                       }, 
                                       @marketing_request.request_type
                                     ),
-                                    { prompt: "Выберите тип заявки" },
+                                    { prompt: "Select request type" },
                                     { class: "form-select", required: true } %>
                     <div class="invalid-feedback">
-                      Пожалуйста, выберите тип заявки.
+                      Please select a request type.
                     </div>
                   </div>
 
                 </div>
 
                 <div class="mb-3">
-                  <%= form.label :platform, "Площадка", class: "form-label" %>
+                  <%= form.label :platform, "Platform", class: "form-label" %>
                   <%= form.text_area :platform, 
                                      class: "form-control", 
                                      rows: 3,
-                                     placeholder: "Ссылка на площадку или описание" %>
+                                     placeholder: "Platform link or description" %>
                   <div class="form-text">
-                    Можете указать ссылку на площадку или текстовое описание
+                    You can provide a platform link or a text description
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <%= form.label :partner_email, "Почта партнёра", class: "form-label" %>
+                    <%= form.label :partner_email, "Partner email", class: "form-label" %>
                     <%= form.email_field :partner_email, 
                                          class: "form-control", 
                                          placeholder: "partner@example.com",
                                          required: true %>
                     <div class="invalid-feedback">
-                      Пожалуйста, введите корректный email партнёра.
+                      Please enter a valid partner email.
                     </div>
                   </div>
 
                   <div class="col-md-6 mb-3">
-                    <%= form.label :promo_code, "Промокоды", class: "form-label" %>
+                    <%= form.label :promo_code, "Promo codes", class: "form-label" %>
                     <%= form.text_area :promo_code, 
                                        class: "form-control", 
                                        placeholder: "PROMO2024, BONUS2024, WELCOME2024",
@@ -89,12 +89,12 @@
                                        rows: 3,
                                        style: "text-transform: uppercase;" %>
                     <div class="form-text">
-                      <strong>Несколько кодов:</strong> разделяйте запятыми или новыми строками.<br>
-                      <strong>Один партнер - один бонус:</strong> коды автоматически приводятся к верхнему регистру.<br>
-                      <strong>Без пробелов:</strong> разрешены только буквы, цифры и подчеркивания.
+                      <strong>Multiple codes:</strong> separate with commas or new lines.<br>
+                      <strong>One partner - one bonus:</strong> codes are auto-uppercased.<br>
+                      <strong>No spaces:</strong> only letters, digits, and underscores are allowed.
                     </div>
                     <div class="invalid-feedback">
-                      Пожалуйста, введите хотя бы один промокод.
+                      Please enter at least one promo code.
                     </div>
                   </div>
                 </div>
@@ -107,17 +107,17 @@
                                         placeholder: "unique_partner_id",
                                         required: true %>
                     <div class="form-text">
-                      <strong>Уникальный идентификатор партнёра.</strong><br>
-                      <strong>Важно:</strong> для одного партнера может быть только одна заявка.<br>
-                      <strong>Без пробелов:</strong> пробелы будут автоматически удалены.
+                      <strong>Unique partner identifier.</strong><br>
+                      <strong>Important:</strong> one partner can only have one request.<br>
+                      <strong>No spaces:</strong> spaces are removed automatically.
                     </div>
                     <div class="invalid-feedback">
-                      Пожалуйста, введите STAG.
+                      Please enter STAG.
                     </div>
                   </div>
 
                   <div class="col-md-6 mb-3">
-                    <%= form.label :status, "Статус", class: "form-label" %>
+                    <%= form.label :status, "Status", class: "form-label" %>
                     <%= form.select :status, 
                                     options_for_select(
                                       MarketingRequest::STATUSES.map { |status| 
@@ -128,28 +128,28 @@
                                     {},
                                     { class: "form-select" } %>
                     <div class="form-text">
-                      По умолчанию заявки создаются со статусом "Ожидает"
+                      Requests are created with status "Pending" by default
                     </div>
                   </div>
                 </div>
 
                 <div class="mb-4">
-                  <%= form.label :activation_date, "Дата активации", class: "form-label" %>
+                  <%= form.label :activation_date, "Activation date", class: "form-label" %>
                   <%= form.datetime_local_field :activation_date, 
                                                 class: "form-control" %>
                   <div class="form-text">
-                    Устанавливается при активации заявки
+                    Set when the request is activated
                   </div>
                 </div>
 
                 <div class="d-flex justify-content-between">
                   <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
-                    <i class="fas fa-times"></i> Отмена
+                    <i class="fas fa-times"></i> Cancel
                   <% end %>
                   
-                  <%= form.submit "Создать заявку", 
+                  <%= form.submit "Create request", 
                                   class: "btn btn-primary" do %>
-                    <i class="fas fa-save"></i> Создать заявку
+                    <i class="fas fa-save"></i> Create request
                   <% end %>
                 </div>
               <% end %>

@@ -9,7 +9,7 @@ test.describe('Uncheck All Currencies Button Test', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should uncheck all currency checkboxes when clicking "Снять все" button', async ({ page }) => {
+  test('should uncheck all currency checkboxes when clicking "Uncheck all" button', async ({ page }) => {
     // Wait for the basic information section to be visible
     await page.waitForSelector('#uncheck-all-currencies-btn', { state: 'visible' });
     
@@ -25,7 +25,7 @@ test.describe('Uncheck All Currencies Button Test', () => {
       expect(await currencyCheckboxes[i].isChecked()).toBe(true);
     }
     
-    // Click the "Снять все" button
+    // Click the "Uncheck all" button
     await page.click('#uncheck-all-currencies-btn');
     
     // Wait a bit for the JavaScript to execute
@@ -75,7 +75,7 @@ test.describe('Uncheck All Currencies Button Test', () => {
     
     // Values may be re-rendered by JS; skip asserting before uncheck
     
-    // Click the "Снять все" button
+    // Click the "Uncheck all" button
     await page.click('#uncheck-all-currencies-btn');
     await page.waitForTimeout(100);
     
@@ -104,7 +104,7 @@ test.describe('Uncheck All Currencies Button Test', () => {
         await currencyCheckboxes[i].check();
       }
       
-      // Click "Снять все" button
+      // Click "Uncheck all" button
       await page.click('#uncheck-all-currencies-btn');
       await page.waitForTimeout(100);
       

@@ -139,7 +139,7 @@ class BonusBuyReward < ApplicationRecord
     return if currency_bet_levels.present? &&
               currency_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
 
-    errors.add(:currency_bet_levels, "должен быть указан размер ставки хотя бы для одной валюты")
+    errors.add(:currency_bet_levels, "a bet level must be provided for at least one currency")
   end
 
   def validate_currency_bet_levels_precision
@@ -150,9 +150,9 @@ class BonusBuyReward < ApplicationRecord
 
       unless self.class.valid_amount_for_currency?(amount, currency)
         precision = self.class.currency_precision(currency)
-        currency_type = self.class.crypto_currency?(currency) ? "криптовалюты" : "фиатной валюты"
+        currency_type = self.class.crypto_currency?(currency) ? "cryptocurrency" : "fiat currency"
         errors.add(:currency_bet_levels,
-          "для #{currency} (#{currency_type}) максимум #{precision} знаков после запятой")
+          "for #{currency} (#{currency_type}) maximum #{precision} decimal places")
       end
     end
   end

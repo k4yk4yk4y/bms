@@ -1,4 +1,4 @@
-<% content_for(:title, "Заявка ##{@marketing_request.id}") %>
+<% content_for(:title, "Request ##{@marketing_request.id}") %>
 
 <div class="container-fluid">
   <div class="row">
@@ -6,16 +6,16 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 mb-0">
           <i class="fas fa-eye text-info"></i>
-          Заявка #<%= @marketing_request.id %>
+          Request #<%= @marketing_request.id %>
         </h1>
         <div class="d-flex gap-2">
           <% if can?(:update, @marketing_request) %>
             <%= link_to edit_marketing_path(@marketing_request), class: "btn btn-outline-warning" do %>
-              <i class="fas fa-edit"></i> Редактировать
+              <i class="fas fa-edit"></i> Edit
             <% end %>
           <% end %>
           <%= link_to marketing_index_path(tab: @marketing_request.request_type), class: "btn btn-outline-secondary" do %>
-            <i class="fas fa-arrow-left"></i> Назад к списку
+            <i class="fas fa-arrow-left"></i> Back to list
           <% end %>
         </div>
       </div>
@@ -29,21 +29,21 @@
                 <%= @marketing_request.request_type_label %>
               </h5>
               <small class="text-muted">
-                Создана <%= l(@marketing_request.created_at, format: :long) %>
+                Created <%= l(@marketing_request.created_at, format: :long) %>
                 <% if @marketing_request.updated_at != @marketing_request.created_at %>
-                  • Обновлена <%= l(@marketing_request.updated_at, format: :long) %>
+                  • Updated <%= l(@marketing_request.updated_at, format: :long) %>
                 <% end %>
               </small>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted">Менеджер</label>
+                  <label class="form-label text-muted">Manager</label>
                   <p class="fw-bold mb-0"><%= @marketing_request.manager %></p>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted">Статус</label>
+                  <label class="form-label text-muted">Status</label>
                   <p class="mb-0">
                     <span class="badge fs-6
                                  <%= case @marketing_request.status
@@ -59,7 +59,7 @@
 
               <% if @marketing_request.platform.present? %>
                 <div class="mb-3">
-                  <label class="form-label text-muted">Площадка</label>
+                  <label class="form-label text-muted">Platform</label>
                   <% if @marketing_request.platform.match?(URI::DEFAULT_PARSER.make_regexp) %>
                     <p class="mb-0">
                       <%= link_to @marketing_request.platform, @marketing_request.platform, 
@@ -75,7 +75,7 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted">Почта партнёра</label>
+                  <label class="form-label text-muted">Partner email</label>
                   <p class="mb-0">
                     <%= mail_to @marketing_request.partner_email, @marketing_request.partner_email, 
                                 class: "text-decoration-none" %>
@@ -84,7 +84,7 @@
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label text-muted">
-                    Промокод<%= 'ы' if @marketing_request.promo_codes_array.length > 1 %>
+                    Promo code<%= 's' if @marketing_request.promo_codes_array.length > 1 %>
                   </label>
                   <% codes = @marketing_request.promo_codes_array %>
                   <% if codes.length == 1 %>
@@ -92,9 +92,9 @@
                       <code class="bg-light px-3 py-2 rounded fs-5">
                         <%= codes.first %>
                       </code>
-                      <button class="btn btn-sm btn-outline-secondary ms-2" 
-                              onclick="copyToClipboard('<%= codes.first %>')"
-                              title="Скопировать промокод">
+                              <button class="btn btn-sm btn-outline-secondary ms-2" 
+                                      onclick="copyToClipboard('<%= codes.first %>')"
+                              title="Copy promo code">
                         <i class="fas fa-copy"></i>
                       </button>
                     </p>
@@ -105,19 +105,19 @@
                           <code class="bg-light px-2 py-1 rounded me-2">
                             <%= code %>
                           </code>
-                          <button class="btn btn-sm btn-outline-secondary" 
-                                  onclick="copyToClipboard('<%= code %>')"
-                                  title="Скопировать код">
+                                  <button class="btn btn-sm btn-outline-secondary" 
+                                          onclick="copyToClipboard('<%= code %>')"
+                                  title="Copy code">
                             <i class="fas fa-copy"></i>
                           </button>
                         </div>
                       <% end %>
-                      <small class="text-muted">Всего кодов: <%= codes.length %></small>
+                      <small class="text-muted">Total codes: <%= codes.length %></small>
                     </div>
                     <button class="btn btn-sm btn-primary" 
                             onclick="copyToClipboard('<%= @marketing_request.formatted_promo_codes %>')"
-                            title="Скопировать все коды">
-                      <i class="fas fa-copy"></i> Скопировать все
+                            title="Copy all codes">
+                      <i class="fas fa-copy"></i> Copy all
                     </button>
                   <% end %>
                 </div>
@@ -132,7 +132,7 @@
                     </code>
                     <button class="btn btn-sm btn-outline-secondary ms-2" 
                             onclick="copyToClipboard('<%= @marketing_request.stag %>')"
-                            title="Скопировать STAG">
+                            title="Copy STAG">
                       <i class="fas fa-copy"></i>
                     </button>
                   </p>
@@ -140,17 +140,17 @@
                     <% existing_request = @marketing_request.existing_partner_request %>
                     <div class="alert alert-warning mt-2" role="alert">
                       <i class="fas fa-exclamation-triangle"></i>
-                      <strong>Внимание!</strong> Для этого партнера существует другая заявка:
+                      <strong>Warning!</strong> Another request exists for this partner:
                       <%= link_to "#{existing_request.request_type_label} ##{existing_request.id}", 
                                   marketing_path(existing_request), 
                                   class: "alert-link" %>
-                      (статус: <%= existing_request.status_label %>)
+                      (status: <%= existing_request.status_label %>)
                     </div>
                   <% end %>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted">Дата активации</label>
+                  <label class="form-label text-muted">Activation date</label>
                   <p class="mb-0">
                     <% if @marketing_request.activation_date %>
                       <i class="fas fa-calendar-check text-success"></i>
@@ -171,7 +171,7 @@
             <div class="card-header">
               <h6 class="card-title mb-0">
                 <i class="fas fa-cogs"></i>
-                Управление заявкой
+                Request management
               </h6>
             </div>
             <div class="card-body">
@@ -182,10 +182,10 @@
                                 method: :patch,
                                 class: "btn btn-success",
                                 data: { 
-                                  confirm: "Активировать заявку? Дата активации будет установлена автоматически.",
+                                  confirm: "Activate request? The activation date will be set automatically.",
                                   turbo_method: :patch 
                                 } do %>
-                      <i class="fas fa-check"></i> Активировать
+                      <i class="fas fa-check"></i> Activate
                     <% end %>
                   <% end %>
                   
@@ -194,22 +194,22 @@
                                 method: :patch,
                                 class: "btn btn-danger",
                                 data: { 
-                                  confirm: "Отклонить заявку?",
+                                  confirm: "Reject request?",
                                   turbo_method: :patch 
                                 } do %>
-                      <i class="fas fa-times"></i> Отклонить
+                      <i class="fas fa-times"></i> Reject
                     <% end %>
                   <% end %>
                 </div>
               <% elsif @marketing_request.activated? %>
                 <div class="alert alert-success" role="alert">
                   <i class="fas fa-check-circle"></i>
-                  <small>Заявка активирована</small>
+                  <small>Request activated</small>
                 </div>
               <% else %>
                 <div class="alert alert-danger" role="alert">
                   <i class="fas fa-times-circle"></i>
-                  <small>Заявка отклонена</small>
+                  <small>Request rejected</small>
                 </div>
               <% end %>
 
@@ -217,7 +217,7 @@
                 <% if can?(:update, @marketing_request) %>
                   <%= link_to edit_marketing_path(@marketing_request), 
                               class: "btn btn-outline-warning" do %>
-                    <i class="fas fa-edit"></i> Редактировать
+                    <i class="fas fa-edit"></i> Edit
                   <% end %>
                 <% end %>
 
@@ -226,7 +226,7 @@
                   <div class="dropdown">
                     <button class="btn btn-outline-info dropdown-toggle" type="button" 
                             data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fas fa-exchange-alt"></i> Перенести в другой тип
+                      <i class="fas fa-exchange-alt"></i> Transfer to another type
                     </button>
                     <ul class="dropdown-menu">
                       <% MarketingRequest::REQUEST_TYPES.each do |request_type| %>
@@ -236,7 +236,7 @@
                                       method: :patch,
                                       class: "dropdown-item",
                                       data: { 
-                                        confirm: "Перенести заявку в тип \"#{MarketingRequest::REQUEST_TYPE_LABELS[request_type]}\"? Статус заявки будет сброшен на \"Ожидает\".",
+                                        confirm: "Transfer request to \"#{MarketingRequest::REQUEST_TYPE_LABELS[request_type]}\"? Status will be reset to \"Pending\".",
                                         turbo_method: :patch 
                                       } do %>
                             <%= MarketingRequest::REQUEST_TYPE_LABELS[request_type] %>
@@ -252,46 +252,46 @@
                               method: :delete,
                               class: "btn btn-outline-danger",
                               data: { 
-                                confirm: "Удалить заявку? Это действие нельзя отменить.",
+                                confirm: "Delete request? This action cannot be undone.",
                                 turbo_method: :delete 
                               } do %>
-                    <i class="fas fa-trash"></i> Удалить
+                    <i class="fas fa-trash"></i> Delete
                   <% end %>
                 <% end %>
               </div>
             </div>
           </div>
 
-          <!-- Информационная панель -->
+          <!-- Information panel -->
           <div class="card mt-3">
             <div class="card-header">
               <h6 class="card-title mb-0">
                 <i class="fas fa-info-circle"></i>
-                Дополнительная информация
+                Additional information
               </h6>
             </div>
             <div class="card-body">
               <div class="mb-2">
-                <small class="text-muted">ID заявки:</small>
+                <small class="text-muted">Request ID:</small>
                 <br>
                 <code><%= @marketing_request.id %></code>
               </div>
               
               <div class="mb-2">
-                <small class="text-muted">Тип заявки:</small>
+                <small class="text-muted">Request type:</small>
                 <br>
                 <span class="badge bg-info"><%= @marketing_request.request_type %></span>
               </div>
 
               <div class="mb-2">
-                <small class="text-muted">Создана:</small>
+                <small class="text-muted">Created:</small>
                 <br>
                 <%= l(@marketing_request.created_at, format: :short) %>
               </div>
 
               <% if @marketing_request.updated_at != @marketing_request.created_at %>
                 <div class="mb-2">
-                  <small class="text-muted">Последнее обновление:</small>
+                  <small class="text-muted">Last update:</small>
                   <br>
                   <%= l(@marketing_request.updated_at, format: :short) %>
                 </div>
@@ -353,22 +353,22 @@
     // Try modern clipboard API first
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
-        showToast('Скопировано в буфер обмена', true);
+        showToast('Copied to clipboard', true);
       }).catch(function(err) {
-        console.error('Ошибка при копировании: ', err);
+        console.error('Copy error: ', err);
         // Fallback to older method
         if (fallbackCopy(text)) {
-          showToast('Скопировано в буфер обмена', true);
+          showToast('Copied to clipboard', true);
         } else {
-          showToast('Не удалось скопировать. Попробуйте выделить и скопировать вручную.', false);
+          showToast('Copy failed. Try selecting and copying manually.', false);
         }
       });
     } else {
       // Use fallback for older browsers
       if (fallbackCopy(text)) {
-        showToast('Скопировано в буфер обмена', true);
+        showToast('Copied to clipboard', true);
       } else {
-        showToast('Не удалось скопировать. Попробуйте выделить и скопировать вручную.', false);
+        showToast('Copy failed. Try selecting and copying manually.', false);
       }
     }
   }

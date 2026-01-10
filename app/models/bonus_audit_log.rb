@@ -23,22 +23,22 @@ class BonusAuditLog < ApplicationRecord
   def action_label
     case action
     when "created"
-      "Создан"
+      "Created"
     when "updated"
-      "Обновлен"
+      "Updated"
     when "deleted"
-      "Удален"
+      "Deleted"
     when "activated"
-      "Активирован"
+      "Activated"
     when "deactivated"
-      "Деактивирован"
+      "Deactivated"
     else
       action.humanize
     end
   end
 
   def formatted_changes
-    return "Нет изменений" if changes_data.blank?
+    return "No changes" if changes_data.blank?
 
     changes_data.map do |field, change|
       old_value = change[0]
@@ -46,21 +46,21 @@ class BonusAuditLog < ApplicationRecord
 
       case field
       when "status"
-        "Статус: #{old_value} → #{new_value}"
+        "Status: #{old_value} → #{new_value}"
       when "name"
-        "Название: #{old_value} → #{new_value}"
+        "Name: #{old_value} → #{new_value}"
       when "code"
-        "Код: #{old_value} → #{new_value}"
+        "Code: #{old_value} → #{new_value}"
       when "event"
-        "Событие: #{old_value} → #{new_value}"
+        "Event: #{old_value} → #{new_value}"
       when "availability_start_date"
-        "Дата начала: #{format_datetime(old_value)} → #{format_datetime(new_value)}"
+        "Start date: #{format_datetime(old_value)} → #{format_datetime(new_value)}"
       when "availability_end_date"
-        "Дата окончания: #{format_datetime(old_value)} → #{format_datetime(new_value)}"
+        "End date: #{format_datetime(old_value)} → #{format_datetime(new_value)}"
       when "currencies"
-        "Валюты: #{format_array(old_value)} → #{format_array(new_value)}"
+        "Currencies: #{format_array(old_value)} → #{format_array(new_value)}"
       when "currency_minimum_deposits"
-        "Минимальные депозиты: #{format_hash(old_value)} → #{format_hash(new_value)}"
+        "Minimum deposits: #{format_hash(old_value)} → #{format_hash(new_value)}"
       else
         "#{field.humanize}: #{old_value} → #{new_value}"
       end
@@ -83,17 +83,17 @@ class BonusAuditLog < ApplicationRecord
   private
 
   def format_datetime(value)
-    return "не установлено" if value.blank?
+    return "not set" if value.blank?
     Time.parse(value).strftime("%d.%m.%Y %H:%M") rescue value.to_s
   end
 
   def format_array(value)
-    return "не установлено" if value.blank?
+    return "not set" if value.blank?
     value.is_a?(Array) ? value.join(", ") : value.to_s
   end
 
   def format_hash(value)
-    return "не установлено" if value.blank?
+    return "not set" if value.blank?
     value.is_a?(Hash) ? value.map { |k, v| "#{k}: #{v}" }.join(", ") : value.to_s
   end
 end

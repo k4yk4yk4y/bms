@@ -58,7 +58,7 @@ RSpec.describe MarketingRequest, type: :model do
       it 'validates email format' do
         marketing_request.partner_email = 'invalid-email'
         expect(marketing_request).not_to be_valid
-        expect(marketing_request.errors[:partner_email]).to include('должен быть валидным email')
+        expect(marketing_request.errors[:partner_email]).to include('must be a valid email')
       end
 
       it 'accepts valid email format' do
@@ -79,7 +79,7 @@ RSpec.describe MarketingRequest, type: :model do
         it 'does not allow duplicate stag' do
           marketing_request.stag = existing_request.stag
           expect(marketing_request).not_to be_valid
-          expect(marketing_request.errors[:stag]).to include(/уже используется в заявке/)
+          expect(marketing_request.errors[:stag]).to include(/is already used in a request/)
         end
 
         it 'allows same stag for the same request' do
@@ -99,14 +99,14 @@ RSpec.describe MarketingRequest, type: :model do
         it 'does not allow duplicate promo codes' do
           marketing_request.promo_code = existing_request.promo_code
           expect(marketing_request).not_to be_valid
-          expect(marketing_request.errors[:promo_code]).to include(/уже используется в заявке/)
+          expect(marketing_request.errors[:promo_code]).to include(/already used in a request/)
         end
 
         it 'detects duplicates in multiple codes' do
           existing_request.update!(promo_code: 'CODE1, CODE2, CODE3')
           marketing_request.promo_code = 'NEWCODE, CODE2, ANOTHERCODE'
           expect(marketing_request).not_to be_valid
-          expect(marketing_request.errors[:promo_code]).to include(/CODE2.*уже используется/)
+          expect(marketing_request.errors[:promo_code]).to include(/CODE2.*already used/)
         end
 
         it 'allows unique promo codes' do
@@ -128,7 +128,7 @@ RSpec.describe MarketingRequest, type: :model do
         it 'does not allow spaces in promo codes' do
           marketing_request.promo_code = 'CODE WITH SPACES, VALIDCODE'
           expect(marketing_request).not_to be_valid
-          expect(marketing_request.errors[:promo_code]).to include(/содержит коды с пробелами/)
+          expect(marketing_request.errors[:promo_code]).to include(/contains codes with spaces/)
         end
 
         it 'allows codes and stags without spaces' do
@@ -162,13 +162,13 @@ RSpec.describe MarketingRequest, type: :model do
           marketing_request.instance_variable_set(:@promo_code, '   ,   ,   ')
           allow(marketing_request).to receive(:promo_codes_array).and_return([])
           marketing_request.send(:valid_promo_codes_format)
-          expect(marketing_request.errors[:promo_code]).to include('должен содержать хотя бы один валидный код')
+          expect(marketing_request.errors[:promo_code]).to include('must contain at least one valid code')
         end
 
         it 'does not allow invalid characters in codes' do
           marketing_request.promo_code = 'VALID_CODE, INVALID@CODE, ANOTHER#CODE'
           expect(marketing_request).not_to be_valid
-          expect(marketing_request.errors[:promo_code]).to include(/содержит коды с недопустимыми символами/)
+          expect(marketing_request.errors[:promo_code]).to include(/contains codes with invalid characters/)
         end
 
         it 'allows valid alphanumeric codes with underscores' do
@@ -285,14 +285,14 @@ RSpec.describe MarketingRequest, type: :model do
 
     describe 'status labels' do
       it '#status_label returns correct label' do
-        expect(build(:marketing_request, status: 'pending').status_label).to eq('Ожидает')
-        expect(build(:marketing_request, status: 'activated').status_label).to eq('Активирован')
-        expect(build(:marketing_request, status: 'rejected').status_label).to eq('Отклонён')
+        expect(build(:marketing_request, status: 'pending').status_label).to eq('Pending')
+        expect(build(:marketing_request, status: 'activated').status_label).to eq('Activated')
+        expect(build(:marketing_request, status: 'rejected').status_label).to eq('Rejected')
       end
 
       it '#request_type_label returns correct label' do
-        expect(build(:marketing_request, request_type: 'promo_webs_50').request_type_label).to eq('ПРОМО ВЕБОВ 50')
-        expect(build(:marketing_request, request_type: 'deposit_bonuses_partners').request_type_label).to eq('ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ')
+        expect(build(:marketing_request, request_type: 'promo_webs_50').request_type_label).to eq('PROMO WEBS 50')
+        expect(build(:marketing_request, request_type: 'deposit_bonuses_partners').request_type_label).to eq('PARTNER DEPOSIT BONUSES')
       end
     end
 

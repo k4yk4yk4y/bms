@@ -1,6 +1,8 @@
 <div class="container-fluid retention-page">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Retention chains</h1>
+    <h1 class="h2 mb-0">
+      <i class="fas fa-retweet me-2 text-success"></i>Retention chains
+    </h1>
     <% if can?(:create, RetentionChain) %>
       <%= link_to "New chain", new_retention_chain_path, class: "btn btn-primary" %>
     <% end %>
@@ -106,3 +108,37 @@
     </div>
   </div>
 </div>
+
+<style>
+  .retention-page .btn-group-sm .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    line-height: 1;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+  }
+
+  .retention-page .btn-group-sm .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+
+  @media (max-width: 768px) {
+    .retention-page .btn-group-sm {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .retention-page .btn-group-sm .btn {
+      border-radius: 0.2rem !important;
+      margin-bottom: 0.25rem;
+    }
+  }
+</style>

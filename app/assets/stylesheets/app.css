@@ -16,3 +16,6 @@
 
 /* Component styles are automatically included via require_tree */
 
+main h1 {
+  margin-left: 0.5rem;
+}

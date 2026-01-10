@@ -19,20 +19,20 @@
 
   <div class="main-params-container">
     <div class="reward-param-field mb-3 full-width">
-      <label for="comp_point_reward_title_<%= index %>" class="form-label">Название награды (title) *</label>
+      <label for="comp_point_reward_title_<%= index %>" class="form-label">Reward name (title) *</label>
       <input type="text" class="form-control" name="<%= field_prefix %>[title]" id="comp_point_reward_title_<%= index %>"
              value="<%= existing_comp_point&.title %>" required>
     </div>
 
     <div class="reward-param-field mb-3">
-      <label for="comp_point_reward_points_amount_<%= index %>" class="form-label">Количество очков (points_amount) *</label>
+      <label for="comp_point_reward_points_amount_<%= index %>" class="form-label">Points amount (points_amount) *</label>
       <input type="number" class="form-control" name="<%= field_prefix %>[points_amount]"
              id="comp_point_reward_points_amount_<%= index %>" min="0"
              value="<%= existing_comp_point&.points_amount %>" required>
     </div>
 
     <div class="reward-param-field mb-3">
-      <label for="comp_point_reward_multiplier_<%= index %>" class="form-label">Множитель (multiplier)</label>
+      <label for="comp_point_reward_multiplier_<%= index %>" class="form-label">Multiplier (multiplier)</label>
       <input type="number" class="form-control" name="<%= field_prefix %>[multiplier]"
              id="comp_point_reward_multiplier_<%= index %>" min="0" step="0.01"
              value="<%= existing_comp_point&.multiplier %>">
@@ -40,13 +40,13 @@
   </div>
 
   <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAdvancedParams(this)">
-    <span class="toggle-text">+ Показать дополнительные параметры</span>
+    <span class="toggle-text">+ Show advanced parameters</span>
   </button>
 
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
       <div class="reward-param-field mb-3 full-width">
-        <label class="form-label">Дополнительные параметры (JSON)</label>
+        <label class="form-label">Advanced parameters (JSON)</label>
         <textarea class="form-control" name="<%= field_prefix %>[config_json]" rows="3"
                   ><%= existing_comp_point&.config&.to_json %></textarea>
       </div>

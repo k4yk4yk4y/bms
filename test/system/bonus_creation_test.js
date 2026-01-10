@@ -321,7 +321,7 @@ test.describe('Bonus Creation - Edge Cases', () => {
   test('should handle special characters in bonus name', async ({ page }) => {
     await page.goto('/bonuses/new?event=deposit');
     
-    const specialName = 'Тест бонус с émojis 🎉 & special chars!';
+    const specialName = 'Test bonus with émojis 🎉 & special chars!';
     
     await page.fill('input[name="bonus[name]"]', specialName);
     await page.selectOption('select[name="bonus[event]"]', 'deposit');

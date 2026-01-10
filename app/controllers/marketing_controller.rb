@@ -82,7 +82,7 @@ class MarketingController < ApplicationController
 
     if @marketing_request.save
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                  notice: "Заявка успешно создана."
+                  notice: "Request created successfully."
     else
       render :new, status: :unprocessable_content
     end
@@ -97,7 +97,7 @@ class MarketingController < ApplicationController
 
     if @marketing_request.update(marketing_request_params)
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                  notice: "Заявка успешно обновлена."
+                  notice: "Request updated successfully."
     else
       render :edit, status: :unprocessable_content
     end
@@ -108,7 +108,7 @@ class MarketingController < ApplicationController
     tab = @marketing_request.request_type
     @marketing_request.destroy
     redirect_to marketing_index_path(tab: tab),
-                notice: "Заявка успешно удалена."
+                notice: "Request deleted successfully."
   end
 
   def activate
@@ -116,18 +116,18 @@ class MarketingController < ApplicationController
 
     if @marketing_request.activate!
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                  notice: "Заявка активирована."
+                  notice: "Request activated."
     else
       redirect_to marketing_path(@marketing_request),
-                  alert: "Ошибка при активации: #{@marketing_request.errors.full_messages.join(', ')}"
+                  alert: "Activation error: #{@marketing_request.errors.full_messages.join(', ')}"
     end
   rescue ActiveRecord::RecordInvalid => e
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при активации: #{e.record.errors.full_messages.join(', ')}"
+                alert: "Activation error: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
     Rails.logger.error "Marketing activation error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при активации: #{e.message}"
+                alert: "Activation error: #{e.message}"
   end
 
   def reject
@@ -135,18 +135,18 @@ class MarketingController < ApplicationController
 
     if @marketing_request.reject!
       redirect_to marketing_index_path(tab: @marketing_request.request_type),
-                  notice: "Заявка отклонена."
+                  notice: "Request rejected."
     else
       redirect_to marketing_path(@marketing_request),
-                  alert: "Ошибка при отклонении: #{@marketing_request.errors.full_messages.join(', ')}"
+                  alert: "Rejection error: #{@marketing_request.errors.full_messages.join(', ')}"
     end
   rescue ActiveRecord::RecordInvalid => e
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при отклонении: #{e.record.errors.full_messages.join(', ')}"
+                alert: "Rejection error: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
     Rails.logger.error "Marketing rejection error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при отклонении: #{e.message}"
+                alert: "Rejection error: #{e.message}"
   end
 
   def transfer
@@ -155,7 +155,7 @@ class MarketingController < ApplicationController
 
     unless MarketingRequest::REQUEST_TYPES.include?(new_request_type)
       redirect_to marketing_path(@marketing_request),
-                  alert: "Неверный тип заявки для переноса."
+                  alert: "Invalid request type for transfer."
       return
     end
 
@@ -167,18 +167,18 @@ class MarketingController < ApplicationController
       activation_date: nil
     )
       redirect_to marketing_index_path(tab: new_request_type),
-                  notice: "Заявка перенесена из \"#{old_type}\" в \"#{@marketing_request.request_type_label}\"."
+                  notice: "Request transferred from \"#{old_type}\" to \"#{@marketing_request.request_type_label}\"."
     else
       redirect_to marketing_path(@marketing_request),
-                  alert: "Ошибка при переносе: #{@marketing_request.errors.full_messages.join(', ')}"
+                  alert: "Transfer error: #{@marketing_request.errors.full_messages.join(', ')}"
     end
   rescue ActiveRecord::RecordInvalid => e
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при переносе: #{e.record.errors.full_messages.join(', ')}"
+                alert: "Transfer error: #{e.record.errors.full_messages.join(', ')}"
   rescue => e
     Rails.logger.error "Marketing transfer error: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     redirect_to marketing_path(@marketing_request),
-                alert: "Ошибка при переносе: #{e.message}"
+                alert: "Transfer error: #{e.message}"
   end
 
   private

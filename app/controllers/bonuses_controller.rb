@@ -522,7 +522,7 @@ class BonusesController < ApplicationController
   def check_bonus_access
     authorize! :read, Bonus
   rescue CanCan::AccessDenied
-    redirect_to marketing_index_path, alert: "У вас нет доступа к разделу бонусов."
+    redirect_to marketing_index_path, alert: "You do not have access to the bonuses section."
   end
 
   def bonus_includes

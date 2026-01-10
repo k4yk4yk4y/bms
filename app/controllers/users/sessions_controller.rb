@@ -21,12 +21,12 @@ class Users::SessionsController < Devise::SessionsController
 
   # Отключаем восстановление пароля
   def forgot_password
-    redirect_to new_user_session_path, alert: "Функция восстановления пароля недоступна. Обратитесь к администратору."
+    redirect_to new_user_session_path, alert: "Password recovery is unavailable. Contact your administrator."
   end
 
   # Отключаем регистрацию
   def sign_up
-    redirect_to new_user_session_path, alert: "Регистрация недоступна. Обратитесь к администратору."
+    redirect_to new_user_session_path, alert: "Registration is unavailable. Contact your administrator."
   end
 
   protected

@@ -241,24 +241,24 @@
           </button>
         </div>
         <div class="card-body">
-          <!-- Основные часто используемые параметры -->
+          <!-- Main frequently used parameters -->
           <div class="main-params-container">
-            <h6 class="text-primary reward-section-header">Основные параметры</h6>
+            <h6 class="text-primary reward-section-header">Main parameters</h6>
             
-            <!-- Тип бонуса -->
+            <!-- Bonus type -->
             <div class="reward-button-group">
-              <label class="form-label">Тип бонуса (bonus_type)</label>
+              <label class="form-label">Bonus type (bonus_type)</label>
               <div class="btn-group w-100" role="group">
                 <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_fixed_${index}" value="fixed" checked onchange="toggleBonusType('fixed', ${index})">
-                <label class="btn btn-outline-primary" for="bonus_type_fixed_${index}">Фиксированная сумма</label>
+                <label class="btn btn-outline-primary" for="bonus_type_fixed_${index}">Fixed amount</label>
                 <input type="radio" class="btn-check" name="bonus_rewards[${index}][bonus_type]" id="bonus_type_percentage_${index}" value="percentage" onchange="toggleBonusType('percentage', ${index})">
-                <label class="btn btn-outline-primary" for="bonus_type_percentage_${index}">Процент</label>
+                <label class="btn btn-outline-primary" for="bonus_type_percentage_${index}">Percentage</label>
               </div>
             </div>
 
             <!-- Amount - Currency fields will be populated by JavaScript -->
             <div id="amount_field_${index}" class="reward-param-field full-width">
-              <label class="form-label">Сумма бонуса по валютам</label>
+              <label class="form-label">Bonus amount by currency</label>
               <div id="currency-bonus-amounts-container-${index}">
                 <div class="currency-amounts-grid" id="bonus-amounts-grid-${index}">
                   <!-- Currency fields will be populated by JavaScript -->
@@ -268,7 +268,7 @@
 
             <!-- Percentage -->
             <div class="reward-param-field mb-3" id="percentage_field_${index}" style="display: none;">
-              <label class="form-label">Процент от депозита</label>
+              <label class="form-label">Percentage of deposit</label>
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
                 <span class="input-group-text">%</span>
@@ -285,18 +285,18 @@
               <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="bonus_rewards[${index}][user_can_have_duplicates]" id="user_can_have_duplicates_${index}" value="true">
                 <label class="form-check-label" for="user_can_have_duplicates_${index}">
-                  Пользователь может иметь дубликаты (user_can_have_duplicates)
+                  User can have duplicates (user_can_have_duplicates)
                 </label>
               </div>
             </div>
 
           </div>
 
-          <!-- Дополнительные параметры -->
+          <!-- Advanced parameters -->
           <div class="mt-4">
-            <h6 class="text-secondary mb-3">Дополнительные параметры</h6>
+            <h6 class="text-secondary mb-3">Advanced parameters</h6>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'bonus')">
-              <span id="advanced-params-toggle-text-${index}">Показать дополнительные</span>
+              <span id="advanced-params-toggle-text-${index}">Show advanced</span>
             </button>
             <div id="advanced-params-section-${index}" style="display: none;" class="mt-3">
               <div class="advanced-params-container">
@@ -423,9 +423,9 @@
                   <div class="reward-param-field">
                     <label class="form-label">Gender</label>
                     <select class="form-select" name="bonus_rewards[${index}][gender]">
-                      <option value="">Не задано</option>
-                      <option value="male">Мужской</option>
-                      <option value="female">Женский</option>
+                      <option value="">Not set</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
                     </select>
                   </div>
                   <!-- Issued Bonus -->
@@ -472,26 +472,26 @@
           </button>
         </div>
         <div class="card-body">
-          <!-- Основные часто используемые параметры -->
+          <!-- Main frequently used parameters -->
           <div class="main-params-container" style="display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 1rem !important; width: 100% !important;">
-            <h6 class="text-success reward-section-header">Основные параметры</h6>
+            <h6 class="text-success reward-section-header">Main parameters</h6>
             
             <!-- Games -->
             <div class="reward-param-field full-width">
-              <label class="form-label">Игры (games)</label>
+              <label class="form-label">Games (games)</label>
               <input type="text" class="form-control" name="freespin_rewards[${index}][games]" >
               <!--Список доступных игр через запятую-->
             </div>
 
             <!-- Freespins Count -->
             <div class="reward-param-field">
-              <label class="form-label">Количество фриспинов *</label>
+              <label class="form-label">Freespins count *</label>
               <input type="number" class="form-control" name="freespin_rewards[${index}][spins_count]" min="1" required >
             </div>
 
             <!-- Bet Level -->
             <div class="reward-param-field">
-              <label class="form-label">Уровень ставки (bet_level)</label>
+              <label class="form-label">Bet level (bet_level)</label>
               <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="0.01" >
             </div>
 
@@ -503,7 +503,7 @@
           <!-- Currency Freespin Bet Levels - separate section -->
           <div class="currency-bet-levels-section mt-3">
             <div class="reward-param-field full-width">
-              <label class="form-label">Размер ставки фриспинов по валютам *</label>
+              <label class="form-label">Freespin bet level by currency *</label>
               <div id="currency-freespin-bet-levels-container-${index}">
                 <div class="currency-bet-levels-grid" id="freespin-bet-levels-grid-${index}">
                   <!-- Currency fields will be populated by JavaScript -->
@@ -515,15 +515,15 @@
           <!-- Note: Usage Limitations are configured in Basic Information -->
           </div>
 
-          <!-- Дополнительные параметры -->
+          <!-- Advanced parameters -->
           <div class="mt-4">
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'freespin')">
-              <span id="freespin-advanced-toggle-text-${index}">+ Показать дополнительные параметры</span>
+              <span id="freespin-advanced-toggle-text-${index}">+ Show advanced parameters</span>
             </button>
             <div id="freespin-advanced-params-${index}" style="display: none;" class="mt-3">
               <div class="card">
                 <div class="card-header">
-                  <h6 class="card-title mb-0">Дополнительные параметры</h6>
+                  <h6 class="card-title mb-0">Advanced parameters</h6>
                 </div>
                 <div class="card-body">
                   <div class="advanced-params-container">
@@ -712,9 +712,9 @@
                   <div class="reward-param-field">
                     <label class="form-label">Gender</label>
                     <select class="form-select" name="freespin_rewards[${index}][gender]">
-                      <option value="">Не задано</option>
-                      <option value="male">Мужской</option>
-                      <option value="female">Женский</option>
+                      <option value="">Not set</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
                     </select>
                   </div>
 
@@ -740,9 +740,9 @@
                   <div class="reward-param-field">
                     <label class="form-label">Wager Done</label>
                     <select class="form-select" name="freespin_rewards[${index}][wager_done]">
-                      <option value="">Не задано</option>
-                      <option value="true">Да</option>
-                      <option value="false">Нет</option>
+                      <option value="">Not set</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
                     </select>
                   </div>
 
@@ -1011,20 +1011,20 @@
     if (section.style.display === 'none') {
       section.style.display = 'block';
       if (type === 'bonus') {
-        toggleText.textContent = 'Скрыть дополнительные';
+        toggleText.textContent = 'Hide advanced';
       } else if (type === 'freespin') {
-        toggleText.textContent = '− Скрыть дополнительные параметры';
+        toggleText.textContent = '− Hide advanced parameters';
       } else if (type === 'bonus_buy') {
-        toggleText.textContent = '− Скрыть дополнительные параметры';
+        toggleText.textContent = '− Hide advanced parameters';
       }
     } else {
       section.style.display = 'none';
       if (type === 'bonus') {
-        toggleText.textContent = 'Показать дополнительные';
+        toggleText.textContent = 'Show advanced';
       } else if (type === 'freespin') {
-        toggleText.textContent = '+ Показать дополнительные параметры';
+        toggleText.textContent = '+ Show advanced parameters';
       } else if (type === 'bonus_buy') {
-        toggleText.textContent = '+ Показать дополнительные параметры';
+        toggleText.textContent = '+ Show advanced parameters';
       }
     }
   }
@@ -1062,13 +1062,13 @@
           </button>
         </div>
         <div class="card-body">
-          <!-- Основные параметры -->
+          <!-- Main parameters -->
           <div class="main-params-container">
-            <h6 class="text-warning reward-section-header">Основные параметры</h6>
+            <h6 class="text-warning reward-section-header">Main parameters</h6>
             
             <!-- Buy Amount -->
             <div class="reward-param-field">
-              <label class="form-label">Сумма покупки (buy_amount) *</label>
+              <label class="form-label">Purchase amount (buy_amount) *</label>
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_buy_rewards[${index}][buy_amount]" min="1"  required>
                 <span class="input-group-text">€</span>
@@ -1078,7 +1078,7 @@
 
             <!-- Multiplier -->
             <div class="reward-param-field">
-              <label class="form-label">Множитель покупки (multiplier)</label>
+              <label class="form-label">Purchase multiplier (multiplier)</label>
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_buy_rewards[${index}][multiplier]" min="1" step="0.1" >
                 <span class="input-group-text">x</span>
@@ -1088,14 +1088,14 @@
 
             <!-- Games -->
             <div class="reward-param-field mb-3 full-width">
-              <label class="form-label">Игры (games)</label>
+              <label class="form-label">Games (games)</label>
               <input type="text" class="form-control" name="bonus_buy_rewards[${index}][games]" >
               <!--Список доступных игр через запятую-->
             </div>
 
             <!-- Bet Level -->
             <div class="reward-param-field">
-              <label class="form-label">Уровень ставки (bet_level)</label>
+              <label class="form-label">Bet level (bet_level)</label>
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_buy_rewards[${index}][bet_level]" min="0" step="0.01" >
                 <span class="input-group-text">€</span>
@@ -1110,20 +1110,20 @@
 
             <!-- Tags -->
             <div class="reward-param-field">
-              <label class="form-label">Теги (tags)</label>
+              <label class="form-label">Tags (tags)</label>
               <input type="text" class="form-control" name="bonus_buy_rewards[${index}][tags]" placeholder="bonus-buy, promo, special">
             </div>
 
             <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
           </div>
 
-          <!-- Дополнительные параметры -->
+          <!-- Advanced parameters -->
           <div class="mt-4">
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAdvancedParams(${index}, 'bonus_buy')">
-              <span id="bonus-buy-advanced-toggle-text-${index}">+ Показать дополнительные параметры</span>
+              <span id="bonus-buy-advanced-toggle-text-${index}">+ Show advanced parameters</span>
             </button>
             <div id="bonus-buy-advanced-params-${index}" style="display: none;" class="mt-3">
-              <h6 class="text-secondary mb-3">Дополнительные параметры</h6>
+              <h6 class="text-secondary mb-3">Advanced parameters</h6>
               <div class="row">
                 <div class="col-md-6">
                   <!-- Stag -->
@@ -1150,27 +1150,27 @@
           </button>
         </div>
         <div class="card-body">
-          <!-- Основные параметры -->
+          <!-- Main parameters -->
           <div class="main-params-container">
-            <h6 class="text-info reward-section-header">Основные параметры</h6>
+            <h6 class="text-info reward-section-header">Main parameters</h6>
             
             <!-- Title -->
             <div class="reward-param-field mb-3 full-width">
-              <label class="form-label">Название награды (title) *</label>
-              <input type="text" class="form-control" name="comp_point_rewards[${index}][title]" placeholder="Очки лояльности" required>
+              <label class="form-label">Reward name (title) *</label>
+              <input type="text" class="form-control" name="comp_point_rewards[${index}][title]" placeholder="Loyalty points" required>
               <!--Описательное название для награды-->
             </div>
 
             <!-- Points Amount -->
             <div class="reward-param-field">
-              <label class="form-label">Количество очков (points_amount) *</label>
+              <label class="form-label">Points amount (points_amount) *</label>
               <input type="number" class="form-control" name="comp_point_rewards[${index}][points_amount]" min="0" required>
               <!--Количество очков, которые получит игрок-->
             </div>
 
             <!-- Multiplier -->
             <div class="reward-param-field">
-              <label class="form-label">Множитель (multiplier)</label>
+              <label class="form-label">Multiplier (multiplier)</label>
               <input type="number" class="form-control" name="comp_point_rewards[${index}][multiplier]" min="0" step="0.01">
               <!--Опциональный множитель очков-->
             </div>
@@ -1213,20 +1213,20 @@
           </button>
         </div>
         <div class="card-body">
-          <!-- Основные параметры -->
+          <!-- Main parameters -->
           <div class="main-params-container">
-            <h6 class="text-secondary reward-section-header">Основные параметры</h6>
+            <h6 class="text-secondary reward-section-header">Main parameters</h6>
             
             <!-- Title -->
             <div class="reward-param-field mb-3 full-width">
-              <label class="form-label">Название награды (title) *</label>
-              <input type="text" class="form-control" name="bonus_code_rewards[${index}][title]" placeholder="Депозитный бонус-код" required>
+              <label class="form-label">Reward name (title) *</label>
+              <input type="text" class="form-control" name="bonus_code_rewards[${index}][title]" placeholder="Deposit bonus code" required>
               <!--Описательное название для награды-->
             </div>
 
             <!-- Set Bonus Code -->
             <div class="reward-param-field mb-3 full-width">
-              <label class="form-label">Бонус-код (set_bonus_code) *</label>
+              <label class="form-label">Bonus code (set_bonus_code) *</label>
               <input type="text" class="form-control" name="bonus_code_rewards[${index}][set_bonus_code]" placeholder="WELCOME100" required>
               <!--Бонус-код, который будет применен в профиле игрока-->
             </div>
@@ -1236,8 +1236,8 @@
             <!-- Information about collect strategy -->
             <div class="alert alert-warning full-width">
               <small>
-                Стратегия collect:<br>
-                Этот тип награды работает с бонусами, использующими стратегию "collect".
+                Collect strategy:<br>
+                This reward type works with bonuses using the "collect" strategy.
               </small>
             </div>
           </div>

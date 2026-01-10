@@ -50,7 +50,7 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
 
       expect(response).to redirect_to(settings_templates_path)
       follow_redirect!
-      expect(response.body).to include("Шаблон бонуса успешно создан")
+      expect(response.body).to include("Bonus template created successfully")
     end
 
     it "renders new template form with errors for invalid attributes" do
@@ -96,7 +96,7 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
 
       expect(response).to redirect_to(settings_templates_path)
       follow_redirect!
-      expect(response.body).to include("Шаблон бонуса успешно обновлен")
+      expect(response.body).to include("Bonus template updated successfully")
 
       template.reload
       expect(template.name).to eq("Updated Template Name")
@@ -122,7 +122,7 @@ RSpec.describe "Settings::BonusTemplates", type: :request do
 
       expect(response).to redirect_to(settings_templates_path)
       follow_redirect!
-      expect(response.body).to include("Шаблон бонуса успешно удален")
+      expect(response.body).to include("Bonus template deleted successfully")
     end
   end
 end

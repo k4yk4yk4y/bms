@@ -16,7 +16,7 @@ class CompPointReward < ApplicationRecord
 
   # Helper methods
   def formatted_points_amount
-    points_amount.present? ? "#{points_amount} очков" : "0"
+    points_amount.present? ? "#{points_amount} points" : "0"
   end
 
   def formatted_multiplier

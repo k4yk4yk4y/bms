@@ -23,7 +23,7 @@ class Settings::BonusTemplatesController < ApplicationController
     @bonus_template = BonusTemplate.new(bonus_template_params)
 
     if @bonus_template.save
-      redirect_to settings_templates_path, notice: "Шаблон бонуса успешно создан."
+      redirect_to settings_templates_path, notice: "Bonus template created successfully."
     else
       render :new, status: :unprocessable_content
     end
@@ -39,7 +39,7 @@ class Settings::BonusTemplatesController < ApplicationController
 
     if @bonus_template.update(bonus_template_params)
       Rails.logger.info "Bonus template #{@bonus_template.id} updated successfully"
-      redirect_to settings_templates_path, notice: "Шаблон бонуса успешно обновлен."
+      redirect_to settings_templates_path, notice: "Bonus template updated successfully."
     else
       Rails.logger.error "Failed to update bonus template #{@bonus_template.id}: #{@bonus_template.errors.full_messages}"
       render :edit, status: :unprocessable_content
@@ -50,13 +50,13 @@ class Settings::BonusTemplatesController < ApplicationController
     authorize! :destroy, @bonus_template
     begin
       if @bonus_template.destroy
-        redirect_to settings_templates_path, notice: "Шаблон бонуса успешно удален."
+        redirect_to settings_templates_path, notice: "Bonus template deleted successfully."
       else
-        redirect_to settings_templates_path, alert: "Не удалось удалить шаблон бонуса: #{@bonus_template.errors.full_messages.join(', ')}"
+        redirect_to settings_templates_path, alert: "Failed to delete bonus template: #{@bonus_template.errors.full_messages.join(', ')}"
       end
     rescue => e
       Rails.logger.error "Error destroying bonus template #{@bonus_template.id}: #{e.message}"
-      redirect_to settings_templates_path, alert: "Ошибка при удалении шаблона бонуса: #{e.message}"
+      redirect_to settings_templates_path, alert: "Bonus template deletion error: #{e.message}"
     end
   end
 

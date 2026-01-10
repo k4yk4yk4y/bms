@@ -19,13 +19,13 @@
 
   <div class="main-params-container">
     <div class="reward-param-field mb-3 full-width">
-      <label for="bonus_code_reward_title_<%= index %>" class="form-label">Название награды (title) *</label>
+      <label for="bonus_code_reward_title_<%= index %>" class="form-label">Reward name (title) *</label>
       <input type="text" class="form-control" name="<%= field_prefix %>[title]" id="bonus_code_reward_title_<%= index %>"
              value="<%= existing_bonus_code&.title %>" required>
     </div>
 
     <div class="reward-param-field mb-3 full-width">
-      <label for="bonus_code_reward_set_bonus_code_<%= index %>" class="form-label">Бонус-код (set_bonus_code) *</label>
+      <label for="bonus_code_reward_set_bonus_code_<%= index %>" class="form-label">Bonus code (set_bonus_code) *</label>
       <input type="text" class="form-control" name="<%= field_prefix %>[set_bonus_code]"
              id="bonus_code_reward_set_bonus_code_<%= index %>"
              value="<%= existing_bonus_code&.code %>" required>
@@ -33,13 +33,13 @@
   </div>
 
   <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAdvancedParams(this)">
-    <span class="toggle-text">+ Показать дополнительные параметры</span>
+    <span class="toggle-text">+ Show advanced parameters</span>
   </button>
 
   <div class="advanced-params mt-3" style="display: none;">
     <div class="advanced-params-container">
       <div class="reward-param-field mb-3 full-width">
-        <label class="form-label">Дополнительные параметры (JSON)</label>
+        <label class="form-label">Advanced parameters (JSON)</label>
         <textarea class="form-control" name="<%= field_prefix %>[config_json]" rows="3"
                   ><%= existing_bonus_code&.config&.to_json %></textarea>
       </div>

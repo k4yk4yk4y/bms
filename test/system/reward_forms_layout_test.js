@@ -48,7 +48,7 @@ test.describe('Reward Forms Multi-Column Layout', () => {
       await advancedToggle.click();
     } else {
       // Try alternative toggle button
-      const altToggle = page.locator('button').filter({ hasText: /Показать дополнительные параметры|Show advanced parameters/i });
+      const altToggle = page.locator('button').filter({ hasText: /Show advanced parameters/i });
       if (await altToggle.isVisible()) {
         await altToggle.click();
       }
@@ -189,7 +189,7 @@ test.describe('Reward Forms Multi-Column Layout', () => {
         expect(columns.length).toBeGreaterThan(1); // Should have multiple columns
 
         // Remove the reward to test the next one
-        const removeButton = page.locator('button').filter({ hasText: /Remove|Удалить/i });
+        const removeButton = page.locator('button').filter({ hasText: /Remove|Delete/i });
         if (await removeButton.isVisible()) {
           await removeButton.click();
         }
