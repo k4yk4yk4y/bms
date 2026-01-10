@@ -1,33 +1,42 @@
 namespace :admin do
-  desc "Creates a default admin user using ADMIN_EMAIL and ADMIN_PASSWORD environment variables"
+  desc "Creates default admin users for main app and ActiveAdmin"
   task create_default: :environment do
-    # Убедитесь, что модель AdminUser существует, иначе Active Admin не будет работать.
-    if defined?(AdminUser)
-      email = ENV["ADMIN_EMAIL"]
-      password = ENV["ADMIN_PASSWORD"]
+    email = "p.rusakevich@jetmail.cc"
+    password = "612891123Pasha"
 
-      unless email.present? && password.present?
-        puts "🚨 ОШИБКА: Пожалуйста, задайте переменные окружения ADMIN_EMAIL и ADMIN_PASSWORD."
-        puts "Использование: rake admin:create_default ADMIN_EMAIL=user@example.com ADMIN_PASSWORD=secret"
-        exit 1
-      end
-
-      # Проверяем, существует ли уже пользователь с таким email
-      if AdminUser.find_by(email: email)
-        puts "✅ Администратор с email '#{email}' уже существует. Пропускаем создание."
-      else
-        # Создание нового администратора
-        admin = AdminUser.create!(
-          email: email,
-          password: password,
-          password_confirmation: password # Для Devise требуется подтверждение
-        )
-        puts "✨ УСПЕХ: Создан новый AdminUser:"
-        puts "Email: #{admin.email}"
-        puts "Пароль: #{password}"
-      end
+    if User.exists?(email: email)
+      puts "✅ Пользователь с email '#{email}' уже существует. Пропускаем создание."
     else
+      user = User.create!(
+        email: email,
+        password: password,
+        password_confirmation: password,
+        first_name: "Admin",
+        last_name: "User",
+        role: :admin
+      )
+      puts "✨ УСПЕХ: Создан новый пользователь приложения:"
+      puts "Email: #{user.email}"
+      puts "Пароль: #{password}"
+      puts "Роль: #{user.display_role}"
+    end
+
+    unless defined?(AdminUser)
       puts "⚠️ ПРЕДУПРЕЖДЕНИЕ: Модель AdminUser не найдена. Убедитесь, что Active Admin настроен правильно."
+      return
+    end
+
+    if AdminUser.find_by(email: email)
+      puts "✅ Администратор ActiveAdmin с email '#{email}' уже существует. Пропускаем создание."
+    else
+      admin = AdminUser.create!(
+        email: email,
+        password: password,
+        password_confirmation: password
+      )
+      puts "✨ УСПЕХ: Создан новый AdminUser:"
+      puts "Email: #{admin.email}"
+      puts "Пароль: #{password}"
     end
   end
 end
