@@ -17,3 +17,13 @@
   border-color: #212529;
   box-shadow: none;
 }
+
+.bonuses-page .table thead th,
+.bonuses-page .table tbody td {
+  text-align: center;
+}
+
+.bonuses-page .table tbody td,
+.bonuses-page .table tbody th {
+  vertical-align: middle;
+}

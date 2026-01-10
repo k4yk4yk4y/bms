@@ -1,0 +1,18 @@
+.marketing-page .table thead th,
+.marketing-page .table tbody td {
+  text-align: center;
+}
+
+.marketing-page .table tbody td,
+.marketing-page .table tbody th {
+  vertical-align: middle;
+}
+
+.marketing-page .marketing-summary {
+  padding-right: 1.5rem;
+}
+
+.marketing-page .marketing-summary small {
+  display: inline-block;
+  margin-right: 0.5rem;
+}

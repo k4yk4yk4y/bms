@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid retention-page">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><%= @retention_chain.display_name %></h1>
     <div class="d-flex gap-2">
@@ -45,16 +45,16 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-striped mb-0">
-          <thead class="table-light">
+          <thead class="table-dark">
             <tr>
               <th style="width: 32px;"></th>
-              <th>Subject</th>
+              <th class="text-start">Subject</th>
               <th>Header</th>
               <th>Status</th>
               <th>Timing</th>
               <th>Bonuses</th>
               <th>Launch date</th>
-              <th class="text-end">Actions</th>
+              <th class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody data-controller="retention-emails-sort"
@@ -69,7 +69,7 @@
                     <i class="fas fa-grip-vertical"></i>
                   <% end %>
                 </td>
-                <td><%= link_to email.display_subject, retention_chain_retention_email_path(@retention_chain, email) %></td>
+                <td class="text-start"><%= link_to email.display_subject, retention_chain_retention_email_path(@retention_chain, email) %></td>
                 <td><%= email.header.presence || "—" %></td>
                 <td><span class="badge bg-secondary"><%= email.status.humanize %></span></td>
                 <td><%= email.send_timing.presence || "—" %></td>
@@ -87,7 +87,7 @@
                   <% end %>
                 </td>
                 <td><%= email.launch_date&.strftime("%Y-%m-%d %H:%M") || "—" %></td>
-                <td class="text-end">
+                <td class="text-center">
                   <div class="btn-group btn-group-sm" role="group">
                     <%= link_to retention_chain_retention_email_path(@retention_chain, email),
                                 class: "btn btn-outline-info",
