@@ -26,13 +26,19 @@ namespace :admin do
       return
     end
 
+    admin_role = AdminRole.find_or_create_by!(key: "superadmin") do |role|
+      role.name = "Superadmin"
+      role.permissions = AdminRole.section_keys.index_with { "manage" }
+    end
+
     if AdminUser.find_by(email: email)
       puts "✅ Администратор ActiveAdmin с email '#{email}' уже существует. Пропускаем создание."
     else
       admin = AdminUser.create!(
         email: email,
         password: password,
-        password_confirmation: password
+        password_confirmation: password,
+        admin_role: admin_role
       )
       puts "✨ УСПЕХ: Создан новый AdminUser:"
       puts "Email: #{admin.email}"
