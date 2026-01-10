@@ -59,7 +59,7 @@
 
                 <div class="mb-3">
                   <%= form.label :description, class: "form-label" %>
-                  <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Описание бонуса..." %>
+                  <%= form.text_area :description, class: "form-control", rows: 3, placeholder: "Bonus description..." %>
                 </div>
 
                 <div class="mb-3">
@@ -92,10 +92,10 @@
                 <div class="mb-3">
                   <%= form.label :currencies, "Currencies", class: "form-label" %>
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <small class="text-muted">Выберите валюты для бонуса</small>
+                    <small class="text-muted">Select currencies for the bonus</small>
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="uncheck-all-currencies-btn" 
                             data-action="click->currency#uncheckAll">
-                      <i class="bi bi-check2-all"></i> Снять все
+                      <i class="bi bi-check2-all"></i> Uncheck all
                     </button>
 
                   </div>
@@ -143,7 +143,7 @@
               </div>
             </div>
 
-            <!-- Currency Minimum Deposits (только для депозитных бонусов) -->
+            <!-- Currency Minimum Deposits (only for deposit bonuses) -->
             <div id="currency-minimum-deposits-section" style="<%= 'display: none;' unless @bonus.event == 'deposit' %>">
               <%= render "currency_minimum_deposits", form: form, bonus: @bonus %>
             </div>
@@ -173,8 +173,8 @@
                     <div class="col-md-4">
                       <%= form.select :maximum_winnings_type, 
                           options_for_select([
-                            ['Множитель', 'multiplier'],
-                            ['Фиксированное значение', 'fixed']
+                            ['Multiplier', 'multiplier'],
+                            ['Fixed value', 'fixed']
                           ], 'multiplier'), 
                           {}, 
                           { class: "form-select", id: "maximum_winnings_type_select" } %>
@@ -243,7 +243,6 @@
     </div>
   </div>
 </div>
-
 
 
 

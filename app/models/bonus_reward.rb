@@ -121,6 +121,6 @@ class BonusReward < ApplicationRecord
     return if amount.present? || percentage.present?
     return if currency_amounts.present? && currency_amounts.values.any? { |value| value.present? }
 
-    errors.add(:base, "Нужно указать сумму, процент или суммы по валютам")
+    errors.add(:base, "You must provide an amount, a percentage, or per-currency amounts")
   end
 end

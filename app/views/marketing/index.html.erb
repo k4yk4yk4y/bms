@@ -42,13 +42,13 @@
           <% if can?(:create, MarketingRequest) %>
             <%= link_to new_marketing_path(request_type: @current_tab), 
                         class: "btn btn-primary" do %>
-              <i class="fas fa-plus"></i> Добавить заявку
+              <i class="fas fa-plus"></i> Add request
             <% end %>
           <% end %>
         </div>
       </div>
 
-      <!-- Табы для типов заявок -->
+      <!-- Tabs for request types -->
       <ul class="nav nav-tabs mb-4" id="marketingTabs" role="tablist">
         <% @tabs.each_with_index do |tab, index| %>
           <li class="nav-item" role="presentation">
@@ -65,7 +65,7 @@
         <% end %>
       </ul>
 
-      <!-- Поиск и фильтры -->
+      <!-- Search and filters -->
       <div class="row mb-3">
         <div class="col-md-4">
           <%= form_with url: marketing_index_path, method: :get, local: true, class: "d-flex" do |form| %>
@@ -73,38 +73,38 @@
             <%= form.hidden_field :status, value: params[:status] if params[:status].present? %>
             <%= form.hidden_field :page, value: params[:page] if params[:page].present? %>
             <%= form.text_field :search, 
-                placeholder: "Поиск по промокоду, STAG, менеджеру или email...", 
+                placeholder: "Search by promo code, STAG, manager, or email...", 
                 value: params[:search], 
                 class: "form-control form-control-sm me-2" %>
-            <%= form.submit "Найти", class: "btn btn-outline-primary btn-sm" %>
+            <%= form.submit "Search", class: "btn btn-outline-primary btn-sm" %>
             <% if params[:search].present? %>
-              <%= link_to "Очистить", marketing_index_path(tab: @current_tab, status: params[:status]), 
+              <%= link_to "Clear", marketing_index_path(tab: @current_tab, status: params[:status]), 
                           class: "btn btn-outline-secondary btn-sm ms-1" %>
             <% end %>
           <% end %>
         </div>
         <div class="col-md-6">
-          <div class="btn-group" role="group" aria-label="Фильтр по статусу">
-            <%= link_to "Все", marketing_index_path(tab: @current_tab, search: params[:search], page: nil), 
+          <div class="btn-group" role="group" aria-label="Status filter">
+            <%= link_to "All", marketing_index_path(tab: @current_tab, search: params[:search], page: nil), 
                         class: "btn btn-outline-secondary #{'active' if params[:status].blank?}" %>
-            <%= link_to "Ожидают", marketing_index_path(tab: @current_tab, status: 'pending', search: params[:search], page: nil), 
+            <%= link_to "Pending", marketing_index_path(tab: @current_tab, status: 'pending', search: params[:search], page: nil), 
                         class: "btn btn-outline-warning #{'active' if params[:status] == 'pending'}" %>
-            <%= link_to "Активированы", marketing_index_path(tab: @current_tab, status: 'activated', search: params[:search], page: nil), 
+            <%= link_to "Activated", marketing_index_path(tab: @current_tab, status: 'activated', search: params[:search], page: nil), 
                         class: "btn btn-outline-success #{'active' if params[:status] == 'activated'}" %>
-            <%= link_to "Отклонены", marketing_index_path(tab: @current_tab, status: 'rejected', search: params[:search], page: nil), 
+            <%= link_to "Rejected", marketing_index_path(tab: @current_tab, status: 'rejected', search: params[:search], page: nil), 
                         class: "btn btn-outline-danger #{'active' if params[:status] == 'rejected'}" %>
           </div>
         </div>
         <div class="col-md-2 text-end marketing-summary">
           <small class="text-muted">
             <% if params[:search].present? %>
-              Найдено: <%= @total_requests %>
-              <br><small>по запросу "<%= params[:search] %>"</small>
+              Found: <%= @total_requests %>
+              <br><small>for query "<%= params[:search] %>"</small>
             <% else %>
-              Всего заявок: <%= @total_requests %>
+              Total requests: <%= @total_requests %>
             <% end %>
             <% if @total_pages > 1 %>
-              <br><small>Страница <%= @current_page %> из <%= @total_pages %></small>
+              <br><small>Page <%= @current_page %> of <%= @total_pages %></small>
             <% end %>
           </small>
         </div>
@@ -118,17 +118,17 @@
               <table class="table table-striped table-hover">
                 <thead class="table-dark">
                   <tr>
-                    <th>Менеджер</th>
+                    <th>Manager</th>
                     <% unless current_user.support_agent? || current_user.shift_leader? %>
-                      <th>Площадка</th>
-                      <th>Почта партнёра</th>
+                      <th>Platform</th>
+                      <th>Partner email</th>
                     <% end %>
-                    <th>Промокод</th>
+                    <th>Promo code</th>
                     <th>STAG</th>
-                    <th>Дата активации</th>
-                    <th>Статус</th>
+                    <th>Activation date</th>
+                    <th>Status</th>
                     <% if can?(:update, MarketingRequest) || can?(:destroy, MarketingRequest) %>
-                      <th>Действия</th>
+                      <th>Actions</th>
                     <% end %>
                   </tr>
                 </thead>
@@ -172,7 +172,7 @@
                               </code>
                             <% end %>
                           </div>
-                          <small class="text-muted">(<%= codes.length %> кодов)</small>
+                          <small class="text-muted">(<%= codes.length %> codes)</small>
                         <% end %>
                       </td>
                       <td>
@@ -183,7 +183,7 @@
                           <br>
                           <small class="text-warning">
                             <i class="fas fa-exclamation-triangle"></i>
-                            Есть другие заявки
+                            Other requests exist
                           </small>
                         <% end %>
                       </td>
@@ -209,14 +209,14 @@
                           <div class="btn-group btn-group-sm" role="group">
                             <%= link_to marketing_path(request), 
                                         class: "btn btn-outline-primary btn-sm",
-                                        title: "Просмотр" do %>
+                                        title: "View" do %>
                               <i class="fas fa-eye"></i>
                             <% end %>
                             
                             <% if can?(:update, request) %>
                               <%= link_to edit_marketing_path(request), 
                                           class: "btn btn-outline-secondary btn-sm",
-                                          title: "Редактировать" do %>
+                                          title: "Edit" do %>
                                 <i class="fas fa-edit"></i>
                               <% end %>
                             <% end %>
@@ -226,9 +226,9 @@
                                 <%= link_to activate_marketing_path(request), 
                                             method: :patch,
                                             class: "btn btn-outline-success btn-sm",
-                                            title: "Активировать",
+                                            title: "Activate",
                                             data: { 
-                                              confirm: "Активировать заявку?",
+                                              confirm: "Activate request?",
                                               turbo_method: :patch 
                                             } do %>
                                   <i class="fas fa-check"></i>
@@ -239,9 +239,9 @@
                                 <%= link_to reject_marketing_path(request), 
                                             method: :patch,
                                             class: "btn btn-outline-danger btn-sm",
-                                            title: "Отклонить",
+                                            title: "Reject",
                                             data: { 
-                                              confirm: "Отклонить заявку?",
+                                              confirm: "Reject request?",
                                               turbo_method: :patch 
                                             } do %>
                                   <i class="fas fa-times"></i>
@@ -253,9 +253,9 @@
                               <%= link_to marketing_path(request), 
                                           method: :delete,
                                           class: "btn btn-outline-danger btn-sm",
-                                          title: "Удалить",
+                                          title: "Delete",
                                           data: { 
-                                            confirm: "Удалить заявку? Это действие нельзя отменить.",
+                                            confirm: "Delete request? This action cannot be undone.",
                                             turbo_method: :delete 
                                           } do %>
                                 <i class="fas fa-trash"></i>
@@ -275,15 +275,15 @@
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <div>
                   <small class="text-muted">
-                    Показано <%= [(@current_page - 1) * 25 + 1, @total_requests].min %> - 
-                    <%= [@current_page * 25, @total_requests].min %> из <%= @total_requests %>
+                    Showing <%= [(@current_page - 1) * 25 + 1, @total_requests].min %> - 
+                    <%= [@current_page * 25, @total_requests].min %> of <%= @total_requests %>
                   </small>
                 </div>
                 <nav aria-label="Page navigation">
                   <ul class="pagination pagination-sm mb-0">
                     <% if @current_page > 1 %>
                       <li class="page-item">
-                        <%= link_to "Предыдущая", marketing_index_path(
+                        <%= link_to "Previous", marketing_index_path(
                           tab: @current_tab, 
                           search: params[:search], 
                           status: params[:status], 
@@ -292,7 +292,7 @@
                       </li>
                     <% else %>
                       <li class="page-item disabled">
-                        <span class="page-link">Предыдущая</span>
+                        <span class="page-link">Previous</span>
                       </li>
                     <% end %>
                     
@@ -345,7 +345,7 @@
                     
                     <% if @current_page < @total_pages %>
                       <li class="page-item">
-                        <%= link_to "Следующая", marketing_index_path(
+                        <%= link_to "Next", marketing_index_path(
                           tab: @current_tab, 
                           search: params[:search], 
                           status: params[:status], 
@@ -354,7 +354,7 @@
                       </li>
                     <% else %>
                       <li class="page-item disabled">
-                        <span class="page-link">Следующая</span>
+                        <span class="page-link">Next</span>
                       </li>
                     <% end %>
                   </ul>
@@ -365,26 +365,26 @@
             <div class="text-center py-5">
               <i class="fas fa-<%= params[:search].present? ? 'search' : 'inbox' %> fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">
-                <%= params[:search].present? ? 'Ничего не найдено' : 'Заявки не найдены' %>
+                <%= params[:search].present? ? 'Nothing found' : 'Requests not found' %>
               </h5>
               <p class="text-muted">
                 <% if params[:search].present? %>
-                  По запросу "<%= params[:search] %>" в типе "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
+                  For query "<%= params[:search] %>" in type "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
                   <% if params[:status].present? %>
-                    со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                    with status "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
                   <% end %>
-                  ничего не найдено.
+                  nothing was found.
                 <% else %>
-                  Нет заявок типа "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
+                  No requests of type "<%= MarketingRequest::REQUEST_TYPE_LABELS[@current_tab] %>"
                   <% if params[:status].present? %>
-                    со статусом "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
+                    with status "<%= MarketingRequest::STATUS_LABELS[params[:status]] %>"
                   <% end %>
                 <% end %>
               </p>
               <% if can?(:create, MarketingRequest) %>
                 <%= link_to new_marketing_path(request_type: @current_tab), 
                             class: "btn btn-primary" do %>
-                  <i class="fas fa-plus"></i> Создать первую заявку
+                  <i class="fas fa-plus"></i> Create first request
                 <% end %>
               <% end %>
             </div>

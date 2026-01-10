@@ -225,9 +225,9 @@ RSpec.describe MarketingHelper, type: :helper do
     it 'returns formatted summary string' do
       result = helper.marketing_request_summary(marketing_request)
 
-      expect(result).to include('ПРОМО ВЕБОВ 50')  # request_type_label
+      expect(result).to include('PROMO WEBS 50')  # request_type_label
       expect(result).to include('TEST_CODE_123')   # promo_code
-      expect(result).to include('Ожидает')         # status_label
+      expect(result).to include('Pending')        # status_label
       expect(result).to include(' - ')
       expect(result).to include(' (')
       expect(result).to include(')')
@@ -237,14 +237,14 @@ RSpec.describe MarketingHelper, type: :helper do
       marketing_request.request_type = 'deposit_bonuses_partners'
       result = helper.marketing_request_summary(marketing_request)
 
-      expect(result).to include('ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ')
+      expect(result).to include('PARTNER DEPOSIT BONUSES')
     end
 
     it 'handles different statuses' do
       marketing_request.status = 'activated'
       result = helper.marketing_request_summary(marketing_request)
 
-      expect(result).to include('Активирован')
+      expect(result).to include('Activated')
     end
 
     it 'handles long promo codes' do

@@ -29,13 +29,13 @@ test.describe('Marketing Section', () => {
     
     // Проверяем наличие всех табов
     const expectedTabs = [
-      'ПРОМО ВЕБОВ 50',
-      'ПРОМО ВЕБОВ 100', 
-      'ПРОМО БЕЗ ССЫЛКИ 50',
-      'ПРОМО БЕЗ ССЫЛКИ 100',
-      'ПРОМО БЕЗ ССЫЛКИ 125',
-      'ПРОМО БЕЗ ССЫЛКИ 150',
-      'ДЕПОЗИТНЫЕ БОНУСЫ ОТ ПАРТНЁРОВ'
+      'PROMO WEBS 50',
+      'PROMO WEBS 100',
+      'PROMO NO LINK 50',
+      'PROMO NO LINK 100',
+      'PROMO NO LINK 125',
+      'PROMO NO LINK 150',
+      'PARTNER DEPOSIT BONUSES'
     ];
 
     for (const tabText of expectedTabs) {
@@ -53,7 +53,7 @@ test.describe('Marketing Section', () => {
     await expect(page).toHaveURL(/.*tab=promo_webs_100/);
     
     // Проверяем, что активный таб изменился
-    await expect(page.locator('.nav-tabs a.active')).toContainText('ПРОМО ВЕБОВ 100');
+    await expect(page.locator('.nav-tabs a.active')).toContainText('PROMO WEBS 100');
   });
 
   test('should display marketing requests table', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('Marketing Section', () => {
     await expect(page.locator('table')).toBeVisible();
     
     // Проверяем заголовки таблицы
-    const headers = ['Менеджер', 'Площадка', 'Почта партнёра', 'Промокод', 'STAG', 'Дата активации', 'Статус', 'Действия'];
+    const headers = ['Manager', 'Platform', 'Partner email', 'Promo code', 'STAG', 'Activation date', 'Status', 'Actions'];
     for (const header of headers) {
       await expect(page.locator('th', { hasText: header })).toBeVisible();
     }
@@ -76,13 +76,13 @@ test.describe('Marketing Section', () => {
     await page.goto(`${BASE_URL}/marketing`);
     
     // Проверяем наличие кнопок фильтрации
-    await expect(page.locator('a', { hasText: 'Все' })).toBeVisible();
-    await expect(page.locator('a', { hasText: 'Ожидают' })).toBeVisible();
-    await expect(page.locator('a', { hasText: 'Активированы' })).toBeVisible();
-    await expect(page.locator('a', { hasText: 'Отклонены' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'All' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Pending' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Activated' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Rejected' })).toBeVisible();
     
     // Кликаем на фильтр "Ожидают"
-    await page.locator('a', { hasText: 'Ожидают' }).click();
+    await page.locator('a', { hasText: 'Pending' }).click();
     
     // Проверяем, что URL содержит фильтр статуса
     await expect(page).toHaveURL(/.*status=pending/);
@@ -92,11 +92,11 @@ test.describe('Marketing Section', () => {
     await page.goto(`${BASE_URL}/marketing`);
     
     // Кликаем на кнопку "Добавить заявку"
-    await page.locator('a', { hasText: 'Добавить заявку' }).click();
+    await page.locator('a', { hasText: 'Add request' }).click();
     
     // Проверяем, что перешли на страницу создания заявки
     await expect(page).toHaveURL(/.*\/marketing\/new/);
-    await expect(page.locator('h1')).toContainText('Новая заявка');
+    await expect(page.locator('h1')).toContainText('New request');
     
     // Проверяем наличие формы
     await expect(page.locator('form.needs-validation')).toBeVisible();
@@ -112,7 +112,7 @@ test.describe('Marketing Section', () => {
     await page.goto(`${BASE_URL}/marketing/new`);
     
     // Ждем загрузки формы
-    await page.waitForSelector('h1:has-text("Новая заявка")', { timeout: 10000 });
+    await page.waitForSelector('h1:has-text("New request")', { timeout: 10000 });
     
     // Заполняем форму
     await page.selectOption('select[name="marketing_request[request_type]"]', 'promo_webs_50');
@@ -131,7 +131,7 @@ test.describe('Marketing Section', () => {
     const currentUrl = page.url();
     if (currentUrl.includes('/marketing/new')) {
       // Если остались на странице создания, проверяем что форма все еще видна
-      await expect(page.locator('h1')).toContainText('Новая заявка');
+      await expect(page.locator('h1')).toContainText('New request');
     } else {
       // Если перешли на главную страницу, просто проверяем URL
       await expect(page).toHaveURL(/.*\/marketing/);
@@ -142,7 +142,7 @@ test.describe('Marketing Section', () => {
     await page.goto(`${BASE_URL}/marketing/new`);
     
     // Ждем загрузки формы
-    await page.waitForSelector('h1:has-text("Новая заявка")', { timeout: 10000 });
+    await page.waitForSelector('h1:has-text("New request")', { timeout: 10000 });
     
     // Заполняем форму с существующим промокодом
     await page.selectOption('select[name="marketing_request[request_type]"]', 'promo_webs_50');
@@ -167,7 +167,7 @@ test.describe('Marketing Section', () => {
       
       // Если нет ошибок валидации, проверяем что форма все еще видна
       if (!hasValidationErrors) {
-        await expect(page.locator('h1')).toContainText('Новая заявка');
+        await expect(page.locator('h1')).toContainText('New request');
       }
     } else {
       // Если перешли на главную страницу, просто проверяем что страница загрузилась
@@ -193,16 +193,16 @@ test.describe('Marketing Section', () => {
     await page.waitForSelector('table', { timeout: 10000 });
     
     // Кликаем на кнопку просмотра первой заявки
-    await page.locator('a[title="Просмотр"]').first().click();
+    await page.locator('a[title="View"]').first().click();
     
     // Проверяем, что перешли на страницу просмотра
     await expect(page).toHaveURL(/.*\/marketing\/\d+/);
-    await expect(page.locator('h1')).toContainText('Заявка #');
+    await expect(page.locator('h1')).toContainText('Request #');
     
     // Проверяем наличие основных элементов (более специфичный селектор)
     await expect(page.locator('.card-body').first()).toBeVisible();
     // Используем правильный селектор для кнопки копирования
-    await expect(page.locator('button.btn-outline-secondary[title="Скопировать промокод"]')).toBeVisible();
+    await expect(page.locator('button.btn-outline-secondary[title="Copy promo code"]')).toBeVisible();
   });
 
   test('should edit marketing request', async ({ page }) => {
@@ -212,11 +212,11 @@ test.describe('Marketing Section', () => {
     await page.waitForSelector('table');
     
     // Кликаем на кнопку редактирования первой заявки
-    await page.locator('a[title="Редактировать"]').first().click();
+    await page.locator('a[title="Edit"]').first().click();
     
     // Проверяем, что перешли на страницу редактирования
     await expect(page).toHaveURL(/.*\/marketing\/\d+\/edit/);
-    await expect(page.locator('h1')).toContainText('Редактирование заявки');
+    await expect(page.locator('h1')).toContainText('Edit request');
     
     // Изменяем почту партнера
     await page.fill('input[name="marketing_request[partner_email]"]', 'updated@partner.com');
@@ -226,7 +226,7 @@ test.describe('Marketing Section', () => {
     
     // Проверяем, что вернулись на главную страницу с сообщением об успехе
     await expect(page).toHaveURL(/.*\/marketing/);
-    await expect(page.locator('.alert-success')).toContainText('успешно обновлена');
+    await expect(page.locator('.alert-success')).toContainText('Request updated successfully.');
   });
 
   test('should activate pending request', async ({ page }) => {
@@ -239,10 +239,10 @@ test.describe('Marketing Section', () => {
     const pendingRow = page.locator('tr', { has: page.locator('.badge.bg-warning') }).first();
     
     if (await pendingRow.count() > 0) {
-      await pendingRow.locator('a[title="Активировать"]').click();
+      await pendingRow.locator('a[title="Activate"]').click();
       
       // Проверяем, что появилось сообщение об успехе
-      await expect(page.locator('.alert-success')).toContainText('активирована');
+      await expect(page.locator('.alert-success')).toContainText('Request activated.');
     }
   });
 
@@ -256,10 +256,10 @@ test.describe('Marketing Section', () => {
     const pendingRow = page.locator('tr', { has: page.locator('.badge.bg-warning') }).first();
     
     if (await pendingRow.count() > 0) {
-      await pendingRow.locator('a[title="Отклонить"]').click();
+      await pendingRow.locator('a[title="Reject"]').click();
       
       // Проверяем, что появилось сообщение об успехе
-      await expect(page.locator('.alert-success')).toContainText('отклонена');
+      await expect(page.locator('.alert-success')).toContainText('Request rejected.');
     }
   });
 
@@ -270,7 +270,7 @@ test.describe('Marketing Section', () => {
     await page.waitForSelector('table', { timeout: 10000 });
     
     // Проверяем, есть ли заявки для удаления
-    const deleteButtons = page.locator('a[title="Удалить"]');
+    const deleteButtons = page.locator('a[title="Delete"]');
     const deleteCount = await deleteButtons.count();
     
     if (deleteCount > 0) {
@@ -281,7 +281,7 @@ test.describe('Marketing Section', () => {
       await deleteButtons.first().click();
       
       // Проверяем, что появилось сообщение об успехе
-      await expect(page.locator('.alert-success')).toContainText('Заявка успешно удалена');
+      await expect(page.locator('.alert-success')).toContainText('Request deleted successfully.');
     } else {
       // Если нет заявок для удаления, просто проверяем что страница загрузилась
       await expect(page.locator('h1')).toContainText('Marketing');
@@ -299,7 +299,7 @@ test.describe('Marketing Section', () => {
     const tableRows = await page.locator('tbody tr').count();
     if (tableRows === 0) {
       // Если таблица пуста, должно показываться сообщение
-      await expect(page.locator('h5:has-text("Заявки не найдены")')).toBeVisible();
+      await expect(page.locator('h5:has-text("Requests not found")')).toBeVisible();
     } else {
       // Если есть данные, проверяем что они отображаются
       await expect(page.locator('table')).toBeVisible();
@@ -320,6 +320,6 @@ test.describe('Marketing Section', () => {
     await expect(page.locator('table')).toBeVisible();
     
     // Проверяем, что кнопки остаются доступными
-    await expect(page.locator('a', { hasText: 'Добавить заявку' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Add request' })).toBeVisible();
   });
 });

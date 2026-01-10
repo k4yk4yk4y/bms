@@ -70,7 +70,7 @@ test.describe('Check All Reward Form Types', () => {
         }
 
         // Remove the reward to test the next one
-        const removeButton = page.locator('button').filter({ hasText: /Remove|Удалить/i });
+        const removeButton = page.locator('button').filter({ hasText: /Remove|Delete/i });
         if (await removeButton.isVisible()) {
           await removeButton.click();
           await page.waitForTimeout(300);

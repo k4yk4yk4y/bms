@@ -106,13 +106,13 @@
             </div>
           </div>
 
-          <!-- Currency Minimum Deposits (для депозитных бонусов) -->
+          <!-- Currency Minimum Deposits (for deposit bonuses) -->
           <% if @bonus.event == 'deposit' && @bonus.has_minimum_deposit_requirements? %>
             <div class="card mb-4">
               <div class="card-header">
                 <h5 class="card-title mb-0">
                   <i class="bi bi-currency-exchange"></i> 
-                  Минимальные депозиты по валютам
+                  Minimum deposits by currency
                 </h5>
               </div>
               <div class="card-body">
@@ -135,13 +135,13 @@
               <div class="card-header">
                 <h5 class="card-title mb-0">
                   <i class="bi bi-currency-exchange"></i> 
-                  Минимальные депозиты по валютам
+                  Minimum deposits by currency
                 </h5>
               </div>
               <div class="card-body">
                 <div class="alert alert-info mb-0">
                   <i class="bi bi-info-circle"></i>
-                  Минимальные депозиты по валютам не установлены
+                  Minimum deposits by currency are not set
                 </div>
               </div>
             </div>

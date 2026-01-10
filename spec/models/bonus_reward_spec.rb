@@ -31,7 +31,7 @@ RSpec.describe BonusReward, type: :model do
     it 'is invalid without amount, percentage, or currency_amounts' do
       bonus_reward = build(:bonus_reward, amount: nil, percentage: nil, currency_amounts: {})
       expect(bonus_reward).not_to be_valid
-      expect(bonus_reward.errors[:base]).to include("Нужно указать сумму, процент или суммы по валютам")
+      expect(bonus_reward.errors[:base]).to include("You must provide an amount, a percentage, or per-currency amounts")
     end
   end
 

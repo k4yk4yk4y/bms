@@ -91,7 +91,7 @@ RSpec.describe Settings::BonusTemplatesController, type: :controller do
       it 'redirects to templates index with success notice' do
         post :create, params: valid_params
         expect(response).to redirect_to(settings_templates_path)
-        expect(flash[:notice]).to eq('Шаблон бонуса успешно создан.')
+        expect(flash[:notice]).to eq('Bonus template created successfully.')
       end
     end
 
@@ -145,7 +145,7 @@ RSpec.describe Settings::BonusTemplatesController, type: :controller do
       it 'renders new template with validation errors' do
         post :create, params: duplicate_params
         expect(response).to render_template(:new)
-        expect(assigns(:bonus_template).errors[:dsl_tag]).to include('комбинация dsl_tag, project и name должна быть уникальной')
+        expect(assigns(:bonus_template).errors[:dsl_tag]).to include('the combination of dsl_tag, project, and name must be unique')
       end
     end
   end
@@ -190,7 +190,7 @@ RSpec.describe Settings::BonusTemplatesController, type: :controller do
       it 'redirects to templates index with success notice' do
         patch :update, params: update_params
         expect(response).to redirect_to(settings_templates_path)
-        expect(flash[:notice]).to eq('Шаблон бонуса успешно обновлен.')
+        expect(flash[:notice]).to eq('Bonus template updated successfully.')
       end
     end
 
@@ -232,7 +232,7 @@ RSpec.describe Settings::BonusTemplatesController, type: :controller do
     it 'redirects to templates index with success notice' do
       delete :destroy, params: { id: template.id }
       expect(response).to redirect_to(settings_templates_path)
-      expect(flash[:notice]).to eq('Шаблон бонуса успешно удален.')
+      expect(flash[:notice]).to eq('Bonus template deleted successfully.')
     end
   end
 

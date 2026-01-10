@@ -238,7 +238,7 @@ RSpec.describe MarketingController, type: :controller do
       it 'redirects to marketing index with correct tab and success notice' do
         post :create, params: { marketing_request: valid_attributes }
         expect(response).to redirect_to(marketing_index_path(tab: 'promo_webs_50'))
-        expect(flash[:notice]).to eq('Заявка успешно создана.')
+        expect(flash[:notice]).to eq('Request created successfully.')
       end
 
       it 'creates request with correct attributes' do
@@ -298,7 +298,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: valid_attributes.merge(stag: pending_request.stag)
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:stag]).to include(/уже используется/)
+        expect(assigns(:marketing_request).errors[:stag]).to include(/already used/)
       end
 
       it 'handles duplicate promo codes' do
@@ -306,7 +306,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: valid_attributes.merge(promo_code: pending_request.promo_code)
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:promo_code]).to include(/уже используется/)
+        expect(assigns(:marketing_request).errors[:promo_code]).to include(/already used/)
       end
 
       it 'handles invalid email format' do
@@ -314,7 +314,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: valid_attributes.merge(partner_email: 'invalid.email')
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:partner_email]).to include(/должен быть валидным email/)
+        expect(assigns(:marketing_request).errors[:partner_email]).to include(/must be a valid email/)
       end
 
       it 'handles special characters in promo codes' do
@@ -322,7 +322,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: valid_attributes.merge(promo_code: 'INVALID@CODE')
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:promo_code]).to include(/недопустимыми символами/)
+        expect(assigns(:marketing_request).errors[:promo_code]).to include(/invalid characters/)
       end
 
       it 'handles spaces in codes' do
@@ -330,7 +330,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: valid_attributes.merge(promo_code: 'CODE WITH SPACES')
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:promo_code]).to include(/содержит коды с пробелами/)
+        expect(assigns(:marketing_request).errors[:promo_code]).to include(/contains codes with spaces/)
       end
     end
   end
@@ -376,7 +376,7 @@ RSpec.describe MarketingController, type: :controller do
       it 'redirects to marketing index with correct tab and success notice' do
         patch :update, params: { id: pending_request.id, marketing_request: update_attributes }
         expect(response).to redirect_to(marketing_index_path(tab: pending_request.request_type))
-        expect(flash[:notice]).to eq('Заявка успешно обновлена.')
+        expect(flash[:notice]).to eq('Request updated successfully.')
       end
 
       it 'resets activated request to pending when content changes' do
@@ -444,7 +444,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: { stag: other_request.stag }
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:stag]).to include(/уже используется/)
+        expect(assigns(:marketing_request).errors[:stag]).to include(/already used/)
       end
 
       it 'handles promo code conflicts during update' do
@@ -454,7 +454,7 @@ RSpec.describe MarketingController, type: :controller do
           marketing_request: { promo_code: other_request.promo_code }
         }
         expect(response).to have_http_status(:unprocessable_content)
-        expect(assigns(:marketing_request).errors[:promo_code]).to include(/уже используется/)
+        expect(assigns(:marketing_request).errors[:promo_code]).to include(/already used/)
       end
 
       it 'normalizes data during update' do
@@ -484,7 +484,7 @@ RSpec.describe MarketingController, type: :controller do
       tab = pending_request.request_type
       delete :destroy, params: { id: pending_request.id }
       expect(response).to redirect_to(marketing_index_path(tab: tab))
-      expect(flash[:notice]).to eq('Заявка успешно удалена.')
+      expect(flash[:notice]).to eq('Request deleted successfully.')
     end
 
     it 'raises error for non-existent request' do
@@ -515,7 +515,7 @@ RSpec.describe MarketingController, type: :controller do
     it 'redirects to marketing index with success notice' do
       patch :activate, params: { id: pending_request.id }
       expect(response).to redirect_to(marketing_index_path(tab: pending_request.request_type))
-      expect(flash[:notice]).to eq('Заявка активирована.')
+      expect(flash[:notice]).to eq('Request activated.')
     end
 
     it 'can activate rejected request' do
@@ -552,7 +552,7 @@ RSpec.describe MarketingController, type: :controller do
     it 'redirects to marketing index with success notice' do
       patch :reject, params: { id: pending_request.id }
       expect(response).to redirect_to(marketing_index_path(tab: pending_request.request_type))
-      expect(flash[:notice]).to eq('Заявка отклонена.')
+      expect(flash[:notice]).to eq('Request rejected.')
     end
 
     it 'can reject activated request' do
@@ -607,8 +607,8 @@ RSpec.describe MarketingController, type: :controller do
         }
 
         expect(response).to redirect_to(marketing_index_path(tab: 'promo_no_link_100'))
-        expect(flash[:notice]).to include('Заявка перенесена из')
-        expect(flash[:notice]).to include('ПРОМО БЕЗ ССЫЛКИ 100')
+        expect(flash[:notice]).to include('Request transferred from')
+        expect(flash[:notice]).to include('PROMO NO LINK 100')
       end
 
       it 'preserves all other request data during transfer' do
@@ -638,7 +638,7 @@ RSpec.describe MarketingController, type: :controller do
         }
 
         expect(response).to redirect_to(marketing_path(pending_request))
-        expect(flash[:alert]).to eq('Неверный тип заявки для переноса.')
+        expect(flash[:alert]).to eq('Invalid request type for transfer.')
       end
 
       it 'does not change request when type is invalid' do
@@ -666,7 +666,7 @@ RSpec.describe MarketingController, type: :controller do
         }
 
         expect(response).to redirect_to(marketing_path(pending_request))
-        expect(flash[:alert]).to include('Ошибка при переносе:')
+        expect(flash[:alert]).to include('Transfer error:')
       end
     end
 
@@ -790,7 +790,7 @@ RSpec.describe MarketingController, type: :controller do
 
       patch :activate, params: { id: pending_request.id }
       expect(response).to redirect_to(marketing_path(pending_request))
-      expect(flash[:alert]).to include('Ошибка при активации')
+      expect(flash[:alert]).to include('Activation error')
     end
   end
 

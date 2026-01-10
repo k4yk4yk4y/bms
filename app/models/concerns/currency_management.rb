@@ -63,7 +63,7 @@ module CurrencyManagement
 
       invalid_currencies = currencies - self.class.all_currencies
       if invalid_currencies.any?
-        errors.add(:currencies, "содержит неподдерживаемые валюты: #{invalid_currencies.join(', ')}")
+        errors.add(:currencies, "contains unsupported currencies: #{invalid_currencies.join(', ')}")
       end
     end
   end

@@ -20,7 +20,7 @@ RSpec.describe FreespinReward, type: :model do
     it 'is invalid without currency_freespin_bet_levels' do
       reward = build(:freespin_reward, currency_freespin_bet_levels: {})
       expect(reward).not_to be_valid
-      expect(reward.errors[:currency_freespin_bet_levels]).to include("должен быть указан размер ставки фриспинов хотя бы для одной валюты")
+      expect(reward.errors[:currency_freespin_bet_levels]).to include("a freespin bet level must be provided for at least one currency")
     end
   end
 

@@ -116,18 +116,18 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" data-settings-dropdown-target="menu">
                 <li>
                   <span class="dropdown-item-text">
-                    <small class="text-muted">Роль: <%= current_user.display_role %></small>
+                    <small class="text-muted">Role: <%= current_user.display_role %></small>
                   </span>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <%= link_to user_path(current_user), class: "dropdown-item" do %>
-                    <i class="fas fa-id-badge"></i> Профиль
+                    <i class="fas fa-id-badge"></i> Profile
                   <% end %>
                 </li>
                 <li>
                   <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item text-danger border-0 bg-transparent text-start w-100", form_class: "d-inline" do %>
-                    <i class="fas fa-sign-out-alt"></i> Выйти
+                    <i class="fas fa-sign-out-alt"></i> Sign out
                   <% end %>
                 </li>
               </ul>

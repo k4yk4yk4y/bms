@@ -1,4 +1,4 @@
-<% content_for(:title, "Редактирование заявки") %>
+<% content_for(:title, "Edit request") %>
 
 <div class="container-fluid">
   <div class="row">
@@ -6,14 +6,14 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 mb-0">
           <i class="fas fa-edit text-warning"></i>
-          Редактирование заявки
+          Edit request
         </h1>
         <div class="d-flex gap-2">
           <%= link_to marketing_path(@marketing_request), class: "btn btn-outline-info" do %>
-            <i class="fas fa-eye"></i> Просмотр
+            <i class="fas fa-eye"></i> View
           <% end %>
           <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
-            <i class="fas fa-arrow-left"></i> Назад к списку
+            <i class="fas fa-arrow-left"></i> Back to list
           <% end %>
         </div>
       </div>
@@ -27,15 +27,15 @@
                 <%= @marketing_request.request_type_label %>
               </h5>
               <small class="text-muted">
-                Заявка от <%= l(@marketing_request.created_at, format: :short) %>
+                Request from <%= l(@marketing_request.created_at, format: :short) %>
               </small>
             </div>
             <div class="card-body">
               <% unless @marketing_request.pending? %>
                 <div class="alert alert-warning" role="alert">
                   <i class="fas fa-exclamation-triangle"></i>
-                  <strong>Внимание!</strong> 
-                  После редактирования заявка автоматически вернется в статус "Ожидает".
+                  <strong>Warning!</strong> 
+                  After editing, the request will automatically return to "Pending".
                 </div>
               <% end %>
 
@@ -45,7 +45,7 @@
                 
                 <% if @marketing_request.errors.any? %>
                   <div class="alert alert-danger" role="alert">
-                    <h6><i class="fas fa-exclamation-triangle"></i> Исправьте следующие ошибки:</h6>
+                    <h6><i class="fas fa-exclamation-triangle"></i> Fix the following errors:</h6>
                     <ul class="mb-0">
                       <% @marketing_request.errors.full_messages.each do |message| %>
                         <li><%= message %></li>
@@ -56,7 +56,7 @@
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <%= form.label :request_type, "Тип заявки", class: "form-label" %>
+                    <%= form.label :request_type, "Request type", class: "form-label" %>
                     <%= form.select :request_type, 
                                     options_for_select(
                                       MarketingRequest::REQUEST_TYPES.map { |type| 
@@ -71,34 +71,34 @@
                 </div>
 
                 <div class="mb-3">
-                  <%= form.label :platform, "Площадка", class: "form-label" %>
+                  <%= form.label :platform, "Platform", class: "form-label" %>
                   <%= form.text_area :platform, 
                                      class: "form-control", 
                                      rows: 3 %>
                   <div class="form-text">
-                    Можете указать ссылку на площадку или текстовое описание
+                    You can provide a platform link or a text description
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <%= form.label :partner_email, "Почта партнёра", class: "form-label" %>
+                    <%= form.label :partner_email, "Partner email", class: "form-label" %>
                     <%= form.email_field :partner_email, 
                                          class: "form-control", 
                                          required: true %>
                   </div>
 
                   <div class="col-md-6 mb-3">
-                    <%= form.label :promo_code, "Промокоды", class: "form-label" %>
+                    <%= form.label :promo_code, "Promo codes", class: "form-label" %>
                     <%= form.text_area :promo_code, 
                                        class: "form-control", 
                                        required: true,
                                        rows: 3,
                                        style: "text-transform: uppercase;" %>
                     <div class="form-text">
-                      <strong>Несколько кодов:</strong> разделяйте запятыми или новыми строками.<br>
-                      <strong>Один партнер - один бонус:</strong> коды автоматически приводятся к верхнему регистру.<br>
-                      <strong>Без пробелов:</strong> разрешены только буквы, цифры и подчеркивания.
+                      <strong>Multiple codes:</strong> separate with commas or new lines.<br>
+                      <strong>One partner - one bonus:</strong> codes are auto-uppercased.<br>
+                      <strong>No spaces:</strong> only letters, digits, and underscores are allowed.
                     </div>
                   </div>
                 </div>
@@ -110,20 +110,20 @@
                                         class: "form-control", 
                                         required: true %>
                     <div class="form-text">
-                      <strong>Уникальный идентификатор партнёра.</strong><br>
-                      <strong>Важно:</strong> для одного партнера может быть только одна заявка.<br>
-                      <strong>Без пробелов:</strong> пробелы будут автоматически удалены.
+                      <strong>Unique partner identifier.</strong><br>
+                      <strong>Important:</strong> one partner can only have one request.<br>
+                      <strong>No spaces:</strong> spaces are removed automatically.
                     </div>
                     <% if @marketing_request.has_existing_partner_request? %>
                       <div class="alert alert-warning mt-2" role="alert">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Внимание!</strong> Для этого партнера уже существует другая заявка.
+                        <strong>Warning!</strong> Another request already exists for this partner.
                       </div>
                     <% end %>
                   </div>
 
                   <div class="col-md-6 mb-3">
-                    <%= form.label :status, "Статус", class: "form-label" %>
+                    <%= form.label :status, "Status", class: "form-label" %>
                     <%= form.select :status, 
                                     options_for_select(
                                       MarketingRequest::STATUSES.map { |status| 
@@ -134,29 +134,29 @@
                                     {},
                                     { class: "form-select" } %>
                     <div class="form-text">
-                      Изменение статуса доступно только администраторам
+                      Status changes are available to admins only
                     </div>
                   </div>
                 </div>
 
                 <div class="mb-4">
-                  <%= form.label :activation_date, "Дата активации", class: "form-label" %>
+                  <%= form.label :activation_date, "Activation date", class: "form-label" %>
                   <%= form.datetime_local_field :activation_date, 
                                                 class: "form-control",
                                                 value: @marketing_request.activation_date&.strftime("%Y-%m-%dT%H:%M") %>
                   <div class="form-text">
-                    Устанавливается при активации заявки
+                    Set when the request is activated
                   </div>
                 </div>
 
                 <div class="d-flex justify-content-between">
                   <%= link_to marketing_index_path, class: "btn btn-outline-secondary" do %>
-                    <i class="fas fa-times"></i> Отмена
+                    <i class="fas fa-times"></i> Cancel
                   <% end %>
                   
-                  <%= form.submit "Сохранить изменения", 
+                  <%= form.submit "Save changes", 
                                   class: "btn btn-warning" do %>
-                    <i class="fas fa-save"></i> Сохранить изменения
+                    <i class="fas fa-save"></i> Save changes
                   <% end %>
                 </div>
               <% end %>

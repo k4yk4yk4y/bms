@@ -124,13 +124,13 @@
 }
 
 /* Marketing Status Filter Styles */
-.btn-group[aria-label="Фильтр по статусу"] {
+.btn-group[aria-label="Status filter"] {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn {
+.btn-group[aria-label="Status filter"] .btn {
   border: none;
   padding: 0.5rem 1rem;
   font-weight: 600;
@@ -140,7 +140,7 @@
   overflow: hidden;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn::before {
+.btn-group[aria-label="Status filter"] .btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -151,56 +151,56 @@
   transition: left 0.5s ease;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn:hover::before {
+.btn-group[aria-label="Status filter"] .btn:hover::before {
   left: 100%;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-secondary {
+.btn-group[aria-label="Status filter"] .btn-outline-secondary {
   background: #6c757d;
   color: white;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-secondary:hover,
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-secondary.active {
+.btn-group[aria-label="Status filter"] .btn-outline-secondary:hover,
+.btn-group[aria-label="Status filter"] .btn-outline-secondary.active {
   background: #495057;
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-warning {
+.btn-group[aria-label="Status filter"] .btn-outline-warning {
   background: #ffc107;
   color: #212529;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-warning:hover,
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-warning.active {
+.btn-group[aria-label="Status filter"] .btn-outline-warning:hover,
+.btn-group[aria-label="Status filter"] .btn-outline-warning.active {
   background: #e0a800;
   color: #212529;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-success {
+.btn-group[aria-label="Status filter"] .btn-outline-success {
   background: #198754;
   color: white;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-success:hover,
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-success.active {
+.btn-group[aria-label="Status filter"] .btn-outline-success:hover,
+.btn-group[aria-label="Status filter"] .btn-outline-success.active {
   background: #157347;
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-danger {
+.btn-group[aria-label="Status filter"] .btn-outline-danger {
   background: #dc3545;
   color: white;
 }
 
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-danger:hover,
-.btn-group[aria-label="Фильтр по статусу"] .btn-outline-danger.active {
+.btn-group[aria-label="Status filter"] .btn-outline-danger:hover,
+.btn-group[aria-label="Status filter"] .btn-outline-danger.active {
   background: #bb2d3b;
   color: white;
   transform: translateY(-1px);

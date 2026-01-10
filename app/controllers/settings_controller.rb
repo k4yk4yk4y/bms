@@ -23,7 +23,7 @@ class SettingsController < ApplicationController
     @bonus_template = BonusTemplate.new(bonus_template_params)
 
     if @bonus_template.save
-      redirect_to settings_templates_path, notice: "Шаблон бонуса успешно создан."
+      redirect_to settings_templates_path, notice: "Bonus template created successfully."
     else
       render :new, status: :unprocessable_content
     end
@@ -36,7 +36,7 @@ class SettingsController < ApplicationController
   def update
     authorize! :update, @bonus_template
     if @bonus_template.update(bonus_template_params)
-      redirect_to settings_templates_path, notice: "Шаблон бонуса успешно обновлен."
+      redirect_to settings_templates_path, notice: "Bonus template updated successfully."
     else
       render :edit, status: :unprocessable_content
     end
@@ -45,7 +45,7 @@ class SettingsController < ApplicationController
   def destroy
     authorize! :destroy, @bonus_template
     @bonus_template.destroy
-    redirect_to settings_templates_path, notice: "Шаблон бонуса успешно удален."
+    redirect_to settings_templates_path, notice: "Bonus template deleted successfully."
   end
 
   private

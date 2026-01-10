@@ -39,7 +39,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         }.to change(BonusTemplate, :count).by(1)
 
         expect(response).to redirect_to(settings_templates_path)
-        expect(flash[:notice]).to eq('Шаблон бонуса успешно создан.')
+        expect(flash[:notice]).to eq('Bonus template created successfully.')
 
         template = BonusTemplate.last
         expect(template.name).to eq('Welcome Bonus Template')
@@ -294,7 +294,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         post settings_templates_path, params: template_params
         expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
-        expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('не должно быть установлено для события manual')
+        expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('must not be set for event manual')
       end
 
       it 'rejects template with negative values' do
@@ -335,7 +335,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         post settings_templates_path, params: template_params
         expect(response).to have_http_status(:unprocessable_content)
         expect(response).to render_template(:new)
-        expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('содержит валюты, которые не указаны в списке поддерживаемых валют: EUR')
+        expect(assigns(:bonus_template).errors[:currency_minimum_deposits]).to include('contains currencies not listed as supported: EUR')
       end
     end
   end
