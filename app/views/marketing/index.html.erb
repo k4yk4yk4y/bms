@@ -30,7 +30,7 @@
   }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid marketing-page">
   <div class="row">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -95,7 +95,7 @@
                         class: "btn btn-outline-danger #{'active' if params[:status] == 'rejected'}" %>
           </div>
         </div>
-        <div class="col-md-2 text-end">
+        <div class="col-md-2 text-end marketing-summary">
           <small class="text-muted">
             <% if params[:search].present? %>
               Найдено: <%= @total_requests %>

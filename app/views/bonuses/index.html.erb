@@ -154,7 +154,7 @@ function submitBulkAction() {
                 <thead class="table-dark">
                   <tr>
                     <th><input type="checkbox" id="select-all"></th>
-                    <th>ID</th>
+                    <th class="text-start">ID</th>
                     <th>Name</th>
                     <th>Code</th>
                     <th>Type</th>
@@ -172,10 +172,10 @@ function submitBulkAction() {
                       <td>
                         <input type="checkbox" class="bonus-checkbox" value="<%= bonus.id %>">
                       </td>
-                      <td>
+                      <td class="text-start">
                         <div><%= bonus.id %></div>
                       </td>
-                      <td>
+                      <td class="text-start">
                         <%= link_to bonus.name, bonus_path(bonus), class: "text-decoration-none" %>
                         <% if @permanent_bonus_ids.include?(bonus.id) %>
                           <span class="badge bg-warning text-dark ms-2" title="Permanent bonus for <%= @current_project&.name %>">
