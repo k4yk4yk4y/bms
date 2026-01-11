@@ -56,14 +56,15 @@ module BonusesHelper
     ]
   end
 
-  def currency_options
-    [
-      [ "USD", "USD" ],
-      [ "EUR", "EUR" ],
-      [ "GBP", "GBP" ],
-      [ "BTC", "BTC" ],
-      [ "ETH", "ETH" ]
-    ]
+  def currency_options(project_name = nil)
+    currencies =
+      if project_name.present? && project_name != "All"
+        Project.find_by(name: project_name)&.currencies || []
+      else
+        Project.available_currencies
+      end
+
+    currencies.map { |code| [ code, code ] }
   end
 
   def project_options

@@ -219,17 +219,28 @@ class Bonus < ApplicationRecord
   end
 
   def currencies=(value)
-    if value.is_a?(Array)
-      super(value.reject(&:blank?))
-    elsif value.is_a?(String)
-      super(value.split(",").map(&:strip).reject(&:blank?))
-    else
-      super(value)
-    end
+    super(normalize_currency_codes(value))
   end
 
   def formatted_currencies
     currencies.join(", ") if currencies.any?
+  end
+
+  def project_currencies
+    return Project.available_currencies if project == "All"
+
+    project_record&.currencies || []
+  end
+
+  def available_currencies
+    project_currencies
+  end
+
+  def supported_currencies
+    return Project.available_currencies if project == "All"
+    return project_currencies if project_record
+
+    nil
   end
 
   # Groups methods
@@ -378,7 +389,8 @@ class Bonus < ApplicationRecord
   end
 
   def set_default_currencies
-    self.currencies = self.class.all_currencies
+    default_currencies = project_currencies
+    self.currencies = default_currencies if default_currencies.present?
   end
 
   # Method removed - no longer needed as we only use currencies array
@@ -484,6 +496,27 @@ class Bonus < ApplicationRecord
 
   def set_default_project
     self.project = "All" if project.blank?
+  end
+
+  def project_record
+    return if project.blank?
+
+    Project.find_by(name: project)
+  end
+
+  def normalize_currency_codes(value)
+    values = case value
+             when String
+               value.split(/[;,]/)
+             when Array
+               value
+             else
+               Array(value)
+             end
+
+    values.map { |code| code.to_s.strip.upcase }
+          .reject(&:blank?)
+          .uniq
   end
 
   private

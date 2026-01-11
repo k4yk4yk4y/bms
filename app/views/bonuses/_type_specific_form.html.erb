@@ -772,11 +772,11 @@
     const grid = document.getElementById(`freespin-bet-levels-grid-${index}`);
     if (!grid) return;
 
-    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    const availableCurrencies = window.currentProjectCurrencies || [];
+    const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
     // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
-    let currenciesToUse = allCurrencies;
+    let currenciesToUse = availableCurrencies;
     
     // Проверяем валюты из минимальных депозитов
     const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
@@ -843,11 +843,11 @@
     const grid = document.getElementById(`bonus-amounts-grid-${index}`);
     if (!grid) return;
 
-    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    const availableCurrencies = window.currentProjectCurrencies || [];
+    const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
     // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
-    let currenciesToUse = allCurrencies;
+    let currenciesToUse = availableCurrencies;
     
     // Проверяем валюты из минимальных депозитов
     const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
@@ -914,11 +914,11 @@
     const grid = document.getElementById(`bonus-buy-bet-levels-grid-${index}`);
     if (!grid) return;
 
-    const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-    const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+    const availableCurrencies = window.currentProjectCurrencies || [];
+    const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
     // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
-    let currenciesToUse = allCurrencies;
+    let currenciesToUse = availableCurrencies;
     
     // Проверяем валюты из минимальных депозитов
     const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');

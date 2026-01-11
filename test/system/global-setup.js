@@ -1,8 +1,11 @@
 const { chromium } = require('@playwright/test');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 module.exports = async () => {
+  execSync('bin/rails runner "project = Project.find_or_initialize_by(name: \\"VOLNA\\"); project.currencies = %w[USD EUR BTC]; project.save!"', { stdio: 'inherit' });
+
   const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
   const email = process.env.PW_EMAIL || 'playwright@example.com';
   const password = process.env.PW_PASSWORD || 'Password123!';

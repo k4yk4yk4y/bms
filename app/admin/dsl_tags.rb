@@ -1,5 +1,5 @@
 ActiveAdmin.register DslTag do
-  menu parent: "Application Settings"
+  menu parent: "Application Settings", priority: 92
   permit_params :name, :description
 
   # Фильтры

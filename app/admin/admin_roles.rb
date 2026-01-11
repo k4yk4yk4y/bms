@@ -1,7 +1,7 @@
 ActiveAdmin.register AdminRole do
   permit_params :key, :name, permissions: AdminRole.section_keys
 
-  menu priority: 31, label: "Admin roles"
+  menu priority: 41, label: "Admin roles"
 
   index do
     selectable_column

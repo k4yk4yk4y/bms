@@ -112,17 +112,23 @@ class BonusTemplate < ApplicationRecord
   end
 
   def currencies=(value)
-    if value.is_a?(Array)
-      super(value.reject(&:blank?))
-    elsif value.is_a?(String)
-      super(value.split(",").map(&:strip).reject(&:blank?))
-    else
-      super(value)
-    end
+    super(normalize_currency_codes(value))
   end
 
   def formatted_currencies
     currencies.join(", ") if currencies.any?
+  end
+
+  def project_currencies
+    return Project.available_currencies if project == "All"
+
+    Project.find_by(name: project)&.currencies || []
+  end
+
+  def supported_currencies
+    return Project.available_currencies if project == "All"
+
+    Project.find_by(name: project)&.currencies
   end
 
   # Groups methods
@@ -188,7 +194,8 @@ class BonusTemplate < ApplicationRecord
   private
 
   def set_default_currencies
-    self.currencies = self.class.all_currencies
+    default_currencies = project_currencies
+    self.currencies = default_currencies if default_currencies.present?
   end
 
   def check_dependencies
@@ -239,5 +246,20 @@ class BonusTemplate < ApplicationRecord
         errors.add(:currency_minimum_deposits, "contains currencies not listed as supported: #{invalid_currencies.join(', ')}")
       end
     end
+  end
+
+  def normalize_currency_codes(value)
+    values = case value
+             when String
+               value.split(/[;,]/)
+             when Array
+               value
+             else
+               Array(value)
+             end
+
+    values.map { |code| code.to_s.strip.upcase }
+          .reject(&:blank?)
+          .uniq
   end
 end

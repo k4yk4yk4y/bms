@@ -17,10 +17,11 @@
         </div>
       </div>
 
-      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true, 
-          data: { 
-            controller: "currency-validation currency", 
-            action: "submit->currency-validation#validateForm" 
+      <%= form_with model: @bonus, local: true, class: "needs-validation", novalidate: true,
+          data: {
+            controller: "currency-validation currency",
+            action: "submit->currency-validation#validateForm",
+            "currency-project-currencies-value": Project.currencies_by_project.to_json
           } do |form| %>
         <% if @bonus.errors.any? %>
           <div class="alert alert-danger">
@@ -73,9 +74,9 @@
 
                 <div class="mb-3">
                   <%= form.label :project, class: "form-label" %>
-                  <%= form.select :project, project_options, 
-                      { include_blank: "Select project" }, 
-                      { class: "form-select" } %>
+                  <%= form.select :project, project_options,
+                      { include_blank: "Select project" },
+                      { class: "form-select", data: { "currency-target": "project" } } %>
                 </div>
 
                 <div class="mb-3">
@@ -87,15 +88,25 @@
                   <%= form.label :currencies, "Currencies", class: "form-label" %>
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <small class="text-muted">Select currencies for the bonus</small>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="uncheck-all-currencies-btn" 
-                            data-action="click->currency#uncheckAll">
-                      <i class="bi bi-check2-all"></i> Uncheck all
-                    </button>
+                    <div class="btn-group" role="group" aria-label="Currency selection">
+                      <button type="button" class="btn btn-sm btn-outline-secondary"
+                              data-action="click->currency#selectAll">
+                        <i class="bi bi-check2-all"></i> Select all
+                      </button>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="uncheck-all-currencies-btn"
+                              data-action="click->currency#uncheckAll">
+                        <i class="bi bi-x-circle"></i> Uncheck all
+                      </button>
+                    </div>
                   </div>
-                  <div class="currencies-checkboxes border rounded p-3" style="max-height: 150px; overflow-y: auto;">
-                    <% selected_currencies = @bonus.currencies.present? ? @bonus.currencies : Bonus.all_currencies %>
-                    <% Bonus.all_currencies.each_with_index do |currency, index| %>
-                      <div class="form-check <%= 'mb-1' unless index == Bonus.all_currencies.length - 1 %>">
+                  <div class="currencies-checkboxes border rounded p-3"
+                       style="max-height: 150px; overflow-y: auto;"
+                       data-currency-target="checkboxesContainer"
+                       data-currency-name="bonus[currencies][]">
+                    <% available_currencies = @bonus.project_currencies %>
+                    <% selected_currencies = @bonus.currencies.present? ? (@bonus.currencies & available_currencies) : available_currencies %>
+                    <% available_currencies.each_with_index do |currency, index| %>
+                      <div class="form-check <%= 'mb-1' unless index == available_currencies.length - 1 %>">
                         <%= check_box_tag "bonus[currencies][]", currency, 
                             selected_currencies.include?(currency),
                             {

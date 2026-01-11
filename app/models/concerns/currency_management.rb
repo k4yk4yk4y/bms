@@ -2,39 +2,39 @@ module CurrencyManagement
   extend ActiveSupport::Concern
 
   module ClassMethods
-    # Фиатные валюты (2 знака после запятой)
-    def fiat_currencies
-      %w[RUB EUR USD UAH KZT NOK PLN TRY CAD AUD AZN NZD BRL INR ARS MXN PEN NGN ZAR CLP DKK SEK RON HUF JPY UZS GBP]
-    end
-
-    # Криптовалюты (до 8 знаков после запятой)
-    def crypto_currencies
-      %w[BTC ETH LTC BCH XRP TRX DOGE USDT]
-    end
-
-    # Все поддерживаемые валюты
+    # Все поддерживаемые валюты (берем из настроек проектов)
     def all_currencies
-      fiat_currencies + crypto_currencies
+      Project.available_currencies
+    end
+
+    # Фиатные валюты (используем доступные валюты проектов)
+    def fiat_currencies
+      all_currencies
+    end
+
+    # Криптовалюты (настройка может быть расширена позже)
+    def crypto_currencies
+      []
     end
 
     # Проверка, является ли валюта криптовалютой
     def crypto_currency?(currency)
-      crypto_currencies.include?(currency.to_s.upcase)
+      false
     end
 
     # Проверка, является ли валюта фиатной
     def fiat_currency?(currency)
-      fiat_currencies.include?(currency.to_s.upcase)
+      all_currencies.include?(currency.to_s.upcase)
     end
 
     # Получить precision для валюты
     def currency_precision(currency)
-      crypto_currency?(currency) ? 8 : 2
+      2
     end
 
     # Получить step для input поля
     def currency_step(currency)
-      crypto_currency?(currency) ? 0.00000001 : 0.01
+      0.01
     end
 
     # Валидация суммы для определенной валюты
@@ -55,13 +55,16 @@ module CurrencyManagement
     private
 
     def should_validate_currencies?
-      respond_to?(:currencies_changed?) && currencies_changed?
+      respond_to?(:currencies_changed?) && (new_record? || currencies_changed?)
     end
 
     def validate_supported_currencies
       return unless currencies.present?
 
-      invalid_currencies = currencies - self.class.all_currencies
+      supported_list = respond_to?(:supported_currencies) ? supported_currencies : self.class.all_currencies
+      return if supported_list.blank?
+
+      invalid_currencies = currencies - supported_list
       if invalid_currencies.any?
         errors.add(:currencies, "contains unsupported currencies: #{invalid_currencies.join(', ')}")
       end
