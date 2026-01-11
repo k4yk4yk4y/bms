@@ -1,4 +1,6 @@
 ActiveAdmin.register User do
+  menu priority: 30
+
   permit_params :email, :password, :password_confirmation, :role, :first_name, :last_name
 
   # Фильтры для поиска пользователей

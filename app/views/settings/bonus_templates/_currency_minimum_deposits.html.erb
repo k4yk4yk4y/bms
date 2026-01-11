@@ -9,8 +9,8 @@
   <div class="card-body">
     <div id="currency-minimum-deposits-container">
       <div class="row">
-        <% all_currencies = Bonus.all_currencies %>
-        <% selected_currencies = bonus_template.currencies.present? ? bonus_template.currencies : all_currencies %>
+        <% available_currencies = bonus_template.project_currencies %>
+        <% selected_currencies = bonus_template.currencies.present? ? (bonus_template.currencies & available_currencies) : available_currencies %>
         
         <% selected_currencies.each_with_index do |currency, index| %>
           <div class="col-12 mb-2">
@@ -48,11 +48,11 @@
         if (!container) return;
         
         const selectedCurrencies = getSelectedCurrenciesMinimumDeposits();
-        const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-        const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+        const availableCurrencies = window.currentProjectCurrencies || [];
+        const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
         
         // If no currencies selected, show all currencies but with empty values
-        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : allCurrencies;
+        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : availableCurrencies;
         
         // Rebuild the fields
         const rowDiv = container.querySelector('.row');

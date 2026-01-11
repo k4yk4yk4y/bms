@@ -1,5 +1,5 @@
 ActiveAdmin.register MarketingRequest do
-  menu priority: 5, label: "Marketing Requests", parent: false
+  menu priority: 20, label: "Marketing Requests", parent: false
 
   permit_params :manager, :platform, :partner_email, :promo_code, :stag,
                 :status, :request_type, :activation_date

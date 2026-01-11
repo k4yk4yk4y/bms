@@ -1,6 +1,6 @@
 ActiveAdmin.register BonusTemplate do
   # Application Settings - Bonus Templates Management
-  menu label: "Bonus Templates", parent: "Application Settings", priority: 2
+  menu label: "Bonus Templates", parent: "Application Settings", priority: 91
 
   permit_params :name, :dsl_tag, :project, :event, :currency, :minimum_deposit,
                 :wager, :maximum_winnings, :no_more, :totally_no_more,
@@ -136,7 +136,7 @@ ActiveAdmin.register BonusTemplate do
     end
 
     f.inputs "Валюты и группы" do
-      f.input :currencies, as: :check_boxes, collection: BonusTemplate.all_currencies,
+      f.input :currencies, as: :check_boxes, collection: f.object.project_currencies,
               hint: "Валюты, для которых действует шаблон"
       f.input :groups, as: :check_boxes, collection: BonusTemplate.all_groups,
               hint: "Группы пользователей, для которых действует шаблон"

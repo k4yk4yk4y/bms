@@ -174,6 +174,24 @@ RSpec.describe Bonus, type: :model do
           expect(bonus).to be_valid
         end
       end
+
+      context 'project currencies' do
+        it 'defaults currencies from the project' do
+          project = create(:project, name: 'VOLNA', currencies: %w[USD EUR])
+          bonus = build(:bonus, project: project.name, currencies: [])
+
+          bonus.valid?
+          expect(bonus.currencies).to eq(%w[USD EUR])
+        end
+
+        it 'rejects currencies not configured for the project' do
+          project = create(:project, name: 'VOLNA', currencies: %w[USD EUR])
+          bonus = build(:bonus, project: project.name, currencies: %w[USD BTC])
+
+          expect(bonus).not_to be_valid
+          expect(bonus.errors[:currencies]).to include('contains unsupported currencies: BTC')
+        end
+      end
     end
   end
 
@@ -716,7 +734,7 @@ RSpec.describe Bonus, type: :model do
         bonus.save!
 
         bonus.reload
-        expect(bonus.currencies).to eq(large_array)
+        expect(bonus.currencies).to eq(large_array.uniq)
       end
     end
 

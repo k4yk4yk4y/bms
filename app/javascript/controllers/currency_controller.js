@@ -2,29 +2,40 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="currency"
 export default class extends Controller {
-  static targets = ["checkbox", "minimumDeposit"]
+  static targets = ["checkbox", "minimumDeposit", "project", "checkboxesContainer"]
+  static values = { projectCurrencies: Object }
   
   connect() {
-    this.setupEventListeners()
+    this.hasInitializedProjectCurrencies = false
+    this.boundHandleChange = this.handleChange.bind(this)
+    this.boundHandleInput = this.handleInput.bind(this)
+    this.element.addEventListener("change", this.boundHandleChange)
+    this.element.addEventListener("input", this.boundHandleInput)
+    this.setupMutationObserver()
+    this.updateProjectCurrencies()
+    this.selectAllIfNoneChecked()
   }
 
-  setupEventListeners() {
-    // Listen for currency checkbox changes
-    this.checkboxTargets.forEach(checkbox => {
-      checkbox.addEventListener('change', () => {
-        this.updateAllCurrencyFields()
-      })
-    })
+  disconnect() {
+    this.element.removeEventListener("change", this.boundHandleChange)
+    this.element.removeEventListener("input", this.boundHandleInput)
+  }
 
-    // Listen for minimum deposit changes
-    this.minimumDepositTargets.forEach(input => {
-      input.addEventListener('input', () => {
-        this.updateAllCurrencyFields()
-      })
-    })
+  handleChange(event) {
+    if (event.target.matches("input.currency-checkbox")) {
+      this.updateAllCurrencyFields()
+      return
+    }
 
-    // Setup MutationObserver for dynamically added forms
-    this.setupMutationObserver()
+    if (this.hasProjectTarget && event.target === this.projectTarget) {
+      this.updateProjectCurrencies()
+    }
+  }
+
+  handleInput(event) {
+    if (event.target.matches('input[name^="bonus[currency_minimum_deposits]"], input[name^="bonus_template[currency_minimum_deposits]"]')) {
+      this.updateAllCurrencyFields()
+    }
   }
 
   setupMutationObserver() {
@@ -56,6 +67,67 @@ export default class extends Controller {
     observer.observe(targetNode, { childList: true, subtree: false })
   }
 
+  updateProjectCurrencies() {
+    if (!this.hasProjectTarget || !this.hasProjectCurrenciesValue) {
+      return
+    }
+
+    const availableCurrencies = this.projectCurrenciesValue[this.projectTarget.value] || []
+    window.currentProjectCurrencies = availableCurrencies
+    window.currentProjectCryptoCurrencies = []
+
+    this.rebuildCurrencyCheckboxes(availableCurrencies)
+    this.updateAllCurrencyFields()
+    this.selectAllIfNoneChecked()
+    this.hasInitializedProjectCurrencies = true
+  }
+
+  rebuildCurrencyCheckboxes(availableCurrencies) {
+    const container = this.hasCheckboxesContainerTarget
+      ? this.checkboxesContainerTarget
+      : this.element.querySelector(".currencies-checkboxes")
+
+    if (!container) return
+
+    const existingCheckboxes = Array.from(container.querySelectorAll("input.currency-checkbox"))
+    const currentCurrencies = existingCheckboxes.map(checkbox => checkbox.value)
+    if (currentCurrencies.length === availableCurrencies.length &&
+        currentCurrencies.every((currency, index) => currency === availableCurrencies[index])) {
+      return
+    }
+
+    const selected = this.getSelectedCurrencies()
+    const selectedSet = new Set(selected)
+    const shouldAutoSelect = !this.hasInitializedProjectCurrencies && selected.length === 0
+    const fieldName = container.dataset.currencyName || "bonus[currencies][]"
+
+    container.innerHTML = ""
+
+    availableCurrencies.forEach((currency, index) => {
+      const wrapper = document.createElement("div")
+      wrapper.className = `form-check${index === availableCurrencies.length - 1 ? "" : " mb-1"}`
+
+      const checkbox = document.createElement("input")
+      checkbox.type = "checkbox"
+      checkbox.name = fieldName
+      checkbox.value = currency
+      checkbox.className = "form-check-input currency-checkbox"
+      checkbox.id = `currency_${currency}`
+      checkbox.dataset.currency = currency
+      checkbox.dataset.currencyTarget = "checkbox"
+      checkbox.checked = shouldAutoSelect ? true : selectedSet.has(currency)
+
+      const label = document.createElement("label")
+      label.className = "form-check-label"
+      label.setAttribute("for", checkbox.id)
+      label.textContent = currency
+
+      wrapper.appendChild(checkbox)
+      wrapper.appendChild(label)
+      container.appendChild(wrapper)
+    })
+  }
+
   // Method called when currency checkboxes change
   updateAllCurrencyFields() {
     
@@ -76,27 +148,42 @@ export default class extends Controller {
 
   // Button action to uncheck all currencies
   uncheckAll() {
-    this.checkboxTargets.forEach(checkbox => {
+    this.element.querySelectorAll("input.currency-checkbox").forEach(checkbox => {
       checkbox.checked = false
     })
-    
-    // Clear minimum deposit values for both bonus and bonus_template forms
-    this.minimumDepositTargets.forEach(input => {
-      input.value = ''
-    })
-    
-    // Also clear any bonus_template specific inputs that might not be targets
-    const templateInputs = document.querySelectorAll('input[name^="bonus_template[currency_minimum_deposits]"]')
-    templateInputs.forEach(input => {
-      input.value = ''
+
+    this.element.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"], input[name^="bonus_template[currency_minimum_deposits]"]').forEach(input => {
+      input.value = ""
     })
     
     this.updateAllCurrencyFields()
   }
 
+  // Button action to check all currencies
+  selectAll() {
+    this.element.querySelectorAll("input.currency-checkbox").forEach(checkbox => {
+      checkbox.checked = true
+    })
+
+    this.updateAllCurrencyFields()
+  }
+
+  selectAllIfNoneChecked() {
+    const checkboxes = Array.from(this.element.querySelectorAll("input.currency-checkbox"))
+    if (checkboxes.length === 0) return
+
+    const hasChecked = checkboxes.some(checkbox => checkbox.checked)
+    if (hasChecked) return
+
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = true
+    })
+
+    this.updateAllCurrencyFields()
+  }
+
   getSelectedCurrencies() {
-    return this.checkboxTargets
-      .filter(checkbox => checkbox.checked)
+    return Array.from(this.element.querySelectorAll("input.currency-checkbox:checked"))
       .map(checkbox => checkbox.value)
   }
 
@@ -130,10 +217,11 @@ export default class extends Controller {
     if (!container) return;
     
     const selectedCurrencies = this.getSelectedCurrencies();
-    const cryptoCurrencies = ["BTC", "ETH", "LTC", "BCH", "XRP", "TRX", "DOGE", "USDT"];
+    const availableCurrencies = window.currentProjectCurrencies || [];
+    const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
-    // Show only selected currencies (not all)
-    const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : [];
+    // Show all available currencies when none are selected
+    const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : availableCurrencies;
     
     // Check if update is actually needed by comparing current displayed currencies
     const rowDiv = container.querySelector('.row');

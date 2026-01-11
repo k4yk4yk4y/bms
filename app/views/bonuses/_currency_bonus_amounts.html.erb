@@ -17,9 +17,9 @@
           if defined?(currencies) && currencies.present?
             selected_currencies = currencies
           else
-            all_currencies = Bonus.all_currencies
+            available_currencies = bonus.project_currencies
             minimum_deposit_currencies = bonus.currency_minimum_deposits.present? ? bonus.currency_minimum_deposits.keys : []
-            selected_currencies = minimum_deposit_currencies.present? ? minimum_deposit_currencies : (bonus.currencies.present? ? bonus.currencies : all_currencies)
+            selected_currencies = minimum_deposit_currencies.present? ? minimum_deposit_currencies : (bonus.currencies.present? ? (bonus.currencies & available_currencies) : available_currencies)
           end
         %>
         <% bonus_reward = defined?(existing_reward) ? existing_reward : nil %>
@@ -61,8 +61,8 @@
         if (!containers.length) return;
 
         const selectedCurrencies = getSelectedCurrencies();
-        const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-        const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+        const availableCurrencies = window.currentProjectCurrencies || [];
+        const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
 
         // Получаем валюты из минимальных депозитов
         const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
@@ -80,7 +80,7 @@
         } else if (minimumDepositCurrencies.length > 0) {
           displayCurrencies = minimumDepositCurrencies;
         } else {
-          displayCurrencies = allCurrencies;
+          displayCurrencies = availableCurrencies;
         }
 
         containers.forEach(container => {

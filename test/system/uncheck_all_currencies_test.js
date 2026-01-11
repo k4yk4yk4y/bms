@@ -1,5 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
+async function selectProject(page, projectName = 'VOLNA') {
+  await page.selectOption('select[name="bonus[project]"]', projectName);
+  await page.waitForSelector('input.currency-checkbox', { state: 'visible' });
+}
+
 test.describe('Uncheck All Currencies Button Test', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the new bonus page
@@ -7,6 +12,7 @@ test.describe('Uncheck All Currencies Button Test', () => {
     
     // Wait for the page to load completely
     await page.waitForLoadState('networkidle');
+    await selectProject(page);
   });
 
   test('should uncheck all currency checkboxes when clicking "Uncheck all" button', async ({ page }) => {

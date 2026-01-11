@@ -23,4 +23,19 @@ RSpec.describe Project, type: :model do
       expect(Project.ransackable_associations).to include('permanent_bonuses')
     end
   end
+
+  describe 'currencies' do
+    it 'normalizes currency codes' do
+      project = create(:project, currencies: 'usd; eur;USD')
+
+      expect(project.currencies).to eq(%w[USD EUR])
+    end
+
+    it 'validates currency format' do
+      project = build(:project, currencies: [ 'US', 'USDT1' ])
+
+      expect(project).not_to be_valid
+      expect(project.errors[:currencies]).to include('contains invalid currency codes: US, USDT1')
+    end
+  end
 end

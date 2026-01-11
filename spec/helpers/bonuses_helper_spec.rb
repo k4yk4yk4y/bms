@@ -163,34 +163,19 @@ RSpec.describe BonusesHelper, type: :helper do
   end
 
   describe '#currency_options' do
-    it 'returns array of currency options' do
-      options = helper.currency_options
-      expect(options).to be_an(Array)
-      expect(options.length).to eq(5)
+    it 'returns array of currency options for a project' do
+      project = create(:project, name: 'VOLNA', currencies: %w[USD EUR GBP])
+
+      options = helper.currency_options(project.name)
+      expect(options).to contain_exactly([ 'USD', 'USD' ], [ 'EUR', 'EUR' ], [ 'GBP', 'GBP' ])
     end
 
-    it 'returns options in correct format [label, value]' do
-      options = helper.currency_options
-      options.each do |option|
-        expect(option).to be_an(Array)
-        expect(option.length).to eq(2)
-        expect(option[0]).to be_a(String)
-        expect(option[1]).to be_a(String)
-      end
-    end
+    it 'returns union of configured project currencies when no project is provided' do
+      create(:project, name: 'VOLNA', currencies: %w[USD EUR])
+      create(:project, name: 'ROX', currencies: %w[BTC ETH])
 
-    it 'includes major currencies' do
-      options = helper.currency_options
-      values = options.map { |option| option[1] }
-
-      expect(values).to include('USD', 'EUR', 'GBP', 'BTC', 'ETH')
-    end
-
-    it 'has labels matching values for currencies' do
-      options = helper.currency_options
-      options.each do |label, value|
-        expect(label).to eq(value)
-      end
+      values = helper.currency_options.map { |option| option[1] }
+      expect(values).to include('USD', 'EUR', 'BTC', 'ETH')
     end
   end
 
@@ -450,6 +435,8 @@ RSpec.describe BonusesHelper, type: :helper do
     end
 
     context 'option methods consistency' do
+      let!(:project) { create(:project, currencies: %w[USD EUR]) }
+
       it 'all option methods return arrays of arrays' do
         option_methods = [
           :event_type_options, :status_options, :currency_options,
@@ -498,6 +485,10 @@ RSpec.describe BonusesHelper, type: :helper do
 
   # Performance considerations
   describe 'performance' do
+    before do
+      create(:project, currencies: %w[USD EUR])
+    end
+
     it 'option methods perform efficiently' do
               # Test that helper methods don't make database queries
               start_time = Time.current

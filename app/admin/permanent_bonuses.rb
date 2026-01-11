@@ -1,4 +1,6 @@
 ActiveAdmin.register PermanentBonus do
+  menu priority: 11
+
   permit_params :project_id, :bonus_id
 
   index do

@@ -14,3 +14,47 @@
 // For example, to change the default status-tag color:
 //
 //   .status_tag { background: #6090DB; }
+
+.project-currencies-field {
+  .project-currencies-entry {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 8px;
+  }
+
+  .project-currencies-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .project-currency-tag {
+    background: #e6eef6;
+    border: 1px solid #c7d7ea;
+    border-radius: 12px;
+    color: #1f2d3d;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+  }
+
+  .project-currency-remove {
+    background: transparent;
+    border: 0;
+    color: #5b6b7a;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+  }
+}
+
+.currency-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}

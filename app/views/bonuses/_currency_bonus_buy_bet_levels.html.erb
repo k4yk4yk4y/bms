@@ -14,14 +14,14 @@
           if defined?(currencies) && currencies.present?
             selected_currencies = currencies
           else
-            all_currencies = Bonus.all_currencies
+            available_currencies = bonus.project_currencies
             minimum_deposit_currencies = bonus.currency_minimum_deposits.present? ? bonus.currency_minimum_deposits.keys : []
             if minimum_deposit_currencies.present?
               selected_currencies = minimum_deposit_currencies
             elsif bonus.currencies.present? && bonus.currencies.any?
-              selected_currencies = bonus.currencies
+              selected_currencies = bonus.currencies & available_currencies
             else
-              selected_currencies = all_currencies
+              selected_currencies = available_currencies
             end
           end
         %>
@@ -64,8 +64,8 @@
         if (!container) return;
 
         const selectedCurrencies = getSelectedCurrenciesBonusBuy();
-        const allCurrencies = <%= Bonus.all_currencies.to_json.html_safe %>;
-        const cryptoCurrencies = <%= Bonus.crypto_currencies.to_json.html_safe %>;
+        const availableCurrencies = window.currentProjectCurrencies || [];
+        const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
 
         // Получаем валюты из минимальных депозитов
         const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
@@ -83,7 +83,7 @@
         } else if (selectedCurrencies.length > 0) {
           displayCurrencies = selectedCurrencies;
         } else {
-          displayCurrencies = allCurrencies;
+          displayCurrencies = availableCurrencies;
         }
 
         // Rebuild the fields
