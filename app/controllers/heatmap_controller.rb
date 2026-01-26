@@ -81,7 +81,8 @@ class HeatmapController < ApplicationController
 
     (@start_date..@end_date).each do |date|
       date_key = date.strftime("%Y-%m-%d")
-      count = bonuses_by_date[date_key] || 0
+      # DB adapters may return Date keys for DATE() groups, not strings.
+      count = bonuses_by_date[date] || bonuses_by_date[date_key] || 0
 
       # Вычисляем интенсивность (от 0 до 1) на основе фиксированного максимума
       intensity = [ count.to_f / max_count_for_color, 1.0 ].min

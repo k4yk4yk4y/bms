@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_11_124757) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_15_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,6 +87,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_11_124757) do
     t.text "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "user_type"
     t.index ["bonus_id"], name: "index_bonus_audit_logs_on_bonus_id"
     t.index ["user_id"], name: "index_bonus_audit_logs_on_user_id"
   end
@@ -191,6 +192,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_11_124757) do
     t.text "description"
     t.string "maximum_winnings_type", default: "multiplier", null: false
     t.bigint "dsl_tag_id"
+    t.string "created_by_type"
+    t.string "updated_by_type"
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["code"], name: "index_bonuses_on_code"
@@ -320,6 +323,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_11_124757) do
     t.integer "updated_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "created_by_type"
+    t.string "updated_by_type"
     t.index ["created_by"], name: "index_retention_chains_on_created_by"
     t.index ["launch_date"], name: "index_retention_chains_on_launch_date"
     t.index ["project_id"], name: "index_retention_chains_on_project_id"
@@ -351,6 +356,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_11_124757) do
     t.integer "updated_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "created_by_type"
+    t.string "updated_by_type"
     t.index ["launch_date"], name: "index_retention_emails_on_launch_date"
     t.index ["retention_chain_id", "position"], name: "index_retention_emails_on_retention_chain_id_and_position"
     t.index ["retention_chain_id"], name: "index_retention_emails_on_retention_chain_id"

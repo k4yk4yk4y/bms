@@ -25,8 +25,8 @@ class Bonus < ApplicationRecord
 
   # Audit associations
   has_many :bonus_audit_logs, dependent: :destroy
-  belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
-  belongs_to :updater, class_name: "User", foreign_key: "updated_by", optional: true
+  belongs_to :creator, polymorphic: true, foreign_key: "created_by", foreign_type: "created_by_type", optional: true
+  belongs_to :updater, polymorphic: true, foreign_key: "updated_by", foreign_type: "updated_by_type", optional: true
   belongs_to :dsl_tag, optional: true
 
   # Override dsl_tag getter to return string if association is nil, otherwise return association
@@ -487,11 +487,11 @@ class Bonus < ApplicationRecord
 
   # Helper methods for audit
   def creator_name
-    creator&.full_name || creator&.email || "System"
+    creator.try(:full_name).presence || creator.try(:email) || "System"
   end
 
   def updater_name
-    updater&.full_name || updater&.email || "System"
+    updater.try(:full_name).presence || updater.try(:email) || "System"
   end
 
   def set_default_project

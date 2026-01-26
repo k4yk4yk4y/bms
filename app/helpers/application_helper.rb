@@ -36,8 +36,13 @@ module ApplicationHelper
   end
 
   def user_profile_link(user)
-    return unless can_read_users?
     return unless user&.email.present?
+
+    if user.is_a?(AdminUser)
+      return user.email
+    end
+
+    return unless can_read_users?
 
     link_to user.email, user_path(user)
   end

@@ -35,7 +35,7 @@ ActiveAdmin.register BonusAuditLog do
       status_tag log.action_label, class: action_class
     end
     column :user do |log|
-      log.user.full_name
+      log.user.try(:full_name).presence || log.user.try(:email)
     end
     column :changes do |log|
       if log.has_changes?
@@ -84,7 +84,7 @@ ActiveAdmin.register BonusAuditLog do
         status_tag log.action_label, class: action_class
       end
       row :user do |log|
-        log.user.full_name
+        log.user.try(:full_name).presence || log.user.try(:email)
       end
       row :created_at
       row :updated_at
