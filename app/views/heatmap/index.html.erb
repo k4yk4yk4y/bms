@@ -22,6 +22,13 @@
               <%= @next_month.strftime("%B %Y") %> <i class="fas fa-chevron-right"></i>
             <% end %>
           </div>
+          <% if can?(:read, HeatmapComment) %>
+            <%= link_to heatmap_comments_path(start_date: @start_date, end_date: @end_date),
+                  class: "btn btn-outline-primary",
+                  data: { turbo_frame: "heatmap_sidebar" } do %>
+              <i class="fas fa-comments"></i> Comments
+            <% end %>
+          <% end %>
         </div>
       </div>
 
@@ -99,6 +106,7 @@
             
             <!-- Calendar grid -->
             <div class="calendar-grid">
+              <% show_comments = can?(:read, HeatmapComment) %>
               <% 
                 # Начинаем с понедельника первой недели месяца
                 start_of_calendar = @start_date.beginning_of_week(:monday)
@@ -119,17 +127,45 @@
                       current_date = current_week_start + day_offset.days
                       date_key = current_date.strftime("%Y-%m-%d")
                       day_data = @heatmap_data[date_key]
+                      day_count = day_data&.dig(:count) || 0
+                      comment_count = show_comments ? (@comment_counts[date_key] || 0) : 0
                       is_current_month = current_date.month == @month
                       is_today = current_date == Date.current
+                      day_classes = [ "calendar-day" ]
+                      day_classes << "other-month" unless is_current_month
+                      day_classes << "today" if is_today
+                      day_style = heatmap_color(day_data&.dig(:intensity) || 0, is_current_month)
+                      if show_comments
+                        day_title = "#{current_date.strftime('%B %d, %Y')}: #{day_count} bonuses, #{comment_count} comments"
+                      else
+                        day_title = "#{current_date.strftime('%B %d, %Y')}: #{day_count} bonuses"
+                      end
                     %>
                     
-                    <div class="calendar-day <%= 'other-month' unless is_current_month %> <%= 'today' if is_today %>"
-                         data-date="<%= date_key %>"
-                         data-count="<%= day_data&.dig(:count) || 0 %>"
-                         style="<%= heatmap_color(day_data&.dig(:intensity) || 0, is_current_month) %>"
-                         title="<%= current_date.strftime('%B %d, %Y') %>: <%= day_data&.dig(:count) || 0 %> bonuses">
-                      <span class="day-number"><%= current_date.day %></span>
-                    </div>
+                    <% if can?(:read, HeatmapComment) %>
+                      <%= link_to heatmap_comments_path(date: date_key, start_date: @start_date, end_date: @end_date),
+                            class: day_classes.join(" "),
+                            data: { turbo_frame: "heatmap_sidebar", date: date_key, count: day_count, comment_count: comment_count },
+                            style: day_style,
+                            title: day_title do %>
+                        <span class="day-number"><%= current_date.day %></span>
+                        <% if show_comments && comment_count.positive? %>
+                          <span class="comment-count"><%= comment_count %></span>
+                        <% end %>
+                      <% end %>
+                    <% else %>
+                      <div class="<%= day_classes.join(' ') %>"
+                           data-date="<%= date_key %>"
+                           data-count="<%= day_count %>"
+                           data-comment-count="<%= comment_count %>"
+                           style="<%= day_style %>"
+                           title="<%= day_title %>">
+                        <span class="day-number"><%= current_date.day %></span>
+                        <% if show_comments && comment_count.positive? %>
+                          <span class="comment-count"><%= comment_count %></span>
+                        <% end %>
+                      </div>
+                    <% end %>
                   <% end %>
                 </div>
                 <% current_week_start += 1.week %>
@@ -187,6 +223,20 @@
   </div>
 </div>
 
+<% if can?(:read, HeatmapComment) %>
+  <div id="heatmap-sidebar" class="heatmap-sidebar">
+    <%= turbo_frame_tag "heatmap_sidebar" do %>
+      <div class="heatmap-sidebar__header">
+        <div><strong>Comments</strong></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-heatmap-sidebar-close>Close</button>
+      </div>
+      <div class="heatmap-sidebar__empty text-muted">
+        Click a day or open Comments to view entries.
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <style>
   .heatmap-legend {
     display: flex;
@@ -205,7 +255,7 @@
   }
   
   .calendar-container {
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
   }
   
@@ -217,7 +267,7 @@
   
   .calendar-header {
     display: grid;
-    grid-template-columns: 25px repeat(7, minmax(0, 1fr));
+    grid-template-columns: 30px repeat(7, minmax(0, 1fr));
     gap: 1px;
     margin-bottom: 1px;
   }
@@ -238,7 +288,7 @@
   
   .calendar-week {
     display: grid;
-    grid-template-columns: 25px repeat(7, minmax(0, 1fr));
+    grid-template-columns: 30px repeat(7, minmax(0, 1fr));
     gap: 1px;
   }
   
@@ -249,7 +299,7 @@
     font-size: 9px;
     color: #999;
     font-weight: 500;
-    width: 25px;
+    width: 30px;
   }
   
   .calendar-day {
@@ -259,10 +309,12 @@
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
-    min-height: 24px;
-    max-height: 32px;
+    min-height: 28px;
+    max-height: 40px;
     display: block;
     padding: 2px;
+    text-decoration: none;
+    color: inherit;
   }
   
   .calendar-day:hover {
@@ -282,7 +334,7 @@
   }
   
   .day-number {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #333;
     position: absolute;
@@ -290,9 +342,95 @@
     left: 3px;
     line-height: 1;
   }
+
+  .comment-count {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: #0d6efd;
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 1;
+    padding: 2px 4px;
+    min-width: 16px;
+    text-align: center;
+  }
   
   .calendar-day.other-month .day-number {
     color: #999;
+  }
+
+  .heatmap-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 360px;
+    background: #ffffff;
+    border-left: 1px solid #e1e4e8;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+    transform: translateX(100%);
+    transition: transform 0.2s ease-in-out;
+    z-index: 1040;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .heatmap-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .heatmap-sidebar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .heatmap-sidebar__empty {
+    padding: 12px 0;
+  }
+
+  .heatmap-sidebar__meta {
+    margin-bottom: 12px;
+  }
+
+  .heatmap-comment {
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+  }
+
+  .heatmap-comment__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .heatmap-comment__body {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-comment__body p {
+    margin-bottom: 6px;
+  }
+
+  .heatmap-comment__actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  @media (max-width: 768px) {
+    .heatmap-sidebar {
+      width: 100%;
+    }
   }
   
   @media (max-width: 768px) {
@@ -311,6 +449,11 @@
       font-size: 11px;
       top: 1px;
       left: 2px;
+    }
+
+    .comment-count {
+      font-size: 9px;
+      padding: 1px 3px;
     }
     
     .week-number {
@@ -333,22 +476,41 @@
     .day-number {
       font-size: 10px;
     }
+
+    .comment-count {
+      font-size: 8px;
+      padding: 1px 2px;
+    }
   }
 </style>
 
 <script>
-  // Добавляем интерактивность для календаря
-  document.addEventListener('DOMContentLoaded', function() {
-    const calendarDays = document.querySelectorAll('.calendar-day');
-    
-    calendarDays.forEach(day => {
-      day.addEventListener('click', function() {
-        const date = this.dataset.date;
-        const count = this.dataset.count;
-        
-        // Здесь можно добавить модальное окно с деталями дня
-        alert(`Date: ${date}\nBonuses: ${count}`);
-      });
+  document.addEventListener("turbo:load", function() {
+    if (window.heatmapSidebarInitialized) return;
+
+    window.heatmapSidebarInitialized = true;
+
+    const openSidebar = () => {
+      const sidebar = document.getElementById("heatmap-sidebar");
+      if (sidebar) sidebar.classList.add("is-open");
+    };
+
+    const closeSidebar = () => {
+      const sidebar = document.getElementById("heatmap-sidebar");
+      if (sidebar) sidebar.classList.remove("is-open");
+    };
+
+    document.addEventListener("turbo:frame-load", function(event) {
+      if (event.target && event.target.id === "heatmap_sidebar") {
+        openSidebar();
+      }
+    });
+
+    document.addEventListener("click", function(event) {
+      if (event.target.closest("[data-heatmap-sidebar-close]")) {
+        event.preventDefault();
+        closeSidebar();
+      }
     });
   });
 </script>

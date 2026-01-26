@@ -7,7 +7,8 @@ class AdminRole < ApplicationRecord
     "admin_users" => "Управление учетными записями администраторов.",
     "roles" => "Управление ролями пользователей фронта.",
     "users" => "Просмотр пользователей фронта из ActiveAdmin.",
-    "admin_roles" => "Управление ролями администраторов."
+    "admin_roles" => "Управление ролями администраторов.",
+    "heatmap_comments" => "Управление комментариями Heatmap."
   }.freeze
 
   validates :key, presence: true, uniqueness: true

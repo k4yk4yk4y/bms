@@ -19,6 +19,9 @@ class HeatmapController < ApplicationController
 
     # Получаем данные о бонусах для текущего месяца
     @heatmap_data = generate_heatmap_data
+    @calendar_start = @start_date.beginning_of_week(:monday)
+    @calendar_end = @end_date.end_of_week(:sunday)
+    @comment_counts = comment_counts_by_date
 
     # Получаем список событий бонусов для фильтра
     @bonus_events = Bonus.distinct.pluck(:event).compact.sort
@@ -95,5 +98,14 @@ class HeatmapController < ApplicationController
     end
 
     heatmap_data
+  end
+
+  def comment_counts_by_date
+    HeatmapComment
+      .where(date: @calendar_start..@calendar_end)
+      .where.not(date: nil)
+      .group(:date)
+      .count
+      .transform_keys { |date| date.strftime("%Y-%m-%d") }
   end
 end

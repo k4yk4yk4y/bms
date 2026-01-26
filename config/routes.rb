@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     end
   end
   get "heatmap", to: "heatmap#index", as: :heatmap
+  resources :heatmap_comments, path: "heatmap/comments", only: [ :index, :show, :edit, :create, :update, :destroy ]
 
   # Settings routes
   namespace :settings do

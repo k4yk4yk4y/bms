@@ -1,0 +1,14 @@
+<%= turbo_frame_tag dom_id(@comment) do %>
+  <div class="heatmap-comment heatmap-comment--edit">
+    <div class="heatmap-comment__meta">
+      <strong><%= @comment.user.full_name.presence || @comment.user.email %></strong>
+      <small class="text-muted"><%= @comment.created_at.strftime("%Y-%m-%d %H:%M") %></small>
+    </div>
+    <%= render "form",
+          comment: @comment,
+          url: heatmap_comment_path(@comment),
+          turbo_frame: dom_id(@comment),
+          range_start: params[:start_date],
+          range_end: params[:end_date] %>
+  </div>
+<% end %>
