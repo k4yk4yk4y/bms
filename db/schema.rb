@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_15_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_20_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -263,6 +263,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_15_000000) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "date"
+    t.text "body"
+    t.index ["date"], name: "index_heatmap_comments_on_date"
     t.index ["user_id"], name: "index_heatmap_comments_on_user_id"
   end
 

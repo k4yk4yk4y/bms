@@ -28,6 +28,8 @@ class User < ApplicationRecord
   scope :marketing_managers, -> { where(role: :marketing_manager) }
   scope :retention_managers, -> { where(role: :retention_manager) }
 
+  has_many :heatmap_comments, dependent: :destroy
+
   def self.ransackable_attributes(auth_object = nil)
     [ "created_at", "email", "first_name", "id", "last_name", "remember_created_at", "reset_password_sent_at", "role", "updated_at" ]
   end

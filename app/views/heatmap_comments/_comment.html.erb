@@ -1,0 +1,30 @@
+<% range_start = local_assigns[:range_start] %>
+<% range_end = local_assigns[:range_end] %>
+
+<%= turbo_frame_tag dom_id(comment) do %>
+  <div class="heatmap-comment">
+    <div class="heatmap-comment__meta">
+      <strong><%= comment.user.full_name.presence || comment.user.email %></strong>
+      <small class="text-muted"><%= comment.created_at.strftime("%Y-%m-%d %H:%M") %></small>
+    </div>
+    <div class="heatmap-comment__body">
+      <%= simple_format(comment.body) %>
+    </div>
+    <div class="heatmap-comment__actions">
+      <% if can?(:update, comment) %>
+        <%= link_to "Edit",
+              edit_heatmap_comment_path(comment, start_date: range_start, end_date: range_end),
+              class: "btn btn-outline-secondary btn-sm",
+              data: { turbo_frame: dom_id(comment) } %>
+      <% end %>
+      <% if can?(:destroy, comment) %>
+        <%= button_to "Delete",
+              heatmap_comment_path(comment),
+              method: :delete,
+              class: "btn btn-outline-danger btn-sm",
+              params: { start_date: range_start, end_date: range_end },
+              data: { turbo_confirm: "Delete comment?", turbo_frame: "heatmap_sidebar" } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

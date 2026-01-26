@@ -1318,14 +1318,26 @@ class BonusesController < ApplicationController
   end
 
   def bonus_params
-    params.require(:bonus).permit(
+    permitted_params = params.require(:bonus).permit(
       :name, :code, :event, :status, :wager,
       :maximum_winnings, :maximum_winnings_type, :wagering_strategy, :availability_start_date,
       :availability_end_date, :user_group, :tags, :country,
       :project, :dsl_tag_id, :dsl_tag, :created_by, :updated_by, :no_more, :totally_no_more,
-      :description,
+      :description, :minimum_deposit, :groups,
       currencies: [], groups: [], currency_minimum_deposits: {}
     )
+
+    if permitted_params[:currency_minimum_deposits].is_a?(String) && permitted_params[:currency_minimum_deposits].present?
+      begin
+        permitted_params[:currency_minimum_deposits] = JSON.parse(permitted_params[:currency_minimum_deposits])
+      rescue JSON::ParserError
+        permitted_params[:currency_minimum_deposits] = {}
+      end
+    elsif permitted_params[:currency_minimum_deposits].is_a?(ActionController::Parameters)
+      permitted_params[:currency_minimum_deposits] = permitted_params[:currency_minimum_deposits].to_unsafe_h
+    end
+
+    permitted_params
   end
 
   def bonus_reward_params

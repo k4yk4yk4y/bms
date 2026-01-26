@@ -34,7 +34,7 @@ export default class extends Controller {
 
   handleInput(event) {
     if (event.target.matches('input[name^="bonus[currency_minimum_deposits]"], input[name^="bonus_template[currency_minimum_deposits]"]')) {
-      this.updateAllCurrencyFields()
+      return
     }
   }
 

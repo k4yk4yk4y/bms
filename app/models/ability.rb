@@ -34,6 +34,8 @@ class Ability
         can :read, ActiveAdmin::Page, name: "Dashboard"
       when "bonuses"
         apply_level(level, bonuses_resources)
+      when "heatmap_comments"
+        apply_level(level, [ HeatmapComment ])
       when "bonus_templates"
         apply_level(level, [ BonusTemplate ])
       when "marketing_requests"
@@ -69,6 +71,8 @@ class Ability
         can :read, ActiveAdmin::Page, name: "Dashboard"
       when "bonuses"
         apply_level(level, bonuses_resources)
+      when "heatmap_comments"
+        apply_level(level, [ HeatmapComment ])
       when "bonus_templates"
         apply_level(level, [ BonusTemplate ])
       when "marketing_requests"

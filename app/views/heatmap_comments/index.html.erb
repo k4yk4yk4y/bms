@@ -1,0 +1,68 @@
+<%= turbo_frame_tag "heatmap_sidebar" do %>
+  <div class="heatmap-sidebar__header">
+    <div>
+      <strong>Comments</strong>
+      <% if @date %>
+        <div class="text-muted"><%= @date.strftime("%B %d, %Y") %></div>
+      <% else %>
+        <div class="text-muted"><%= @range_start.strftime("%B %Y") %></div>
+      <% end %>
+    </div>
+    <div class="d-flex gap-2">
+      <% if @date %>
+        <%= link_to "All days",
+              heatmap_comments_path(start_date: @range_start, end_date: @range_end),
+              class: "btn btn-outline-secondary btn-sm",
+              data: { turbo_frame: "heatmap_sidebar" } %>
+      <% end %>
+      <button type="button" class="btn btn-outline-secondary btn-sm" data-heatmap-sidebar-close>Close</button>
+    </div>
+  </div>
+
+  <% if @date.blank? %>
+    <div class="heatmap-sidebar__meta text-muted">
+      <%= pluralize(@comment_days.size, "day") %> with comments
+    </div>
+
+    <div class="heatmap-comment-days list-group">
+      <% if @comment_days.any? %>
+        <% @comment_days.each do |date, count| %>
+          <%= link_to heatmap_comments_path(date: date, start_date: @range_start, end_date: @range_end),
+                class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center",
+                data: { turbo_frame: "heatmap_sidebar" } do %>
+            <span><%= date.strftime("%B %d, %Y") %></span>
+            <span class="badge bg-primary rounded-pill"><%= count %></span>
+          <% end %>
+        <% end %>
+      <% else %>
+        <div class="text-muted">No comments for this period.</div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="heatmap-sidebar__meta text-muted">
+      <%= pluralize(@comments.size, "comment") %>
+    </div>
+
+    <div class="heatmap-comments">
+      <% if @comments.any? %>
+        <% @comments.each do |comment| %>
+          <%= render "comment", comment: comment, range_start: @range_start, range_end: @range_end %>
+        <% end %>
+      <% else %>
+        <div class="text-muted">No comments yet.</div>
+      <% end %>
+    </div>
+
+    <% if can?(:create, HeatmapComment) %>
+      <div class="heatmap-comment-form mt-3">
+        <h6>New comment</h6>
+        <%= render "form",
+              comment: @comment,
+              url: heatmap_comments_path,
+              turbo_frame: "heatmap_sidebar",
+              range_start: @range_start,
+              range_end: @range_end %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

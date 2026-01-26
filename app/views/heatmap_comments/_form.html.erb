@@ -1,0 +1,34 @@
+<% turbo_frame = local_assigns.fetch(:turbo_frame, "heatmap_sidebar") %>
+<% form_url = local_assigns.fetch(:url) %>
+<% range_start = local_assigns[:range_start] %>
+<% range_end = local_assigns[:range_end] %>
+
+<%= form_with model: comment,
+      url: form_url,
+      method: (comment.persisted? ? :patch : :post),
+      data: { turbo_frame: turbo_frame },
+      class: "heatmap-comment-form" do |form| %>
+  <% if comment.errors.any? %>
+    <div class="alert alert-danger py-2">
+      <%= comment.errors.full_messages.join(", ") %>
+    </div>
+  <% end %>
+
+  <%= form.hidden_field :date, value: comment.date %>
+  <% if range_start %>
+    <%= hidden_field_tag :start_date, range_start %>
+  <% end %>
+  <% if range_end %>
+    <%= hidden_field_tag :end_date, range_end %>
+  <% end %>
+
+  <div class="mb-2">
+    <%= form.text_area :body, rows: 3, class: "form-control", placeholder: "Write a comment..." %>
+  </div>
+  <div class="d-flex gap-2">
+    <%= form.submit(comment.persisted? ? "Save" : "Post", class: "btn btn-primary btn-sm") %>
+    <% if comment.persisted? %>
+      <%= link_to "Cancel", heatmap_comment_path(comment), class: "btn btn-outline-secondary btn-sm", data: { turbo_frame: turbo_frame } %>
+    <% end %>
+  </div>
+<% end %>

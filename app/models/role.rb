@@ -7,7 +7,8 @@ class Role < ApplicationRecord
     "users" => "Доступ к профилям пользователей во фронте.",
     "self_profile" => "Доступ только к собственному профилю.",
     "settings" => "Доступ к разделу настроек во фронте.",
-    "api" => "Доступ к внутренним API эндпоинтам."
+    "api" => "Доступ к внутренним API эндпоинтам.",
+    "heatmap_comments" => "Доступ к комментариям Heatmap."
   }.freeze
 
   SECTION_DEFINITIONS.each do |section|
@@ -81,6 +82,7 @@ class Role < ApplicationRecord
     "admin" => {
       "dashboard" => "manage",
       "bonuses" => "manage",
+      "heatmap_comments" => "manage",
       "bonus_templates" => "manage",
       "marketing_requests" => "manage",
       "permanent_bonuses" => "manage",

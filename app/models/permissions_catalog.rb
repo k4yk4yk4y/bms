@@ -10,6 +10,7 @@ module PermissionsCatalog
   FRONTEND_SECTIONS = [
     { key: "dashboard", label: "Dashboard" },
     { key: "bonuses", label: "Bonuses" },
+    { key: "heatmap_comments", label: "Heatmap comments" },
     { key: "bonus_templates", label: "Bonus templates" },
     { key: "marketing_requests", label: "Marketing requests" },
     { key: "permanent_bonuses", label: "Permanent bonuses" },
@@ -23,6 +24,7 @@ module PermissionsCatalog
   ADMIN_SECTIONS = [
     { key: "dashboard", label: "Dashboard" },
     { key: "bonuses", label: "Bonuses" },
+    { key: "heatmap_comments", label: "Comments" },
     { key: "bonus_templates", label: "Bonus templates" },
     { key: "marketing_requests", label: "Marketing requests" },
     { key: "bonus_audit_logs", label: "Bonus audit logs" },

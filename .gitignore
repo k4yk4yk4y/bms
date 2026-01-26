@@ -96,7 +96,6 @@ eslint.config.js
 .eslintrc.js
 
 # Image and video files (screenshots, recordings from tests)
-*.md
 *.png
 *.jpg
 *.jpeg
