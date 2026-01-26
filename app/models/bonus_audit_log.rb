@@ -1,6 +1,6 @@
 class BonusAuditLog < ApplicationRecord
   belongs_to :bonus
-  belongs_to :user
+  belongs_to :user, polymorphic: true
 
   # Actions constants
   ACTIONS = %w[created updated deleted activated deactivated].freeze

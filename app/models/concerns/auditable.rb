@@ -12,11 +12,17 @@ module Auditable
   private
 
   def set_created_by
-    self.created_by = current_user&.id if respond_to?(:created_by) && current_user
+    return unless current_user
+
+    self.created_by = current_user.id if respond_to?(:created_by)
+    self.created_by_type = current_user.class.name if respond_to?(:created_by_type)
   end
 
   def set_updated_by
-    self.updated_by = current_user&.id if respond_to?(:updated_by) && current_user
+    return unless current_user
+
+    self.updated_by = current_user.id if respond_to?(:updated_by)
+    self.updated_by_type = current_user.class.name if respond_to?(:updated_by_type)
   end
 
   def audit_log_creation

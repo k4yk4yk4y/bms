@@ -111,14 +111,14 @@ ActiveAdmin.register Bonus do
       row :totally_no_more
       row :created_by do |bonus|
         if bonus.creator
-          bonus.creator.full_name || bonus.creator.email
+          bonus.creator.try(:full_name).presence || bonus.creator.try(:email)
         else
           "System"
         end
       end
       row :updated_by do |bonus|
         if bonus.updater
-          bonus.updater.full_name || bonus.updater.email
+          bonus.updater.try(:full_name).presence || bonus.updater.try(:email)
         else
           "System"
         end
@@ -178,7 +178,7 @@ ActiveAdmin.register Bonus do
           status_tag log.action_label, class: action_class
         end
         column :user do |log|
-          log.user.full_name
+          log.user.try(:full_name).presence || log.user.try(:email)
         end
         column :changes do |log|
           if log.has_changes?

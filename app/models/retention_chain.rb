@@ -4,8 +4,8 @@ class RetentionChain < ApplicationRecord
   STATUSES = %w[draft active archived].freeze
 
   belongs_to :project, optional: true
-  belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
-  belongs_to :updater, class_name: "User", foreign_key: "updated_by", optional: true
+  belongs_to :creator, polymorphic: true, foreign_key: "created_by", foreign_type: "created_by_type", optional: true
+  belongs_to :updater, polymorphic: true, foreign_key: "updated_by", foreign_type: "updated_by_type", optional: true
 
   has_many :retention_emails, dependent: :destroy
 
