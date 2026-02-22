@@ -105,7 +105,18 @@ class Api::V1::BonusesController < ApplicationController
   private
 
   def authorize_api_access!
-    authorize! :access, :api
+    case action_name
+    when "index", "show", "by_type", "active", "expired"
+      authorize! :access, :api
+    when "create"
+      authorize! :create, :api
+    when "update"
+      authorize! :update, :api
+    when "destroy"
+      authorize! :destroy, :api
+    else
+      authorize! :access, :api
+    end
   end
 
   def set_bonus

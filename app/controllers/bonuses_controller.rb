@@ -10,8 +10,8 @@
 #
 class BonusesController < ApplicationController
   before_action :authenticate_user!
-  before_action :check_bonus_access
   before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :preview, :duplicate ]
+  before_action :authorize_bonus_access
 
   # GET /bonuses
   def index
@@ -519,10 +519,38 @@ class BonusesController < ApplicationController
 
   private
 
-  def check_bonus_access
-    authorize! :read, Bonus
+  def authorize_bonus_access
+    case action_name
+    when "index", "by_type"
+      authorize! :read, Bonus
+    when "show", "preview"
+      authorize! :read, @bonus
+    when "new", "create"
+      authorize! :create, Bonus
+    when "edit", "update"
+      authorize! :update, @bonus
+    when "destroy"
+      authorize! :destroy, @bonus
+    when "duplicate"
+      authorize! :create, Bonus
+    when "bulk_update"
+      authorize_bulk_update!
+    else
+      authorize! :read, Bonus
+    end
   rescue CanCan::AccessDenied
     redirect_to marketing_index_path, alert: "You do not have access to the bonuses section."
+  end
+
+  def authorize_bulk_update!
+    case params[:bulk_action]
+    when "delete"
+      authorize! :destroy, Bonus
+    when "duplicate"
+      authorize! :create, Bonus
+    else
+      authorize! :update, Bonus
+    end
   end
 
   def bonus_includes
