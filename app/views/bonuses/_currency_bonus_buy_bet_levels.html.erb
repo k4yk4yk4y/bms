@@ -30,7 +30,7 @@
         <% selected_currencies.each_with_index do |currency, index| %>
           <div class="currency-bet-level-item">
             <div class="input-group">
-              <span class="input-group-text"><%= currency %></span>
+              <span class="input-group-text currency-code"><%= currency %></span>
               <%= number_field_tag "#{field_prefix}[currency_bet_levels][#{currency}]",
                   bonus_buy_reward&.currency_bet_levels&.dig(currency),
                   class: "form-control currency-input",
@@ -129,7 +129,7 @@
 
           colDiv.innerHTML = `
             <div class="input-group">
-              <span class="input-group-text">${currency}</span>
+              <span class="input-group-text currency-code">${currency}</span>
               <input type="number"
                      name="bonus_buy_rewards[${formIndex}][currency_bet_levels][${currency}]"
                      value="${currentValue}"

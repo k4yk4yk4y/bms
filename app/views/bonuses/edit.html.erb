@@ -104,7 +104,9 @@
                        data-currency-target="checkboxesContainer"
                        data-currency-name="bonus[currencies][]">
                     <% available_currencies = @bonus.project_currencies %>
-                    <% selected_currencies = @bonus.currencies.present? ? (@bonus.currencies & available_currencies) : available_currencies %>
+                    <% minimum_deposit_currencies = @bonus.currency_minimum_deposits.present? ? @bonus.currency_minimum_deposits.keys : [] %>
+                    <% selected_currencies = ((@bonus.currencies.present? ? @bonus.currencies : []) | minimum_deposit_currencies) & available_currencies %>
+                    <% selected_currencies = available_currencies if selected_currencies.empty? %>
                     <% available_currencies.each_with_index do |currency, index| %>
                       <div class="form-check <%= 'mb-1' unless index == available_currencies.length - 1 %>">
                         <%= check_box_tag "bonus[currencies][]", currency, 

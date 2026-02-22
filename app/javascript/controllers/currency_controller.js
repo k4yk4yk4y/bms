@@ -219,23 +219,41 @@ export default class extends Controller {
     const selectedCurrencies = this.getSelectedCurrencies();
     const availableCurrencies = window.currentProjectCurrencies || [];
     const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
-    
-    // Show all available currencies when none are selected
-    const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : availableCurrencies;
+    const hasSeeded = container.dataset.minimumDepositsSeeded === 'true';
+    let savedDeposits = {};
+    if (container.dataset.minimumDeposits) {
+      try {
+        savedDeposits = JSON.parse(container.dataset.minimumDeposits) || {};
+      } catch (e) {
+        savedDeposits = {};
+      }
+    }
     
     // Check if update is actually needed by comparing current displayed currencies
     const rowDiv = container.querySelector('.row');
+    const currentCurrencies = rowDiv
+      ? Array.from(rowDiv.querySelectorAll('input[type="number"]'))
+          .map(input => {
+            const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+            return match ? match[1] : null;
+          })
+          .filter(currency => currency !== null)
+      : [];
+    const savedCurrencies = hasSeeded ? [] : Object.keys(savedDeposits || {});
+
+    let displayCurrencies;
+    if (selectedCurrencies.length > 0) {
+      displayCurrencies = Array.from(new Set([ ...selectedCurrencies, ...currentCurrencies, ...savedCurrencies ]));
+    } else if (currentCurrencies.length > 0) {
+      displayCurrencies = Array.from(new Set([ ...currentCurrencies, ...savedCurrencies ]));
+    } else if (savedCurrencies.length > 0) {
+      displayCurrencies = savedCurrencies;
+    } else {
+      displayCurrencies = availableCurrencies;
+    }
+    
     if (rowDiv) {
-      const currentCurrencies = Array.from(rowDiv.querySelectorAll('input[type="number"]'))
-        .map(input => {
-          const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-          return match ? match[1] : null;
-        })
-        .filter(currency => currency !== null);
-      
-      // If currencies are the same, don't rebuild (but always rebuild if no currencies selected to clear fields)
-      if (displayCurrencies.length > 0 && 
-          currentCurrencies.length === displayCurrencies.length && 
+      if (currentCurrencies.length === displayCurrencies.length && 
           currentCurrencies.every(currency => displayCurrencies.includes(currency)) &&
           displayCurrencies.every(currency => currentCurrencies.includes(currency))) {
         return; // No update needed
@@ -243,14 +261,17 @@ export default class extends Controller {
     }
     
     // Save ALL current values to preserve user input
-    const currentValues = {};
+    const currentValues = hasSeeded ? {} : { ...savedDeposits };
     if (rowDiv) {
       rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
         const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
         if (match) {
           // Save value even if it's being edited or just typed
-          const value = input.value || input.getAttribute('value') || '';
-          if (value) {
+          const rawValue = input.value;
+          const value = hasSeeded ? rawValue : (rawValue || input.getAttribute('value') || '');
+          if (hasSeeded) {
+            currentValues[match[1]] = rawValue;
+          } else if (value !== '') {
             currentValues[match[1]] = value;
           }
         }
@@ -275,7 +296,7 @@ export default class extends Controller {
         
         colDiv.innerHTML = `
           <div class="input-group">
-            <span class="input-group-text">${currency}</span>
+            <span class="input-group-text currency-code">${currency}</span>
             <input type="number" 
                    name="bonus[currency_minimum_deposits][${currency}]" 
                    value="${currentValue}"
@@ -291,6 +312,9 @@ export default class extends Controller {
         
         rowDiv.appendChild(colDiv);
       });
+
+      container.dataset.minimumDeposits = JSON.stringify(currentValues);
+      container.dataset.minimumDepositsSeeded = 'true';
       
       // Ensure all new input fields are properly enabled and focusable
       setTimeout(() => {

@@ -205,6 +205,16 @@
   flex: 0 0 100% !important;
 }
 
+.input-group .currency-code {
+  width: 4rem;
+  min-width: 4rem;
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
 .currency-bet-levels-grid .currency-bet-level-item {
   margin-bottom: 0.25rem !important;
 }
