@@ -114,12 +114,13 @@
       <div class="card">
         <div class="card-body">
           <% if @marketing_requests.any? %>
+            <% can_view_sensitive_fields = can?(:update, MarketingRequest) %>
             <div class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead class="table-dark">
                   <tr>
                     <th>Manager</th>
-                    <% unless current_user.support_agent? || current_user.shift_leader? %>
+                    <% if can_view_sensitive_fields %>
                       <th>Platform</th>
                       <th>Partner email</th>
                     <% end %>
@@ -138,7 +139,7 @@
                       <td>
                         <strong><%= request.manager %></strong>
                       </td>
-                      <% unless current_user.support_agent? || current_user.shift_leader? %>
+                      <% if can_view_sensitive_fields %>
                         <td>
                           <% if request.platform.present? %>
                             <% if request.platform.match?(URI::DEFAULT_PARSER.make_regexp) %>

@@ -1,4 +1,5 @@
 class HeatmapController < ApplicationController
+  before_action :authorize_heatmap_access!
   def index
     # Получаем валидированные параметры
     @year = parse_year_param(heatmap_params[:year])
@@ -32,6 +33,10 @@ class HeatmapController < ApplicationController
   end
 
   private
+
+  def authorize_heatmap_access!
+    authorize! :read, Bonus
+  end
 
   def heatmap_params
     params.permit(:year, :month, :bonus_event)

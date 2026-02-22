@@ -194,7 +194,7 @@ class MarketingController < ApplicationController
     )
 
     # Only allow status and activation_date changes for admins
-    unless current_user&.admin?
+    unless can?(:manage, MarketingRequest)
       permitted.delete(:status)
       permitted.delete(:activation_date)
     end

@@ -4,6 +4,8 @@ class Ability
   include CanCan::Ability
 
   def initialize(user)
+    alias_action :duplicate, to: :create
+    alias_action :activate, :reject, :transfer, to: :update
     # Проверяем тип пользователя и устанавливаем соответствующие права
     if user.is_a?(AdminUser)
       setup_admin_abilities(user)
@@ -129,11 +131,12 @@ class Ability
   end
 
   def apply_api_permissions(level)
-    if level == "manage"
-      can :manage, :api
-    else
-      can :access, :api
+    actions = case level
+    when "manage" then :manage
+    when "write" then [ :access, :create, :update, :destroy ]
+    else :access
     end
+    can actions, :api
   end
 
   def apply_self_profile_permissions(user, level)
