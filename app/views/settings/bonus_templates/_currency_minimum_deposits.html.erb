@@ -7,7 +7,8 @@
     </h5>
   </div>
   <div class="card-body">
-    <div id="currency-minimum-deposits-container">
+    <div id="currency-minimum-deposits-container"
+         data-minimum-deposits="<%= ERB::Util.html_escape(bonus_template.currency_minimum_deposits.to_json) %>">
       <div class="row">
         <% available_currencies = bonus_template.project_currencies %>
         <% selected_currencies = bonus_template.currencies.present? ? (bonus_template.currencies & available_currencies) : available_currencies %>
@@ -15,7 +16,7 @@
         <% selected_currencies.each_with_index do |currency, index| %>
           <div class="col-12 mb-2">
             <div class="input-group">
-              <span class="input-group-text"><%= currency %></span>
+              <span class="input-group-text currency-code"><%= currency %></span>
               <%= number_field_tag "bonus_template[currency_minimum_deposits][#{currency}]", 
                   bonus_template.currency_minimum_deposits[currency],
                   class: "form-control currency-input",
@@ -50,20 +51,38 @@
         const selectedCurrencies = getSelectedCurrenciesMinimumDeposits();
         const availableCurrencies = window.currentProjectCurrencies || [];
         const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
+        const hasSeeded = container.dataset.minimumDepositsSeeded === 'true';
+        let savedDeposits = {};
+        if (container.dataset.minimumDeposits) {
+          try {
+            savedDeposits = JSON.parse(container.dataset.minimumDeposits) || {};
+          } catch (e) {
+            savedDeposits = {};
+          }
+        }
         
-        // If no currencies selected, show all currencies but with empty values
-        const displayCurrencies = selectedCurrencies.length > 0 ? selectedCurrencies : availableCurrencies;
+        const savedCurrencies = hasSeeded ? [] : Object.keys(savedDeposits || {});
+        const displayCurrencies =
+          selectedCurrencies.length > 0
+            ? Array.from(new Set([ ...selectedCurrencies, ...savedCurrencies ]))
+            : (savedCurrencies.length > 0 ? savedCurrencies : availableCurrencies);
         
         // Rebuild the fields
         const rowDiv = container.querySelector('.row');
         if (!rowDiv) return;
         
         // Save current values for all currencies
-        const currentValues = {};
+        const currentValues = hasSeeded ? {} : { ...savedDeposits };
         rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
           const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-          if (match && input.value) {
-            currentValues[match[1]] = input.value;
+          if (match) {
+            const rawValue = input.value;
+            const value = hasSeeded ? rawValue : (rawValue || input.getAttribute('value') || '');
+            if (hasSeeded) {
+              currentValues[match[1]] = rawValue;
+            } else if (value !== '') {
+              currentValues[match[1]] = value;
+            }
           }
         });
         
@@ -80,11 +99,11 @@
           const precision = isCrypto ? 8 : 2;
           
           // Use current value if it exists and currency is still selected
-          const currentValue = selectedCurrencies.includes(currency) ? (currentValues[currency] || '') : '';
+          const currentValue = currentValues[currency] || '';
           
           colDiv.innerHTML = `
             <div class="input-group">
-              <span class="input-group-text">${currency}</span>
+              <span class="input-group-text currency-code">${currency}</span>
               <input type="number" 
                      name="bonus_template[currency_minimum_deposits][${currency}]" 
                      value="${currentValue}"
@@ -101,6 +120,8 @@
           rowDiv.appendChild(colDiv);
         });
 
+        container.dataset.minimumDeposits = JSON.stringify(currentValues);
+        container.dataset.minimumDepositsSeeded = 'true';
       }
       
       // Note: Event listeners for currency checkboxes are handled by Stimulus currency controller

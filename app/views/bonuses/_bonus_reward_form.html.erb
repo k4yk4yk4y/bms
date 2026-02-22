@@ -67,7 +67,7 @@
         <div class="input-group">
           <input type="number" class="form-control" name="<%= field_prefix %>[amount]" id="bonus_reward_amount"
                  step="0.01" min="0" value="<%= existing_reward&.amount %>">
-          <span class="input-group-text"><%= bonus.currency || 'USD' %></span>
+          <span class="input-group-text currency-code"><%= bonus.currency || 'USD' %></span>
         </div>
       </div>
     <% end %>

@@ -264,7 +264,19 @@ class Bonus < ApplicationRecord
 
   # Currency minimum deposits methods
   def currency_minimum_deposits
-    super || {}
+    raw_value = super
+    return {} if raw_value.blank?
+
+    parsed = raw_value
+    if raw_value.is_a?(String)
+      begin
+        parsed = JSON.parse(raw_value)
+      rescue JSON::ParserError
+        return {}
+      end
+    end
+
+    parsed.is_a?(Hash) ? parsed.with_indifferent_access : {}
   end
 
   def currency_minimum_deposits=(value)
