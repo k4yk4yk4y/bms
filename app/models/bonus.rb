@@ -70,6 +70,7 @@ class Bonus < ApplicationRecord
   scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
+  scope :by_project_with_all, ->(project) { where(project: [ project, "All" ]) }
   scope :by_dsl_tag, ->(dsl_tag) {
     left_joins(:dsl_tag).where(
       "dsl_tags.name ILIKE ? OR bonuses.dsl_tag ILIKE ?",

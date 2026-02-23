@@ -209,7 +209,7 @@ class Api::V1::BonusesController < ApplicationController
     end
 
     # Filter by project
-    scope = scope.by_project(params[:project]) if params[:project].present?
+    scope = scope.by_project_with_all(params[:project]) if params[:project].present?
 
     # Filter by dsl_tag
     scope = scope.by_dsl_tag(params[:dsl_tag]) if params[:dsl_tag].present?

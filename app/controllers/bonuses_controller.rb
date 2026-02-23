@@ -40,9 +40,9 @@ class BonusesController < ApplicationController
     # Filter by project if specified (support both old string and new project_id)
     if params[:project_id].present?
       project = Project.find_by(id: params[:project_id])
-      @bonuses = @bonuses.by_project(project.name) if project
+      @bonuses = @bonuses.by_project_with_all(project.name) if project
     elsif params[:project].present?
-      @bonuses = @bonuses.by_project(params[:project])
+      @bonuses = @bonuses.by_project_with_all(params[:project])
     end
 
     # Filter by dsl_tag if specified

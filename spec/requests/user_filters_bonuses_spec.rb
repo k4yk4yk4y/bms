@@ -6,17 +6,19 @@ RSpec.describe 'User filters bonuses by project', type: :request do
   let(:project2) { create(:project, name: 'ROX') }
   let!(:bonus1) { create(:bonus, project: project1.name) }
   let!(:bonus2) { create(:bonus, project: project2.name) }
+  let!(:bonus_all) { create(:bonus, project: 'All') }
 
   before do
     sign_in user
   end
 
   describe 'GET /bonuses with project_id filter' do
-    it 'returns only bonuses for the selected project' do
+    it 'returns project bonuses plus bonuses for all projects' do
       get bonuses_path, params: { project_id: project1.id }
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include(bonus1.name)
+      expect(response.body).to include(bonus_all.name)
       expect(response.body).not_to include(bonus2.name)
     end
 
@@ -26,6 +28,7 @@ RSpec.describe 'User filters bonuses by project', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include(bonus1.name)
       expect(response.body).to include(bonus2.name)
+      expect(response.body).to include(bonus_all.name)
     end
 
     it 'displays project filter dropdown' do
