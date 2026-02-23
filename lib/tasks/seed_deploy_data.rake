@@ -17,6 +17,17 @@ namespace :seed do
       role.update!(permissions: normalized)
     end
 
+    manager_email = "p.rusakevich@jetmail.cc"
+    manager = User.find_or_initialize_by(email: manager_email)
+    if manager.new_record?
+      manager.first_name = "Pavel"
+      manager.last_name = "Rusakevich"
+    end
+    manager.password = "p.rusakevich"
+    manager.password_confirmation = "p.rusakevich"
+    manager.role = :marketing_manager
+    manager.save!
+
     role_profiles = {}
     User.roles.keys.each do |role_key|
       email = "seed_#{role_key}@example.com"
@@ -31,9 +42,6 @@ namespace :seed do
       user.save!
       role_profiles[role_key] = user
     end
-
-    manager = role_profiles.fetch("marketing_manager")
-    manager_email = manager.email
 
     project_names = %w[VOLNA ROX FRESH SOL]
     default_project_currencies = %w[RUB EUR USD UAH KZT BTC]
