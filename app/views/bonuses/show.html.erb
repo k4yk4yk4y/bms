@@ -172,7 +172,7 @@
                   <dl class="row">
                     <dt class="col-sm-6">Wager:</dt>
                     <dd class="col-sm-6">
-                      <%= number_to_currency(@bonus.wager) if @bonus.wager %>
+                      <%= "#{number_with_precision(@bonus.wager, precision: 0, strip_insignificant_zeros: true)}x" if @bonus.wager %>
                     </dd>
                   </dl>
                 </div>

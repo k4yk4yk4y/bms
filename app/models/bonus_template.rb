@@ -220,6 +220,7 @@ class BonusTemplate < ApplicationRecord
     # minimum_deposit validation removed
     validate_decimal_field(:wager)
     validate_decimal_field(:maximum_winnings)
+    validate_integer_field(:wager)
   end
 
   def validate_decimal_field(field)
@@ -228,6 +229,15 @@ class BonusTemplate < ApplicationRecord
 
     if value < 0
       errors.add(field, "must be greater than or equal to 0")
+    end
+  end
+
+  def validate_integer_field(field)
+    value = send(field)
+    return if value.nil?
+
+    unless value == value.to_i
+      errors.add(field, "must be an integer")
     end
   end
 

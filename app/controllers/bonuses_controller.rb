@@ -599,8 +599,11 @@ class BonusesController < ApplicationController
       :affiliates_user, :balance, :cashout, :chargeable_comp_points,
       :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
       :registered, :social_networks, :hold_min, :hold_max,
-      currencies: [], currency_amounts: {}
+      currencies: [], currency_amounts: {}, currency_maximum_amounts: {}
     )
+
+    permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
+    permitted[:currency_maximum_amounts] = normalize_currency_amounts(permitted[:currency_maximum_amounts]) if permitted[:currency_maximum_amounts].present?
 
     permitted.delete(:bonus_type)
 
@@ -623,6 +626,8 @@ class BonusesController < ApplicationController
     )
 
     # Set new direct attributes
+    reward.currency_amounts = reward_params[:currency_amounts] if reward_params[:currency_amounts].present?
+    reward.currency_maximum_amounts = reward_params[:currency_maximum_amounts] if reward_params[:currency_maximum_amounts].present?
 
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
@@ -630,7 +635,7 @@ class BonusesController < ApplicationController
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts, :currency_maximum_amounts).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -653,6 +658,8 @@ class BonusesController < ApplicationController
     reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
 
     # Update new direct attributes
+    reward.currency_amounts = reward_params[:currency_amounts] if reward_params[:currency_amounts].present?
+    reward.currency_maximum_amounts = reward_params[:currency_maximum_amounts] if reward_params[:currency_maximum_amounts].present?
 
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.user_can_have_duplicates = reward_params[:user_can_have_duplicates] if reward_params[:user_can_have_duplicates].present?
@@ -660,7 +667,7 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts, :currency_maximum_amounts).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -689,8 +696,6 @@ class BonusesController < ApplicationController
     permitted = permitted_params.permit(
       :spins_count, :games, :bet_level, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
-      # Currency freespin bet levels
-      :currency_freespin_bet_levels,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
       :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -699,9 +704,12 @@ class BonusesController < ApplicationController
       :deposits_count, :spend_sum, :category_loss_sum, :wager_sum, :bets_count,
       :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
-      :wager_done, :hold_min, :hold_max, :currencies,
-      # Array parameters
-      currencies: [], games: []
+      :wager_done, :hold_min, :hold_max,
+      # Currency freespin bet amounts + array parameters
+      currency_freespin_bet_levels: {},
+      currency_bet_levels: {},
+      currencies: [],
+      games: []
     )
 
     # Handle array fields properly
@@ -730,7 +738,7 @@ class BonusesController < ApplicationController
         :affiliates_user, :balance, :cashout, :chargeable_comp_points,
         :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
         :registered, :social_networks, :hold_min, :hold_max,
-        currencies: [], currency_amounts: {}
+        currencies: [], currency_amounts: {}, currency_maximum_amounts: {}
       )
 
       # Handle array fields properly
@@ -738,6 +746,7 @@ class BonusesController < ApplicationController
       permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
       permitted[:currencies] = permitted[:currencies].compact.reject(&:blank?) if permitted[:currencies].is_a?(Array)
       permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
+      permitted[:currency_maximum_amounts] = normalize_currency_amounts(permitted[:currency_maximum_amounts]) if permitted[:currency_maximum_amounts].present?
 
       permitted
     end.compact
@@ -795,10 +804,11 @@ class BonusesController < ApplicationController
       )
 
       reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+      reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
 
       # Set all additional parameters through the config field
       config = {}
-      reward_params.except(:amount, :percentage, :currency_amounts).each do |key, value|
+      reward_params.except(:amount, :percentage, :currency_amounts, :currency_maximum_amounts).each do |key, value|
         next if value.blank?
         config[key.to_s] = value
       end
@@ -828,17 +838,8 @@ class BonusesController < ApplicationController
     Rails.logger.debug "Creating multiple freespin rewards with params: #{rewards_params.inspect}"
 
     rewards_params.each do |reward_params|
-      # Prepare currency freespin bet levels first
-      currency_bet_levels = if reward_params[:currency_freespin_bet_levels].present?
-        normalize_currency_hash(reward_params[:currency_freespin_bet_levels])
-      elsif @bonus.currencies.present?
-        default_levels = {}
-        bet_level_value = reward_params[:bet_level] || 0.1  # Use bet_level or default to 0.1
-        @bonus.currencies.each { |currency| default_levels[currency] = bet_level_value }
-        default_levels
-      else
-        {}
-      end
+      currency_bet_levels = reward_params[:currency_freespin_bet_levels].presence ||
+                            reward_params[:currency_bet_levels].presence
 
       reward = @bonus.freespin_rewards.build(
         spins_count: reward_params[:spins_count]
@@ -861,7 +862,7 @@ class BonusesController < ApplicationController
       # reward.currencies = @bonus.currencies if @bonus.currencies.present? # Reward models don't have currencies attribute
       # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
-      # Set currency freespin bet levels
+      # Set currency freespin bet amounts
       reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
       # Set advanced parameters
@@ -895,10 +896,11 @@ class BonusesController < ApplicationController
         reward.amount = reward_params[:amount] if reward_params[:amount].present?
         reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
         reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+        reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
 
         # Update config with all other parameters
         config = reward.config || {}
-        reward_params.except(:id, :amount, :percentage, :currency_amounts).each do |key, value|
+        reward_params.except(:id, :amount, :percentage, :currency_amounts, :currency_maximum_amounts).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -924,10 +926,11 @@ class BonusesController < ApplicationController
         )
 
         reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+        reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
 
         # Set all additional parameters through the config field
         config = {}
-        reward_params.except(:amount, :percentage, :currency_amounts).each do |key, value|
+        reward_params.except(:amount, :percentage, :currency_amounts, :currency_maximum_amounts).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -1007,6 +1010,9 @@ class BonusesController < ApplicationController
           spins_count: reward_params[:spins_count]
         )
 
+        currency_bet_levels = reward_params[:currency_freespin_bet_levels].presence ||
+                              reward_params[:currency_bet_levels].presence
+
         # Set common parameters
         reward.games = reward_params[:games] if reward_params[:games].present?
         reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
@@ -1018,13 +1024,11 @@ class BonusesController < ApplicationController
 
         # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
 
-        # Set currency bet levels
-        if reward_params[:currency_bet_levels].present?
-          reward.currency_bet_levels = reward_params[:currency_bet_levels]
-        end
+        # Set currency freespin bet amounts
+        reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
         # Set advanced parameters
-        config = {}
+        config = reward.config || {}
         reward.advanced_params.each do |param|
           config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
         end
@@ -1130,7 +1134,7 @@ class BonusesController < ApplicationController
 
       # Set currency bet levels
       if reward_params[:currency_bet_levels].present?
-        config["currency_bet_levels"] = reward_params[:currency_bet_levels]
+        config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
       end
 
       reward.config = config
@@ -1177,7 +1181,7 @@ class BonusesController < ApplicationController
 
         # Set currency bet levels
         if reward_params[:currency_bet_levels].present?
-          config["currency_bet_levels"] = reward_params[:currency_bet_levels]
+          config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
         end
 
         # Add common parameters from bonus
@@ -1218,7 +1222,7 @@ class BonusesController < ApplicationController
 
         # Set currency bet levels
         if reward_params[:currency_bet_levels].present?
-          config["currency_bet_levels"] = reward_params[:currency_bet_levels]
+          config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
         end
 
         reward.config = config
@@ -1383,8 +1387,11 @@ class BonusesController < ApplicationController
       :affiliates_user, :balance, :cashout, :chargeable_comp_points,
       :persistent_comp_points, :date_of_birth, :deposit, :gender, :issued_bonus,
       :registered, :social_networks, :hold_min, :hold_max,
-      currencies: [], currency_amounts: {}
+      currencies: [], currency_amounts: {}, currency_maximum_amounts: {}
     )
+
+    permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
+    permitted[:currency_maximum_amounts] = normalize_currency_amounts(permitted[:currency_maximum_amounts]) if permitted[:currency_maximum_amounts].present?
 
     permitted.delete(:bonus_type)
 
@@ -1402,6 +1409,7 @@ class BonusesController < ApplicationController
     )
 
     reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+    reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
 
     # Set new direct attributes
 
@@ -1411,7 +1419,7 @@ class BonusesController < ApplicationController
 
     # Set all additional parameters through the config field
     config = {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts, :currency_maximum_amounts).each do |key, value|
       next if value.blank?
       config[key.to_s] = value
     end
@@ -1442,7 +1450,7 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts).each do |key, value|
+    reward_params.except(:amount, :percentage, :reward_type, :code, :user_can_have_duplicates, :stag, :currency_amounts, :currency_maximum_amounts).each do |key, value|
       if value.blank?
         config.delete(key.to_s)
       else
@@ -1460,17 +1468,8 @@ class BonusesController < ApplicationController
 
 
 
-    # Prepare currency freespin bet levels first
-    currency_bet_levels = if reward_params[:currency_freespin_bet_levels].present?
-      normalize_currency_hash(reward_params[:currency_freespin_bet_levels])
-    elsif @bonus.currencies.present?
-      default_levels = {}
-      bet_level_value = reward_params[:bet_level] || 0.1  # Use bet_level or default to 0.1
-      @bonus.currencies.each { |currency| default_levels[currency] = bet_level_value }
-      default_levels
-    else
-      {}
-    end
+    currency_bet_levels = reward_params[:currency_freespin_bet_levels].presence ||
+                          reward_params[:currency_bet_levels].presence
 
     reward = @bonus.freespin_rewards.build(
       spins_count: reward_params[:spins_count],
@@ -1483,7 +1482,7 @@ class BonusesController < ApplicationController
       stag: reward_params[:stag]
     )
 
-    # Set currency freespin bet levels
+    # Set currency freespin bet amounts
     reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
     # Set advanced parameters
@@ -1512,6 +1511,10 @@ class BonusesController < ApplicationController
     reward.available = reward_params[:available] if reward_params[:available].present?
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
+
+    currency_bet_levels = reward_params[:currency_freespin_bet_levels].presence ||
+                          reward_params[:currency_bet_levels].presence
+    reward.currency_freespin_bet_levels = normalize_currency_hash(currency_bet_levels) if currency_bet_levels.present?
 
     # reward.no_more and reward.totally_no_more are read-only and come from bonus via BonusCommonParameters concern
     # reward.min_deposit is read-only and comes from bonus via BonusCommonParameters concern
@@ -1555,6 +1558,10 @@ class BonusesController < ApplicationController
       config[key.to_s] = value
     end
 
+    if reward_params[:currency_bet_levels].present?
+      config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+    end
+
     reward.config = config unless config.empty?
     reward.save
   end
@@ -1588,6 +1595,10 @@ class BonusesController < ApplicationController
       else
         config[key.to_s] = value
       end
+    end
+
+    if reward_params[:currency_bet_levels].present?
+      config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
     end
 
     reward.config = config unless config.empty?

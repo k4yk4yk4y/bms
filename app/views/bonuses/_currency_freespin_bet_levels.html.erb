@@ -2,12 +2,14 @@
 <div class="reward-param-field full-width currency-bet-levels-wrapper-freespin">
   <label class="form-label">
     <i class="bi bi-coin"></i>
-    Freespin bet level by currency *
+    Freespin bet amount by currency *
   </label>
   <%
     field_prefix = "freespin_rewards[#{index}]"
+    freespin_reward = defined?(existing_freespin) ? existing_freespin : nil
   %>
-  <div id="currency-freespin-bet-levels-container">
+  <div id="currency-freespin-bet-levels-container"
+       data-freespin-bet-levels="<%= ERB::Util.html_escape((freespin_reward&.currency_freespin_bet_levels || {}).to_json) %>">
     <div class="currency-bet-levels-grid">
         <% 
           # Приоритет валют: переданные валюты > минимальные депозиты > выбранные валюты из bonus.currencies > все валюты
@@ -25,8 +27,6 @@
             end
           end
         %>
-        <% freespin_reward = defined?(existing_freespin) ? existing_freespin : nil %>
-
         <% selected_currencies.each_with_index do |currency, index| %>
           <div class="currency-bet-level-item">
             <div class="input-group">
@@ -66,6 +66,15 @@
         const selectedCurrencies = getSelectedCurrenciesFreespin();
         const availableCurrencies = window.currentProjectCurrencies || [];
         const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
+        const hasSeeded = container.dataset.freespinBetLevelsSeeded === 'true';
+        let savedBetLevels = {};
+        if (container.dataset.freespinBetLevels) {
+          try {
+            savedBetLevels = JSON.parse(container.dataset.freespinBetLevels) || {};
+          } catch (e) {
+            savedBetLevels = {};
+          }
+        }
 
         // Получаем валюты из минимальных депозитов
         const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
@@ -77,17 +86,31 @@
           .filter(currency => currency !== null);
 
         // Приоритет: минимальные депозиты > выбранные валюты > все валюты
+        const rowDiv = container.querySelector('.currency-bet-levels-grid');
+        const currentCurrencies = rowDiv
+          ? Array.from(rowDiv.querySelectorAll('input[type="number"]'))
+              .map(input => {
+                const match = input.name.match(/currency_freespin_bet_levels\[([^\]]+)\]/);
+                return match ? match[1] : null;
+              })
+              .filter(currency => currency !== null)
+          : [];
+        const savedCurrencies = hasSeeded ? [] : Object.keys(savedBetLevels || {});
+
         let displayCurrencies;
         if (minimumDepositCurrencies.length > 0) {
-          displayCurrencies = minimumDepositCurrencies;
+          displayCurrencies = Array.from(new Set([ ...minimumDepositCurrencies, ...currentCurrencies, ...savedCurrencies ]));
         } else if (selectedCurrencies.length > 0) {
-          displayCurrencies = selectedCurrencies;
+          displayCurrencies = Array.from(new Set([ ...selectedCurrencies, ...currentCurrencies, ...savedCurrencies ]));
+        } else if (currentCurrencies.length > 0) {
+          displayCurrencies = Array.from(new Set([ ...currentCurrencies, ...savedCurrencies ]));
+        } else if (savedCurrencies.length > 0) {
+          displayCurrencies = savedCurrencies;
         } else {
           displayCurrencies = availableCurrencies;
         }
 
         // Rebuild the fields
-        const rowDiv = container.querySelector('.currency-bet-levels-grid');
         if (!rowDiv) return;
 
         // Find the form index from existing input if any
@@ -101,13 +124,16 @@
         }
 
         // Save ALL current values to preserve user input
-        const currentValues = {};
+        const currentValues = hasSeeded ? {} : { ...savedBetLevels };
         rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
           const match = input.name.match(/currency_freespin_bet_levels\[([^\]]+)\]/);
           if (match) {
             // Save value even if it's being edited or just typed
-            const value = input.value || input.getAttribute('value') || '';
-            if (value) {
+            const rawValue = input.value;
+            const value = hasSeeded ? rawValue : (rawValue || input.getAttribute('value') || '');
+            if (hasSeeded) {
+              currentValues[match[1]] = rawValue;
+            } else if (value !== '') {
               currentValues[match[1]] = value;
             }
           }
@@ -148,6 +174,9 @@
 
           rowDiv.appendChild(colDiv);
         });
+
+        container.dataset.freespinBetLevels = JSON.stringify(currentValues);
+        container.dataset.freespinBetLevelsSeeded = 'true';
 
         // Ensure all new input fields are properly enabled and focusable
         setTimeout(() => {

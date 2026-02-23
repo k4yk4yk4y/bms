@@ -9,6 +9,7 @@ class BonusReward < ApplicationRecord
 
   validate :amount_percentage_or_currency_amounts_present
   validate :validate_currency_amounts
+  validate :validate_currency_maximum_amounts
 
 
   scope :by_type, ->(type) { where(reward_type: type) }
@@ -18,6 +19,7 @@ class BonusReward < ApplicationRecord
 
   # Store currency amounts as JSON
   serialize :currency_amounts, coder: JSON
+  serialize :currency_maximum_amounts, coder: JSON
 
   # Common parameters accessors - DEPRECATED
   # These attributes have been moved to dedicated columns.
@@ -111,6 +113,18 @@ class BonusReward < ApplicationRecord
 
       unless self.class.valid_amount_for_currency?(amount, currency)
         errors.add(:currency_amounts, "Invalid amount for currency #{currency}: #{amount}")
+      end
+    end
+  end
+
+  def validate_currency_maximum_amounts
+    return if currency_maximum_amounts.blank?
+
+    currency_maximum_amounts.each do |currency, amount|
+      next if amount.blank?
+
+      unless self.class.valid_amount_for_currency?(amount, currency)
+        errors.add(:currency_maximum_amounts, "Invalid amount for currency #{currency}: #{amount}")
       end
     end
   end

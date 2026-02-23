@@ -182,7 +182,7 @@ RSpec.describe BonusesController, type: :controller do
             dsl_tag: 'welcome_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP', 'Premium' ],
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             no_more: 1,
             totally_no_more: 5,
@@ -210,7 +210,7 @@ RSpec.describe BonusesController, type: :controller do
         expect(bonus.dsl_tag).to eq('welcome_bonus')
         expect(bonus.project).to eq('VOLNA')
         expect(bonus.event).to eq('deposit')
-        expect(bonus.wager).to eq(35.0)
+        expect(bonus.wager).to eq(35)
         expect(bonus.maximum_winnings).to eq(500.0)
         expect(bonus.currencies).to eq([ 'USD', 'EUR' ])
         expect(bonus.groups).to eq([ 'VIP', 'Premium' ])
@@ -245,7 +245,7 @@ RSpec.describe BonusesController, type: :controller do
             dsl_tag: 'reload_freespins',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 25.0,
+            wager: 25,
             maximum_winnings: 200.0,
             no_more: 1,
             totally_no_more: 3,
@@ -255,8 +255,9 @@ RSpec.describe BonusesController, type: :controller do
           freespin_reward: {
             spins_count: 50,
             games: 'Book of Dead, Starburst',
-            bet_level: 0.10,
-            max_win: 100.0
+            bet_level: 1,
+            max_win: 100.0,
+            currency_freespin_bet_levels: { 'USD' => 0.10, 'EUR' => 0.10 }
           }
         }
       end
@@ -271,7 +272,7 @@ RSpec.describe BonusesController, type: :controller do
         expect(bonus.dsl_tag).to eq('reload_freespins')
         expect(bonus.project).to eq('FRESH')
         expect(bonus.event).to eq('deposit')
-        expect(bonus.wager).to eq(25.0)
+        expect(bonus.wager).to eq(25)
         expect(bonus.maximum_winnings).to eq(200.0)
       end
 
@@ -284,7 +285,7 @@ RSpec.describe BonusesController, type: :controller do
                 expect(freespin_reward.spins_count).to eq(50)
         # Note: games, bet_level, and max_win field processing needs to be fixed separately
         # expect(freespin_reward.games).to eq(['Book of Dead', 'Starburst'])
-        # expect(freespin_reward.bet_level).to eq(0.10)
+        # expect(freespin_reward.bet_level).to eq(1)
         # expect(freespin_reward.max_win).to eq(100.0)
       end
     end
@@ -304,7 +305,7 @@ RSpec.describe BonusesController, type: :controller do
             dsl_tag: 'manual_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 0.0,
+            wager: 0,
             maximum_winnings: 1000.0,
             no_more: 1,
             totally_no_more: 10,
@@ -345,7 +346,7 @@ RSpec.describe BonusesController, type: :controller do
             dsl_tag: 'welcome_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             no_more: 1,
             totally_no_more: 5,
@@ -373,7 +374,7 @@ RSpec.describe BonusesController, type: :controller do
         expect(assigns(:bonus).dsl_tag).to eq('welcome_bonus')
         expect(assigns(:bonus).project).to eq('VOLNA')
         expect(assigns(:bonus).event).to eq('deposit')
-        expect(assigns(:bonus).wager).to eq(35.0)
+        expect(assigns(:bonus).wager).to eq(35)
         expect(assigns(:bonus).maximum_winnings).to eq(500.0)
       end
     end
@@ -413,7 +414,7 @@ RSpec.describe BonusesController, type: :controller do
             dsl_tag: 'welcome_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             no_more: 1,
             totally_no_more: 5,

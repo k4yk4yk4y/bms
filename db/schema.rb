@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_20_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_22_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -135,9 +135,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_20_000001) do
     t.boolean "user_can_have_duplicates", default: false
     t.string "stag"
     t.text "currency_amounts"
+    t.text "currency_maximum_amounts"
     t.decimal "max_win_value", precision: 15, scale: 2
     t.string "max_win_type", default: "fixed"
     t.integer "available"
+    t.text "currency_maximum_amounts"
     t.index ["bonus_id", "reward_type"], name: "index_bonus_rewards_on_bonus_id_and_reward_type"
     t.index ["bonus_id"], name: "index_bonus_rewards_on_bonus_id"
     t.index ["reward_type"], name: "index_bonus_rewards_on_reward_type"

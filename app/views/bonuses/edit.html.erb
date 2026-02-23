@@ -184,7 +184,7 @@
 
                 <div class="mb-3">
                   <%= form.label :wager, class: "form-label" %>
-                  <%= form.number_field :wager, step: 0.01, 
+                  <%= form.number_field :wager, step: 1,
                       class: "form-control", min: 0 %>
                 </div>
 
@@ -298,6 +298,9 @@ function updateAllCurrencyFields() {
     if (typeof updateCurrencyBonusAmountsFields === 'function') {
       updateCurrencyBonusAmountsFields();
     }
+    if (typeof updateCurrencyBonusMaxAmountsFields === 'function') {
+      updateCurrencyBonusMaxAmountsFields();
+    }
     
     // Update currency minimum deposits
     if (typeof updateCurrencyMinimumDepositsFields === 'function') {
@@ -334,6 +337,9 @@ function updateTypeSpecificCurrencyFields() {
   bonusForms.forEach((bonusForm, index) => {
     if (typeof populateBonusRewardCurrencyFields === 'function') {
       populateBonusRewardCurrencyFields(index);
+    }
+    if (typeof populateBonusRewardMaxAmountFields === 'function') {
+      populateBonusRewardMaxAmountFields(index);
     }
   });
   

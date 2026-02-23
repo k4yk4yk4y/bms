@@ -168,6 +168,7 @@
     
     // Populate currency fields
     populateBonusRewardCurrencyFields(bonusRewardIndex);
+    populateBonusRewardMaxAmountFields(bonusRewardIndex);
     
     bonusRewardIndex++;
     
@@ -272,6 +273,16 @@
               <div class="input-group">
                 <input type="number" class="form-control" name="bonus_rewards[${index}][percentage]" step="0.01" min="0" max="100">
                 <span class="input-group-text">%</span>
+              </div>
+            </div>
+
+            <!-- Maximum bonus amount -->
+            <div class="reward-param-field mb-3" id="max_amount_field_${index}" style="display: none;">
+              <label class="form-label">Maximum bonus amount by currency</label>
+              <div id="currency-bonus-max-amounts-container-${index}">
+                <div class="currency-amounts-grid" id="bonus-max-amounts-grid-${index}">
+                  <!-- Currency fields will be populated by JavaScript -->
+                </div>
               </div>
             </div>
 
@@ -492,7 +503,7 @@
             <!-- Bet Level -->
             <div class="reward-param-field">
               <label class="form-label">Bet level (bet_level)</label>
-              <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="0.01" >
+              <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="1" >
             </div>
 
             <!-- Code -->
@@ -503,7 +514,7 @@
           <!-- Currency Freespin Bet Levels - separate section -->
           <div class="currency-bet-levels-section mt-3">
             <div class="reward-param-field full-width">
-              <label class="form-label">Freespin bet level by currency *</label>
+              <label class="form-label">Freespin bet amount by currency *</label>
               <div id="currency-freespin-bet-levels-container-${index}">
                 <div class="currency-bet-levels-grid" id="freespin-bet-levels-grid-${index}">
                   <!-- Currency fields will be populated by JavaScript -->
@@ -909,6 +920,75 @@
     }, 50);
   }
 
+  function populateBonusRewardMaxAmountFields(index) {
+    const grid = document.getElementById(`bonus-max-amounts-grid-${index}`);
+    if (!grid) return;
+
+    const availableCurrencies = window.currentProjectCurrencies || [];
+    const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
+
+    // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
+    let currenciesToUse = availableCurrencies;
+
+    // Проверяем валюты из минимальных депозитов
+    const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+      .map(input => {
+        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        return match ? match[1] : null;
+      })
+      .filter(currency => currency !== null);
+
+    // Проверяем выбранные валюты
+    const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox:checked');
+    const selectedCurrencies = Array.from(currencyCheckboxes).map(checkbox => checkbox.value);
+
+    // Приоритет валют
+    if (minimumDepositCurrencies.length > 0) {
+      currenciesToUse = minimumDepositCurrencies;
+    } else if (selectedCurrencies.length > 0) {
+      currenciesToUse = selectedCurrencies;
+    }
+
+    // Clear existing fields first
+    grid.innerHTML = '';
+
+    currenciesToUse.forEach(currency => {
+      const isCrypto = cryptoCurrencies.includes(currency);
+      const step = isCrypto ? '0.00000001' : '0.01';
+      const placeholder = isCrypto ? '0.00000000' : '0.00';
+      const precision = isCrypto ? 8 : 2;
+
+      const fieldHtml = `
+        <div class="currency-amount-item">
+          <div class="input-group">
+            <span class="input-group-text currency-code">${currency}</span>
+            <input type="number" 
+                   name="bonus_rewards[${index}][currency_maximum_amounts][${currency}]"
+                   class="form-control currency-input"
+                   step="${step}"
+                   min="0"
+                   placeholder="${placeholder}"
+                   data-currency="${currency}"
+                   data-precision="${precision}"
+                   data-currency-validation-target="input">
+          </div>
+        </div>
+      `;
+
+      grid.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+
+    // Ensure all new input fields are properly enabled and focusable
+    setTimeout(() => {
+      grid.querySelectorAll('input[type="number"]').forEach(input => {
+        input.removeAttribute('disabled');
+        input.removeAttribute('readonly');
+        input.style.pointerEvents = 'auto';
+      });
+    }, 50);
+  }
+
   // Populate currency fields for bonus buy rewards
   function populateBonusBuyRewardCurrencyFields(index) {
     const grid = document.getElementById(`bonus-buy-bet-levels-grid-${index}`);
@@ -975,15 +1055,18 @@
   function toggleBonusType(type, index) {
     const amountField = document.getElementById('amount_field_' + index);
     const percentageField = document.getElementById('percentage_field_' + index);
+    const maxAmountField = document.getElementById('max_amount_field_' + index);
     
     if (type === 'fixed') {
       amountField.style.display = 'block';
       percentageField.style.display = 'none';
+      if (maxAmountField) maxAmountField.style.display = 'none';
       amountField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
       percentageField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
     } else {
       amountField.style.display = 'none';
       percentageField.style.display = 'block';
+      if (maxAmountField) maxAmountField.style.display = 'block';
       amountField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
       percentageField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
     }
@@ -1097,8 +1180,7 @@
             <div class="reward-param-field">
               <label class="form-label">Bet level (bet_level)</label>
               <div class="input-group">
-                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][bet_level]" min="0" step="0.01" >
-                <span class="input-group-text">€</span>
+                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][bet_level]" min="0" step="1" >
               </div>
               <!--Размер ставки за покупку-->
             </div>
@@ -1115,6 +1197,18 @@
             </div>
 
             <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
+          </div>
+
+          <!-- Currency Bonus Buy Bet Levels -->
+          <div class="currency-bet-levels-section mt-3">
+            <div class="reward-param-field full-width">
+              <label class="form-label">Bet level by currency *</label>
+              <div id="currency-bonus-buy-bet-levels-container-${index}">
+                <div class="currency-bet-levels-grid" id="bonus-buy-bet-levels-grid-${index}">
+                  <!-- Currency fields will be populated by JavaScript -->
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Advanced parameters -->

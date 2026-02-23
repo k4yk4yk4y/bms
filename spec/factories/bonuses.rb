@@ -14,7 +14,7 @@ FactoryBot.define do
     availability_end_date { 1.month.from_now }
     currencies { %w[USD EUR RUB] }
     minimum_deposit { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
-    wager { Faker::Number.decimal(l_digits: 2, r_digits: 2) }
+    wager { Faker::Number.between(from: 1, to: 100) }
     maximum_winnings { Faker::Number.decimal(l_digits: 3, r_digits: 2) }
     wagering_strategy { %w[bonus_first deposit_first].sample }
     user_group { Faker::Company.name }

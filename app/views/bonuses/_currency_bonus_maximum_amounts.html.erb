@@ -1,0 +1,149 @@
+<%
+  field_prefix ||= "bonus_reward"
+  container_id = "currency-bonus-max-amounts-container-#{field_prefix.parameterize}"
+  grid_id = "currency-bonus-max-amounts-grid-#{field_prefix.parameterize}"
+%>
+
+<!-- Currency Bonus Maximum Amounts Section -->
+<div class="reward-param-field full-width currency-amounts-wrapper-bonus">
+  <label class="form-label">
+    <i class="bi bi-coin"></i>
+    Maximum bonus amount by currency
+  </label>
+  <div id="<%= container_id %>" data-currency-bonus-max-amounts="true" data-field-prefix="<%= field_prefix %>">
+    <div class="currency-amounts-grid" id="<%= grid_id %>">
+        <% 
+          # Используем переданные валюты или определяем автоматически как fallback
+          if defined?(currencies) && currencies.present?
+            selected_currencies = currencies
+          else
+            available_currencies = bonus.project_currencies
+            minimum_deposit_currencies = bonus.currency_minimum_deposits.present? ? bonus.currency_minimum_deposits.keys : []
+            selected_currencies = minimum_deposit_currencies.present? ? minimum_deposit_currencies : (bonus.currencies.present? ? (bonus.currencies & available_currencies) : available_currencies)
+          end
+        %>
+        <% bonus_reward = defined?(existing_reward) ? existing_reward : nil %>
+
+        <% selected_currencies.each_with_index do |currency, index| %>
+          <div class="currency-amount-item">
+            <div class="input-group">
+              <span class="input-group-text currency-code"><%= currency %></span>
+              <%= number_field_tag "#{field_prefix}[currency_maximum_amounts][#{currency}]",
+                  bonus_reward&.currency_maximum_amounts&.dig(currency),
+                  class: "form-control currency-input",
+                  step: Bonus.currency_step(currency),
+                  min: 0,
+                  placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
+                  data: { 
+                    currency: currency, 
+                    precision: Bonus.currency_precision(currency),
+                    "currency-validation-target": "input"
+                  } %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+  </div>
+
+  <!-- Dynamic update based on selected currencies -->
+  <script>
+      (() => {
+        function getSelectedCurrenciesForMaxAmounts() {
+          const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
+          return Array.from(checkboxes).map(checkbox => checkbox.value);
+        }
+
+        window.updateCurrencyBonusMaxAmountsFields = function() {
+          const containers = document.querySelectorAll('[data-currency-bonus-max-amounts="true"]');
+          if (!containers.length) return;
+
+          const selectedCurrencies = getSelectedCurrenciesForMaxAmounts();
+          const availableCurrencies = window.currentProjectCurrencies || [];
+          const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
+
+          // Получаем валюты из минимальных депозитов
+          const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+          const minimumDepositCurrencies = Array.from(minimumDepositInputs)
+            .map(input => {
+              const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+              return match ? match[1] : null;
+            })
+            .filter(currency => currency !== null);
+
+          // Приоритет: выбранные валюты > минимальные депозиты > все валюты
+          let displayCurrencies;
+          if (selectedCurrencies.length > 0) {
+            displayCurrencies = selectedCurrencies;
+          } else if (minimumDepositCurrencies.length > 0) {
+            displayCurrencies = minimumDepositCurrencies;
+          } else {
+            displayCurrencies = availableCurrencies;
+          }
+
+          containers.forEach(container => {
+            const fieldPrefix = container.dataset.fieldPrefix || "bonus_reward";
+            const rowDiv = container.querySelector('.currency-amounts-grid');
+            if (!rowDiv) return;
+
+            // Save ALL current values to preserve user input
+            const currentValues = {};
+            rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+              const match = input.name.match(/currency_maximum_amounts\[([^\]]+)\]/);
+              if (match) {
+                const value = input.value || input.getAttribute('value') || '';
+                if (value) {
+                  currentValues[match[1]] = value;
+                }
+              }
+            });
+
+            // Clear and rebuild
+            rowDiv.innerHTML = '';
+
+            displayCurrencies.forEach(currency => {
+              const colDiv = document.createElement('div');
+              colDiv.className = 'currency-amount-item';
+
+              const isCrypto = cryptoCurrencies.includes(currency);
+              const step = isCrypto ? '0.00000001' : '0.01';
+              const placeholder = isCrypto ? '0.00000000' : '0.00';
+              const precision = isCrypto ? 8 : 2;
+
+              // Always use current value if it exists to preserve user input
+              const currentValue = currentValues[currency] || '';
+
+              colDiv.innerHTML = `
+                <div class="input-group">
+                  <span class="input-group-text currency-code">${currency}</span>
+                  <input type="number"
+                         name="${fieldPrefix}[currency_maximum_amounts][${currency}]"
+                         value="${currentValue}"
+                         class="form-control currency-input"
+                         step="${step}"
+                         min="0"
+                         placeholder="${placeholder}"
+                         data-currency="${currency}"
+                         data-precision="${precision}"
+                         data-currency-validation-target="input"
+                         autocomplete="off">
+                </div>
+              `;
+
+              rowDiv.appendChild(colDiv);
+            });
+
+            // Ensure all new input fields are properly enabled and focusable
+            setTimeout(() => {
+              rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
+                input.removeAttribute('disabled');
+                input.removeAttribute('readonly');
+                input.style.pointerEvents = 'auto';
+              });
+            }, 50);
+          });
+        };
+      })();
+
+      // Note: Currency updates are now handled by Stimulus currency controller
+  </script>
+</div>

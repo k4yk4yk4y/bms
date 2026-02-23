@@ -326,7 +326,11 @@ RSpec.describe BonusesController, type: :controller do
       end
 
       it 'creates freespin reward when specified' do
-        freespin_params = { spins_count: 50, games: 'slot1,slot2' }
+        freespin_params = {
+          spins_count: 50,
+          games: 'slot1,slot2',
+          currency_freespin_bet_levels: { "USD" => "0.10" }
+        }
         post :create, params: {
           bonus: valid_attributes,
           freespin_reward: freespin_params
@@ -461,6 +465,27 @@ RSpec.describe BonusesController, type: :controller do
         new_reward = bonus.bonus_rewards.last
         expect(new_reward.reward_type).to eq('cashback')
         expect(new_reward.amount).to eq(200.0)
+      end
+
+      it 'creates freespin reward with currency bet levels' do
+        expect {
+          patch :update, params: {
+            id: bonus.id,
+            bonus: { name: bonus.name },
+            freespin_rewards: {
+              '0' => {
+                spins_count: 10,
+                bet_level: "1",
+                currency_freespin_bet_levels: { "USD" => "0.2" }
+              }
+            }
+          }
+        }.to change(FreespinReward, :count).by(1)
+
+        bonus.reload
+        reward = bonus.freespin_rewards.last
+        expect(reward.bet_level).to eq(1)
+        expect(reward.currency_freespin_bet_levels['USD']).to eq(0.2)
       end
     end
 
@@ -774,7 +799,7 @@ RSpec.describe BonusesController, type: :controller do
         post :create, params: {
           bonus: valid_attributes,
           bonus_reward: { reward_type: 'bonus', amount: 100.0 },
-          freespin_reward: { spins_count: 50 },
+          freespin_reward: { spins_count: 50, currency_freespin_bet_levels: { "USD" => "0.10" } },
           comp_point_reward: { points: 1000 }
         }
 
@@ -884,8 +909,18 @@ RSpec.describe BonusesController, type: :controller do
       it "creates multiple freespin rewards" do
         params = valid_bonus_params.merge(
           freespin_rewards: {
-            "0" => { spins_count: "50", games: "slot1,slot2", bet_level: "0.10" },
-            "1" => { spins_count: "100", games: "slot3,slot4", bet_level: "0.20" }
+            "0" => {
+              spins_count: "50",
+              games: "slot1,slot2",
+              bet_level: "1",
+              currency_freespin_bet_levels: { "USD" => "0.10" }
+            },
+            "1" => {
+              spins_count: "100",
+              games: "slot3,slot4",
+              bet_level: "2",
+              currency_freespin_bet_levels: { "USD" => "0.20" }
+            }
           }
         )
 
@@ -1154,19 +1189,22 @@ RSpec.describe BonusesController, type: :controller do
           bonus: valid_bonus_params,
           freespin_reward: {
             spins_count: "25",
-            bet_level: "0.05",
-            games: "slots"
+            bet_level: "1",
+            games: "slots",
+            currency_freespin_bet_levels: { "USD" => "0.05" }
           },
           freespin_rewards: {
             "0" => {
               spins_count: "50",
-              bet_level: "0.1",
-              games: "table_games"
+              bet_level: "2",
+              games: "table_games",
+              currency_freespin_bet_levels: { "USD" => "0.10" }
             },
             "1" => {
               spins_count: "100",
-              bet_level: "0.2",
-              games: "live_games"
+              bet_level: "3",
+              games: "live_games",
+              currency_freespin_bet_levels: { "USD" => "0.20" }
             }
           }
         }
@@ -1183,7 +1221,7 @@ RSpec.describe BonusesController, type: :controller do
       expect(spins_counts).to contain_exactly(25, 50, 100)
 
       bet_levels = bonus.freespin_rewards.pluck(:bet_level)
-      expect(bet_levels).to contain_exactly(0.05, 0.1, 0.2)
+      expect(bet_levels).to contain_exactly(1, 2, 3)
 
       games = bonus.freespin_rewards.pluck(:games).flatten
       expect(games).to contain_exactly("slots", "table_games", "live_games")
@@ -1195,8 +1233,9 @@ RSpec.describe BonusesController, type: :controller do
           bonus: valid_bonus_params,
           freespin_reward: {
             spins_count: "25",
-            bet_level: "0.05",
-            games: "slots"
+            bet_level: "1",
+            games: "slots",
+            currency_freespin_bet_levels: { "USD" => "0.05" }
           }
         }
       }.to change(Bonus, :count).by(1)
@@ -1206,7 +1245,7 @@ RSpec.describe BonusesController, type: :controller do
 
       reward = bonus.freespin_rewards.first
       expect(reward.spins_count).to eq(25)
-      expect(reward.bet_level).to eq(0.05)
+      expect(reward.bet_level).to eq(1)
       expect(reward.games).to eq([ "slots" ])
     end
 
@@ -1217,13 +1256,15 @@ RSpec.describe BonusesController, type: :controller do
           freespin_rewards: {
             "0" => {
               spins_count: "50",
-              bet_level: "0.1",
-              games: "table_games"
+              bet_level: "1",
+              games: "table_games",
+              currency_freespin_bet_levels: { "USD" => "0.10" }
             },
             "1" => {
               spins_count: "100",
-              bet_level: "0.2",
-              games: "live_games"
+              bet_level: "2",
+              games: "live_games",
+              currency_freespin_bet_levels: { "USD" => "0.20" }
             }
           }
         }

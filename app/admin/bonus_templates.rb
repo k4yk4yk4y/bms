@@ -129,7 +129,7 @@ ActiveAdmin.register BonusTemplate do
 
     f.inputs "Финансовые параметры" do
       f.input :minimum_deposit, hint: "Минимальный депозит"
-      f.input :wager, hint: "Вейджер (множитель отыгрыша)"
+      f.input :wager, hint: "Вейджер (множитель отыгрыша)", input_html: { step: 1, min: 0 }
       f.input :maximum_winnings, hint: "Максимальный выигрыш"
       f.input :no_more, hint: "Больше нельзя использовать"
       f.input :totally_no_more, hint: "Полностью больше нельзя использовать"

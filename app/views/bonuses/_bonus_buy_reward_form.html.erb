@@ -58,8 +58,7 @@
     <label for="bonus_buy_reward_bet_level_<%= index %>" class="form-label">Bet level (bet_level)</label>
     <div class="input-group">
       <input type="number" class="form-control" name="<%= field_prefix %>[bet_level]" id="bonus_buy_reward_bet_level_<%= index %>"
-             step="0.01" min="0"  value="<%= existing_bonus_buy&.bet_level %>">
-      <span class="input-group-text">€</span>
+             step="1" min="0"  value="<%= existing_bonus_buy&.bet_level %>">
     </div>
   </div>
 

@@ -218,7 +218,7 @@ ActiveAdmin.register Bonus do
 
     f.inputs "Финансовые параметры" do
       f.input :minimum_deposit
-      f.input :wager
+      f.input :wager, input_html: { step: 1, min: 0 }
       f.input :maximum_winnings
       f.input :maximum_winnings_type, as: :select, collection: %w[fixed multiplier]
       f.input :wagering_strategy

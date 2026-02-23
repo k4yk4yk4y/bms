@@ -5,7 +5,7 @@ FactoryBot.define do
     project { "VOLNA" }
     event { "deposit" }
 
-    wager { 35.0 }
+    wager { 35 }
     maximum_winnings { 500.0 }
     no_more { 1 }
     totally_no_more { 5 }
@@ -20,7 +20,7 @@ FactoryBot.define do
       project { "VOLNA" }
       event { "deposit" }
 
-      wager { 40.0 }
+      wager { 40 }
       maximum_winnings { 1000.0 }
     end
 
@@ -30,7 +30,7 @@ FactoryBot.define do
       project { "ROX" }
       event { "deposit" }
 
-      wager { 30.0 }
+      wager { 30 }
       maximum_winnings { 300.0 }
     end
 
@@ -40,7 +40,7 @@ FactoryBot.define do
       project { "FRESH" }
       event { "deposit" }
 
-      wager { 25.0 }
+      wager { 25 }
       maximum_winnings { 200.0 }
     end
 
@@ -50,7 +50,7 @@ FactoryBot.define do
       project { "All" }
       event { "deposit" }
 
-      wager { 35.0 }
+      wager { 35 }
       maximum_winnings { 500.0 }
     end
 

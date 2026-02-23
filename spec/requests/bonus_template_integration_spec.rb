@@ -23,7 +23,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'welcome_bonus',
             project: 'VOLNA',
             event: 'deposit',
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             no_more: 1,
             totally_no_more: 5,
@@ -46,7 +46,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         expect(template.dsl_tag).to eq('welcome_bonus')
         expect(template.project).to eq('VOLNA')
         expect(template.event).to eq('deposit')
-        expect(template.wager).to eq(35.0)
+        expect(template.wager).to eq(35)
         expect(template.maximum_winnings).to eq(500.0)
         expect(template.currencies).to eq([ 'USD', 'EUR' ])
         expect(template.groups).to eq([ 'VIP', 'Premium' ])
@@ -65,7 +65,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'welcome_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP', 'Premium' ],
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             no_more: 1,
             totally_no_more: 5,
@@ -91,7 +91,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         expect(bonus.dsl_tag).to eq('welcome_bonus')
         expect(bonus.project).to eq('VOLNA')
         expect(bonus.event).to eq('deposit')
-        expect(bonus.wager).to eq(35.0)
+        expect(bonus.wager).to eq(35)
         expect(bonus.maximum_winnings).to eq(500.0)
         expect(bonus.currencies).to eq([ 'USD', 'EUR' ])
         expect(bonus.groups).to eq([ 'VIP', 'Premium' ])
@@ -116,7 +116,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'freespin_welcome',
             project: 'FRESH',
             event: 'deposit',
-            wager: 25.0,
+            wager: 25,
             maximum_winnings: 200.0,
             no_more: 1,
             totally_no_more: 3,
@@ -146,19 +146,20 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'freespin_welcome',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 25.0,
+            wager: 25,
             maximum_winnings: 200.0,
             no_more: 1,
             totally_no_more: 3,
             currency_minimum_deposits: { 'USD' => 20.0, 'EUR' => 15.0 },
             description: 'Freespin welcome bonus'
           },
-                      freespin_reward: {
-              spins_count: 50,
-              games: 'Book of Dead, Starburst',
-              bet_level: 0.10,
-              max_win: 100.0
-            }
+          freespin_reward: {
+            spins_count: 50,
+            games: 'Book of Dead, Starburst',
+            bet_level: 1,
+            max_win: 100.0,
+            currency_freespin_bet_levels: { 'USD' => 0.10, 'EUR' => 0.10 }
+          }
         }
 
 
@@ -176,7 +177,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
         expect(freespin_reward.spins_count).to eq(50)
         # Note: games, bet_level, and max_win field processing needs to be fixed separately
         # expect(freespin_reward.games).to eq(['Book of Dead', 'Starburst'])
-        # expect(freespin_reward.bet_level).to eq(0.10)
+        # expect(freespin_reward.bet_level).to eq(1)
         # expect(freespin_reward.max_win).to eq(100.0)
       end
     end
@@ -190,7 +191,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'manual_bonus',
             project: 'SOL',
             event: 'manual',
-            wager: 0.0,
+            wager: 0,
             maximum_winnings: 1000.0,
             no_more: 1,
             totally_no_more: 10,
@@ -222,7 +223,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'manual_bonus',
             currencies: [ 'USD', 'EUR' ],
             groups: [ 'VIP' ],
-            wager: 0.0,
+            wager: 0,
             maximum_winnings: 1000.0,
             no_more: 1,
             totally_no_more: 10,
@@ -284,7 +285,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'invalid_tag',
             project: 'VOLNA',
             event: 'manual',
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             currencies: [ 'USD' ],
             currency_minimum_deposits: { 'USD' => 10.0 } # This should be invalid for manual events
@@ -304,7 +305,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'invalid_tag',
             project: 'VOLNA',
             event: 'deposit',
-            wager: -35.0, # Negative value
+            wager: -35, # Negative value
             maximum_winnings: -500.0, # Negative value
             currencies: [ 'USD' ],
             currency_minimum_deposits: { 'USD' => 10.0 }
@@ -325,7 +326,7 @@ RSpec.describe 'Bonus Template Integration', type: :request do
             dsl_tag: 'invalid_tag',
             project: 'VOLNA',
             event: 'deposit',
-            wager: 35.0,
+            wager: 35,
             maximum_winnings: 500.0,
             currencies: [ 'USD' ], # Only USD supported
             currency_minimum_deposits: { 'EUR' => 10.0 } # EUR not in currencies

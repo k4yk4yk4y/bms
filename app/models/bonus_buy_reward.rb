@@ -6,7 +6,7 @@ class BonusBuyReward < ApplicationRecord
 
   validates :buy_amount, presence: true, numericality: { greater_than: 0 }
   validates :multiplier, numericality: { greater_than: 0 }, allow_nil: true
-  validates :bet_level, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   validate :currency_bet_levels_must_be_present
   validate :validate_currency_bet_levels_precision
@@ -139,7 +139,7 @@ class BonusBuyReward < ApplicationRecord
     return if currency_bet_levels.present? &&
               currency_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
 
-    errors.add(:currency_bet_levels, "a bet level must be provided for at least one currency")
+    errors.add(:currency_bet_levels, "a bet amount must be provided for at least one currency")
   end
 
   def validate_currency_bet_levels_precision

@@ -14,8 +14,8 @@ RSpec.describe BonusBuyReward, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:buy_amount) }
     it { should validate_numericality_of(:buy_amount).is_greater_than(0) }
-    it { should validate_numericality_of(:multiplier).is_greater_than(0).allow_nil }
-    it { should validate_numericality_of(:bet_level).is_greater_than_or_equal_to(0).allow_nil }
+    it { should validate_numericality_of(:multiplier).is_greater_than(1).allow_nil }
+    it { should validate_numericality_of(:bet_level).only_integer.is_greater_than_or_equal_to(0).allow_nil }
   end
 
   # Serialization

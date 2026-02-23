@@ -332,12 +332,18 @@ export default class extends Controller {
     if (typeof updateCurrencyBonusAmountsFields === 'function') {
       updateCurrencyBonusAmountsFields()
     }
+    if (typeof updateCurrencyBonusMaxAmountsFields === 'function') {
+      updateCurrencyBonusMaxAmountsFields()
+    }
     
     // Update each bonus reward form individually from _type_specific_form.html.erb
     const bonusForms = document.querySelectorAll('[id^="bonus-reward-"]')
     bonusForms.forEach((form, index) => {
       if (typeof populateBonusRewardCurrencyFields === 'function') {
         populateBonusRewardCurrencyFields(index)
+      }
+      if (typeof populateBonusRewardMaxAmountFields === 'function') {
+        populateBonusRewardMaxAmountFields(index)
       }
     })
     
@@ -346,6 +352,13 @@ export default class extends Controller {
     bonusAmountsGrids.forEach((grid, index) => {
       if (typeof populateBonusRewardCurrencyFields === 'function') {
         populateBonusRewardCurrencyFields(index)
+      }
+    })
+
+    const bonusMaxAmountsGrids = document.querySelectorAll('[id^="bonus-max-amounts-grid-"]')
+    bonusMaxAmountsGrids.forEach((grid, index) => {
+      if (typeof populateBonusRewardMaxAmountFields === 'function') {
+        populateBonusRewardMaxAmountFields(index)
       }
     })
   }

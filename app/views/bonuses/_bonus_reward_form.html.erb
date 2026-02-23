@@ -81,6 +81,24 @@
       </div>
     </div>
 
+    <% if available_currencies.any? %>
+      <div id="max_amount_field_<%= index %>" <%= 'style="display: none;"' unless has_percentage %>>
+        <%= render "currency_bonus_maximum_amounts", bonus: bonus, existing_reward: existing_reward, currencies: available_currencies, field_prefix: field_prefix %>
+      </div>
+    <% else %>
+      <% single_currency = bonus.currency.presence || bonus.currencies&.first || 'USD' %>
+      <div class="reward-param-field mb-3" id="max_amount_field_<%= index %>" <%= 'style="display: none;"' unless has_percentage %>>
+        <label for="bonus_reward_maximum_amount" class="form-label">Maximum bonus amount</label>
+        <div class="input-group">
+          <input type="number" class="form-control" name="<%= field_prefix %>[currency_maximum_amounts][<%= single_currency %>]"
+                 step="<%= Bonus.currency_step(single_currency) %>" min="0"
+                 placeholder="<%= Bonus.crypto_currency?(single_currency) ? '0.00000000' : '0.00' %>"
+                 value="<%= existing_reward&.currency_maximum_amounts&.dig(single_currency) %>">
+          <span class="input-group-text currency-code"><%= single_currency %></span>
+        </div>
+      </div>
+    <% end %>
+
 
 
 
@@ -335,16 +353,32 @@
 </div>
 
 <script>
-  function toggleBonusType(type) {
-    const amountField = document.getElementById('amount_field');
-    const percentageField = document.getElementById('percentage_field');
+  function toggleBonusType(type, index) {
+    const suffix = (index !== undefined && index !== null) ? `_${index}` : '';
+    const amountField = document.getElementById(`amount_field${suffix}`);
+    const percentageField = document.getElementById(`percentage_field${suffix}`);
+    const maxAmountField = document.getElementById(`max_amount_field${suffix}`);
     
     if (type === 'fixed') {
-      amountField.style.display = 'block';
-      percentageField.style.display = 'none';
+      if (amountField) {
+        amountField.style.display = 'block';
+        amountField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
+      }
+      if (percentageField) {
+        percentageField.style.display = 'none';
+        percentageField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+      }
+      if (maxAmountField) maxAmountField.style.display = 'none';
     } else {
-      amountField.style.display = 'none';
-      percentageField.style.display = 'block';
+      if (amountField) {
+        amountField.style.display = 'none';
+        amountField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+      }
+      if (percentageField) {
+        percentageField.style.display = 'block';
+        percentageField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
+      }
+      if (maxAmountField) maxAmountField.style.display = 'block';
     }
   }
 

@@ -13,7 +13,7 @@ FactoryBot.define do
     end
 
     trait :with_bet_level do
-      bet_level { Faker::Number.decimal(l_digits: 1, r_digits: 2) }
+      bet_level { Faker::Number.between(from: 1, to: 10) }
     end
 
 
