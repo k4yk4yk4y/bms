@@ -16,6 +16,7 @@ module PermissionsCatalog
     { key: "permanent_bonuses", label: "Permanent bonuses" },
     { key: "users", label: "Users" },
     { key: "retention", label: "Retention" },
+    { key: "smm", label: "SMM" },
     { key: "settings", label: "Settings" },
     { key: "api", label: "API" },
     { key: "self_profile", label: "Self profile" }

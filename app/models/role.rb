@@ -8,7 +8,8 @@ class Role < ApplicationRecord
     "self_profile" => "Доступ только к собственному профилю.",
     "settings" => "Доступ к разделу настроек во фронте.",
     "api" => "Доступ к внутренним API эндпоинтам.",
-    "heatmap_comments" => "Доступ к комментариям Heatmap."
+    "heatmap_comments" => "Доступ к комментариям Heatmap.",
+    "smm" => "Доступ к разделу SMM во фронте."
   }.freeze
 
   SECTION_DEFINITIONS.each do |section|
@@ -88,6 +89,7 @@ class Role < ApplicationRecord
       "permanent_bonuses" => "manage",
       "users" => "read",
       "retention" => "manage",
+      "smm" => "manage",
       "settings" => "manage",
       "api" => "manage",
       "self_profile" => "write"
@@ -118,6 +120,13 @@ class Role < ApplicationRecord
       "bonuses" => "read",
       "users" => "read",
       "retention" => "manage",
+      "self_profile" => "write"
+    },
+    "smm_manager" => {
+      "dashboard" => "read",
+      "bonuses" => "read",
+      "users" => "read",
+      "smm" => "manage",
       "self_profile" => "write"
     },
     "support_agent" => {

@@ -89,6 +89,8 @@ class Ability
         apply_level(level, [ User ])
       when "retention"
         apply_level(level, [ RetentionChain, RetentionEmail, RetentionEmailBonus ])
+      when "smm"
+        apply_level(level, [ SmmMonth, SmmMonthProject, SmmBonus, SmmPreset ])
       when "settings"
         apply_settings_permissions(level)
       when "api"

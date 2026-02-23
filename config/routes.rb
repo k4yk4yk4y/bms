@@ -73,6 +73,23 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :smm_months, path: "smm", only: [ :index, :create, :destroy ] do
+    member do
+      post :copy
+    end
+    resources :smm_month_projects, path: "projects", only: [ :create, :destroy ] do
+      member do
+        get :bonuses
+      end
+    end
+    resources :smm_bonuses, path: "bonuses", only: [ :create, :update, :destroy ] do
+      collection do
+        post :batch_create
+      end
+    end
+  end
+  resources :smm_presets, only: [ :create, :update, :destroy ]
+
   # API routes for bonus management
   namespace :api do
     namespace :v1 do

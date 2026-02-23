@@ -1,0 +1,91 @@
+.smm-page .smm-month-list .list-group-item {
+  border: 1px solid #eef1f5;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  color: #2a2f36;
+  background: #ffffff;
+}
+
+.smm-page .smm-month-list .list-group-item.active {
+  background: #e8f0ff;
+  border-color: #cfe0ff;
+  color: #1f2a44;
+  font-weight: 600;
+}
+
+.smm-project-tabs .nav-link {
+  color: #56627a;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 16px;
+}
+
+.smm-project-tabs .nav-link.active {
+  color: #1f2a44;
+  background: #f2f5ff;
+  font-weight: 600;
+  border: 1px solid #d9e2ff;
+  border-bottom-color: transparent;
+}
+
+.smm-table thead th {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b778c;
+  background: #f7f9fc;
+}
+
+.smm-table tbody td {
+  vertical-align: middle;
+}
+
+.smm-row--draft {
+  background-color: #fff7db;
+}
+
+.smm-row--ready {
+  background-color: #e9f2ff;
+}
+
+.smm-row--checked {
+  background-color: #e9f8ef;
+}
+
+.smm-bonus-link {
+  font-size: 0.75rem;
+  color: #2c5cc5;
+  text-decoration: none;
+}
+
+.smm-bonus-link:hover {
+  text-decoration: underline;
+}
+
+.smm-preset-section {
+  padding: 12px 0 6px;
+  border-bottom: 1px solid #edf0f5;
+  margin-bottom: 10px;
+}
+
+.smm-preset-section:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.smm-preset-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #6a7487;
+  margin-bottom: 12px;
+}
+
+.smm-currency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px 16px;
+}
+
+.smm-currency-grid .form-check {
+  margin-bottom: 0;
+}

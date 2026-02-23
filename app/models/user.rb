@@ -10,7 +10,8 @@ class User < ApplicationRecord
     shift_leader: 2,
     support_agent: 3,
     marketing_manager: 4,
-    retention_manager: 5
+    retention_manager: 5,
+    smm_manager: 6
   }
 
   # Validations
@@ -27,6 +28,7 @@ class User < ApplicationRecord
   scope :support_agents, -> { where(role: :support_agent) }
   scope :marketing_managers, -> { where(role: :marketing_manager) }
   scope :retention_managers, -> { where(role: :retention_manager) }
+  scope :smm_managers, -> { where(role: :smm_manager) }
 
   has_many :heatmap_comments, dependent: :destroy
 

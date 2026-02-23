@@ -68,6 +68,13 @@
               <% end %>
             </li>
           <% end %>
+          <% if can?(:read, SmmMonth) %>
+            <li class="nav-item">
+              <%= link_to smm_months_path, class: "nav-link #{'active' if controller_name.start_with?('smm')}" do %>
+                <i class="fas fa-comments"></i> SMM
+              <% end %>
+            </li>
+          <% end %>
           <% if can?(:read, Bonus) %>
             <li class="nav-item dropdown" data-controller="projects-dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown" data-action="click->projects-dropdown#handleDropdownClick keydown->projects-dropdown#handleKeydown">

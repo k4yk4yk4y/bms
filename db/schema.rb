@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_22_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_23_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -135,7 +135,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_000000) do
     t.boolean "user_can_have_duplicates", default: false
     t.string "stag"
     t.text "currency_amounts"
-    t.text "currency_maximum_amounts"
     t.decimal "max_win_value", precision: 15, scale: 2
     t.string "max_win_type", default: "fixed"
     t.integer "available"
@@ -379,6 +378,85 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_000000) do
     t.index ["key"], name: "index_roles_on_key", unique: true
   end
 
+  create_table "smm_bonuses", force: :cascade do |t|
+    t.bigint "smm_month_project_id", null: false
+    t.bigint "smm_preset_id"
+    t.bigint "bonus_id"
+    t.bigint "manager_id"
+    t.string "status", default: "draft", null: false
+    t.string "code"
+    t.string "deposit"
+    t.integer "activation_limit"
+    t.string "game"
+    t.integer "fs_count"
+    t.string "bet_value"
+    t.decimal "wager_multiplier", precision: 10, scale: 2
+    t.decimal "max_win_multiplier", precision: 10, scale: 2
+    t.string "group"
+    t.string "bonus_type"
+    t.string "subject"
+    t.string "locale"
+    t.jsonb "currencies", default: []
+    t.bigint "created_by"
+    t.string "created_by_type"
+    t.bigint "updated_by"
+    t.string "updated_by_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bonus_id"], name: "index_smm_bonuses_on_bonus_id"
+    t.index ["manager_id"], name: "index_smm_bonuses_on_manager_id"
+    t.index ["smm_month_project_id"], name: "index_smm_bonuses_on_smm_month_project_id"
+    t.index ["smm_preset_id"], name: "index_smm_bonuses_on_smm_preset_id"
+  end
+
+  create_table "smm_month_projects", force: :cascade do |t|
+    t.bigint "smm_month_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "created_by"
+    t.string "created_by_type"
+    t.bigint "updated_by"
+    t.string "updated_by_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_smm_month_projects_on_project_id"
+    t.index ["smm_month_id", "project_id"], name: "index_smm_month_projects_on_smm_month_id_and_project_id", unique: true
+    t.index ["smm_month_id"], name: "index_smm_month_projects_on_smm_month_id"
+  end
+
+  create_table "smm_months", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "starts_on", null: false
+    t.bigint "created_by"
+    t.string "created_by_type"
+    t.bigint "updated_by"
+    t.string "updated_by_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "smm_presets", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "project_id", null: false
+    t.bigint "manager_id"
+    t.string "subject"
+    t.string "bonus_type"
+    t.integer "activation_limit"
+    t.integer "fs_count"
+    t.decimal "wager_multiplier", precision: 10, scale: 2
+    t.decimal "max_win_multiplier", precision: 10, scale: 2
+    t.string "locale"
+    t.string "group"
+    t.jsonb "currencies", default: []
+    t.bigint "created_by"
+    t.string "created_by_type"
+    t.bigint "updated_by"
+    t.string "updated_by_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["manager_id"], name: "index_smm_presets_on_manager_id"
+    t.index ["project_id"], name: "index_smm_presets_on_project_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -420,4 +498,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_000000) do
   add_foreign_key "retention_email_bonuses", "bonuses"
   add_foreign_key "retention_email_bonuses", "retention_emails"
   add_foreign_key "retention_emails", "retention_chains"
+  add_foreign_key "smm_bonuses", "bonuses"
+  add_foreign_key "smm_bonuses", "smm_month_projects"
+  add_foreign_key "smm_bonuses", "smm_presets"
+  add_foreign_key "smm_bonuses", "users", column: "manager_id"
+  add_foreign_key "smm_month_projects", "projects"
+  add_foreign_key "smm_month_projects", "smm_months"
+  add_foreign_key "smm_presets", "projects"
+  add_foreign_key "smm_presets", "users", column: "manager_id"
 end
