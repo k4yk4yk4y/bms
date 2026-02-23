@@ -25,7 +25,7 @@ namespace :seed do
     end
     manager.password = "p.rusakevich"
     manager.password_confirmation = "p.rusakevich"
-    manager.role = :marketing_manager
+    manager.role = :admin
     manager.save!
 
     role_profiles = {}
