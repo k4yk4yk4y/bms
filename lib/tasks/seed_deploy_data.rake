@@ -3,14 +3,46 @@ namespace :seed do
   task deploy_data: :environment do
     require "set"
 
-    manager_email = "p.rusakevich@jetmail.cc"
-    manager = User.find_or_create_by!(email: manager_email) do |user|
-      user.password = SecureRandom.hex(16)
-      user.role = :marketing_manager
+    User.roles.keys.each do |key|
+      role = Role.find_or_initialize_by(key: key)
+      role.name ||= key.tr("_", " ").split.map(&:capitalize).join(" ")
+      role.permissions = Role.permissions_for(key)
+      role.save!
     end
 
+    Role.find_each do |role|
+      normalized = Role.normalize_permissions_hash(role.permissions)
+      next if normalized == role.permissions
+
+      role.update!(permissions: normalized)
+    end
+
+    role_profiles = {}
+    User.roles.keys.each do |role_key|
+      email = "seed_#{role_key}@example.com"
+      user = User.find_or_initialize_by(email: email)
+      if user.new_record?
+        user.first_name = role_key.to_s.split("_").map(&:capitalize).join(" ")
+        user.last_name = "Seed"
+      end
+      user.password = "123123"
+      user.password_confirmation = "123123"
+      user.role = role_key
+      user.save!
+      role_profiles[role_key] = user
+    end
+
+    manager = role_profiles.fetch("marketing_manager")
+    manager_email = manager.email
+
     project_names = %w[VOLNA ROX FRESH SOL]
-    projects = project_names.map { |name| Project.find_or_create_by!(name: name) }
+    default_project_currencies = %w[RUB EUR USD UAH KZT BTC]
+    projects = project_names.map do |name|
+      project = Project.find_or_initialize_by(name: name)
+      project.currencies = default_project_currencies if project.currencies.blank?
+      project.save!
+      project
+    end
 
     event_types = Bonus::EVENT_TYPES.first(5)
     bonuses_by_project = {}
@@ -29,7 +61,7 @@ namespace :seed do
             status: "active",
             availability_start_date: Time.current,
             availability_end_date: Time.current + 30.days,
-            currencies: %w[USD EUR BTC],
+            currencies: project.currencies.presence || default_project_currencies,
             country: "US",
             user_group: "All",
             tags: "seed,#{project.name.downcase}",
