@@ -13,6 +13,12 @@
         </h6>
       </div>
       <div class="card-body">
+        <%= hidden_field_tag "reward_sections[bonus_rewards]", "1" %>
+        <%= hidden_field_tag "reward_sections[freespin_rewards]", "1" %>
+        <%= hidden_field_tag "reward_sections[bonus_buy_rewards]", "1" %>
+        <%= hidden_field_tag "reward_sections[comp_point_rewards]", "1" %>
+        <%= hidden_field_tag "reward_sections[bonus_code_rewards]", "1" %>
+
         <!-- Add Bonus Rewards Menu -->
         <div class="mb-4">
           <h6 class="mb-3">Add Bonus Rewards</h6>
@@ -1309,8 +1315,10 @@
     hideNoRewardsMessage();
   }
 
-  function removeCompPointReward(index) {
-    const rewardForm = document.getElementById(`comp-point-reward-${index}`);
+  function removeCompPointReward(indexOrButton) {
+    const rewardForm = Number.isInteger(indexOrButton) || /^\d+$/.test(String(indexOrButton))
+      ? document.getElementById(`comp-point-reward-${indexOrButton}`)
+      : indexOrButton?.closest('[id^="comp-point-reward-"]');
     if (rewardForm) {
       rewardForm.remove();
       checkAndShowNoRewardsMessage();
@@ -1480,8 +1488,10 @@
     hideNoRewardsMessage();
   }
 
-  function removeBonusCodeReward(index) {
-    const rewardForm = document.getElementById(`bonus-code-reward-${index}`);
+  function removeBonusCodeReward(indexOrButton) {
+    const rewardForm = Number.isInteger(indexOrButton) || /^\d+$/.test(String(indexOrButton))
+      ? document.getElementById(`bonus-code-reward-${indexOrButton}`)
+      : indexOrButton?.closest('[id^="bonus-code-reward-"]');
     if (rewardForm) {
       rewardForm.remove();
       checkAndShowNoRewardsMessage();

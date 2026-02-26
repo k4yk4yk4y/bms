@@ -578,13 +578,13 @@ class Bonus < ApplicationRecord
 
   def normalize_currency_codes(value)
     values = case value
-             when String
+    when String
                value.split(/[;,]/)
-             when Array
+    when Array
                value
-             else
+    else
                Array(value)
-             end
+    end
 
     values.map { |code| code.to_s.strip.upcase }
           .reject(&:blank?)

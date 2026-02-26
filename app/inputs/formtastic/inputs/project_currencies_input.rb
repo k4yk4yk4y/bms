@@ -48,13 +48,13 @@ module Formtastic
       def label_html_options
         {
           for: "project_currencies_entry",
-          class: ["label"]
+          class: [ "label" ]
         }
       end
 
       def wrapper_html_options
         options = super
-        options[:class] = [options[:class], "project-currencies-field"].compact.join(" ")
+        options[:class] = [ options[:class], "project-currencies-field" ].compact.join(" ")
         options
       end
     end

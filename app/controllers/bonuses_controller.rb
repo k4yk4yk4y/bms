@@ -559,6 +559,10 @@ class BonusesController < ApplicationController
       :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards ]
   end
 
+  def reward_section_submitted?(section_name)
+    params.dig(:reward_sections, section_name).present?
+  end
+
   def generate_preview_data
     # This is a placeholder. In a real application, this method would
     # generate preview data based on the bonus's settings.
@@ -874,7 +878,10 @@ class BonusesController < ApplicationController
 
   def update_multiple_bonus_rewards_if_provided
     rewards_params = multiple_bonus_rewards_params
-    return if rewards_params.empty?
+    if rewards_params.empty?
+      @bonus.bonus_rewards.destroy_all if reward_section_submitted?("bonus_rewards")
+      return
+    end
 
     # Get existing reward IDs from params
     existing_reward_ids = rewards_params.map { |rp| rp[:id] }.compact
@@ -940,7 +947,10 @@ class BonusesController < ApplicationController
 
   def update_multiple_freespin_rewards_if_provided
     rewards_params = multiple_freespin_rewards_params
-    return if rewards_params.empty?
+    if rewards_params.empty?
+      @bonus.freespin_rewards.destroy_all if reward_section_submitted?("freespin_rewards")
+      return
+    end
 
     # Get existing reward IDs from params
     existing_reward_ids = rewards_params.map { |rp| rp[:id] }.compact
@@ -1133,7 +1143,10 @@ class BonusesController < ApplicationController
 
   def update_multiple_bonus_buy_rewards_if_provided
     rewards_params = multiple_bonus_buy_rewards_params
-    return if rewards_params.empty?
+    if rewards_params.empty?
+      @bonus.bonus_buy_rewards.destroy_all if reward_section_submitted?("bonus_buy_rewards")
+      return
+    end
 
     # Get existing reward IDs from params
     existing_reward_ids = rewards_params.map { |rp| rp[:id] }.compact
@@ -1726,7 +1739,10 @@ class BonusesController < ApplicationController
 
   def update_multiple_comp_point_rewards_if_provided
     rewards_params = multiple_comp_point_rewards_params
-    return if rewards_params.empty?
+    if rewards_params.empty?
+      @bonus.comp_point_rewards.destroy_all if reward_section_submitted?("comp_point_rewards")
+      return
+    end
 
     # Remove existing comp_point rewards that are not in the new params
     existing_rewards = @bonus.comp_point_rewards.to_a
@@ -1807,7 +1823,10 @@ class BonusesController < ApplicationController
 
   def update_multiple_bonus_code_rewards_if_provided
     rewards_params = multiple_bonus_code_rewards_params
-    return if rewards_params.empty?
+    if rewards_params.empty?
+      @bonus.bonus_code_rewards.destroy_all if reward_section_submitted?("bonus_code_rewards")
+      return
+    end
 
     # Remove existing bonus_code rewards that are not in the new params
     existing_rewards = @bonus.bonus_code_rewards.to_a

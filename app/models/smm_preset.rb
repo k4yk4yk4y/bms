@@ -32,13 +32,13 @@ class SmmPreset < ApplicationRecord
 
   def currencies=(value)
     values = case value
-             when String
+    when String
                value.split(/[;,]/)
-             when Array
+    when Array
                value
-             else
+    else
                Array(value)
-             end
+    end
 
     super(values.map { |code| code.to_s.strip.upcase }.reject(&:blank?).uniq)
   end
