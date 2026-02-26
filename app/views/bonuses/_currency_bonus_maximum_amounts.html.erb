@@ -2,6 +2,7 @@
   field_prefix ||= "bonus_reward"
   container_id = "currency-bonus-max-amounts-container-#{field_prefix.parameterize}"
   grid_id = "currency-bonus-max-amounts-grid-#{field_prefix.parameterize}"
+  bonus_reward = defined?(existing_reward) ? existing_reward : nil
 %>
 
 <!-- Currency Bonus Maximum Amounts Section -->
@@ -10,7 +11,10 @@
     <i class="bi bi-coin"></i>
     Maximum bonus amount by currency
   </label>
-  <div id="<%= container_id %>" data-currency-bonus-max-amounts="true" data-field-prefix="<%= field_prefix %>">
+  <div id="<%= container_id %>"
+       data-currency-bonus-max-amounts="true"
+       data-field-prefix="<%= field_prefix %>"
+       data-initial-values="<%= (bonus_reward&.currency_maximum_amounts || {}).to_json %>">
     <div class="currency-amounts-grid" id="<%= grid_id %>">
         <% 
           # Используем переданные валюты или определяем автоматически как fallback
@@ -22,8 +26,6 @@
             selected_currencies = minimum_deposit_currencies.present? ? minimum_deposit_currencies : (bonus.currencies.present? ? (bonus.currencies & available_currencies) : available_currencies)
           end
         %>
-        <% bonus_reward = defined?(existing_reward) ? existing_reward : nil %>
-
         <% selected_currencies.each_with_index do |currency, index| %>
           <div class="currency-amount-item">
             <div class="input-group">
@@ -86,12 +88,21 @@
             if (!rowDiv) return;
 
             // Save ALL current values to preserve user input
-            const currentValues = {};
+            let initialValues = {};
+            if (container.dataset.initialValues) {
+              try {
+                initialValues = JSON.parse(container.dataset.initialValues) || {};
+              } catch (e) {
+                initialValues = {};
+              }
+            }
+
+            const currentValues = { ...initialValues };
             rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
               const match = input.name.match(/currency_maximum_amounts\[([^\]]+)\]/);
               if (match) {
                 const value = input.value || input.getAttribute('value') || '';
-                if (value) {
+                if (value !== '') {
                   currentValues[match[1]] = value;
                 }
               }

@@ -947,6 +947,35 @@ RSpec.describe BonusesController, type: :controller do
         expect(reward.currency_amounts).to eq({ "USD" => 75.0 })
       end
 
+      it "preserves existing percentage when updating only maximum amounts" do
+        bonus = create(:bonus)
+        reward = create(
+          :bonus_reward,
+          bonus: bonus,
+          amount: nil,
+          percentage: 50.0,
+          currency_amounts: {},
+          currency_maximum_amounts: {}
+        )
+
+        params = valid_bonus_params.merge(
+          bonus_rewards: {
+            "0" => {
+              id: reward.id,
+              bonus_type: "percentage",
+              percentage: "",
+              currency_maximum_amounts: { "USD" => "333" }
+            }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward.reload
+        expect(reward.percentage).to eq(50.0)
+        expect(reward.currency_maximum_amounts).to eq({ "USD" => 333.0 })
+      end
+
       it "removes rewards not in params" do
         bonus = create(:bonus)
         reward1 = create(:bonus_reward, bonus: bonus, amount: 100)

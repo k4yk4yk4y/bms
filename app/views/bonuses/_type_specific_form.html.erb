@@ -980,6 +980,16 @@
     const grid = document.getElementById(`bonus-amounts-grid-${index}`);
     if (!grid) return;
 
+    const currentValues = {};
+    grid.querySelectorAll('input[type="number"]').forEach((input) => {
+      const match = input.name.match(/currency_amounts\[([^\]]+)\]/);
+      if (!match) return;
+      const value = input.value || input.getAttribute('value') || '';
+      if (value !== '') {
+        currentValues[match[1]] = value;
+      }
+    });
+
     const availableCurrencies = window.currentProjectCurrencies || [];
     const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
@@ -1021,6 +1031,7 @@
             <span class="input-group-text currency-code">${currency}</span>
             <input type="number" 
                    name="bonus_rewards[${index}][currency_amounts][${currency}]"
+                   value="${currentValues[currency] || ''}"
                    class="form-control currency-input"
                    step="${step}"
                    min="0"
@@ -1043,6 +1054,16 @@
   function populateBonusRewardMaxAmountFields(index) {
     const grid = document.getElementById(`bonus-max-amounts-grid-${index}`);
     if (!grid) return;
+
+    const currentValues = {};
+    grid.querySelectorAll('input[type="number"]').forEach((input) => {
+      const match = input.name.match(/currency_maximum_amounts\[([^\]]+)\]/);
+      if (!match) return;
+      const value = input.value || input.getAttribute('value') || '';
+      if (value !== '') {
+        currentValues[match[1]] = value;
+      }
+    });
 
     const availableCurrencies = window.currentProjectCurrencies || [];
     const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
@@ -1085,6 +1106,7 @@
             <span class="input-group-text currency-code">${currency}</span>
             <input type="number" 
                    name="bonus_rewards[${index}][currency_maximum_amounts][${currency}]"
+                   value="${currentValues[currency] || ''}"
                    class="form-control currency-input"
                    step="${step}"
                    min="0"

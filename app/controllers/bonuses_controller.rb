@@ -2094,7 +2094,9 @@ class BonusesController < ApplicationController
     when "percentage"
       reward.amount = nil
       reward.currency_amounts = {}
-      reward.percentage = reward_params[:percentage].presence
+      # Preserve existing percentage on update if the field is missing/blank in params.
+      # This prevents silent validation failure when only max amounts are edited.
+      reward.percentage = reward_params[:percentage].presence || reward.percentage
       reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts])
     when "fixed"
       reward.amount = reward_params[:amount].presence

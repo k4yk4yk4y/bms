@@ -50,6 +50,23 @@
                           <% end %>
                         </div>
                       </div>
+                    <% elsif reward.percentage.present? %>
+                      <div class="mb-2">
+                        <span class="text-muted"><%= reward.reward_type.humanize %>:</span>
+                        <%= reward.formatted_amount %>
+                      </div>
+
+                      <% if reward.currency_maximum_amounts.present? %>
+                        <div class="d-flex align-items-baseline gap-2">
+                          <span class="text-muted flex-shrink-0">Maximum bonus amount by currency:</span>
+                          <div class="d-flex flex-wrap gap-1">
+                            <% reward.currency_maximum_amounts.each do |currency, amount| %>
+                              <% next if amount.blank? %>
+                              <span class="badge bg-light text-dark"><%= currency %>: <%= amount %></span>
+                            <% end %>
+                          </div>
+                        </div>
+                      <% end %>
                     <% else %>
                       <span class="text-muted"><%= reward.reward_type.humanize %>:</span>
                       <%= reward.formatted_amount %>
