@@ -5,8 +5,8 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 class="h2"><%= @bonus.name %></h1>
-          <div class="d-flex align-items-center gap-2">
+          <h1 class="h2 mb-2"><%= @bonus.name %></h1>
+          <div class="d-flex align-items-center flex-wrap gap-2 ms-2">
             <span class="badge bg-info text-dark"><%= @bonus.event.humanize %></span>
             <span class="badge <%= status_badge_class(@bonus.status) %>">
               <%= @bonus.status.humanize %>
@@ -14,13 +14,13 @@
             <code><%= @bonus.code %></code>
           </div>
         </div>
-        <div class="btn-group" role="group">
+        <div class="btn-group bonus-show-header-actions" role="group">
           <% if can?(:update, @bonus) %>
-            <%= link_to "Edit", edit_bonus_path(@bonus), class: "btn btn-primary" %>
+            <%= link_to "Edit", edit_bonus_path(@bonus), class: "btn btn-primary bonus-show-header-btn-edit" %>
           <% end %>
           <% if can?(:destroy, @bonus) %>
             <%= link_to "Delete", bonus_path(@bonus), 
-                class: "btn btn-danger", data: { "turbo-method": :delete, confirm: "Are you sure?" } %>
+                class: "btn btn-danger bonus-show-header-btn-delete", data: { "turbo-method": :delete, confirm: "Are you sure?" } %>
           <% end %>
           <%= link_to "Back to List", bonuses_path, class: "btn btn-outline-secondary" %>
         </div>
@@ -28,7 +28,7 @@
 
       <div class="row">
         <!-- Basic Information -->
-        <div class="col-lg-8">
+        <div class="col-md-8">
           <div class="card mb-4">
             <div class="card-header">
               <h5 class="card-title mb-0">Basic Information</h5>
@@ -44,36 +44,29 @@
               
               <div class="row">
                 <div class="col-md-6">
-                  <dl class="row">
-                    <dt class="col-sm-4">Name:</dt>
-                    <dd class="col-sm-8"><%= @bonus.name %></dd>
+                  <dl class="row gy-2 mb-0">
+                    <dt class="col-sm-4 mb-0">Name:</dt>
+                    <dd class="col-sm-8 mb-0"><%= @bonus.name %></dd>
                     
-                    <dt class="col-sm-4">Code:</dt>
-                    <dd class="col-sm-8"><code><%= @bonus.code %></code></dd>
+                    <dt class="col-sm-4 mb-0">Code:</dt>
+                    <dd class="col-sm-8 mb-0"><code><%= @bonus.code %></code></dd>
                     
-                    <dt class="col-sm-4">Type:</dt>
-                    <dd class="col-sm-8">
+                    <dt class="col-sm-4 mb-0">Type:</dt>
+                    <dd class="col-sm-8 mb-0">
                       <span class="badge bg-info text-dark"><%= @bonus.event.humanize %></span>
                     </dd>
-                    
-                    <dt class="col-sm-4">Status:</dt>
-                    <dd class="col-sm-8">
-                      <span class="badge <%= status_badge_class(@bonus.status) %>">
-                        <%= @bonus.status.humanize %>
-                      </span>
-                    </dd>
+
+                    <dt class="col-sm-4 mb-0">Country:</dt>
+                    <dd class="col-sm-8 mb-0"><%= @bonus.country || 'All' %></dd>
                   </dl>
                 </div>
                 <div class="col-md-6">
-                  <dl class="row">
-                    <dt class="col-sm-4">Country:</dt>
-                    <dd class="col-sm-8"><%= @bonus.country || 'All' %></dd>
+                  <dl class="row gy-2 mb-0">
+                    <dt class="col-sm-4 mb-0">User Group:</dt>
+                    <dd class="col-sm-8 mb-0"><%= @bonus.user_group || 'All' %></dd>
                     
-                    <dt class="col-sm-4">User Group:</dt>
-                    <dd class="col-sm-8"><%= @bonus.user_group || 'All' %></dd>
-                    
-                    <dt class="col-sm-4">Tags:</dt>
-                    <dd class="col-sm-8">
+                    <dt class="col-sm-4 mb-0">Tags:</dt>
+                    <dd class="col-sm-8 mb-0">
                       <% if @bonus.tags_array.any? %>
                         <% @bonus.tags_array.each do |tag| %>
                           <span class="badge bg-secondary me-1"><%= tag %></span>
@@ -83,8 +76,8 @@
                       <% end %>
                     </dd>
                     
-                    <dt class="col-sm-4">Project:</dt>
-                    <dd class="col-sm-8">
+                    <dt class="col-sm-4 mb-0">Project:</dt>
+                    <dd class="col-sm-8 mb-0">
                       <% if @bonus.project.present? %>
                         <span class="badge bg-primary"><%= @bonus.project %></span>
                       <% else %>
@@ -92,8 +85,8 @@
                       <% end %>
                     </dd>
                     
-                    <dt class="col-sm-4">DSL Tag:</dt>
-                    <dd class="col-sm-8">
+                    <dt class="col-sm-4 mb-0">DSL Tag:</dt>
+                    <dd class="col-sm-8 mb-0">
                       <% if @bonus.dsl_tag.present? %>
                         <code><%= @bonus.dsl_tag %></code>
                       <% else %>
@@ -103,94 +96,6 @@
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Currency Minimum Deposits (for deposit bonuses) -->
-          <% if @bonus.event == 'deposit' && @bonus.has_minimum_deposit_requirements? %>
-            <div class="card mb-4">
-              <div class="card-header">
-                <h5 class="card-title mb-0">
-                  <i class="bi bi-currency-exchange"></i> 
-                  Minimum deposits by currency
-                </h5>
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <% @bonus.effective_currency_minimum_deposits.each do |currency, amount| %>
-                    <div class="col-md-3 col-sm-6 mb-2">
-                      <dl class="row">
-                        <dt class="col-sm-4"><%= currency %>:</dt>
-                        <dd class="col-sm-8">
-                          <span class="badge bg-primary"><%= amount %></span>
-                        </dd>
-                      </dl>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          <% elsif @bonus.event == 'deposit' %>
-            <div class="card mb-4">
-              <div class="card-header">
-                <h5 class="card-title mb-0">
-                  <i class="bi bi-currency-exchange"></i> 
-                  Minimum deposits by currency
-                </h5>
-              </div>
-              <div class="card-body">
-                <div class="alert alert-info mb-0">
-                  <i class="bi bi-info-circle"></i>
-                  Minimum deposits by currency are not set
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <!-- Wagering Information -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5 class="card-title mb-0">Wagering Information</h5>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <% 
-                  non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
-                  should_show_minimum_deposit = !non_deposit_types.include?(@bonus.event) && @bonus.event != 'deposit' && @bonus.minimum_deposit.present?
-                %>
-                <% if should_show_minimum_deposit %>
-                <div class="col-md-4">
-                  <dl class="row">
-                    <dt class="col-sm-6">Min Deposit:</dt>
-                    <dd class="col-sm-6">
-                      <%= number_to_currency(@bonus.minimum_deposit) %>
-                    </dd>
-                  </dl>
-                </div>
-                <% end %>
-                <div class="col-md-4">
-                  <dl class="row">
-                    <dt class="col-sm-6">Wager:</dt>
-                    <dd class="col-sm-6">
-                      <%= "#{number_with_precision(@bonus.wager, precision: 0, strip_insignificant_zeros: true)}x" if @bonus.wager %>
-                    </dd>
-                  </dl>
-                </div>
-                <div class="col-md-4">
-                  <dl class="row">
-                    <dt class="col-sm-6">Max Winnings:</dt>
-                    <dd class="col-sm-6">
-                      <%= @bonus.formatted_maximum_winnings %>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-              <% if @bonus.wagering_strategy.present? %>
-                <dl class="row">
-                  <dt class="col-sm-2">Strategy:</dt>
-                  <dd class="col-sm-10"><%= @bonus.wagering_strategy %></dd>
-                </dl>
-              <% end %>
             </div>
           </div>
 
@@ -206,7 +111,7 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="col-lg-4">
+        <div class="col-md-4">
           <!-- Availability -->
           <div class="card mb-4">
             <div class="card-header">
@@ -237,6 +142,76 @@
                     <span class="badge bg-success">No</span>
                   <% end %>
                 </dd>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Currency Minimum Deposits (for deposit bonuses) -->
+          <% if @bonus.event == 'deposit' && @bonus.has_minimum_deposit_requirements? %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-currency-exchange"></i>
+                  Minimum deposits by currency
+                </h5>
+              </div>
+              <div class="card-body">
+                <dl class="row">
+                  <% @bonus.effective_currency_minimum_deposits.each do |currency, amount| %>
+                    <dt class="col-sm-5"><%= currency %>:</dt>
+                    <dd class="col-sm-7">
+                      <span class="badge bg-primary"><%= amount %></span>
+                    </dd>
+                  <% end %>
+                </dl>
+              </div>
+            </div>
+          <% elsif @bonus.event == 'deposit' %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-currency-exchange"></i>
+                  Minimum deposits by currency
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="alert alert-info mb-0">
+                  <i class="bi bi-info-circle"></i>
+                  Minimum deposits by currency are not set
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Wagering Information -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Wagering Information</h5>
+            </div>
+            <div class="card-body">
+              <% 
+                non_deposit_types = %w[input_coupon manual collection groups_update scheduler]
+                should_show_minimum_deposit = !non_deposit_types.include?(@bonus.event) && @bonus.event != 'deposit' && @bonus.minimum_deposit.present?
+              %>
+              <dl class="row">
+                <% if should_show_minimum_deposit %>
+                  <dt class="col-sm-5">Min Deposit:</dt>
+                  <dd class="col-sm-7">
+                    <%= number_to_currency(@bonus.minimum_deposit) %>
+                  </dd>
+                <% end %>
+                <dt class="col-sm-5">Wager:</dt>
+                <dd class="col-sm-7">
+                  <%= "#{number_with_precision(@bonus.wager, precision: 0, strip_insignificant_zeros: true)}x" if @bonus.wager %>
+                </dd>
+                <dt class="col-sm-5">Max Winnings:</dt>
+                <dd class="col-sm-7">
+                  <%= @bonus.formatted_maximum_winnings %>
+                </dd>
+                <% if @bonus.wagering_strategy.present? %>
+                  <dt class="col-sm-5">Strategy:</dt>
+                  <dd class="col-sm-7"><%= @bonus.wagering_strategy %></dd>
+                <% end %>
               </dl>
             </div>
           </div>

@@ -1,16 +1,11 @@
-<div class="row">
-  <div class="col-md-6">
+<div class="row gy-3">
+  <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h6 class="card-title mb-0">Event Configuration</h6>
       </div>
       <div class="card-body">
         <dl class="row">
-          <dt class="col-sm-5">Event Type:</dt>
-          <dd class="col-sm-7">
-            <span class="badge bg-info"><%= bonus.event&.humanize %></span>
-          </dd>
-          
           <dt class="col-sm-5">Rewards Count:</dt>
           <dd class="col-sm-7"><%= bonus.all_rewards.count %></dd>
           
@@ -29,7 +24,7 @@
     </div>
   </div>
   
-  <div class="col-md-6">
+  <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h6 class="card-title mb-0">Reward Details</h6>
@@ -37,50 +32,75 @@
       <div class="card-body">
         <% if bonus.all_rewards.any? %>
           <% if bonus.bonus_rewards.any? %>
-            <h6>Cash Bonuses:</h6>
             <% bonus.bonus_rewards.each_with_index do |reward, index| %>
-              <div class="mb-2">
-                <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
-                <%= reward.reward_type.humanize %>: 
-                <% if reward.has_currency_amounts? %>
-                  <%= reward.formatted_currency_amounts %>
-                <% else %>
-                  <%= reward.formatted_amount %>
-                <% end %>
+              <div class="mb-3">
+                <dl class="row mb-0">
+                  <dt class="col-sm-5 fw-bold">
+                    <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                    Cash Bonuses:
+                  </dt>
+                  <dd class="col-sm-7 mb-0 small">
+                    <% if reward.has_currency_amounts? %>
+                      <div class="d-flex align-items-baseline gap-2">
+                        <span class="text-muted flex-shrink-0"><%= reward.reward_type.humanize %>:</span>
+                        <div class="d-flex flex-wrap gap-1">
+                          <% reward.currency_amounts.each do |currency, amount| %>
+                            <% next if amount.blank? %>
+                            <span class="badge bg-light text-dark"><%= currency %>: <%= amount %></span>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% else %>
+                      <span class="text-muted"><%= reward.reward_type.humanize %>:</span>
+                      <%= reward.formatted_amount %>
+                    <% end %>
+                  </dd>
+                </dl>
               </div>
             <% end %>
           <% end %>
           
           <% if bonus.freespin_rewards.any? %>
-            <h6>Free Spins:</h6>
             <% bonus.freespin_rewards.each_with_index do |reward, index| %>
               <div class="mb-3">
-                <div class="mb-2">
-                  <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
-                  <strong>Freespins count: <%= reward.spins_count %></strong>
-                </div>
-                
-                <% if reward.has_game_restrictions? %>
-                  <div class="mb-2">
-                    <strong>Games:</strong><br>
-                    <% reward.games.each do |game| %>
-                      <span class="badge bg-primary me-1 mb-1"><%= game %></span>
+                <dl class="row mb-0">
+                  <dt class="col-sm-5 fw-bold">
+                    <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
+                    Free Spins:
+                  </dt>
+                  <dd class="col-sm-7 mb-0 small">
+                    <div class="mb-2">
+                      <span class="text-muted">Freespins count:</span>
+                      <%= reward.spins_count %>
+                    </div>
+
+                    <% if reward.has_game_restrictions? %>
+                      <div class="mb-2 d-flex flex-wrap align-items-center gap-1">
+                        <span class="text-muted">Games:</span>
+                        <% reward.games.each do |game| %>
+                          <span class="badge bg-primary"><%= game %></span>
+                        <% end %>
+                      </div>
                     <% end %>
-                  </div>
-                <% end %>
-                
-                <% if reward.has_currency_freespin_bet_levels? %>
-                  <div class="ms-2">
-                    <small class="text-muted">Bet amount by currency:</small><br>
-                    <% reward.currency_freespin_bet_levels.each do |currency, amount| %>
-                      <span class="badge bg-light text-dark me-1"><%= currency %>: <%= amount %></span>
+
+                    <% if reward.has_currency_freespin_bet_levels? %>
+                      <div>
+                        <div class="d-flex align-items-baseline gap-2">
+                          <span class="text-muted flex-shrink-0">Bet amount by currency:</span>
+                          <div class="d-flex flex-wrap gap-1">
+                            <% reward.currency_freespin_bet_levels.each do |currency, amount| %>
+                              <span class="badge bg-light text-dark"><%= currency %>: <%= amount %></span>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    <% else %>
+                      <div class="text-muted">
+                        Bet level not set
+                      </div>
                     <% end %>
-                  </div>
-                <% else %>
-                  <div class="ms-2">
-                    <small class="text-muted">Bet level not set</small>
-                  </div>
-                <% end %>
+                  </dd>
+                </dl>
               </div>
             <% end %>
           <% end %>
