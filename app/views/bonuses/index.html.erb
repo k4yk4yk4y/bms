@@ -10,7 +10,7 @@
           </h1>
         </div>
         <% if can?(:create, Bonus) %>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bonusTypeModal">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='<%= new_bonus_path %>'">
             <i class="fas fa-plus"></i> Create New Bonus
           </button>
         <% end %>
@@ -341,147 +341,7 @@ function submitBulkAction() {
   }
 </script>
 
-<!-- Modal for Bonus Type Selection -->
-<div class="modal fade" id="bonusTypeModal" tabindex="-1" aria-labelledby="bonusTypeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="bonusTypeModalLabel">
-          <i class="fas fa-plus-circle"></i> Create New Bonus
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="text-muted mb-4">Select the type of bonus you want to create:</p>
-        
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="deposit">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-coins fa-3x text-success"></i>
-                </div>
-                <h5 class="card-title text-center">Deposit Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Bonuses that require a minimum deposit amount. Users get bonus funds based on their deposit percentage.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Deposit Bonus", new_bonus_path(event: 'deposit'), 
-                      class: "btn btn-success btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="input_coupon">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-ticket-alt fa-3x text-primary"></i>
-                </div>
-                <h5 class="card-title text-center">Coupon Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Bonuses activated by entering a coupon code. No deposit required, just enter the valid code.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Coupon Bonus", new_bonus_path(event: 'input_coupon'), 
-                      class: "btn btn-primary btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="manual">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-user-cog fa-3x text-warning"></i>
-                </div>
-                <h5 class="card-title text-center">Manual Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Bonuses that require manual approval or are applied manually by administrators.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Manual Bonus", new_bonus_path(event: 'manual'), 
-                      class: "btn btn-warning btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="collection">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-gift fa-3x text-info"></i>
-                </div>
-                <h5 class="card-title text-center">Collection Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Daily, weekly, or monthly collectible bonuses that users can claim periodically.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Collection Bonus", new_bonus_path(event: 'collection'), 
-                      class: "btn btn-info btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="groups_update">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-users fa-3x text-secondary"></i>
-                </div>
-                <h5 class="card-title text-center">Groups Update Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Bonuses that update multiple user groups at once with batch processing capabilities.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Groups Update Bonus", new_bonus_path(event: 'groups_update'), 
-                      class: "btn btn-secondary btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-md-6">
-            <div class="card h-100 bonus-type-card" data-type="scheduler">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  <i class="fas fa-clock fa-3x text-dark"></i>
-                </div>
-                <h5 class="card-title text-center">Scheduler Bonus</h5>
-                <p class="card-text text-muted small flex-grow-1">
-                  Time-based bonuses that are automatically triggered according to a schedule or cron expression.
-                </p>
-                <div class="text-center">
-                  <%= link_to "Create Scheduler Bonus", new_bonus_path(event: 'scheduler'), 
-                      class: "btn btn-dark btn-sm" %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <style>
-  .bonus-type-card {
-    transition: transform 0.2s ease-in-out;
-    cursor: pointer;
-  }
-  
-  .bonus-type-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-
   /* Ensure consistent text color for code elements */
   code.text-dark {
     color: #212529 !important;
@@ -543,26 +403,4 @@ function submitBulkAction() {
       margin-bottom: 0.25rem;
     }
   }
-
-  /* Simple modal backdrop fix */
-  .modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5) !important;
-  }
 </style>
-
-<script>
-  // Simple modal backdrop fix
-  document.addEventListener('DOMContentLoaded', function() {
-    const bonusTypeModal = document.getElementById('bonusTypeModal');
-    if (bonusTypeModal) {
-      bonusTypeModal.addEventListener('show.bs.modal', function() {
-        setTimeout(() => {
-          const backdrop = document.querySelector('.modal-backdrop');
-          if (backdrop) {
-            backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-          }
-        }, 10);
-      });
-    }
-  });
-</script>
