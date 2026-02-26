@@ -14,11 +14,13 @@
         <% selected_currencies = bonus_template.currencies.present? ? (bonus_template.currencies & available_currencies) : available_currencies %>
         
         <% selected_currencies.each_with_index do |currency, index| %>
+          <% minimum_deposit_value = bonus_template.currency_minimum_deposits[currency] %>
+          <% display_minimum_deposit_value = minimum_deposit_value.present? && minimum_deposit_value.to_f == minimum_deposit_value.to_i ? minimum_deposit_value.to_i : minimum_deposit_value %>
           <div class="col-12 mb-2">
             <div class="input-group">
               <span class="input-group-text currency-code"><%= currency %></span>
               <%= number_field_tag "bonus_template[currency_minimum_deposits][#{currency}]", 
-                  bonus_template.currency_minimum_deposits[currency],
+                  display_minimum_deposit_value,
                   class: "form-control currency-input",
                   step: Bonus.currency_step(currency),
                   min: 0,

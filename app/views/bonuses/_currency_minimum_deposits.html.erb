@@ -11,7 +11,7 @@
         Calculate
       </button>
       <button type="button" class="btn btn-sm btn-outline-secondary"
-              onclick="if (typeof copyMinimumDepositsPresetToClipboard === 'function') { copyMinimumDepositsPresetToClipboard(); }">
+              onclick="if (typeof copyMinimumDepositsToClipboard === 'function') { copyMinimumDepositsToClipboard(this); }">
         Copy
       </button>
     </div>
@@ -26,11 +26,13 @@
         <% selected_currencies = available_currencies if selected_currencies.empty? %>
         
         <% selected_currencies.each_with_index do |currency, index| %>
+          <% minimum_deposit_value = bonus.currency_minimum_deposits[currency] %>
+          <% display_minimum_deposit_value = minimum_deposit_value.present? && minimum_deposit_value.to_f == minimum_deposit_value.to_i ? minimum_deposit_value.to_i : minimum_deposit_value %>
           <div class="col-12 mb-2">
             <div class="input-group">
               <span class="input-group-text currency-code"><%= currency %></span>
               <%= number_field_tag "bonus[currency_minimum_deposits][#{currency}]", 
-                  bonus.currency_minimum_deposits[currency],
+                  display_minimum_deposit_value,
                   class: "form-control currency-input",
                   step: Bonus.currency_step(currency),
                   min: 0,
@@ -62,8 +64,24 @@
         document.body.removeChild(textarea);
       }
 
-      async function copyMinimumDepositsPresetToClipboard() {
-        const text = "EUR\t25\nUSD\t25\nBRL\t50";
+      function minimumDepositsClipboardText(cardElement) {
+        if (!cardElement) return '';
+
+        const rows = cardElement.querySelectorAll('#currency-minimum-deposits-container .input-group');
+        const lines = Array.from(rows).map(row => {
+          const currency = row.querySelector('.currency-code')?.textContent?.trim();
+          const amount = row.querySelector('input[name*="[currency_minimum_deposits]"]')?.value?.trim() || '';
+          if (!currency) return null;
+          return `${currency}\t${amount}`;
+        }).filter(Boolean);
+
+        return lines.join('\n');
+      }
+
+      async function copyMinimumDepositsToClipboard(buttonElement) {
+        const cardElement = buttonElement?.closest('.card') || document.getElementById('currency-minimum-deposits-card');
+        const text = minimumDepositsClipboardText(cardElement);
+        if (!text) return;
 
         try {
           if (navigator.clipboard && window.isSecureContext) {
@@ -76,7 +94,7 @@
         }
       }
 
-      window.copyMinimumDepositsPresetToClipboard = copyMinimumDepositsPresetToClipboard;
+      window.copyMinimumDepositsToClipboard = copyMinimumDepositsToClipboard;
 
       function parseNumericValue(value) {
         const parsed = parseFloat(value);

@@ -1,5 +1,12 @@
 /* Reward Forms Multi-Column Layout */
 
+/* Keep add-reward buttons typography consistent (override global .btn-primary login styles) */
+.reward-add-buttons .btn {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 /* Main parameters container - 2 columns on large screens, 1 column on smaller screens */
 .main-params-container .reward-param-field {
   margin-bottom: 1rem;
