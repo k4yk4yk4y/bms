@@ -109,6 +109,7 @@ class BonusesController < ApplicationController
       begin
         template = BonusTemplate.find(params[:template_id])
         template.apply_to_bonus(@bonus)
+        @template_deposit_percentage = template.deposit_percentage
       rescue ActiveRecord::RecordNotFound
         # Template not found, continue without template
       end
@@ -694,7 +695,7 @@ class BonusesController < ApplicationController
     end
 
     permitted = permitted_params.permit(
-      :spins_count, :games, :bet_level, :code,
+      :spins_count, :games, :bet_level, :deposit_percentage, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -763,7 +764,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:spins_count].blank?
 
       permitted = reward_params.permit(
-        :id, :spins_count, :games, :bet_level, :code,
+        :id, :spins_count, :games, :bet_level, :deposit_percentage, :code,
         :tags, :stag,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -1043,7 +1044,7 @@ class BonusesController < ApplicationController
     return {} unless params[:bonus_buy_reward].present?
 
     permitted = params.require(:bonus_buy_reward).permit(
-      :buy_amount, :multiplier, :games, :bet_level, :code,
+      :buy_amount, :multiplier, :games, :bet_level, :deposit_percentage, :code,
       :min, :groups, :tags, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
@@ -1074,7 +1075,7 @@ class BonusesController < ApplicationController
       next if reward_params.blank? || reward_params[:buy_amount].blank?
 
       permitted = reward_params.permit(
-        :id, :buy_amount, :multiplier, :games, :bet_level, :code,
+        :id, :buy_amount, :multiplier, :games, :bet_level, :deposit_percentage, :code,
         :min, :groups, :tags, :stag, :wagering_strategy,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,

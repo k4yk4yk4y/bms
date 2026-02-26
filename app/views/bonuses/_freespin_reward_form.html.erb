@@ -39,7 +39,7 @@
   <div class="reward-param-field">
     <label for="freespin_reward_spins_count_<%= index %>" class="form-label">Freespins count</label>
     <input type="number" class="form-control" name="<%= field_prefix %>[spins_count]" id="freespin_reward_spins_count_<%= index %>"
-           min="1" required  value="<%= existing_freespin&.spins_count %>">
+           min="1" required oninput="updateMinimumDepositsFromFreespins()" value="<%= existing_freespin&.spins_count %>">
   </div>
 
   <!-- Bet Level -->
@@ -47,7 +47,19 @@
     <label for="freespin_reward_bet_level_<%= index %>" class="form-label">Bet level (bet_level)</label>
     <div class="input-group">
       <input type="number" class="form-control" name="<%= field_prefix %>[bet_level]" id="freespin_reward_bet_level_<%= index %>"
-             step="1" min="0"  value="<%= existing_freespin&.bet_level %>">
+             step="1" min="0" oninput="updateMinimumDepositsFromFreespins()" value="<%= existing_freespin&.bet_level %>">
+    </div>
+  </div>
+
+  <!-- Deposit Percentage -->
+  <div class="reward-param-field">
+    <label for="freespin_reward_deposit_percentage_<%= index %>" class="form-label">Deposit percentage (deposit_percentage)</label>
+    <div class="input-group">
+      <input type="number" class="form-control" name="<%= field_prefix %>[deposit_percentage]"
+             id="freespin_reward_deposit_percentage_<%= index %>" step="0.01"
+             oninput="updateMinimumDepositsFromFreespins()"
+             value="<%= existing_freespin&.deposit_percentage %>">
+      <span class="input-group-text">%</span>
     </div>
   </div>
 

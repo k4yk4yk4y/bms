@@ -33,6 +33,14 @@ export default class extends Controller {
             if (wagerInput) {
               wagerInput.value = data.template.wager
             }
+            if (data.template.deposit_percentage !== undefined) {
+              window.templateDepositPercentage = data.template.deposit_percentage
+              form.querySelectorAll('input[name^="freespin_rewards"][name$="[deposit_percentage]"], input[name^="bonus_buy_rewards"][name$="[deposit_percentage]"]').forEach(input => {
+                if (!input.value) {
+                  input.value = data.template.deposit_percentage
+                }
+              })
+            }
           }
         })
         .catch(error => console.error("Error fetching template:", error))

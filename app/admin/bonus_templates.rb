@@ -3,7 +3,7 @@ ActiveAdmin.register BonusTemplate do
   menu label: "Bonus Templates", parent: "Application Settings", priority: 91
 
   permit_params :name, :dsl_tag, :project, :event, :currency, :minimum_deposit,
-                :wager, :maximum_winnings, :no_more, :totally_no_more,
+                :deposit_percentage, :wager, :maximum_winnings, :no_more, :totally_no_more,
                 :description, currencies: [], groups: [], currency_minimum_deposits: {}
 
   # Фильтры
@@ -33,6 +33,7 @@ ActiveAdmin.register BonusTemplate do
       truncate(template.description, length: 50) if template.description.present?
     end
     column :minimum_deposit
+    column :deposit_percentage
     column :wager
     column :maximum_winnings
     column :currencies do |template|
@@ -60,6 +61,7 @@ ActiveAdmin.register BonusTemplate do
       end
       row :description
       row :minimum_deposit
+      row :deposit_percentage
       row :wager
       row :maximum_winnings
       row :no_more
@@ -129,6 +131,7 @@ ActiveAdmin.register BonusTemplate do
 
     f.inputs "Финансовые параметры" do
       f.input :minimum_deposit, hint: "Минимальный депозит"
+      f.input :deposit_percentage, hint: "Процент для расчёта минимального депозита", input_html: { step: 0.01 }
       f.input :wager, hint: "Вейджер (множитель отыгрыша)", input_html: { step: 1, min: 0 }
       f.input :maximum_winnings, hint: "Максимальный выигрыш"
       f.input :no_more, hint: "Больше нельзя использовать"
@@ -160,10 +163,10 @@ ActiveAdmin.register BonusTemplate do
   batch_action :export, confirm: "Экспортировать выбранные шаблоны?" do |ids|
     templates = BonusTemplate.where(id: ids)
     csv_data = CSV.generate do |csv|
-      csv << [ "Name", "DSL Tag", "Project", "Event", "Description", "Minimum Deposit", "Wager", "Maximum Winnings" ]
+      csv << [ "Name", "DSL Tag", "Project", "Event", "Description", "Minimum Deposit", "Deposit Percentage", "Wager", "Maximum Winnings" ]
       templates.each do |template|
         csv << [ template.name, template.dsl_tag, template.project, template.event,
-                template.description, template.minimum_deposit, template.wager, template.maximum_winnings ]
+                template.description, template.minimum_deposit, template.deposit_percentage, template.wager, template.maximum_winnings ]
       end
     end
 

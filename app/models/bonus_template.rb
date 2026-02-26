@@ -70,7 +70,7 @@ class BonusTemplate < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    [ "created_at", "currencies", "currency_minimum_deposits", "description", "dsl_tag", "event", "groups", "id", "maximum_winnings", "minimum_deposit", "name", "no_more", "project", "totally_no_more", "updated_at", "wager" ]
+    [ "created_at", "currencies", "currency_minimum_deposits", "deposit_percentage", "description", "dsl_tag", "event", "groups", "id", "maximum_winnings", "minimum_deposit", "name", "no_more", "project", "totally_no_more", "updated_at", "wager" ]
   end
 
   def self.ransackable_associations(auth_object = nil)

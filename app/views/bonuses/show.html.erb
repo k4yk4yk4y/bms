@@ -117,7 +117,7 @@
               </div>
               <div class="card-body">
                 <div class="row">
-                  <% @bonus.currency_minimum_deposits.each do |currency, amount| %>
+                  <% @bonus.effective_currency_minimum_deposits.each do |currency, amount| %>
                     <div class="col-md-3 col-sm-6 mb-2">
                       <dl class="row">
                         <dt class="col-sm-4"><%= currency %>:</dt>

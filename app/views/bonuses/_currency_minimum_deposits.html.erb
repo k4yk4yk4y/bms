@@ -7,6 +7,12 @@
     </h5>
   </div>
   <div class="card-body">
+    <div class="d-flex justify-content-end mb-2">
+      <button type="button" class="btn btn-sm btn-outline-primary"
+              onclick="if (typeof calculateMinimumDepositsFromFreespins === 'function') { calculateMinimumDepositsFromFreespins(); }">
+        Calculate
+      </button>
+    </div>
     <div id="currency-minimum-deposits-container"
          data-minimum-deposits="<%= ERB::Util.html_escape(bonus.currency_minimum_deposits.to_json) %>">
       <div class="row">
@@ -40,6 +46,113 @@
     
     <!-- Dynamic update based on selected currencies -->
     <script>
+      function parseNumericValue(value) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+
+      function extractCurrencyFromMinimumDepositInputName(name) {
+        if (!name) return null;
+        const match = name.match(/currency_minimum_deposits(?:\]\[|\[)([^\]]+)\]/);
+        return match ? match[1] : null;
+      }
+
+      function roundNiceAmount(amount) {
+        if (!Number.isFinite(amount)) return null;
+        const step = Math.abs(amount) >= 1000 ? 100 : 10;
+        return Math.round(amount / step) * step;
+      }
+
+      function getFreespinRewardIndexes() {
+        const inputs = document.querySelectorAll('input[name^="freespin_rewards"]');
+        const indexes = new Set();
+        inputs.forEach(input => {
+          const match = input.name.match(/^freespin_rewards\[(\d+)\]/);
+          if (match) {
+            indexes.add(match[1]);
+          }
+        });
+        return Array.from(indexes);
+      }
+
+      function computeFreespinMinimumDepositsByCurrency() {
+        const totals = {};
+
+        getFreespinRewardIndexes().forEach(index => {
+          const spins = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][spins_count]"]`)?.value);
+          const percentage = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][deposit_percentage]"]`)?.value);
+          if (spins === null || percentage === null) return;
+
+          const baseBet = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][bet_level]"]`)?.value);
+          const currencyInputs = document.querySelectorAll(`input[name^="freespin_rewards[${index}][currency_freespin_bet_levels]"]`);
+
+          if (currencyInputs.length > 0) {
+            currencyInputs.forEach(input => {
+              const match = input.name.match(/currency_freespin_bet_levels\]\[([^\]]+)\]/);
+              const currency = match ? match[1] : null;
+              if (!currency) return;
+
+              const betValue = parseNumericValue(input.value);
+              const bet = betValue !== null ? betValue : 0;
+
+              const amount = bet * spins * (percentage / 100.0);
+              if (!Number.isFinite(amount)) return;
+              totals[currency] = (totals[currency] || 0) + amount;
+            });
+          } else {
+            const bet = baseBet !== null ? baseBet : 0;
+            const minDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+            minDepositInputs.forEach(input => {
+              const currency = extractCurrencyFromMinimumDepositInputName(input.name);
+              if (!currency) return;
+
+              const amount = bet * spins * (percentage / 100.0);
+              if (!Number.isFinite(amount)) return;
+              totals[currency] = (totals[currency] || 0) + amount;
+            });
+          }
+        });
+
+        return totals;
+      }
+
+      function calculateMinimumDepositsFromFreespins() {
+        const container = document.getElementById('currency-minimum-deposits-container');
+        if (!container) return;
+
+        const totals = computeFreespinMinimumDepositsByCurrency();
+        if (Object.keys(totals).length === 0) return;
+        const inputs = container.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+        if (!inputs.length) return;
+
+        let savedDeposits = {};
+        if (container.dataset.minimumDeposits) {
+          try {
+            savedDeposits = JSON.parse(container.dataset.minimumDeposits) || {};
+          } catch (e) {
+            savedDeposits = {};
+          }
+        }
+
+        inputs.forEach(input => {
+          const currency = extractCurrencyFromMinimumDepositInputName(input.name);
+          if (!currency) return;
+
+          const amount = totals[currency] === undefined ? 0 : totals[currency];
+          const rounded = roundNiceAmount(amount);
+          if (rounded === null) return;
+          const formatted = Math.trunc(rounded).toString();
+
+          input.value = formatted;
+          savedDeposits[currency] = formatted;
+        });
+
+        container.dataset.minimumDeposits = JSON.stringify(savedDeposits);
+        container.dataset.minimumDepositsSeeded = 'true';
+      }
+
+      window.calculateMinimumDepositsFromFreespins = calculateMinimumDepositsFromFreespins;
+
       // Helper function to get selected currencies from checkboxes
       function getSelectedCurrenciesMinimumDeposits() {
         const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
@@ -68,8 +181,7 @@
         const currentCurrencies = rowDiv
           ? Array.from(rowDiv.querySelectorAll('input[type="number"]'))
               .map(input => {
-                const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-                return match ? match[1] : null;
+                return extractCurrencyFromMinimumDepositInputName(input.name);
               })
               .filter(currency => currency !== null)
           : [];
@@ -101,15 +213,15 @@
         // Save ALL current values to preserve user input
         const currentValues = hasSeeded ? {} : { ...savedDeposits };
         rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
-          const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-          if (match) {
+          const currency = extractCurrencyFromMinimumDepositInputName(input.name);
+          if (currency) {
             // Save value even if it's being edited or just typed
             const rawValue = input.value;
             const value = hasSeeded ? rawValue : (rawValue || input.getAttribute('value') || '');
             if (hasSeeded) {
-              currentValues[match[1]] = rawValue;
+              currentValues[currency] = rawValue;
             } else if (value !== '') {
-              currentValues[match[1]] = value;
+              currentValues[currency] = value;
             }
           }
         });

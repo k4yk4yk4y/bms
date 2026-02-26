@@ -120,6 +120,10 @@
 </div>
 
 <script>
+  const templateDepositPercentage = (typeof window.templateDepositPercentage !== 'undefined' && window.templateDepositPercentage !== null)
+    ? window.templateDepositPercentage
+    : <%= @template_deposit_percentage.present? ? @template_deposit_percentage.to_f : 'null' %>;
+
   let bonusRewardIndex = <%= bonus.persisted? ? bonus.bonus_rewards.count : 0 %>;
   let freespinRewardIndex = <%= bonus.persisted? ? bonus.freespin_rewards.count : 0 %>;
   let bonusBuyRewardIndex = <%= bonus.persisted? ? bonus.bonus_buy_rewards.count : 0 %>;
@@ -189,6 +193,7 @@
     freespinRewardIndex++;
     
     hideNoRewardsMessage();
+    updateMinimumDepositsFromFreespins();
   }
 
   function addBonusBuyReward() {
@@ -220,6 +225,7 @@
     if (rewardForm) {
       rewardForm.remove();
       checkAndShowNoRewardsMessage();
+      updateMinimumDepositsFromFreespins();
     }
   }
 
@@ -489,21 +495,30 @@
             
             <!-- Games -->
             <div class="reward-param-field full-width">
-              <label class="form-label">Games (games)</label>
+              <label class="form-label">Games</label>
               <input type="text" class="form-control" name="freespin_rewards[${index}][games]" >
               <!--Список доступных игр через запятую-->
             </div>
 
             <!-- Freespins Count -->
             <div class="reward-param-field">
-              <label class="form-label">Freespins count *</label>
-              <input type="number" class="form-control" name="freespin_rewards[${index}][spins_count]" min="1" required >
+              <label class="form-label">Freespins count </label>
+              <input type="number" class="form-control" name="freespin_rewards[${index}][spins_count]" min="1" required oninput="updateMinimumDepositsFromFreespins()" >
             </div>
 
             <!-- Bet Level -->
             <div class="reward-param-field">
-              <label class="form-label">Bet level (bet_level)</label>
-              <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="1" >
+              <label class="form-label">Bet level </label>
+              <input type="number" class="form-control" name="freespin_rewards[${index}][bet_level]" min="0" step="1" oninput="updateMinimumDepositsFromFreespins()" >
+            </div>
+
+            <!-- Deposit Percentage -->
+            <div class="reward-param-field">
+              <label class="form-label">Deposit percentage </label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="freespin_rewards[${index}][deposit_percentage]" step="0.01" oninput="updateMinimumDepositsFromFreespins()" value="${templateDepositPercentage ?? ''}" >
+                <span class="input-group-text">%</span>
+              </div>
             </div>
 
             <!-- Code -->
@@ -514,7 +529,7 @@
           <!-- Currency Freespin Bet Levels - separate section -->
           <div class="currency-bet-levels-section mt-3">
             <div class="reward-param-field full-width">
-              <label class="form-label">Freespin bet amount by currency *</label>
+              <label class="form-label">Freespin bet amount by currency</label>
               <div id="currency-freespin-bet-levels-container-${index}">
                 <div class="currency-bet-levels-grid" id="freespin-bet-levels-grid-${index}">
                   <!-- Currency fields will be populated by JavaScript -->
@@ -828,6 +843,7 @@
                    step="${step}"
                    min="0"
                    placeholder="${placeholder}"
+                   oninput="updateMinimumDepositsFromFreespins()"
                    data-currency="${currency}"
                    data-precision="${precision}"
                    data-currency-validation-target="input"
@@ -848,6 +864,116 @@
       });
     }, 50);
   }
+
+  function parseNumericValue(value) {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function getFreespinRewardIndexes() {
+    const inputs = document.querySelectorAll('input[name^="freespin_rewards"]');
+    const indexes = new Set();
+    inputs.forEach(input => {
+      const match = input.name.match(/^freespin_rewards\[(\d+)\]/);
+      if (match) {
+        indexes.add(match[1]);
+      }
+    });
+    return Array.from(indexes);
+  }
+
+  function computeFreespinMinimumDepositsByCurrency() {
+    const totals = {};
+
+    getFreespinRewardIndexes().forEach(index => {
+      const spins = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][spins_count]"]`)?.value);
+      const percentage = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][deposit_percentage]"]`)?.value);
+      if (spins === null || percentage === null) return;
+
+      const baseBet = parseNumericValue(document.querySelector(`input[name="freespin_rewards[${index}][bet_level]"]`)?.value);
+      const currencyInputs = document.querySelectorAll(`input[name^="freespin_rewards[${index}][currency_freespin_bet_levels]"]`);
+
+      if (currencyInputs.length > 0) {
+        currencyInputs.forEach(input => {
+          const match = input.name.match(/currency_freespin_bet_levels\]\[([^\]]+)\]/);
+          const currency = match ? match[1] : null;
+          if (!currency) return;
+
+          const betValue = parseNumericValue(input.value);
+          const bet = betValue !== null ? betValue : baseBet;
+          if (bet === null) return;
+
+          const amount = bet * spins * (percentage / 100.0);
+          if (!Number.isFinite(amount)) return;
+          totals[currency] = (totals[currency] || 0) + amount;
+        });
+      } else if (baseBet !== null) {
+        const minDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+        minDepositInputs.forEach(input => {
+          const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+          const currency = match ? match[1] : null;
+          if (!currency) return;
+
+          const amount = baseBet * spins * (percentage / 100.0);
+          if (!Number.isFinite(amount)) return;
+          totals[currency] = (totals[currency] || 0) + amount;
+        });
+      }
+    });
+
+    return totals;
+  }
+
+  function updateMinimumDepositsFromFreespins() {
+    const container = document.getElementById('currency-minimum-deposits-container');
+    if (!container) return;
+
+    const totals = computeFreespinMinimumDepositsByCurrency();
+    const inputs = container.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    if (!inputs.length) return;
+
+    let savedDeposits = {};
+    if (container.dataset.minimumDeposits) {
+      try {
+        savedDeposits = JSON.parse(container.dataset.minimumDeposits) || {};
+      } catch (e) {
+        savedDeposits = {};
+      }
+    }
+
+    inputs.forEach(input => {
+      const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+      const currency = match ? match[1] : null;
+      if (!currency || totals[currency] === undefined) return;
+
+      const precision = parseInt(input.dataset.precision || "2", 10);
+      const formatted = totals[currency].toFixed(Number.isFinite(precision) ? precision : 2);
+
+      input.value = formatted;
+      savedDeposits[currency] = formatted;
+    });
+
+    container.dataset.minimumDeposits = JSON.stringify(savedDeposits);
+    container.dataset.minimumDepositsSeeded = 'true';
+  }
+
+  window.updateMinimumDepositsFromFreespins = updateMinimumDepositsFromFreespins;
+
+  document.addEventListener('input', (event) => {
+    const name = event.target?.name || "";
+    const isFreespinBetLevel = /^freespin_rewards\[\d+\]\[bet_level\]$/.test(name);
+    const isFreespinSpins = /^freespin_rewards\[\d+\]\[spins_count\]$/.test(name);
+    const isFreespinPercentage = /^freespin_rewards\[\d+\]\[deposit_percentage\]$/.test(name);
+    const isFreespinCurrencyBet = /^freespin_rewards\[\d+\]\[currency_freespin_bet_levels\]\[[^\]]+\]$/.test(name);
+
+    if (isFreespinBetLevel || isFreespinSpins || isFreespinPercentage || isFreespinCurrencyBet) {
+      updateMinimumDepositsFromFreespins();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateMinimumDepositsFromFreespins();
+  });
 
   // Populate currency fields for bonus rewards
   function populateBonusRewardCurrencyFields(index) {
@@ -1171,7 +1297,7 @@
 
             <!-- Games -->
             <div class="reward-param-field mb-3 full-width">
-              <label class="form-label">Games (games)</label>
+              <label class="form-label">Games</label>
               <input type="text" class="form-control" name="bonus_buy_rewards[${index}][games]" >
               <!--Список доступных игр через запятую-->
             </div>
@@ -1183,6 +1309,15 @@
                 <input type="number" class="form-control" name="bonus_buy_rewards[${index}][bet_level]" min="0" step="1" >
               </div>
               <!--Размер ставки за покупку-->
+            </div>
+
+            <!-- Deposit Percentage -->
+            <div class="reward-param-field">
+              <label class="form-label">Deposit percentage (deposit_percentage)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][deposit_percentage]" step="0.01" value="${templateDepositPercentage ?? ''}" >
+                <span class="input-group-text">%</span>
+              </div>
             </div>
 
 

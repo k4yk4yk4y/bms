@@ -38,6 +38,7 @@
                   min: 0,
                   placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
                   required: true,
+                  oninput: "updateMinimumDepositsFromFreespins()",
                   data: { 
                     currency: currency, 
                     precision: Bonus.currency_precision(currency),
@@ -164,6 +165,7 @@
                      step="${step}"
                      min="0"
                      placeholder="${placeholder}"
+                     oninput="updateMinimumDepositsFromFreespins()"
                      data-currency="${currency}"
                      data-precision="${precision}"
                      data-currency-validation-target="input"

@@ -294,21 +294,70 @@ class Bonus < ApplicationRecord
   end
 
   def formatted_currency_minimum_deposits
-    return "No minimum deposits specified" if currency_minimum_deposits.empty?
-
-    # Handle case where currency_minimum_deposits is a string
-    deposits = currency_minimum_deposits.is_a?(String) ? JSON.parse(currency_minimum_deposits) : currency_minimum_deposits
-    return "No minimum deposits specified" unless deposits.is_a?(Hash) && deposits.any?
+    deposits = effective_currency_minimum_deposits
+    return "No minimum deposits specified" if deposits.blank?
 
     deposits.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
   end
 
   def minimum_deposit_for_currency(currency)
-    currency_minimum_deposits[currency.to_s]
+    effective_currency_minimum_deposits[currency.to_s]
   end
 
   def has_minimum_deposit_requirements?
-    currency_minimum_deposits.any?
+    effective_currency_minimum_deposits.any?
+  end
+
+  def effective_currency_minimum_deposits
+    computed = computed_currency_minimum_deposits
+    return currency_minimum_deposits if computed.empty?
+
+    currency_minimum_deposits.merge(computed) { |_currency, _stored, calculated| calculated }
+  end
+
+  def computed_currency_minimum_deposits
+    computed = Hash.new(0.0)
+
+    freespin_rewards.each do |reward|
+      next if reward.deposit_percentage.blank?
+
+      reward_currencies = reward.currency_freespin_bet_levels.keys
+      reward_currencies = currencies if reward_currencies.blank?
+      reward_currencies = project_currencies if reward_currencies.blank?
+
+      reward_currencies.each do |currency|
+        amount = reward.minimum_deposit_amount_for_currency(currency)
+        next if amount.nil?
+
+        computed[currency] += amount.to_f
+      end
+    end
+
+    bonus_buy_rewards.each do |reward|
+      next if reward.deposit_percentage.blank?
+
+      reward_currencies = reward.currency_bet_levels.keys
+      reward_currencies = currencies if reward_currencies.blank?
+      reward_currencies = project_currencies if reward_currencies.blank?
+
+      reward_currencies.each do |currency|
+        amount = reward.minimum_deposit_amount_for_currency(currency)
+        next if amount.nil?
+
+        computed[currency] += amount.to_f
+      end
+    end
+
+    computed.each_with_object({}) do |(currency, amount), acc|
+      acc[currency] = nice_round_amount(amount)
+    end
+  end
+
+  def nice_round_amount(amount)
+    return 0 if amount.nil?
+
+    step = amount.abs >= 1000 ? 100.0 : 10.0
+    ((amount.to_f / step).round * step).to_i
   end
 
   # Limitation methods

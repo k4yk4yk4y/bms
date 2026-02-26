@@ -74,7 +74,7 @@ class Settings::BonusTemplatesController < ApplicationController
     # Получаем базовые параметры
     permitted_params = params.require(:bonus_template).permit(
       :name, :dsl_tag, :project, :event,
-      :wager, :maximum_winnings, :no_more, :totally_no_more,
+      :wager, :maximum_winnings, :no_more, :totally_no_more, :deposit_percentage,
       :description, currencies: [], groups: [], currency_minimum_deposits: {}
     )
 

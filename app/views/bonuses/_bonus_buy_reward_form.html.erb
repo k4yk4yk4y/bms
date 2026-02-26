@@ -62,6 +62,17 @@
     </div>
   </div>
 
+  <!-- Deposit Percentage -->
+  <div class="reward-param-field">
+    <label for="bonus_buy_reward_deposit_percentage_<%= index %>" class="form-label">Deposit percentage (deposit_percentage)</label>
+    <div class="input-group">
+      <input type="number" class="form-control" name="<%= field_prefix %>[deposit_percentage]"
+             id="bonus_buy_reward_deposit_percentage_<%= index %>" step="0.01"
+             value="<%= existing_bonus_buy&.deposit_percentage %>">
+      <span class="input-group-text">%</span>
+    </div>
+  </div>
+
 
 
 

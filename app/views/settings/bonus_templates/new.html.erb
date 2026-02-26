@@ -102,6 +102,14 @@
             <!-- Currency Minimum Deposits -->
             <%= render "currency_minimum_deposits", form: form, bonus_template: @bonus_template %>
 
+            <div class="mb-3">
+              <%= form.label :deposit_percentage, "Deposit percentage", class: "form-label" %>
+              <div class="input-group">
+                <%= form.number_field :deposit_percentage, class: "form-control", step: "0.01", placeholder: "0.00" %>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">

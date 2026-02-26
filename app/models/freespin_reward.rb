@@ -44,7 +44,7 @@ class FreespinReward < ApplicationRecord
       total_deposits deposits_sum loss_sum deposits_count spend_sum category_loss_sum
       wager_sum bets_count affiliates_user balance chargeable_comp_points
       persistent_comp_points date_of_birth deposit gender issued_bonus registered
-      social_networks wager_done hold_min hold_max
+      social_networks wager_done hold_min hold_max deposit_percentage
     ]
   end
 
@@ -55,6 +55,20 @@ class FreespinReward < ApplicationRecord
   def set_advanced_param(param, value)
     return unless advanced_params.include?(param)
     self.config = (config || {}).merge(param => value)
+  end
+
+  def deposit_percentage
+    config&.dig("deposit_percentage")
+  end
+
+  def deposit_percentage=(value)
+    new_config = (config || {}).dup
+    if value.blank?
+      new_config.delete("deposit_percentage")
+    else
+      new_config["deposit_percentage"] = value.to_f
+    end
+    self.config = new_config
   end
 
   def formatted_spins
@@ -144,6 +158,29 @@ class FreespinReward < ApplicationRecord
 
   def has_currency_freespin_bet_levels?
     currency_freespin_bet_levels.any?
+  end
+
+  def bonus_amount_for_currency(currency)
+    return nil if spins_count.blank?
+    levels = currency_freespin_bet_levels
+    bet = if levels.present?
+      return 0 unless levels.key?(currency.to_s)
+      levels[currency.to_s]
+    else
+      bet_level
+    end
+    return 0 if bet.blank?
+
+    bet.to_f * spins_count.to_f
+  end
+
+  def minimum_deposit_amount_for_currency(currency)
+    return nil if deposit_percentage.blank?
+
+    bonus_amount = bonus_amount_for_currency(currency)
+    return nil if bonus_amount.nil?
+
+    bonus_amount * (deposit_percentage.to_f / 100.0)
   end
 
   private
