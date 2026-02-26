@@ -1,18 +1,22 @@
 <!-- Currency Minimum Deposits Section -->
 <div class="card mb-4" id="currency-minimum-deposits-card">
-  <div class="card-header">
+  <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="card-title mb-0">
       <i class="bi bi-currency-exchange"></i> 
       Minimum deposits by currency
     </h5>
-  </div>
-  <div class="card-body">
-    <div class="d-flex justify-content-end mb-2">
+    <div class="btn-group" role="group" aria-label="Minimum deposits actions">
       <button type="button" class="btn btn-sm btn-outline-primary"
               onclick="if (typeof calculateMinimumDepositsFromFreespins === 'function') { calculateMinimumDepositsFromFreespins(); }">
         Calculate
       </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary"
+              onclick="if (typeof copyMinimumDepositsPresetToClipboard === 'function') { copyMinimumDepositsPresetToClipboard(); }">
+        Copy
+      </button>
     </div>
+  </div>
+  <div class="card-body">
     <div id="currency-minimum-deposits-container"
          data-minimum-deposits="<%= ERB::Util.html_escape(bonus.currency_minimum_deposits.to_json) %>">
       <div class="row">
@@ -46,6 +50,34 @@
     
     <!-- Dynamic update based on selected currencies -->
     <script>
+      function fallbackCopyText(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      async function copyMinimumDepositsPresetToClipboard() {
+        const text = "EUR\t25\nUSD\t25\nBRL\t50";
+
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            fallbackCopyText(text);
+          }
+        } catch (e) {
+          fallbackCopyText(text);
+        }
+      }
+
+      window.copyMinimumDepositsPresetToClipboard = copyMinimumDepositsPresetToClipboard;
+
       function parseNumericValue(value) {
         const parsed = parseFloat(value);
         return Number.isFinite(parsed) ? parsed : null;
