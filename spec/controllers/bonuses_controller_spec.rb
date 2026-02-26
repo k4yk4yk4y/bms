@@ -887,6 +887,66 @@ RSpec.describe BonusesController, type: :controller do
         expect(reward2.amount).to eq(250)
       end
 
+      it "clears fixed fields when bonus_type is switched to percentage" do
+        bonus = create(:bonus)
+        reward = create(
+          :bonus_reward,
+          bonus: bonus,
+          amount: 100,
+          percentage: nil,
+          currency_amounts: { "USD" => 100.0 },
+          currency_maximum_amounts: {}
+        )
+
+        params = valid_bonus_params.merge(
+          bonus_rewards: {
+            "0" => {
+              id: reward.id,
+              bonus_type: "percentage",
+              percentage: "25",
+              currency_maximum_amounts: { "USD" => "300" }
+            }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward.reload
+        expect(reward.amount).to be_nil
+        expect(reward.currency_amounts).to eq({})
+        expect(reward.percentage).to eq(25.0)
+        expect(reward.currency_maximum_amounts).to eq({ "USD" => 300.0 })
+      end
+
+      it "clears percentage fields when bonus_type is switched to fixed" do
+        bonus = create(:bonus)
+        reward = create(
+          :bonus_reward,
+          bonus: bonus,
+          amount: nil,
+          percentage: 25,
+          currency_amounts: {},
+          currency_maximum_amounts: { "USD" => 300.0 }
+        )
+
+        params = valid_bonus_params.merge(
+          bonus_rewards: {
+            "0" => {
+              id: reward.id,
+              bonus_type: "fixed",
+              currency_amounts: { "USD" => "75" }
+            }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward.reload
+        expect(reward.percentage).to be_nil
+        expect(reward.currency_maximum_amounts).to eq({})
+        expect(reward.currency_amounts).to eq({ "USD" => 75.0 })
+      end
+
       it "removes rewards not in params" do
         bonus = create(:bonus)
         reward1 = create(:bonus_reward, bonus: bonus, amount: 100)

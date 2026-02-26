@@ -358,28 +358,31 @@
     const amountField = document.getElementById(`amount_field${suffix}`);
     const percentageField = document.getElementById(`percentage_field${suffix}`);
     const maxAmountField = document.getElementById(`max_amount_field${suffix}`);
-    
+
+    const setFieldState = (field, visible, required = false) => {
+      if (!field) return;
+
+      field.style.display = visible ? 'block' : 'none';
+      field.querySelectorAll('input, select, textarea').forEach((input) => {
+        input.disabled = !visible;
+        if (visible && required) {
+          input.setAttribute('required', 'required');
+        } else {
+          input.removeAttribute('required');
+        }
+      });
+    };
+
     if (type === 'fixed') {
-      if (amountField) {
-        amountField.style.display = 'block';
-        amountField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
-      }
-      if (percentageField) {
-        percentageField.style.display = 'none';
-        percentageField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
-      }
-      if (maxAmountField) maxAmountField.style.display = 'none';
-    } else {
-      if (amountField) {
-        amountField.style.display = 'none';
-        amountField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
-      }
-      if (percentageField) {
-        percentageField.style.display = 'block';
-        percentageField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
-      }
-      if (maxAmountField) maxAmountField.style.display = 'block';
+      setFieldState(amountField, true, true);
+      setFieldState(percentageField, false);
+      setFieldState(maxAmountField, false);
+      return;
     }
+
+    setFieldState(amountField, false);
+    setFieldState(percentageField, true, true);
+    setFieldState(maxAmountField, true);
   }
 
 

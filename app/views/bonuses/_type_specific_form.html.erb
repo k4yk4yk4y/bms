@@ -1035,15 +1035,9 @@
 
       grid.insertAdjacentHTML('beforeend', fieldHtml);
     });
-    
-    // Ensure all new input fields are properly enabled and focusable
-    setTimeout(() => {
-      grid.querySelectorAll('input[type="number"]').forEach(input => {
-        input.removeAttribute('disabled');
-        input.removeAttribute('readonly');
-        input.style.pointerEvents = 'auto';
-      });
-    }, 50);
+
+    const selectedType = document.querySelector(`input[name="bonus_rewards[${index}][bonus_type]"]:checked`)?.value || 'fixed';
+    toggleBonusType(selectedType, index);
   }
 
   function populateBonusRewardMaxAmountFields(index) {
@@ -1105,14 +1099,8 @@
       grid.insertAdjacentHTML('beforeend', fieldHtml);
     });
 
-    // Ensure all new input fields are properly enabled and focusable
-    setTimeout(() => {
-      grid.querySelectorAll('input[type="number"]').forEach(input => {
-        input.removeAttribute('disabled');
-        input.removeAttribute('readonly');
-        input.style.pointerEvents = 'auto';
-      });
-    }, 50);
+    const selectedType = document.querySelector(`input[name="bonus_rewards[${index}][bonus_type]"]:checked`)?.value || 'fixed';
+    toggleBonusType(selectedType, index);
   }
 
   // Populate currency fields for bonus buy rewards
@@ -1182,20 +1170,49 @@
     const amountField = document.getElementById('amount_field_' + index);
     const percentageField = document.getElementById('percentage_field_' + index);
     const maxAmountField = document.getElementById('max_amount_field_' + index);
-    
+
+    const setFieldState = (field, visible, required = false) => {
+      if (!field) return;
+
+      field.style.display = visible ? 'block' : 'none';
+      field.querySelectorAll('input, select, textarea').forEach((input) => {
+        input.disabled = !visible;
+        if (visible && required) {
+          input.setAttribute('required', 'required');
+        } else {
+          input.removeAttribute('required');
+        }
+      });
+    };
+
     if (type === 'fixed') {
-      amountField.style.display = 'block';
-      percentageField.style.display = 'none';
-      if (maxAmountField) maxAmountField.style.display = 'none';
-      amountField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
-      percentageField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
-    } else {
-      amountField.style.display = 'none';
-      percentageField.style.display = 'block';
-      if (maxAmountField) maxAmountField.style.display = 'block';
-      amountField.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
-      percentageField.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
+      setFieldState(amountField, true, true);
+      setFieldState(percentageField, false);
+      setFieldState(maxAmountField, false);
+      return;
     }
+
+    setFieldState(amountField, false);
+    setFieldState(percentageField, true, true);
+    setFieldState(maxAmountField, true);
+  }
+
+  function initializeBonusRewardTypes() {
+    const rewardCards = document.querySelectorAll('[id^="bonus-reward-"]');
+    rewardCards.forEach((card) => {
+      const match = card.id.match(/^bonus-reward-(\d+)$/);
+      if (!match) return;
+
+      const index = match[1];
+      const selectedType = document.querySelector(`input[name="bonus_rewards[${index}][bonus_type]"]:checked`)?.value || 'fixed';
+      toggleBonusType(selectedType, index);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeBonusRewardTypes);
+  } else {
+    initializeBonusRewardTypes();
   }
 
 

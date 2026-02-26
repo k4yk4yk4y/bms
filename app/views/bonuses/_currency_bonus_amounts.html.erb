@@ -136,14 +136,12 @@
             rowDiv.appendChild(colDiv);
           });
 
-          // Ensure all new input fields are properly enabled and focusable
-          setTimeout(() => {
-            rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
-              input.removeAttribute('disabled');
-              input.removeAttribute('readonly');
-              input.style.pointerEvents = 'auto';
-            });
-          }, 50);
+          const match = fieldPrefix.match(/^bonus_rewards\[(\d+)\]$/);
+          if (match && typeof toggleBonusType === 'function') {
+            const index = match[1];
+            const selectedType = document.querySelector(`input[name="bonus_rewards[${index}][bonus_type]"]:checked`)?.value || 'fixed';
+            toggleBonusType(selectedType, index);
+          }
         });
       };
 

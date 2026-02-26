@@ -606,8 +606,6 @@ class BonusesController < ApplicationController
     permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
     permitted[:currency_maximum_amounts] = normalize_currency_amounts(permitted[:currency_maximum_amounts]) if permitted[:currency_maximum_amounts].present?
 
-    permitted.delete(:bonus_type)
-
     permitted
   end
 
@@ -799,13 +797,10 @@ class BonusesController < ApplicationController
       next if reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?
 
       reward = @bonus.bonus_rewards.build(
-        reward_type: "bonus",
-        amount: reward_params[:amount],
-        percentage: reward_params[:percentage]
+        reward_type: "bonus"
       )
 
-      reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
-      reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
+      apply_bonus_reward_type_fields(reward, reward_params)
 
       # Set all additional parameters through the config field
       config = {}
@@ -893,11 +888,7 @@ class BonusesController < ApplicationController
         reward = @bonus.bonus_rewards.find_by(id: reward_params[:id])
         next unless reward
 
-        # Update basic attributes
-        reward.amount = reward_params[:amount] if reward_params[:amount].present?
-        reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
-        reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
-        reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
+        apply_bonus_reward_type_fields(reward, reward_params)
 
         # Update config with all other parameters
         config = reward.config || {}
@@ -921,13 +912,10 @@ class BonusesController < ApplicationController
         next if reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?
 
         reward = @bonus.bonus_rewards.build(
-          reward_type: "bonus",
-          amount: reward_params[:amount],
-          percentage: reward_params[:percentage]
+          reward_type: "bonus"
         )
 
-        reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
-        reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
+        apply_bonus_reward_type_fields(reward, reward_params)
 
         # Set all additional parameters through the config field
         config = {}
@@ -1394,8 +1382,6 @@ class BonusesController < ApplicationController
     permitted[:currency_amounts] = normalize_currency_amounts(permitted[:currency_amounts]) if permitted[:currency_amounts].present?
     permitted[:currency_maximum_amounts] = normalize_currency_amounts(permitted[:currency_maximum_amounts]) if permitted[:currency_maximum_amounts].present?
 
-    permitted.delete(:bonus_type)
-
     permitted
   end
 
@@ -1404,13 +1390,10 @@ class BonusesController < ApplicationController
     return if reward_params.empty? || (reward_params[:amount].blank? && reward_params[:percentage].blank? && reward_params[:currency_amounts].blank?)
 
     reward = @bonus.bonus_rewards.build(
-      reward_type: reward_params[:reward_type] || "bonus",
-      amount: reward_params[:amount],
-      percentage: reward_params[:percentage]
+      reward_type: reward_params[:reward_type] || "bonus"
     )
 
-    reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
-    reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
+    apply_bonus_reward_type_fields(reward, reward_params)
 
     # Set new direct attributes
 
@@ -1438,10 +1421,7 @@ class BonusesController < ApplicationController
     reward = @bonus.bonus_rewards.find_by(reward_type: reward_type) ||
              @bonus.bonus_rewards.build(reward_type: reward_type)
 
-    # Update amount/percentage
-    reward.amount = reward_params[:amount] if reward_params[:amount].present?
-    reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
-    reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+    apply_bonus_reward_type_fields(reward, reward_params)
 
     # Update new direct attributes
 
@@ -2107,6 +2087,26 @@ class BonusesController < ApplicationController
 
     reward_data = params[:bonus_code_reward] || params.dig(:bonus, :bonus_code_reward) || {}
     reward_data.permit(:code, :set_bonus_code, :code_type, :title)
+  end
+
+  def apply_bonus_reward_type_fields(reward, reward_params)
+    case reward_params[:bonus_type].to_s
+    when "percentage"
+      reward.amount = nil
+      reward.currency_amounts = {}
+      reward.percentage = reward_params[:percentage].presence
+      reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts])
+    when "fixed"
+      reward.amount = reward_params[:amount].presence
+      reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts])
+      reward.percentage = nil
+      reward.currency_maximum_amounts = {}
+    else
+      reward.amount = reward_params[:amount] if reward_params[:amount].present?
+      reward.percentage = reward_params[:percentage] if reward_params[:percentage].present?
+      reward.currency_amounts = normalize_currency_amounts(reward_params[:currency_amounts]) if reward_params[:currency_amounts].present?
+      reward.currency_maximum_amounts = normalize_currency_amounts(reward_params[:currency_maximum_amounts]) if reward_params[:currency_maximum_amounts].present?
+    end
   end
 
   def normalize_currency_hash(value)
