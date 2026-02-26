@@ -312,8 +312,10 @@ function updateAllCurrencyFields() {
       updateCurrencyFreespinBetLevelsFields();
     }
     
-    // Update currency bonus buy bet levels
-    if (typeof updateCurrencyBonusBuyBetLevelsFields === 'function') {
+    // Update currency bonus buy purchase amounts
+    if (typeof updateCurrencyBonusBuyAmountsFields === 'function') {
+      updateCurrencyBonusBuyAmountsFields();
+    } else if (typeof updateCurrencyBonusBuyBetLevelsFields === 'function') {
       updateCurrencyBonusBuyBetLevelsFields();
     }
     

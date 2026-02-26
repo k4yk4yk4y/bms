@@ -4,12 +4,12 @@ class BonusBuyReward < ApplicationRecord
 
   belongs_to :bonus
 
-  validates :buy_amount, presence: true, numericality: { greater_than: 0 }
+  validates :buy_amount, numericality: { greater_than: 0 }, allow_nil: true
   validates :multiplier, numericality: { greater_than: 0 }, allow_nil: true
   validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
-  validate :currency_bet_levels_must_be_present
-  validate :validate_currency_bet_levels_precision
+  validate :currency_buy_amounts_must_be_present
+  validate :validate_currency_buy_amounts_precision
 
   # Store additional configuration as JSON
   serialize :config, coder: JSON
@@ -17,42 +17,67 @@ class BonusBuyReward < ApplicationRecord
 
   # Common parameters accessors - DEPRECATED
 
-  # Currency-specific bet levels
-  def currency_bet_levels
+  # Currency-specific purchase amounts
+  def currency_buy_amounts
+    values = config&.dig("currency_buy_amounts")
+    return values if values.present?
+
+    # Backward compatibility for records that still store old key.
     config&.dig("currency_bet_levels") || {}
   end
 
+  def currency_buy_amounts=(value)
+    clean_value = normalize_currency_values(value)
+    new_config = (config || {}).merge("currency_buy_amounts" => clean_value)
+    new_config.delete("currency_bet_levels")
+    self.config = new_config
+  end
+
+  # Backward compatibility aliases for old field naming.
+  def currency_bet_levels
+    currency_buy_amounts
+  end
+
   def currency_bet_levels=(value)
-    if value.is_a?(Hash)
-      # Remove blank values and convert to proper format
-      clean_value = value.reject { |_k, v| v.blank? }
-      clean_value = clean_value.transform_values { |v| v.to_f }
-      self.config = (config || {}).merge("currency_bet_levels" => clean_value)
-    elsif value.blank?
-      self.config = (config || {}).merge("currency_bet_levels" => {})
-    else
-      self.config = (config || {}).merge("currency_bet_levels" => value)
-    end
+    self.currency_buy_amounts = value
+  end
+
+  def get_buy_amount_for_currency(currency)
+    currency_buy_amounts[currency.to_s]
+  end
+
+  def set_buy_amount_for_currency(currency, value)
+    amounts = currency_buy_amounts.dup
+    amounts[currency.to_s] = value&.to_f
+    self.currency_buy_amounts = amounts
   end
 
   def get_bet_level_for_currency(currency)
-    currency_bet_levels[currency.to_s] || bet_level
+    currency_buy_amounts[currency.to_s] || bet_level
   end
 
   def set_bet_level_for_currency(currency, value)
-    levels = currency_bet_levels.dup
+    levels = currency_buy_amounts.dup
     levels[currency.to_s] = value&.to_f
-    self.currency_bet_levels = levels
+    self.currency_buy_amounts = levels
+  end
+
+  def formatted_currency_buy_amounts
+    return "No purchase amounts specified" if currency_buy_amounts.empty?
+
+    currency_buy_amounts.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
   end
 
   def formatted_currency_bet_levels
-    return "No bet levels specified" if currency_bet_levels.empty?
+    formatted_currency_buy_amounts
+  end
 
-    currency_bet_levels.map { |currency, amount| "#{currency}: #{amount}" }.join(", ")
+  def has_currency_buy_amounts?
+    currency_buy_amounts.any?
   end
 
   def has_currency_bet_levels?
-    currency_bet_levels.any?
+    has_currency_buy_amounts?
   end
 
   # Advanced parameters accessors
@@ -92,6 +117,8 @@ class BonusBuyReward < ApplicationRecord
   end
 
   def formatted_buy_amount
+    return formatted_currency_buy_amounts if currency_buy_amounts.any?
+
     "#{buy_amount} #{bonus.currencies.first || ''}"
   end
 
@@ -147,19 +174,23 @@ class BonusBuyReward < ApplicationRecord
   end
 
   def bonus_amount_for_currency(currency)
-    levels = currency_bet_levels
-    bet = if levels.present?
-      return 0 unless levels.key?(currency.to_s)
-      levels[currency.to_s]
-    else
-      bet_level
+    amounts = currency_buy_amounts
+    if amounts.present?
+      return 0 unless amounts.key?(currency.to_s)
+
+      amount = amounts[currency.to_s]
+      return 0 if amount.blank?
+
+      return amount.to_f
     end
-    return nil if bet.blank?
 
-    return bet.to_f * multiplier.to_f if multiplier.present?
+    # Backward compatibility for older records.
     return buy_amount.to_f if buy_amount.present?
+    return nil if bet_level.blank?
 
-    bet.to_f
+    return bet_level.to_f * multiplier.to_f if multiplier.present?
+
+    bet_level.to_f
   end
 
   def minimum_deposit_amount_for_currency(currency)
@@ -173,26 +204,41 @@ class BonusBuyReward < ApplicationRecord
 
   private
 
-  def currency_bet_levels_must_be_present
-    # Check if we have at least one currency with a non-zero bet level
-    return if currency_bet_levels.present? &&
-              currency_bet_levels.values.any? { |v| v.present? && v.to_f > 0 }
+  def currency_buy_amounts_must_be_present
+    return if currency_buy_amounts.present? &&
+              currency_buy_amounts.values.any? { |v| v.present? && v.to_f > 0 }
 
-    errors.add(:currency_bet_levels, "a bet amount must be provided for at least one currency")
+    # Keep old single amount as fallback for legacy records.
+    return if buy_amount.present? && buy_amount.to_f > 0
+
+    errors.add(:currency_buy_amounts, "a purchase amount must be provided for at least one currency")
   end
 
-  def validate_currency_bet_levels_precision
-    return unless currency_bet_levels.present?
+  def validate_currency_buy_amounts_precision
+    return unless currency_buy_amounts.present?
 
-    currency_bet_levels.each do |currency, amount|
+    currency_buy_amounts.each do |currency, amount|
       next if amount.blank?
 
       unless self.class.valid_amount_for_currency?(amount, currency)
         precision = self.class.currency_precision(currency)
         currency_type = self.class.crypto_currency?(currency) ? "cryptocurrency" : "fiat currency"
-        errors.add(:currency_bet_levels,
+        errors.add(:currency_buy_amounts,
           "for #{currency} (#{currency_type}) maximum #{precision} decimal places")
       end
+    end
+  end
+
+  def normalize_currency_values(value)
+    return {} if value.blank?
+
+    if value.is_a?(Hash)
+      value.each_with_object({}) do |(currency, amount), result|
+        next if amount.blank?
+        result[currency.to_s] = amount.to_f
+      end
+    else
+      {}
     end
   end
 end

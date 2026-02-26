@@ -216,6 +216,7 @@
     bonusBuyRewardIndex++;
     
     hideNoRewardsMessage();
+    updateMinimumDepositsFromFreespins();
   }
 
   function removeBonusReward(index) {
@@ -257,6 +258,7 @@
     if (rewardForm) {
       rewardForm.remove();
       checkAndShowNoRewardsMessage();
+      updateMinimumDepositsFromFreespins();
     }
   }
 
@@ -905,6 +907,33 @@
     return Array.from(indexes);
   }
 
+  function getBonusBuyRewardIndexes() {
+    const inputs = document.querySelectorAll('input[name^="bonus_buy_rewards"]');
+    const indexes = new Set();
+    inputs.forEach(input => {
+      const match = input.name.match(/^bonus_buy_rewards\[(\d+)\]/);
+      if (match) {
+        indexes.add(match[1]);
+      }
+    });
+    return Array.from(indexes);
+  }
+
+  function getMinimumDepositCurrencies() {
+    const minDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+    return Array.from(minDepositInputs)
+      .map((input) => {
+        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        return match ? match[1] : null;
+      })
+      .filter((currency) => currency !== null);
+  }
+
+  function addAmountToCurrencyTotals(totals, currency, amount) {
+    if (!currency || !Number.isFinite(amount)) return;
+    totals[currency] = (totals[currency] || 0) + amount;
+  }
+
   function computeFreespinMinimumDepositsByCurrency() {
     const totals = {};
 
@@ -927,21 +956,44 @@
           if (bet === null) return;
 
           const amount = bet * spins * (percentage / 100.0);
-          if (!Number.isFinite(amount)) return;
-          totals[currency] = (totals[currency] || 0) + amount;
+          addAmountToCurrencyTotals(totals, currency, amount);
         });
       } else if (baseBet !== null) {
-        const minDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
-        minDepositInputs.forEach(input => {
-          const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+        getMinimumDepositCurrencies().forEach((currency) => {
+          const amount = baseBet * spins * (percentage / 100.0);
+          addAmountToCurrencyTotals(totals, currency, amount);
+        });
+      }
+    });
+
+    getBonusBuyRewardIndexes().forEach((index) => {
+      const percentage = parseNumericValue(document.querySelector(`input[name="bonus_buy_rewards[${index}][deposit_percentage]"]`)?.value);
+      if (percentage === null) return;
+
+      const amountInputs = document.querySelectorAll(`input[name^="bonus_buy_rewards[${index}][currency_buy_amounts]"]`);
+      if (amountInputs.length > 0) {
+        amountInputs.forEach((input) => {
+          const match = input.name.match(/currency_buy_amounts\]\[([^\]]+)\]/);
           const currency = match ? match[1] : null;
           if (!currency) return;
 
-          const amount = baseBet * spins * (percentage / 100.0);
-          if (!Number.isFinite(amount)) return;
-          totals[currency] = (totals[currency] || 0) + amount;
+          const buyAmount = parseNumericValue(input.value);
+          if (buyAmount === null) return;
+
+          const amount = buyAmount * (percentage / 100.0);
+          addAmountToCurrencyTotals(totals, currency, amount);
         });
+        return;
       }
+
+      // Backward compatibility for old single-value field.
+      const fallbackBuyAmount = parseNumericValue(document.querySelector(`input[name="bonus_buy_rewards[${index}][buy_amount]"]`)?.value);
+      if (fallbackBuyAmount === null) return;
+
+      getMinimumDepositCurrencies().forEach((currency) => {
+        const amount = fallbackBuyAmount * (percentage / 100.0);
+        addAmountToCurrencyTotals(totals, currency, amount);
+      });
     });
 
     return totals;
@@ -988,8 +1040,11 @@
     const isFreespinSpins = /^freespin_rewards\[\d+\]\[spins_count\]$/.test(name);
     const isFreespinPercentage = /^freespin_rewards\[\d+\]\[deposit_percentage\]$/.test(name);
     const isFreespinCurrencyBet = /^freespin_rewards\[\d+\]\[currency_freespin_bet_levels\]\[[^\]]+\]$/.test(name);
+    const isBonusBuyPercentage = /^bonus_buy_rewards\[\d+\]\[deposit_percentage\]$/.test(name);
+    const isBonusBuyAmount = /^bonus_buy_rewards\[\d+\]\[currency_buy_amounts\]\[[^\]]+\]$/.test(name);
+    const isBonusBuyFallbackAmount = /^bonus_buy_rewards\[\d+\]\[buy_amount\]$/.test(name);
 
-    if (isFreespinBetLevel || isFreespinSpins || isFreespinPercentage || isFreespinCurrencyBet) {
+    if (isFreespinBetLevel || isFreespinSpins || isFreespinPercentage || isFreespinCurrencyBet || isBonusBuyPercentage || isBonusBuyAmount || isBonusBuyFallbackAmount) {
       updateMinimumDepositsFromFreespins();
     }
   });
@@ -1150,39 +1205,36 @@
 
   // Populate currency fields for bonus buy rewards
   function populateBonusBuyRewardCurrencyFields(index) {
-    const grid = document.getElementById(`bonus-buy-bet-levels-grid-${index}`);
+    const grid = document.getElementById(`bonus-buy-amounts-grid-${index}`);
     if (!grid) return;
+
+    const currentValues = {};
+    grid.querySelectorAll('input[type="number"]').forEach((input) => {
+      const match = input.name.match(/currency_buy_amounts\[([^\]]+)\]/);
+      if (!match) return;
+      const value = input.value || input.getAttribute('value') || '';
+      if (value !== '') {
+        currentValues[match[1]] = value;
+      }
+    });
 
     const availableCurrencies = window.currentProjectCurrencies || [];
     const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
     
-    // Получаем валюты по приоритету: минимальные депозиты > выбранные валюты > все валюты
+    // Используем выбранные валюты в Currencies.
     let currenciesToUse = availableCurrencies;
-    
-    // Проверяем валюты из минимальных депозитов
-    const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
-    const minimumDepositCurrencies = Array.from(minimumDepositInputs)
-      .map(input => {
-        const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
-        return match ? match[1] : null;
-      })
-      .filter(currency => currency !== null);
-    
-    // Проверяем выбранные валюты
+
     const currencyCheckboxes = document.querySelectorAll('input.currency-checkbox:checked');
-    const selectedCurrencies = Array.from(currencyCheckboxes).map(checkbox => checkbox.value);
-    
-    // Приоритет валют
-    if (minimumDepositCurrencies.length > 0) {
-      currenciesToUse = minimumDepositCurrencies;
-    } else if (selectedCurrencies.length > 0) {
+    const selectedCurrencies = Array.from(currencyCheckboxes).map((checkbox) => checkbox.value);
+    if (selectedCurrencies.length > 0) {
       currenciesToUse = selectedCurrencies;
     }
 
-    // Clear existing fields first
+    currenciesToUse = Array.from(new Set([ ...currenciesToUse, ...Object.keys(currentValues) ]));
+
     grid.innerHTML = '';
 
-    currenciesToUse.forEach(currency => {
+    currenciesToUse.forEach((currency) => {
       const isCrypto = cryptoCurrencies.includes(currency);
       const step = isCrypto ? '0.00000001' : '0.01';
       const placeholder = isCrypto ? '0.00000000' : '0.00';
@@ -1193,11 +1245,13 @@
           <div class="input-group">
             <span class="input-group-text currency-code">${currency}</span>
             <input type="number" 
-                   name="bonus_buy_rewards[${index}][currency_bet_levels][${currency}]"
+                   name="bonus_buy_rewards[${index}][currency_buy_amounts][${currency}]"
+                   value="${currentValues[currency] || ''}"
                    class="form-control currency-input"
                    step="${step}"
                    min="0"
                    placeholder="${placeholder}"
+                   oninput="updateMinimumDepositsFromFreespins()"
                    data-currency="${currency}"
                    data-precision="${precision}"
                    data-currency-validation-target="input"
@@ -1338,16 +1392,6 @@
           <!-- Main parameters -->
           <div class="main-params-container">
             <h6 class="text-warning reward-section-header">Main parameters</h6>
-            
-            <!-- Buy Amount -->
-            <div class="reward-param-field">
-              <label class="form-label">Purchase amount (buy_amount) *</label>
-              <div class="input-group">
-                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][buy_amount]" min="1"  required>
-                <span class="input-group-text">€</span>
-              </div>
-              <!--Сумма которую игрок должен заплатить за покупку бонуса-->
-            </div>
 
             <!-- Multiplier -->
             <div class="reward-param-field">
@@ -1379,31 +1423,22 @@
             <div class="reward-param-field">
               <label class="form-label">Deposit percentage (deposit_percentage)</label>
               <div class="input-group">
-                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][deposit_percentage]" step="0.01" value="${templateDepositPercentage ?? ''}" >
+                <input type="number" class="form-control" name="bonus_buy_rewards[${index}][deposit_percentage]" step="0.01" value="${templateDepositPercentage ?? ''}" oninput="updateMinimumDepositsFromFreespins()">
                 <span class="input-group-text">%</span>
               </div>
             </div>
 
 
 
-            <!-- Code -->
-
-
-            <!-- Tags -->
-            <div class="reward-param-field">
-              <label class="form-label">Tags (tags)</label>
-              <input type="text" class="form-control" name="bonus_buy_rewards[${index}][tags]" placeholder="bonus-buy, promo, special">
-            </div>
-
-            <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
+            <!-- Note: Currencies, Groups, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
           </div>
 
-          <!-- Currency Bonus Buy Bet Levels -->
+          <!-- Currency Bonus Buy Purchase Amounts -->
           <div class="currency-bet-levels-section mt-3">
             <div class="reward-param-field full-width">
-              <label class="form-label">Bet level by currency *</label>
-              <div id="currency-bonus-buy-bet-levels-container-${index}">
-                <div class="currency-bet-levels-grid" id="bonus-buy-bet-levels-grid-${index}">
+              <label class="form-label">Purchase amount (buy_amount) by currency *</label>
+              <div id="currency-bonus-buy-amounts-container-${index}">
+                <div class="currency-bet-levels-grid" id="bonus-buy-amounts-grid-${index}">
                   <!-- Currency fields will be populated by JavaScript -->
                 </div>
               </div>
@@ -1459,13 +1494,6 @@
               <label class="form-label">Points amount (points_amount) *</label>
               <input type="number" class="form-control" name="comp_point_rewards[${index}][points_amount]" min="0" required>
               <!--Количество очков, которые получит игрок-->
-            </div>
-
-            <!-- Multiplier -->
-            <div class="reward-param-field">
-              <label class="form-label">Multiplier (multiplier)</label>
-              <input type="number" class="form-control" name="comp_point_rewards[${index}][multiplier]" min="0" step="0.01">
-              <!--Опциональный множитель очков-->
             </div>
 
             <!-- Note: Currencies, Groups, Tags, Usage Limitations, Minimum Deposit, and Wagering Strategy are configured in Basic Information -->
@@ -1555,8 +1583,8 @@
       grid.innerHTML = '';
     });
 
-    // Clear bonus buy bet levels
-    const bonusBuyGrids = document.querySelectorAll('[id^="bonus-buy-bet-levels-grid-"]');
+    // Clear bonus buy purchase amounts
+    const bonusBuyGrids = document.querySelectorAll('[id^="bonus-buy-amounts-grid-"]');
     bonusBuyGrids.forEach(grid => {
       grid.innerHTML = '';
     });

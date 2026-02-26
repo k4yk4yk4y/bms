@@ -125,6 +125,23 @@
         return Array.from(indexes);
       }
 
+      function getBonusBuyRewardIndexes() {
+        const inputs = document.querySelectorAll('input[name^="bonus_buy_rewards"]');
+        const indexes = new Set();
+        inputs.forEach((input) => {
+          const match = input.name.match(/^bonus_buy_rewards\[(\d+)\]/);
+          if (match) {
+            indexes.add(match[1]);
+          }
+        });
+        return Array.from(indexes);
+      }
+
+      function addAmountToCurrencyTotals(totals, currency, amount) {
+        if (!currency || !Number.isFinite(amount)) return;
+        totals[currency] = (totals[currency] || 0) + amount;
+      }
+
       function computeFreespinMinimumDepositsByCurrency() {
         const totals = {};
 
@@ -146,8 +163,7 @@
               const bet = betValue !== null ? betValue : 0;
 
               const amount = bet * spins * (percentage / 100.0);
-              if (!Number.isFinite(amount)) return;
-              totals[currency] = (totals[currency] || 0) + amount;
+              addAmountToCurrencyTotals(totals, currency, amount);
             });
           } else {
             const bet = baseBet !== null ? baseBet : 0;
@@ -157,10 +173,43 @@
               if (!currency) return;
 
               const amount = bet * spins * (percentage / 100.0);
-              if (!Number.isFinite(amount)) return;
-              totals[currency] = (totals[currency] || 0) + amount;
+              addAmountToCurrencyTotals(totals, currency, amount);
             });
           }
+        });
+
+        getBonusBuyRewardIndexes().forEach((index) => {
+          const percentage = parseNumericValue(document.querySelector(`input[name="bonus_buy_rewards[${index}][deposit_percentage]"]`)?.value);
+          if (percentage === null) return;
+
+          const amountInputs = document.querySelectorAll(`input[name^="bonus_buy_rewards[${index}][currency_buy_amounts]"]`);
+          if (amountInputs.length > 0) {
+            amountInputs.forEach((input) => {
+              const match = input.name.match(/currency_buy_amounts\]\[([^\]]+)\]/);
+              const currency = match ? match[1] : null;
+              if (!currency) return;
+
+              const buyAmount = parseNumericValue(input.value);
+              if (buyAmount === null) return;
+
+              const amount = buyAmount * (percentage / 100.0);
+              addAmountToCurrencyTotals(totals, currency, amount);
+            });
+            return;
+          }
+
+          // Backward compatibility for old single-value field.
+          const fallbackBuyAmount = parseNumericValue(document.querySelector(`input[name="bonus_buy_rewards[${index}][buy_amount]"]`)?.value);
+          if (fallbackBuyAmount === null) return;
+
+          const minDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
+          minDepositInputs.forEach((input) => {
+            const currency = extractCurrencyFromMinimumDepositInputName(input.name);
+            if (!currency) return;
+
+            const amount = fallbackBuyAmount * (percentage / 100.0);
+            addAmountToCurrencyTotals(totals, currency, amount);
+          });
         });
 
         return totals;
@@ -202,6 +251,7 @@
       }
 
       window.calculateMinimumDepositsFromFreespins = calculateMinimumDepositsFromFreespins;
+      window.calculateMinimumDepositsFromRewards = calculateMinimumDepositsFromFreespins;
 
       // Helper function to get selected currencies from checkboxes
       function getSelectedCurrenciesMinimumDeposits() {

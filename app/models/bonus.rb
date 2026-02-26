@@ -336,7 +336,7 @@ class Bonus < ApplicationRecord
     bonus_buy_rewards.each do |reward|
       next if reward.deposit_percentage.blank?
 
-      reward_currencies = reward.currency_bet_levels.keys
+      reward_currencies = reward.currency_buy_amounts.keys
       reward_currencies = currencies if reward_currencies.blank?
       reward_currencies = project_currencies if reward_currencies.blank?
 

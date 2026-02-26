@@ -387,7 +387,9 @@ export default class extends Controller {
   }
 
   updateBonusBuyRewardCurrencyFields() {
-    if (typeof updateCurrencyBonusBuyBetLevelsFields === 'function') {
+    if (typeof updateCurrencyBonusBuyAmountsFields === 'function') {
+      updateCurrencyBonusBuyAmountsFields()
+    } else if (typeof updateCurrencyBonusBuyBetLevelsFields === 'function') {
       updateCurrencyBonusBuyBetLevelsFields()
     }
     

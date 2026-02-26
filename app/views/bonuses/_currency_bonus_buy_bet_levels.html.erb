@@ -1,120 +1,131 @@
-<!-- Currency Bonus Buy Bet Levels Section -->
+<!-- Currency Bonus Buy Purchase Amounts Section -->
 <div class="reward-param-field full-width currency-bet-levels-wrapper-bonus-buy">
   <label class="form-label">
     <i class="bi bi-coin"></i>
-    Bet level by currency *
+    Purchase amount (buy_amount) by currency *
   </label>
   <%
     field_prefix = "bonus_buy_rewards[#{index}]"
+    bonus_buy_reward = defined?(existing_bonus_buy) ? existing_bonus_buy : nil
   %>
-  <div id="currency-bonus-buy-bet-levels-container">
+  <div class="currency-bonus-buy-amounts-container"
+       data-index="<%= index %>"
+       data-bonus-buy-amounts="<%= ERB::Util.html_escape((bonus_buy_reward&.currency_buy_amounts || {}).to_json) %>">
     <div class="currency-bet-levels-grid">
-        <% 
-          # Приоритет валют: переданные валюты > минимальные депозиты > выбранные валюты из bonus.currencies > все валюты
-          if defined?(currencies) && currencies.present?
-            selected_currencies = currencies
-          else
-            available_currencies = bonus.project_currencies
-            minimum_deposit_currencies = bonus.currency_minimum_deposits.present? ? bonus.currency_minimum_deposits.keys : []
-            if minimum_deposit_currencies.present?
-              selected_currencies = minimum_deposit_currencies
-            elsif bonus.currencies.present? && bonus.currencies.any?
-              selected_currencies = bonus.currencies & available_currencies
-            else
-              selected_currencies = available_currencies
-            end
-          end
-        %>
-        <% bonus_buy_reward = defined?(existing_bonus_buy) ? existing_bonus_buy : nil %>
-
-        <% selected_currencies.each_with_index do |currency, index| %>
-          <div class="currency-bet-level-item">
-            <div class="input-group">
-              <span class="input-group-text currency-code"><%= currency %></span>
-              <%= number_field_tag "#{field_prefix}[currency_bet_levels][#{currency}]",
-                  bonus_buy_reward&.currency_bet_levels&.dig(currency),
-                  class: "form-control currency-input",
-                  step: Bonus.currency_step(currency),
-                  min: 0,
-                  placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
-                  required: true,
-                  data: { 
-                    currency: currency, 
-                    precision: Bonus.currency_precision(currency),
-                    "currency-validation-target": "input"
-                  } %>
-            </div>
+      <%
+        available_currencies = bonus.project_currencies
+        selected_currencies = if defined?(currencies) && currencies.present?
+          currencies & available_currencies
+        elsif bonus.currencies.present?
+          bonus.currencies & available_currencies
+        else
+          []
+        end
+        saved_currencies = bonus_buy_reward&.currency_buy_amounts&.keys || []
+        selected_currencies = (selected_currencies | saved_currencies)
+        selected_currencies = available_currencies if selected_currencies.empty?
+      %>
+      <% selected_currencies.each do |currency| %>
+        <div class="currency-bet-level-item">
+          <div class="input-group">
+            <span class="input-group-text currency-code"><%= currency %></span>
+            <%= number_field_tag "#{field_prefix}[currency_buy_amounts][#{currency}]",
+                bonus_buy_reward&.currency_buy_amounts&.dig(currency),
+                class: "form-control currency-input",
+                step: Bonus.currency_step(currency),
+                min: 0,
+                placeholder: (Bonus.crypto_currency?(currency) ? "0.00000000" : "0.00"),
+                required: true,
+                oninput: "updateMinimumDepositsFromFreespins()",
+                data: {
+                  currency: currency,
+                  precision: Bonus.currency_precision(currency),
+                  "currency-validation-target": "input"
+                } %>
           </div>
-        <% end %>
-      </div>
-
+        </div>
+      <% end %>
     </div>
+  </div>
 
-    <!-- Dynamic update based on selected currencies -->
-    <script>
-      // Helper function to get selected currencies from checkboxes
-      function getSelectedCurrenciesBonusBuy() {
-        const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
-        return Array.from(checkboxes).map(checkbox => checkbox.value);
-      }
+  <script>
+    function getSelectedCurrenciesBonusBuy() {
+      const checkboxes = document.querySelectorAll('input.currency-checkbox:checked');
+      return Array.from(checkboxes).map((checkbox) => checkbox.value);
+    }
 
-      // Function to update currency bonus buy bet levels fields based on selected currencies
-      function updateCurrencyBonusBuyBetLevelsFields() {
-        const container = document.getElementById('currency-bonus-buy-bet-levels-container');
-        if (!container) return;
+    window.updateCurrencyBonusBuyAmountsFields = function() {
+      const containers = document.querySelectorAll('.currency-bonus-buy-amounts-container');
+      if (!containers.length) return;
 
-        const selectedCurrencies = getSelectedCurrenciesBonusBuy();
-        const availableCurrencies = window.currentProjectCurrencies || [];
-        const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
+      const selectedCurrencies = getSelectedCurrenciesBonusBuy();
+      const availableCurrencies = window.currentProjectCurrencies || [];
+      const cryptoCurrencies = window.currentProjectCryptoCurrencies || [];
 
-        // Получаем валюты из минимальных депозитов
-        const minimumDepositInputs = document.querySelectorAll('input[name^="bonus[currency_minimum_deposits]"]');
-        const minimumDepositCurrencies = Array.from(minimumDepositInputs)
-          .map(input => {
-            const match = input.name.match(/currency_minimum_deposits\[([^\]]+)\]/);
+      containers.forEach((container) => {
+        const rowDiv = container.querySelector('.currency-bet-levels-grid');
+        if (!rowDiv) return;
+
+        const hasSeeded = container.dataset.bonusBuyAmountsSeeded === 'true';
+        let savedAmounts = {};
+        if (container.dataset.bonusBuyAmounts) {
+          try {
+            savedAmounts = JSON.parse(container.dataset.bonusBuyAmounts) || {};
+          } catch (e) {
+            savedAmounts = {};
+          }
+        }
+
+        const currentCurrencies = Array.from(rowDiv.querySelectorAll('input[type="number"]'))
+          .map((input) => {
+            const match = input.name.match(/currency_buy_amounts\[([^\]]+)\]/);
             return match ? match[1] : null;
           })
-          .filter(currency => currency !== null);
+          .filter((currency) => currency !== null);
+        const savedCurrencies = hasSeeded ? [] : Object.keys(savedAmounts || {});
 
-        // Приоритет: минимальные депозиты > выбранные валюты > все валюты
         let displayCurrencies;
-        if (minimumDepositCurrencies.length > 0) {
-          displayCurrencies = minimumDepositCurrencies;
-        } else if (selectedCurrencies.length > 0) {
-          displayCurrencies = selectedCurrencies;
+        if (selectedCurrencies.length > 0) {
+          displayCurrencies = Array.from(new Set([ ...selectedCurrencies, ...currentCurrencies, ...savedCurrencies ]));
+        } else if (currentCurrencies.length > 0) {
+          displayCurrencies = Array.from(new Set([ ...currentCurrencies, ...savedCurrencies ]));
+        } else if (savedCurrencies.length > 0) {
+          displayCurrencies = savedCurrencies;
         } else {
           displayCurrencies = availableCurrencies;
         }
 
-        // Rebuild the fields
-        const rowDiv = container.querySelector('.currency-bet-levels-grid');
-        if (!rowDiv) return;
-
-        // Find the form index from existing input if any
-        let formIndex = 0;
-        const existingInput = rowDiv.querySelector('input[name*="bonus_buy_rewards"]');
-        if (existingInput) {
-          const match = existingInput.name.match(/bonus_buy_rewards\[(\d+)\]/);
-          if (match) {
-            formIndex = parseInt(match[1]);
+        let formIndex = parseInt(container.dataset.index || '', 10);
+        if (!Number.isFinite(formIndex)) {
+          const existingInput = rowDiv.querySelector('input[name*="bonus_buy_rewards"]');
+          if (existingInput) {
+            const match = existingInput.name.match(/bonus_buy_rewards\[(\d+)\]/);
+            if (match) {
+              formIndex = parseInt(match[1], 10);
+            }
           }
         }
-
-        // Save current values
-        const currentValues = {};
-        if (selectedCurrencies.length > 0 || minimumDepositCurrencies.length > 0) {
-          rowDiv.querySelectorAll('input[type="number"]').forEach(input => {
-            const match = input.name.match(/currency_bet_levels\[([^\]]+)\]/);
-            if (match && input.value) {
-              currentValues[match[1]] = input.value;
-            }
-          });
+        if (!Number.isFinite(formIndex)) {
+          formIndex = 0;
         }
-        
-        // Clear and rebuild
+
+        const currentValues = hasSeeded ? {} : { ...savedAmounts };
+        rowDiv.querySelectorAll('input[type="number"]').forEach((input) => {
+          const match = input.name.match(/currency_buy_amounts\[([^\]]+)\]/);
+          if (!match) return;
+
+          const rawValue = input.value;
+          const value = hasSeeded ? rawValue : (rawValue || input.getAttribute('value') || '');
+          if (hasSeeded) {
+            currentValues[match[1]] = rawValue;
+          } else if (value !== '') {
+            currentValues[match[1]] = value;
+          }
+        });
+
         rowDiv.innerHTML = '';
 
-        displayCurrencies.forEach((currency, index) => {
+        displayCurrencies.forEach((currency) => {
           const colDiv = document.createElement('div');
           colDiv.className = 'currency-bet-level-item';
 
@@ -122,46 +133,44 @@
           const step = isCrypto ? '0.00000001' : '0.01';
           const placeholder = isCrypto ? '0.00000000' : '0.00';
           const precision = isCrypto ? 8 : 2;
-
-          // Only use current value if currency is still relevant
-          const isRelevant = selectedCurrencies.includes(currency) || minimumDepositCurrencies.includes(currency);
-          const currentValue = isRelevant ? (currentValues[currency] || '') : '';
+          const currentValue = currentValues[currency] || '';
 
           colDiv.innerHTML = `
             <div class="input-group">
               <span class="input-group-text currency-code">${currency}</span>
               <input type="number"
-                     name="bonus_buy_rewards[${formIndex}][currency_bet_levels][${currency}]"
+                     name="bonus_buy_rewards[${formIndex}][currency_buy_amounts][${currency}]"
                      value="${currentValue}"
                      class="form-control currency-input"
                      step="${step}"
                      min="0"
                      placeholder="${placeholder}"
+                     oninput="updateMinimumDepositsFromFreespins()"
                      data-currency="${currency}"
                      data-precision="${precision}"
                      data-currency-validation-target="input"
-                     required>
+                     required
+                     autocomplete="off">
             </div>
           `;
 
           rowDiv.appendChild(colDiv);
         });
 
-      }
+        container.dataset.bonusBuyAmounts = JSON.stringify(currentValues);
+        container.dataset.bonusBuyAmountsSeeded = 'true';
 
-      // Attach event listener to minimum deposits changes
-      document.addEventListener('DOMContentLoaded', function() {
-        // Следим за изменениями минимальных депозитов
-        const minimumDepositsContainer = document.getElementById('currency-minimum-deposits-container');
-        if (minimumDepositsContainer) {
-          // Используем MutationObserver для отслеживания изменений в контейнере минимальных депозитов
-          const observer = new MutationObserver(() => {
-            updateCurrencyBonusBuyBetLevelsFields();
+        setTimeout(() => {
+          rowDiv.querySelectorAll('input[type="number"]').forEach((input) => {
+            input.removeAttribute('disabled');
+            input.removeAttribute('readonly');
+            input.style.pointerEvents = 'auto';
           });
-          observer.observe(minimumDepositsContainer, { childList: true, subtree: true });
-        }
+        }, 50);
       });
-    </script>
-    </div>
-  </div>
+    };
+
+    // Backward compatibility alias.
+    window.updateCurrencyBonusBuyBetLevelsFields = window.updateCurrencyBonusBuyAmountsFields;
+  </script>
 </div>

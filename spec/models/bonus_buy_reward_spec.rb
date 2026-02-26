@@ -12,10 +12,23 @@ RSpec.describe BonusBuyReward, type: :model do
 
   # Validations
   describe 'validations' do
-    it { should validate_presence_of(:buy_amount) }
-    it { should validate_numericality_of(:buy_amount).is_greater_than(0) }
-    it { should validate_numericality_of(:multiplier).is_greater_than(1).allow_nil }
+    it { should validate_numericality_of(:buy_amount).is_greater_than(0).allow_nil }
+    it { should validate_numericality_of(:multiplier).is_greater_than(0).allow_nil }
     it { should validate_numericality_of(:bet_level).only_integer.is_greater_than_or_equal_to(0).allow_nil }
+
+    it 'requires currency buy amount when buy_amount is blank' do
+      reward = build(:bonus_buy_reward, buy_amount: nil, config: {})
+
+      expect(reward).not_to be_valid
+      expect(reward.errors[:currency_buy_amounts]).to include('a purchase amount must be provided for at least one currency')
+    end
+
+    it 'is valid when currency buy amounts are present and buy_amount is blank' do
+      reward = build(:bonus_buy_reward, buy_amount: nil, config: {})
+      reward.currency_buy_amounts = { 'USD' => 12.5, 'EUR' => 10.0 }
+
+      expect(reward).to be_valid
+    end
   end
 
   # Serialization

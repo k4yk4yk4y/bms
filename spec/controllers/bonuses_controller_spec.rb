@@ -1077,6 +1077,26 @@ RSpec.describe BonusesController, type: :controller do
         expect(bonus.bonus_buy_rewards.pluck(:buy_amount)).to contain_exactly(10, 20)
       end
 
+      it "creates bonus_buy rewards using currency_buy_amounts schema" do
+        params = valid_bonus_params.merge(
+          bonus_buy_rewards: {
+            "0" => {
+              multiplier: "2",
+              deposit_percentage: "50",
+              currency_buy_amounts: { "USD" => "12.5", "EUR" => "10" }
+            }
+          }
+        )
+
+        expect {
+          post :create, params: { bonus: params }
+        }.to change(BonusBuyReward, :count).by(1)
+
+        reward = Bonus.last.bonus_buy_rewards.last
+        expect(reward.buy_amount).to be_nil
+        expect(reward.currency_buy_amounts).to eq({ "USD" => 12.5, "EUR" => 10.0 })
+      end
+
       it "updates existing bonus_buy rewards" do
         bonus = create(:bonus)
         reward1 = create(:bonus_buy_reward, bonus: bonus, buy_amount: 10, multiplier: 2)
@@ -1114,6 +1134,23 @@ RSpec.describe BonusesController, type: :controller do
         bonus = Bonus.last
         expect(bonus.comp_point_rewards.count).to eq(2)
         expect(bonus.comp_point_rewards.pluck(:points_amount)).to contain_exactly(100, 200)
+      end
+
+      it "ignores and clears multiplier for comp_point rewards" do
+        bonus = create(:bonus)
+        reward = create(:comp_point_reward, bonus: bonus, points_amount: 100, multiplier: 2.5)
+
+        params = valid_bonus_params.merge(
+          comp_point_rewards: {
+            "0" => { id: reward.id, points: "150", multiplier: "3.0", title: "Comp Points Updated" }
+          }
+        )
+
+        put :update, params: { id: bonus.id, bonus: params }
+
+        reward.reload
+        expect(reward.points_amount).to eq(150)
+        expect(reward.multiplier).to be_nil
       end
 
       it "updates existing comp_point rewards" do

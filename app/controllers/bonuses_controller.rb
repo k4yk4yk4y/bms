@@ -1043,7 +1043,7 @@ class BonusesController < ApplicationController
 
     permitted = params.require(:bonus_buy_reward).permit(
       :buy_amount, :multiplier, :games, :bet_level, :deposit_percentage, :code,
-      :min, :groups, :tags, :stag, :wagering_strategy,
+      :min, :groups, :stag, :wagering_strategy,
       # Advanced parameters
       :auto_activate, :duration, :activation_duration, :email_template, :range,
       :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -1053,13 +1053,15 @@ class BonusesController < ApplicationController
       :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
       :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
       :wager_done, :hold_min, :hold_max, currencies: [],
-      # Currency bet levels
+      # Currency purchase amounts
+      currency_buy_amounts: {},
+      # Backward compatibility
       currency_bet_levels: {}
     )
 
     # Handle array fields properly
     permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
-    permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
+    permitted[:currency_buy_amounts] = extract_bonus_buy_currency_amounts(permitted)
 
     permitted
   end
@@ -1070,11 +1072,11 @@ class BonusesController < ApplicationController
     return [] unless rewards_params.present?
 
     rewards_params.values.map do |reward_params|
-      next if reward_params.blank? || reward_params[:buy_amount].blank?
+      next if reward_params.blank?
 
       permitted = reward_params.permit(
         :id, :buy_amount, :multiplier, :games, :bet_level, :deposit_percentage, :code,
-        :min, :groups, :tags, :stag, :wagering_strategy,
+        :min, :groups, :stag, :wagering_strategy,
         # Advanced parameters
         :auto_activate, :duration, :activation_duration, :email_template, :range,
         :last_login_country, :profile_country, :current_ip_country, :emails,
@@ -1084,15 +1086,19 @@ class BonusesController < ApplicationController
         :affiliates_user, :balance, :chargeable_comp_points, :persistent_comp_points,
         :date_of_birth, :deposit, :gender, :issued_bonus, :registered, :social_networks,
         :wager_done, :hold_min, :hold_max, currencies: [],
-        # Currency bet levels
+        # Currency purchase amounts
+        currency_buy_amounts: {},
+        # Backward compatibility
         currency_bet_levels: {}
       )
 
       # Handle array fields properly
       permitted[:games] = permitted[:games].split(",").map(&:strip) if permitted[:games].is_a?(String)
       permitted[:groups] = permitted[:groups].split(",").map(&:strip) if permitted[:groups].is_a?(String)
-      permitted[:tags] = permitted[:tags].split(",").map(&:strip) if permitted[:tags].is_a?(String)
       permitted[:currencies] = permitted[:currencies].split(",").map(&:strip) if permitted[:currencies].is_a?(String)
+      permitted[:currency_buy_amounts] = extract_bonus_buy_currency_amounts(permitted)
+
+      next if permitted[:buy_amount].blank? && permitted[:currency_buy_amounts].blank?
 
       permitted
     end.compact
@@ -1131,9 +1137,9 @@ class BonusesController < ApplicationController
         config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present?
       end
 
-      # Set currency bet levels
-      if reward_params[:currency_bet_levels].present?
-        config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+      # Set currency purchase amounts
+      if reward_params[:currency_buy_amounts].present?
+        config["currency_buy_amounts"] = normalize_currency_amounts(reward_params[:currency_buy_amounts])
       end
 
       reward.config = config
@@ -1181,9 +1187,13 @@ class BonusesController < ApplicationController
           end
         end
 
-        # Set currency bet levels
-        if reward_params[:currency_bet_levels].present?
-          config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+        # Set currency purchase amounts
+        if reward_params[:currency_buy_amounts].present?
+          config["currency_buy_amounts"] = normalize_currency_amounts(reward_params[:currency_buy_amounts])
+          config.delete("currency_bet_levels")
+        elsif reward_params.key?(:currency_buy_amounts)
+          config.delete("currency_buy_amounts")
+          config.delete("currency_bet_levels")
         end
 
         # Add common parameters from bonus
@@ -1198,7 +1208,7 @@ class BonusesController < ApplicationController
         reward.save
       else
         # Create new reward
-        next if reward_params[:buy_amount].blank?
+        next if reward_params[:buy_amount].blank? && reward_params[:currency_buy_amounts].blank?
 
         reward = @bonus.bonus_buy_rewards.build(
           buy_amount: reward_params[:buy_amount],
@@ -1222,9 +1232,9 @@ class BonusesController < ApplicationController
           config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
         end
 
-        # Set currency bet levels
-        if reward_params[:currency_bet_levels].present?
-          config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+        # Set currency purchase amounts
+        if reward_params[:currency_buy_amounts].present?
+          config["currency_buy_amounts"] = normalize_currency_amounts(reward_params[:currency_buy_amounts])
         end
 
         reward.config = config
@@ -1527,15 +1537,14 @@ class BonusesController < ApplicationController
 
   def create_bonus_buy_reward_if_provided
     reward_params = bonus_buy_reward_params
-    return if reward_params.empty? || reward_params[:bonus_buy_amount].blank?
+    return if reward_params.empty? || (reward_params[:buy_amount].blank? && reward_params[:currency_buy_amounts].blank?)
 
     reward = @bonus.bonus_buy_rewards.build(
-      bonus_buy_amount: reward_params[:bonus_buy_amount],
-      bonus_buy_games: reward_params[:bonus_buy_games],
-      bonus_buy_percentage: reward_params[:bonus_buy_percentage]
+      buy_amount: reward_params[:buy_amount],
+      multiplier: reward_params[:multiplier]
     )
 
-    # Set new direct attributes
+    # Set main attributes
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
     reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
@@ -1544,16 +1553,14 @@ class BonusesController < ApplicationController
     reward.code = reward_params[:code] if reward_params[:code].present?
     reward.stag = reward_params[:stag] if reward_params[:stag].present?
 
-
-    # Set all additional parameters through the config field
+    # Set advanced parameters
     config = {}
-    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :code, :stag).each do |key, value|
-      next if value.blank?
-      config[key.to_s] = value
+    reward.advanced_params.each do |param|
+      config[param] = reward_params[param.to_sym] if reward_params[param.to_sym].present? && ![ :games, :bet_level, :code, :stag ].include?(param.to_sym)
     end
 
-    if reward_params[:currency_bet_levels].present?
-      config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+    if reward_params[:currency_buy_amounts].present?
+      config["currency_buy_amounts"] = normalize_currency_amounts(reward_params[:currency_buy_amounts])
     end
 
     reward.config = config unless config.empty?
@@ -1568,11 +1575,10 @@ class BonusesController < ApplicationController
     reward = @bonus.bonus_buy_rewards.first || @bonus.bonus_buy_rewards.build
 
     # Update main attributes
-    reward.bonus_buy_amount = reward_params[:bonus_buy_amount] if reward_params[:bonus_buy_amount].present?
-    reward.bonus_buy_games = reward_params[:bonus_buy_games] if reward_params[:bonus_buy_games].present?
-    reward.bonus_buy_percentage = reward_params[:bonus_buy_percentage] if reward_params[:bonus_buy_percentage].present?
+    reward.buy_amount = reward_params[:buy_amount] if reward_params[:buy_amount].present?
+    reward.multiplier = reward_params[:multiplier] if reward_params[:multiplier].present?
 
-    # Set new direct attributes
+    # Set main attributes
     reward.games = reward_params[:games] if reward_params[:games].present?
     reward.bet_level = reward_params[:bet_level] if reward_params[:bet_level].present?
     reward.max_win_value = reward_params[:max_win_value] if reward_params[:max_win_value].present?
@@ -1583,16 +1589,18 @@ class BonusesController < ApplicationController
 
     # Update config
     config = reward.config || {}
-    reward_params.except(:bonus_buy_amount, :bonus_buy_games, :bonus_buy_percentage, :games, :bet_level, :code, :stag).each do |key, value|
-      if value.blank?
-        config.delete(key.to_s)
-      else
-        config[key.to_s] = value
+    reward.advanced_params.each do |param|
+      if reward_params[param.to_sym].present?
+        config[param] = reward_params[param.to_sym]
       end
     end
 
-    if reward_params[:currency_bet_levels].present?
-      config["currency_bet_levels"] = normalize_currency_hash(reward_params[:currency_bet_levels])
+    if reward_params[:currency_buy_amounts].present?
+      config["currency_buy_amounts"] = normalize_currency_amounts(reward_params[:currency_buy_amounts])
+      config.delete("currency_bet_levels")
+    elsif reward_params.key?(:currency_buy_amounts)
+      config.delete("currency_buy_amounts")
+      config.delete("currency_bet_levels")
     end
 
     reward.config = config unless config.empty?
@@ -1721,13 +1729,13 @@ class BonusesController < ApplicationController
 
       reward = @bonus.comp_point_rewards.build(
         points_amount: reward_params[:points_amount],
-        multiplier: reward_params[:multiplier],
+        multiplier: nil,
         title: reward_params[:title]
       )
 
       # Set config
       config = {}
-      reward_params.except(:points_amount, :multiplier, :title).each do |key, value|
+      reward_params.except(:points_amount, :title).each do |key, value|
         next if value.blank?
         config[key.to_s] = value
       end
@@ -1755,13 +1763,13 @@ class BonusesController < ApplicationController
         # Update existing reward
         reward.update!(
           points_amount: reward_params[:points_amount],
-          multiplier: reward_params[:multiplier],
+          multiplier: nil,
           title: reward_params[:title]
         )
 
         # Update config
         config = {}
-        reward_params.except(:points_amount, :multiplier, :title).each do |key, value|
+        reward_params.except(:points_amount, :title).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -1772,13 +1780,13 @@ class BonusesController < ApplicationController
         # Create new reward
         reward = @bonus.comp_point_rewards.build(
           points_amount: reward_params[:points_amount],
-          multiplier: reward_params[:multiplier],
+          multiplier: nil,
           title: reward_params[:title]
         )
 
         # Set config
         config = {}
-        reward_params.except(:points_amount, :multiplier, :title).each do |key, value|
+        reward_params.except(:points_amount, :title).each do |key, value|
           next if value.blank?
           config[key.to_s] = value
         end
@@ -2044,7 +2052,7 @@ class BonusesController < ApplicationController
 
     rewards_data.values.map do |reward_params|
       next if reward_params.blank?
-      permitted = reward_params.permit(:points_amount, :points, :multiplier, :title)
+      permitted = reward_params.permit(:points_amount, :points, :title)
       # Map 'points' to 'points_amount' for backward compatibility
       permitted[:points_amount] = permitted[:points] if permitted[:points].present?
       permitted.except(:points)
@@ -2095,7 +2103,7 @@ class BonusesController < ApplicationController
     return {} unless params[:comp_point_reward].present? || params.dig(:bonus, :comp_point_reward).present?
 
     reward_data = params[:comp_point_reward] || params.dig(:bonus, :comp_point_reward) || {}
-    permitted = reward_data.permit(:points_amount, :points, :multiplier, :title, :config_json)
+    permitted = reward_data.permit(:points_amount, :points, :title, :config_json)
     # Map 'points' to 'points_amount' for backward compatibility
     permitted[:points_amount] = permitted[:points] if permitted[:points].present?
     permitted.except(:points)
@@ -2145,6 +2153,11 @@ class BonusesController < ApplicationController
       next if amount.blank?
       result[currency] = amount
     end
+  end
+
+  def extract_bonus_buy_currency_amounts(value)
+    source = value[:currency_buy_amounts].presence || value[:currency_bet_levels].presence
+    normalize_currency_amounts(source)
   end
 
   def normalize_currency_amounts(value)

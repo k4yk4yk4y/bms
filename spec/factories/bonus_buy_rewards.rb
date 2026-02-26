@@ -7,7 +7,7 @@ FactoryBot.define do
     multiplier { Faker::Number.decimal(l_digits: 1, r_digits: 2) }
     config do
       {
-        'currency_bet_levels' => {
+        'currency_buy_amounts' => {
           'USD' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
           'EUR' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
           'RUB' => Faker::Number.decimal(l_digits: 3, r_digits: 2)
@@ -62,10 +62,10 @@ FactoryBot.define do
       end
     end
 
-    trait :with_currency_bet_levels do
+    trait :with_currency_buy_amounts do
       config do
         {
-          'currency_bet_levels' => {
+          'currency_buy_amounts' => {
             'USD' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
             'EUR' => Faker::Number.decimal(l_digits: 2, r_digits: 2),
             'RUB' => Faker::Number.decimal(l_digits: 3, r_digits: 2)
@@ -115,7 +115,7 @@ FactoryBot.define do
       with_groups
       with_tags
       with_limits
-      with_currency_bet_levels
+      with_currency_buy_amounts
     end
   end
 end

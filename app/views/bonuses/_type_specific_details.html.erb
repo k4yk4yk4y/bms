@@ -127,7 +127,14 @@
             <% bonus.bonus_buy_rewards.each_with_index do |reward, index| %>
               <div class="mb-2">
                 <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
-                Bonus purchase: <%= reward.formatted_buy_amount %>
+                <% if reward.has_currency_buy_amounts? %>
+                  <span class="text-muted">Purchase amount by currency:</span>
+                  <% reward.currency_buy_amounts.each do |currency, amount| %>
+                    <span class="badge bg-light text-dark"><%= currency %>: <%= amount %></span>
+                  <% end %>
+                <% else %>
+                  Bonus purchase: <%= reward.formatted_buy_amount %>
+                <% end %>
                 <% if reward.multiplier.present? %>
                   (x<%= reward.multiplier %>)
                 <% end %>
@@ -165,9 +172,6 @@
               <div class="mb-2">
                 <span class="badge bg-secondary me-1">#<%= index + 1 %></span>
                 <%= reward.formatted_points_amount %>
-                <% if reward.multiplier.present? %>
-                  (x<%= reward.multiplier %>)
-                <% end %>
               </div>
             <% end %>
           <% end %>
