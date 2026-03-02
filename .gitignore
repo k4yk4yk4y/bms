@@ -88,9 +88,25 @@ test/system/.auth/
 # VS Code workspace settings
 .vscode/
 
-# Spec kit and Gemini CLI files
+# Local assistant tooling artifacts
+DEPLOY_DOCKER_RU.md
+playwright.config.js
+playwright-report/
+test-results/
+playwright/.cache/
+playwright/
+test/system/.auth/
+.cursor/
+.copilot/
+.claude/
+.claude-code/
+.aider*
+.codex/
 .gemini/
 .specify/
+.specstory/
+AGENTS.md
+CLAUDE.md
 specs/
 eslint.config.js
 .eslintrc.js
