@@ -47,7 +47,7 @@
     <label for="freespin_reward_bet_level_<%= index %>" class="form-label">Bet level (bet_level)</label>
     <div class="input-group">
       <input type="number" class="form-control" name="<%= field_prefix %>[bet_level]" id="freespin_reward_bet_level_<%= index %>"
-             step="1" min="0" oninput="updateMinimumDepositsFromFreespins()" value="<%= existing_freespin&.bet_level %>">
+             step="1" min="1" oninput="updateMinimumDepositsFromFreespins()" value="<%= existing_freespin&.formatted_bet_level %>">
     </div>
   </div>
 

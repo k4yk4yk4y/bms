@@ -6,7 +6,7 @@ class BonusBuyReward < ApplicationRecord
 
   validates :buy_amount, numericality: { greater_than: 0 }, allow_nil: true
   validates :multiplier, numericality: { greater_than: 0 }, allow_nil: true
-  validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 1 }, allow_nil: true
 
   validate :currency_buy_amounts_must_be_present
   validate :validate_currency_buy_amounts_precision
@@ -124,6 +124,13 @@ class BonusBuyReward < ApplicationRecord
 
   def formatted_multiplier
     multiplier.present? ? "#{multiplier}x" : "N/A"
+  end
+
+  def formatted_bet_level
+    return nil if bet_level.blank?
+
+    integer_bet_level = bet_level.to_i
+    integer_bet_level.to_f == bet_level.to_f ? integer_bet_level : bet_level
   end
 
   def has_game_restrictions?

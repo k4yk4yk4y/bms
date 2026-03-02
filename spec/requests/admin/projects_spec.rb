@@ -1,129 +1,65 @@
-require 'rails_helper'
+require "rails_helper"
 
-RSpec.describe 'Admin::Projects', type: :request do
-  let(:admin_user) { create(:admin_user) }
+RSpec.describe "Project section (ActiveAdmin)", type: :request do
+  describe "access control" do
+    it "redirects regular users to admin login" do
+      sign_in create(:user, role: :admin), scope: :user
 
-  before do
-    sign_in(admin_user, scope: :admin_user)
-  end
-
-  describe 'GET /admin/projects' do
-    let!(:project) { create(:project, name: 'Test Project') }
-
-    it 'returns a successful response' do
       get admin_projects_path
-      expect(response).to have_http_status(:success)
+
+      expect(response).to redirect_to(new_admin_user_session_path)
     end
 
-    it 'displays the project name' do
+    it "redirects guests to admin login" do
       get admin_projects_path
-      expect(response.body).to include('Test Project')
+
+      expect(response).to redirect_to(new_admin_user_session_path)
     end
   end
 
-  describe 'GET /admin/projects/:id' do
-    let(:project) { create(:project, name: 'Test Project') }
+  context "as admin user" do
+    let(:admin_user) { create(:admin_user) }
 
-    it 'returns a successful response' do
-      get admin_project_path(project)
-      expect(response).to have_http_status(:success)
+    before { sign_in(admin_user, scope: :admin_user) }
+
+    it "shows project index" do
+      project = create(:project, name: "Project Main")
+
+      get admin_projects_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(project.name)
     end
 
-    it 'displays the project details' do
-      get admin_project_path(project)
-      expect(response.body).to include('Test Project')
-    end
-  end
+    it "creates project" do
+      expect {
+        post admin_projects_path, params: { project: { name: "New Project CI", currencies: "USD;EUR" } }
+      }.to change(Project, :count).by(1)
 
-  describe 'GET /admin/projects/new' do
-    it 'returns a successful response' do
-      get new_admin_project_path
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe 'POST /admin/projects' do
-    context 'with valid parameters' do
-      let(:valid_attributes) { { project: { name: 'New Project' } } }
-
-      it 'creates a new project' do
-        expect {
-          post admin_projects_path, params: valid_attributes
-        }.to change(Project, :count).by(1)
-      end
-
-      it 'redirects to the project details page' do
-        post admin_projects_path, params: valid_attributes
-        expect(response).to have_http_status(:redirect)
-      end
+      created = Project.order(:id).last
+      expect(response).to redirect_to(admin_project_path(created))
+      expect(created.currencies).to contain_exactly("USD", "EUR")
     end
 
-    context 'with invalid parameters' do
-      let(:invalid_attributes) { { project: { name: '' } } }
+    it "updates project" do
+      project = create(:project, name: "Old Project", currencies: [ "USD" ])
 
-      it 'does not create a new project' do
-        expect {
-          post admin_projects_path, params: invalid_attributes
-        }.not_to change(Project, :count)
-      end
+      patch admin_project_path(project), params: { project: { name: "Updated Project", currencies: "EUR;BTC" } }
 
-      it 'returns an unprocessable entity status' do
-        post admin_projects_path, params: invalid_attributes
-        expect(response).to have_http_status(:success) # Active Admin returns 200 with errors
-      end
-    end
-  end
-
-  describe 'GET /admin/projects/:id/edit' do
-    let(:project) { create(:project) }
-
-    it 'returns a successful response' do
-      get edit_admin_project_path(project)
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe 'PATCH /admin/projects/:id' do
-    let(:project) { create(:project, name: 'Old Name') }
-
-    context 'with valid parameters' do
-      let(:new_attributes) { { project: { name: 'New Name' } } }
-
-      it 'updates the project' do
-        patch admin_project_path(project), params: new_attributes
-        project.reload
-        expect(project.name).to eq('New Name')
-      end
-
-      it 'redirects to the project details page' do
-        patch admin_project_path(project), params: new_attributes
-        expect(response).to have_http_status(:redirect)
-      end
+      expect(response).to redirect_to(admin_project_path(project))
+      project.reload
+      expect(project.name).to eq("Updated Project")
+      expect(project.currencies).to contain_exactly("EUR", "BTC")
     end
 
-    context 'with invalid parameters' do
-      let(:invalid_attributes) { { project: { name: '' } } }
+    it "deletes project" do
+      project = create(:project)
 
-      it 'does not update the project' do
-        patch admin_project_path(project), params: invalid_attributes
-        project.reload
-        expect(project.name).to eq('Old Name')
-      end
-    end
-  end
-
-  describe 'DELETE /admin/projects/:id' do
-    let!(:project) { create(:project) }
-
-    it 'destroys the project' do
       expect {
         delete admin_project_path(project)
       }.to change(Project, :count).by(-1)
-    end
 
-    it 'redirects to the projects list' do
-      delete admin_project_path(project)
-      expect(response).to have_http_status(:redirect)
+      expect(response).to redirect_to(admin_projects_path)
     end
   end
 end

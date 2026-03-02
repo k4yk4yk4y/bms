@@ -169,20 +169,20 @@ RSpec.describe BonusTemplate, type: :model do
       end
     end
 
-    context 'when applying template with decimal values' do
+    context 'when applying template with numeric values' do
       let(:decimal_template) do
         create(:bonus_template,
-          wager: 35.5,
+          wager: 35,
           maximum_winnings: 500.75,
           no_more: 1,
           totally_no_more: 5
         )
       end
 
-      it 'applies decimal values correctly' do
+      it 'applies numeric values correctly' do
         decimal_template.apply_to_bonus(bonus)
 
-        expect(bonus.wager).to eq(35.5)
+        expect(bonus.wager).to eq(35.0)
         expect(bonus.maximum_winnings).to eq(500.75)
         expect(bonus.no_more.to_i).to eq(1)
         expect(bonus.totally_no_more.to_i).to eq(5)

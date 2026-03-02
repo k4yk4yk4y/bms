@@ -5,7 +5,7 @@ class FreespinReward < ApplicationRecord
   belongs_to :bonus
 
   validates :spins_count, presence: true, numericality: { greater_than: 0 }
-  validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :bet_level, numericality: { only_integer: true, greater_than_or_equal_to: 1 }, allow_nil: true
 
   validate :currency_freespin_bet_levels_must_be_present
   validate :validate_currency_bet_levels_precision
@@ -73,6 +73,13 @@ class FreespinReward < ApplicationRecord
 
   def formatted_spins
     "#{spins_count} #{'spin'.pluralize(spins_count)}"
+  end
+
+  def formatted_bet_level
+    return nil if bet_level.blank?
+
+    integer_bet_level = bet_level.to_i
+    integer_bet_level.to_f == bet_level.to_f ? integer_bet_level : bet_level
   end
 
   def has_game_restrictions?

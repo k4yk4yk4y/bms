@@ -139,9 +139,11 @@ ActiveAdmin.register Bonus do
             when BonusReward
               "Бонус: #{reward.bonus_amount} #{reward.currency}"
             when FreespinReward
-              "Фриспины: #{reward.spins_count} (ставка: #{reward.bet_level})"
+              "Фриспины: #{reward.spins_count} (ставка: #{reward.formatted_bet_level || "не задана"})"
             when BonusBuyReward
-              "Бонус-бай: #{reward.formatted_buy_amount}"
+              details = "Бонус-бай: #{reward.formatted_buy_amount}"
+              details += " (ставка: #{reward.formatted_bet_level})" if reward.bet_level.present?
+              details
             when FreechipReward
               "Фричипы: #{reward.chips_count} x #{reward.chip_value}"
             when BonusCodeReward

@@ -91,6 +91,13 @@
                       <%= reward.spins_count %>
                     </div>
 
+                    <% if reward.bet_level.present? %>
+                      <div class="mb-2">
+                        <span class="text-muted">Bet level:</span>
+                        <%= reward.formatted_bet_level %>
+                      </div>
+                    <% end %>
+
                     <% if reward.has_game_restrictions? %>
                       <div class="mb-2 d-flex flex-wrap align-items-center gap-1">
                         <span class="text-muted">Games:</span>
@@ -137,6 +144,9 @@
                 <% end %>
                 <% if reward.multiplier.present? %>
                   (x<%= reward.multiplier %>)
+                <% end %>
+                <% if reward.bet_level.present? %>
+                  <span class="text-muted">(Bet level: <%= reward.formatted_bet_level %>)</span>
                 <% end %>
               </div>
             <% end %>

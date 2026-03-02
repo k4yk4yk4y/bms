@@ -108,7 +108,7 @@ RSpec.describe Bonus, type: :model do
           end
 
           it "allows #{field} to be positive" do
-            bonus.send("#{field}=", 100.50)
+            bonus.send("#{field}=", field == :wager ? 100 : 100.50)
             expect(bonus).to be_valid
           end
 
@@ -116,6 +116,13 @@ RSpec.describe Bonus, type: :model do
             bonus.send("#{field}=", nil)
             expect(bonus).to be_valid
           end
+        end
+
+        it 'does not allow non-integer wager values' do
+          bonus.wager = 100.50
+
+          expect(bonus).not_to be_valid
+          expect(bonus.errors[:wager]).to include('must be an integer')
         end
       end
 

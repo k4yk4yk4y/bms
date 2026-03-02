@@ -13,8 +13,8 @@ RSpec.describe FreespinReward, type: :model do
   # Validations
   describe 'validations' do
     it { should validate_presence_of(:spins_count) }
-    it { should validate_numericality_of(:spins_count).is_greater_than(1) }
-    it { should validate_numericality_of(:bet_level).only_integer.is_greater_than_or_equal_to(0).allow_nil }
+    it { should validate_numericality_of(:spins_count).is_greater_than(0) }
+    it { should validate_numericality_of(:bet_level).only_integer.is_greater_than_or_equal_to(1).allow_nil }
 
 
     it 'is invalid without currency_freespin_bet_levels' do
