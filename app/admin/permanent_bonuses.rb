@@ -41,73 +41,88 @@ ActiveAdmin.register PermanentBonus do
     end
   end
 
-  filter :project, as: :select, collection: -> { Project.all.map { |p| [ p.name, p.id ] } }
-  filter :bonus, as: :select, collection: -> { Bonus.all.map { |b| [ b.name, b.id ] } }
+  filter :project, as: :select, collection: -> { Project.order(:name).pluck(:name, :id) }
+  filter :bonus, as: :select, collection: -> { Bonus.order(:name).limit(200).pluck(:name, :id) }
   filter :created_at
   filter :updated_at
 
   form do |f|
     f.inputs do
+      selected_project = f.object.project
+      selected_project_name = selected_project&.name
+
       f.input :project_id, as: :select,
-              collection: Project.all.map { |p| [ p.name, p.id ] },
+              collection: Project.order(:name).pluck(:name, :id),
               include_blank: false,
               label: "Project",
               hint: "Select the project first, then choose a bonus",
               input_html: { id: "permanent_bonus_project_id", class: "project-selector" }
 
-      # Show all bonuses with project prefix and ID
-      bonus_options = Bonus.all
-                           .order(:project, :name)
-                           .map do |b|
-                             # Format: "PROJECT - #ID: Bonus Name"
-                             [ "#{b.project} - ##{b.id}: #{b.name}", b.id, { 'data-project': b.project } ]
-                           end
+      bonus_scope = if selected_project_name.present?
+                      Bonus.where(project: selected_project_name)
+                    else
+                      Bonus.none
+                    end
+
+      bonus_options = bonus_scope.order(:name).limit(500).pluck(:id, :name, :project).map do |id, name, project|
+        [ "#{project} - ##{id}: #{name}", id ]
+      end
 
       f.input :bonus_id, as: :select,
               collection: bonus_options,
               include_blank: false,
               label: "Bonus",
               hint: "Bonuses will be filtered based on selected project",
-              input_html: { id: "permanent_bonus_bonus_id", class: "bonus-selector" }
+              input_html: {
+                id: "permanent_bonus_bonus_id",
+                class: "bonus-selector",
+                data: { selected_bonus_id: f.object.bonus_id }
+              }
 
-      # Add inline JavaScript for dynamic filtering
       li class: "hidden" do
         content_tag :script do
           raw <<~JS
             (function() {
               const projectSelect = document.getElementById('permanent_bonus_project_id');
               const bonusSelect = document.getElementById('permanent_bonus_bonus_id');
-            #{'  '}
-              if (projectSelect && bonusSelect) {
-                const allBonusOptions = Array.from(bonusSelect.options).map(option => ({
-                  value: option.value,
-                  text: option.text,
-                  project: option.text.split(' - ')[0]
-                }));
-            #{'    '}
-                function filterBonuses() {
-                  const selectedProjectId = projectSelect.value;
-                  if (!selectedProjectId) return;
-            #{'      '}
-                  const projectName = projectSelect.options[projectSelect.selectedIndex].text;
+
+              if (!projectSelect || !bonusSelect) return;
+
+              async function loadBonuses(projectId, selectedBonusId) {
+                if (!projectId) {
                   bonusSelect.innerHTML = '';
-            #{'      '}
-                  const matchingBonuses = allBonusOptions.filter(opt => opt.project === projectName);
-            #{'      '}
-                  const bonusesToShow = matchingBonuses.length > 0 ? matchingBonuses : allBonusOptions;
-                  bonusesToShow.forEach(option => {
+                  return;
+                }
+
+                try {
+                  const response = await fetch(`/admin/permanent_bonuses/bonuses_for_project?project_id=${encodeURIComponent(projectId)}`, {
+                    headers: { 'Accept': 'application/json' }
+                  });
+                  if (!response.ok) return;
+
+                  const options = await response.json();
+                  bonusSelect.innerHTML = '';
+                  options.forEach(({ id, label }) => {
                     const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.text = option.text;
+                    opt.value = String(id);
+                    opt.text = label;
                     bonusSelect.add(opt);
                   });
+
+                  if (selectedBonusId) {
+                    bonusSelect.value = String(selectedBonusId);
+                  }
+                } catch (_) {
+                  // no-op
                 }
-            #{'    '}
-                projectSelect.addEventListener('change', filterBonuses);
-            #{'    '}
-                if (projectSelect.value) {
-                  setTimeout(filterBonuses, 100);
-                }
+              }
+
+              projectSelect.addEventListener('change', () => {
+                loadBonuses(projectSelect.value, null);
+              });
+
+              if (projectSelect.value) {
+                loadBonuses(projectSelect.value, bonusSelect.dataset.selectedBonusId);
               }
             })();
           JS
@@ -117,8 +132,22 @@ ActiveAdmin.register PermanentBonus do
     f.actions
   end
 
-  # Add JavaScript for dynamic filtering
+  collection_action :bonuses_for_project, method: :get do
+    project = Project.find_by(id: params[:project_id])
+    bonuses = if project
+      Bonus.where(project: project.name).order(:name).limit(500).pluck(:id, :name, :project)
+    else
+      []
+    end
+
+    render json: bonuses.map { |id, name, project_name| { id: id, label: "#{project_name} - ##{id}: #{name}" } }
+  end
+
   controller do
+    def scoped_collection
+      super.includes(:project, :bonus)
+    end
+
     def new
       @page_title = "New Permanent Bonus"
       new!

@@ -1,4 +1,40 @@
 module BonusesHelper
+  DCOPY_CURRENCY_SUFFIXES = {
+    "rub" => "&#8381;",
+    "eur" => "&#8364;",
+    "usd" => "&#36;",
+    "uah" => "&#8372;",
+    "kzt" => "&#8376;",
+    "nok" => "kr",
+    "pln" => "z&#x142;",
+    "try" => "&#8378;",
+    "cad" => "c&#36;",
+    "aud" => "aud",
+    "azn" => "&#8380;",
+    "nzd" => "nzd",
+    "brl" => "r&#36;",
+    "inr" => "&#8377;",
+    "ars" => "ars",
+    "mxn" => "mxn",
+    "pen" => "pen",
+    "ngn" => "ngn",
+    "zar" => "zar",
+    "clp" => "clp",
+    "dkk" => "kr",
+    "sek" => "kr",
+    "ron" => "ron",
+    "huf" => "ft",
+    "jpy" => "&#165;",
+    "btc" => "btc",
+    "eth" => "eth",
+    "ltc" => "ltc",
+    "bch" => "bch",
+    "xrp" => "xrp",
+    "trx" => "trx",
+    "doge" => "doge",
+    "usdt" => "usdt"
+  }.freeze
+
   def status_badge_class(status)
     case status
     when "active"
@@ -136,5 +172,87 @@ module BonusesHelper
       [ "Modify Bonus", "modify_bonus" ],
       [ "Bulk Apply", "bulk_apply" ]
     ]
+  end
+
+  def dcopy_template_for_currency_amounts(amounts_by_currency)
+    pairs = dcopy_currency_amount_pairs(amounts_by_currency)
+    return "" if pairs.empty?
+
+    pairs.map do |currency, amount|
+      code = currency.to_s.downcase
+      suffix = DCOPY_CURRENCY_SUFFIXES.fetch(code, code)
+      %(#{dcopy_currency_condition(code)}#{dcopy_format_amount(amount)}&nbsp;#{suffix}{{/equals}})
+    end.join
+  end
+
+  def dcopy_minimum_deposit_amounts(bonus)
+    return {} unless bonus
+
+    bonus.effective_currency_minimum_deposits
+  end
+
+  def dcopy_freespin_bet_amounts(reward, bonus:)
+    return {} unless reward
+
+    values = reward.currency_freespin_bet_levels
+    return values if values.present?
+    return {} if reward.bet_level.blank?
+
+    currencies = bonus.currencies.presence || bonus.project_currencies.presence || []
+    return {} if currencies.blank?
+
+    currencies.index_with { reward.bet_level }
+  end
+
+  def dcopy_bonus_reward_maximum_amounts(reward)
+    return {} unless reward
+
+    reward.currency_maximum_amounts.presence || {}
+  end
+
+  def dcopy_fixed_bonus_reward_amounts(reward, bonus:)
+    return {} unless reward
+    return {} if reward.percentage.present?
+
+    values = reward.currency_amounts
+    return values if values.present?
+    return {} if reward.amount.blank?
+
+    currencies = bonus.currencies.presence || bonus.project_currencies.presence || []
+    return {} if currencies.blank?
+
+    currencies.index_with { reward.amount }
+  end
+
+  private
+
+  def dcopy_currency_condition(currency_code)
+    %({{#equals account_currency "#{currency_code}" }})
+  end
+
+  def dcopy_currency_amount_pairs(amounts_by_currency)
+    return [] unless amounts_by_currency.respond_to?(:each)
+
+    amounts_by_currency.each_with_object([]) do |(currency, amount), pairs|
+      next if currency.blank? || amount.blank?
+
+      pairs << [ currency, amount ]
+    end
+  end
+
+  def dcopy_format_amount(amount)
+    raw_amount = amount.is_a?(String) ? amount.strip : amount.to_s
+    normalized = raw_amount.tr(",", ".")
+    decimal = BigDecimal(normalized)
+
+    formatted = if decimal.frac.zero?
+      decimal.to_i.to_s
+    else
+      decimal.to_s("F").sub(/\.?0+$/, "")
+    end
+
+    formatted.tr(".", ",")
+  rescue ArgumentError, TypeError
+    raw_amount.to_s.tr(".", ",")
   end
 end

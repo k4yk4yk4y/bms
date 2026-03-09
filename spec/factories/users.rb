@@ -15,6 +15,7 @@ FactoryBot.define do
     factory :shift_leader_user, traits: [ :shift_leader_role ]
     factory :support_agent_user, traits: [ :support_agent_role ]
     factory :marketing_manager_user, traits: [ :marketing_manager_role ]
+    factory :delivery_manager_user, traits: [ :delivery_manager_role ]
 
     # Traits for different roles
     trait :admin_role do
@@ -35,6 +36,10 @@ FactoryBot.define do
 
     trait :marketing_manager_role do
       role { :marketing_manager }
+    end
+
+    trait :delivery_manager_role do
+      role { :delivery_manager }
     end
 
     # Skip validations for tests to avoid Devise issues

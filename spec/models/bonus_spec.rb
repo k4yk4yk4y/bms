@@ -267,26 +267,13 @@ RSpec.describe Bonus, type: :model do
     end
   end
 
-  # Callbacks tests
-  describe 'callbacks' do
-    describe 'after_find :check_and_update_expired_status!' do
-      it 'updates status to inactive when expired and active' do
-        bonus = create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago)
-        reloaded_bonus = Bonus.find(bonus.id)
-        expect(reloaded_bonus.status).to eq('inactive')
-      end
+  # Callback tests
+  describe 'loading records' do
+    it 'does not mutate status on find for expired active bonuses' do
+      bonus = create(:bonus, :active, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago)
+      reloaded_bonus = Bonus.find(bonus.id)
 
-      it 'does not update status when not expired' do
-        bonus = create(:bonus, :active, availability_end_date: 1.day.from_now)
-        reloaded_bonus = Bonus.find(bonus.id)
-        expect(reloaded_bonus.status).to eq('active')
-      end
-
-      it 'does not update status when already inactive' do
-        bonus = create(:bonus, :inactive, availability_start_date: 2.days.ago, availability_end_date: 1.day.ago)
-        reloaded_bonus = Bonus.find(bonus.id)
-        expect(reloaded_bonus.status).to eq('inactive')
-      end
+      expect(reloaded_bonus.status).to eq('active')
     end
   end
 

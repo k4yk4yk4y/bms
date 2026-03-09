@@ -192,23 +192,33 @@ class MarketingRequest < ApplicationRecord
     current_codes = promo_codes_array
     return if current_codes.empty?
 
-    # Optimize: fetch all relevant requests once instead of per code
+    codes_by_upper = current_codes.each_with_object({}) do |code, memo|
+      memo[code.upcase] ||= code
+    end
+    current_upper_codes = codes_by_upper.keys
+
     scope = self.class.where.not(id: id || 0)
-    all_other_requests = scope.select(:id, :promo_code, :request_type).to_a
+    regex_patterns = current_upper_codes.map do |code|
+      "(^|[[:space:],])#{Regexp.escape(code)}($|[[:space:],])"
+    end
+    where_sql = regex_patterns.map { "promo_code ~* ?" }.join(" OR ")
 
-    # Check each code for uniqueness across all requests
-    current_codes.each do |code|
-      code_upper = code.upcase
+    potential_conflicts = scope.where(where_sql, *regex_patterns).select(:id, :promo_code, :request_type).to_a
+    conflict_by_code = {}
 
-      # Check if any other request contains this exact code
-      conflicting_request = all_other_requests.find do |request|
-        request.promo_codes_array.map(&:upcase).include?(code_upper)
+    potential_conflicts.each do |request|
+      request_codes = request.promo_codes_array.map(&:upcase)
+      (request_codes & current_upper_codes).each do |matched_code|
+        conflict_by_code[matched_code] ||= request
       end
+    end
 
-      if conflicting_request
-        errors.add(:promo_code, "contains code \"#{code}\", which is already used in a request " \
-                                "of type \"#{conflicting_request.request_type_label}\" (ID: #{conflicting_request.id})")
-      end
+    current_upper_codes.each do |code_upper|
+      conflicting_request = conflict_by_code[code_upper]
+      next unless conflicting_request
+
+      errors.add(:promo_code, "contains code \"#{codes_by_upper[code_upper]}\", which is already used in a request " \
+                              "of type \"#{conflicting_request.request_type_label}\" (ID: #{conflicting_request.id})")
     end
   end
 

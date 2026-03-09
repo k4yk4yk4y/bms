@@ -180,7 +180,7 @@
                         <code class="bg-light px-2 py-1 rounded">
                           <%= request.stag %>
                         </code>
-                        <% if request.has_existing_partner_request? %>
+                        <% if @duplicate_stags[request.stag] %>
                           <br>
                           <small class="text-warning">
                             <i class="fas fa-exclamation-triangle"></i>

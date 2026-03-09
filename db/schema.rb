@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_26_114952) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_223000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -161,6 +161,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_26_114952) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "deposit_percentage"
+    t.index "((COALESCE(currencies, '[]'::text))::jsonb)", name: "index_bonus_templates_on_currencies_jsonb", using: :gin
     t.index ["dsl_tag", "project", "name"], name: "index_bonus_templates_on_dsl_tag_project_name", unique: true
     t.index ["dsl_tag"], name: "index_bonus_templates_on_dsl_tag"
     t.index ["project"], name: "index_bonus_templates_on_project"
@@ -196,6 +197,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_26_114952) do
     t.bigint "dsl_tag_id"
     t.string "created_by_type"
     t.string "updated_by_type"
+    t.index "((COALESCE(currencies, '[]'::text))::jsonb)", name: "index_bonuses_on_currencies_jsonb", using: :gin
     t.index ["availability_end_date"], name: "index_bonuses_on_availability_end_date"
     t.index ["availability_start_date"], name: "index_bonuses_on_availability_start_date"
     t.index ["code"], name: "index_bonuses_on_code"

@@ -33,6 +33,19 @@ RSpec.describe Ability do
       expect(ability.can?(:update, Bonus)).to be(true)
       expect(ability.can?(:destroy, Bonus)).to be(false)
     end
+
+    it "grants delivery manager read-only access to bonuses, retention, and user profiles" do
+      user = create(:user, role: :delivery_manager)
+      other_user = create(:user)
+      ability = described_class.new(user)
+
+      expect(ability.can?(:read, Bonus)).to be(true)
+      expect(ability.can?(:create, Bonus)).to be(false)
+      expect(ability.can?(:update, Bonus)).to be(false)
+      expect(ability.can?(:read, RetentionChain)).to be(true)
+      expect(ability.can?(:read, other_user)).to be(true)
+      expect(ability.can?(:update, user)).to be(false)
+    end
   end
 
   describe "admin roles" do

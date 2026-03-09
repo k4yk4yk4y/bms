@@ -318,7 +318,7 @@ RSpec.describe Bonus, type: :model do
   describe 'class methods' do
     describe '.update_expired_bonuses!' do
       it 'updates expired active bonuses to inactive' do
-        # Skip the after_find callback for this test by using update_all directly
+        # Create an expired active bonus to verify bulk expiration update
         expired_bonus = Bonus.create!(
           name: 'Expired Bonus',
           code: 'EXPIRED123',
@@ -331,7 +331,7 @@ RSpec.describe Bonus, type: :model do
           currency_minimum_deposits: { 'USD' => 50.0 }
         )
 
-        # Force the status to be active in the database (bypass callbacks)
+        # Force the status to be active in the database
         expired_bonus.update_column(:status, 'active')
 
         # Count how many active expired bonuses exist
@@ -344,7 +344,7 @@ RSpec.describe Bonus, type: :model do
         # Check that the count was returned and bonuses were updated
         expect(result).to eq(count_before)
 
-        # Verify the specific bonus was updated (accessing directly from DB to avoid callbacks)
+        # Verify the specific bonus was updated
         updated_status = Bonus.connection.select_value("SELECT status FROM bonuses WHERE id = #{expired_bonus.id}")
         expect(updated_status).to eq('inactive')
       end

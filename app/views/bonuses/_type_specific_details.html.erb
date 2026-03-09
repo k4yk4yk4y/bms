@@ -33,6 +33,8 @@
         <% if bonus.all_rewards.any? %>
           <% if bonus.bonus_rewards.any? %>
             <% bonus.bonus_rewards.each_with_index do |reward, index| %>
+              <% fixed_bonus_dcopy_text = dcopy_template_for_currency_amounts(dcopy_fixed_bonus_reward_amounts(reward, bonus: bonus)) %>
+              <% maximum_bonus_dcopy_text = dcopy_template_for_currency_amounts(dcopy_bonus_reward_maximum_amounts(reward)) %>
               <div class="mb-3">
                 <dl class="row mb-0">
                   <dt class="col-sm-5 fw-bold">
@@ -50,6 +52,16 @@
                           <% end %>
                         </div>
                       </div>
+                      <% if fixed_bonus_dcopy_text.present? %>
+                        <div class="mt-2">
+                          <button type="button"
+                                  class="btn btn-sm btn-outline-secondary"
+                                  data-copy-text="<%= fixed_bonus_dcopy_text %>"
+                                  onclick="if (typeof copyDataTextToClipboard === 'function') { copyDataTextToClipboard(this); }">
+                            DCopy
+                          </button>
+                        </div>
+                      <% end %>
                     <% elsif reward.percentage.present? %>
                       <div class="mb-2">
                         <span class="text-muted"><%= reward.reward_type.humanize %>:</span>
@@ -66,10 +78,30 @@
                             <% end %>
                           </div>
                         </div>
+                        <% if maximum_bonus_dcopy_text.present? %>
+                          <div class="mt-2">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    data-copy-text="<%= maximum_bonus_dcopy_text %>"
+                                    onclick="if (typeof copyDataTextToClipboard === 'function') { copyDataTextToClipboard(this); }">
+                              DCopy
+                            </button>
+                          </div>
+                        <% end %>
                       <% end %>
                     <% else %>
                       <span class="text-muted"><%= reward.reward_type.humanize %>:</span>
                       <%= reward.formatted_amount %>
+                      <% if fixed_bonus_dcopy_text.present? %>
+                        <div class="mt-2">
+                          <button type="button"
+                                  class="btn btn-sm btn-outline-secondary"
+                                  data-copy-text="<%= fixed_bonus_dcopy_text %>"
+                                  onclick="if (typeof copyDataTextToClipboard === 'function') { copyDataTextToClipboard(this); }">
+                            DCopy
+                          </button>
+                        </div>
+                      <% end %>
                     <% end %>
                   </dd>
                 </dl>
@@ -79,6 +111,7 @@
           
           <% if bonus.freespin_rewards.any? %>
             <% bonus.freespin_rewards.each_with_index do |reward, index| %>
+              <% freespin_bet_dcopy_text = dcopy_template_for_currency_amounts(dcopy_freespin_bet_amounts(reward, bonus: bonus)) %>
               <div class="mb-3">
                 <dl class="row mb-0">
                   <dt class="col-sm-5 fw-bold">
@@ -121,6 +154,17 @@
                     <% else %>
                       <div class="text-muted">
                         Bet level not set
+                      </div>
+                    <% end %>
+
+                    <% if freespin_bet_dcopy_text.present? %>
+                      <div class="mt-2">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                data-copy-text="<%= freespin_bet_dcopy_text %>"
+                                onclick="if (typeof copyDataTextToClipboard === 'function') { copyDataTextToClipboard(this); }">
+                          DCopy
+                        </button>
                       </div>
                     <% end %>
                   </dd>

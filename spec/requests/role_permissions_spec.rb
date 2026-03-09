@@ -160,6 +160,51 @@ RSpec.describe "Role permissions", type: :request do
     end
   end
 
+  context "as delivery manager (read-only bonuses, heatmap, retention, projects, and profiles)" do
+    let(:user) { create(:user, role: :delivery_manager) }
+    let(:other_user) { create(:user) }
+
+    before do
+      login_as(user, scope: :user)
+    end
+
+    it "allows read access to requested sections and profiles" do
+      get bonuses_path
+      expect(response).to have_http_status(:success)
+
+      get bonuses_path, params: { project_id: project.id }
+      expect(response).to have_http_status(:success)
+
+      get heatmap_path
+      expect(response).to have_http_status(:success)
+
+      get retention_chains_path
+      expect(response).to have_http_status(:success)
+
+      get user_path(user)
+      expect(response).to have_http_status(:success)
+
+      get user_path(other_user)
+      expect(response).to have_http_status(:success)
+    end
+
+    it "blocks write actions" do
+      get new_bonus_path
+      expect(response).to have_http_status(:redirect)
+
+      expect {
+        post bonuses_path, params: { bonus: attributes_for(:bonus) }
+      }.not_to change(Bonus, :count)
+
+      get new_retention_chain_path
+      expect(response).to have_http_status(:redirect)
+
+      expect {
+        post retention_chains_path, params: { retention_chain: { status: "draft" } }
+      }.not_to change(RetentionChain, :count)
+    end
+  end
+
   context "when role permissions are customized" do
     let(:user) { create(:user, role: :support_agent) }
 

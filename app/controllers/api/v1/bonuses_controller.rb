@@ -78,28 +78,37 @@ class Api::V1::BonusesController < ApplicationController
 
   # GET /api/v1/bonuses/by_type
   def by_type
-    @bonuses = Bonus.by_event(params[:type]) if params[:type].present?
-    @bonuses ||= Bonus.none
+    scope = params[:type].present? ? Bonus.by_event(params[:type]) : Bonus.none
+    bonuses = paginate_scope(
+      scope.includes(*bonus_includes).order(created_at: :desc),
+      default_per_page: 20
+    )
 
-    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
+    render json: bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   # GET /api/v1/bonuses/active
   def active
-    @bonuses = Bonus.active.available_now
-                    .includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
-                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
+    bonuses = paginate_scope(
+      Bonus.active.available_now
+           .includes(*bonus_includes)
+           .order(created_at: :desc),
+      default_per_page: 20
+    )
 
-    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
+    render json: bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   # GET /api/v1/bonuses/expired
   def expired
-    @bonuses = Bonus.expired
-                    .includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
-                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
+    bonuses = paginate_scope(
+      Bonus.expired
+           .includes(*bonus_includes)
+           .order(created_at: :desc),
+      default_per_page: 20
+    )
 
-    render json: @bonuses.as_json(include: bonus_includes, except: [ :currency ])
+    render json: bonuses.as_json(include: bonus_includes, except: [ :currency ])
   end
 
   private
@@ -253,5 +262,15 @@ class Api::V1::BonusesController < ApplicationController
   def update_type_specific_attributes
     # This method is called after bonus creation/update to handle type-specific attributes
     # Currently handled by reward associations, so this is a no-op
+  end
+
+  def paginate_scope(scope, default_per_page: 20)
+    page = [ (params[:page] || 1).to_i, 1 ].max
+    per_page = params[:per_page].present? ? params[:per_page].to_i : default_per_page
+    per_page = [ per_page, 100 ].min
+    per_page = [ per_page, 1 ].max
+    offset = [ (page - 1) * per_page, 0 ].max
+
+    scope.limit(per_page).offset(offset)
   end
 end

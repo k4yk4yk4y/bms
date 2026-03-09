@@ -22,12 +22,14 @@ RSpec.describe BonusesController, type: :controller do
         expect(assigns(:bonuses)).to include(bonus, draft_bonus, inactive_bonus, expired_bonus)
       end
 
-      it 'includes reward associations' do
+      it 'does not eagerly load reward associations in index list' do
         bonus_with_rewards = create(:bonus, :with_bonus_rewards, :with_freespin_rewards)
         get :index
-        # Verify that associations are loaded to prevent N+1 queries
-        expect(assigns(:bonuses).first.association(:bonus_rewards)).to be_loaded
-        expect(assigns(:bonuses).first.association(:freespin_rewards)).to be_loaded
+        listed_bonus = assigns(:bonuses).find { |item| item.id == bonus_with_rewards.id }
+
+        expect(listed_bonus).to be_present
+        expect(listed_bonus.association(:bonus_rewards)).not_to be_loaded
+        expect(listed_bonus.association(:freespin_rewards)).not_to be_loaded
       end
 
       it 'orders bonuses by id desc' do
@@ -778,7 +780,7 @@ RSpec.describe BonusesController, type: :controller do
   # Error handling tests
   describe 'error handling' do
     it 'handles database connection errors gracefully' do
-      allow(Bonus).to receive(:includes).and_raise(ActiveRecord::ConnectionNotEstablished)
+      allow(Bonus).to receive(:all).and_raise(ActiveRecord::ConnectionNotEstablished)
 
       expect {
         get :index

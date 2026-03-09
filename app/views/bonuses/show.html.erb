@@ -148,16 +148,27 @@
 
           <!-- Currency Minimum Deposits (for deposit bonuses) -->
           <% if @bonus.event == 'deposit' && @bonus.has_minimum_deposit_requirements? %>
+            <% minimum_deposits_dcopy_text = dcopy_template_for_currency_amounts(dcopy_minimum_deposit_amounts(@bonus)) %>
             <div class="card mb-4">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
                   <i class="bi bi-currency-exchange"></i>
                   Minimum deposits by currency
                 </h5>
-                <button type="button" class="btn btn-sm btn-outline-secondary"
-                        onclick="if (typeof copyMinimumDepositsToClipboard === 'function') { copyMinimumDepositsToClipboard(this); }">
-                  Copy
-                </button>
+                <div class="btn-group" role="group" aria-label="Minimum deposit copy actions">
+                  <button type="button" class="btn btn-sm btn-outline-secondary"
+                          onclick="if (typeof copyMinimumDepositsToClipboard === 'function') { copyMinimumDepositsToClipboard(this); }">
+                    Copy
+                  </button>
+                  <% if minimum_deposits_dcopy_text.present? %>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-copy-text="<%= minimum_deposits_dcopy_text %>"
+                            onclick="if (typeof copyDataTextToClipboard === 'function') { copyDataTextToClipboard(this); }">
+                      DCopy
+                    </button>
+                  <% end %>
+                </div>
               </div>
               <div class="card-body">
                 <dl class="row">
@@ -351,5 +362,21 @@
     }
   }
 
+  async function copyDataTextToClipboard(buttonElement) {
+    const text = buttonElement?.dataset?.copyText;
+    if (!text) return;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        fallbackCopyText(text);
+      }
+    } catch (e) {
+      fallbackCopyText(text);
+    }
+  }
+
   window.copyMinimumDepositsToClipboard = copyMinimumDepositsToClipboard;
+  window.copyDataTextToClipboard = copyDataTextToClipboard;
 </script>

@@ -67,7 +67,7 @@ class Bonus < ApplicationRecord
   scope :inactive, -> { where(status: "inactive") }
   scope :expired, -> { where(status: "expired") }
   scope :by_event, ->(event) { where(event: event) }
-  scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
+  scope :by_currency, ->(currency) { where("COALESCE(currencies, '[]')::jsonb @> ?", [ currency ].to_json) }
   scope :by_country, ->(country) { where(country: country) }
   scope :by_project, ->(project) { where(project: project) }
   scope :by_project_with_all, ->(project) { where(project: [ project, "All" ]) }
@@ -89,7 +89,6 @@ class Bonus < ApplicationRecord
   # Callbacks
   before_validation :set_default_currencies, if: -> { currencies.blank? }
   before_validation :set_default_project, if: -> { project.blank? }
-  after_find :check_and_update_expired_status!
 
   # Class method for groups
   def self.all_groups

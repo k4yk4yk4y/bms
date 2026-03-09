@@ -26,8 +26,32 @@ RSpec.describe "Authentication", type: :request do
       expect(response).to redirect_to(retention_chains_path)
     end
 
+    it "redirects smm manager to smm section after sign in" do
+      user = create(:user, role: :smm_manager, password: "password123", password_confirmation: "password123")
+
+      post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+      expect(response).to redirect_to(smm_months_path)
+    end
+
     it "redirects admin user to bonuses section after sign in" do
       user = create(:user, role: :admin, password: "password123", password_confirmation: "password123")
+
+      post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+      expect(response).to redirect_to(bonuses_path)
+    end
+
+    it "redirects support agent user to bonuses section after sign in" do
+      user = create(:user, role: :support_agent, password: "password123", password_confirmation: "password123")
+
+      post user_session_path, params: { user: { email: user.email, password: "password123" } }
+
+      expect(response).to redirect_to(bonuses_path)
+    end
+
+    it "redirects delivery manager user to bonuses section after sign in" do
+      user = create(:user, role: :delivery_manager, password: "password123", password_confirmation: "password123")
 
       post user_session_path, params: { user: { email: user.email, password: "password123" } }
 

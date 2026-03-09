@@ -397,6 +397,66 @@ RSpec.describe BonusesHelper, type: :helper do
     end
   end
 
+  describe 'dcopy helpers' do
+    describe '#dcopy_template_for_currency_amounts' do
+      it 'builds mustache equals blocks with known suffixes' do
+        result = helper.dcopy_template_for_currency_amounts({ 'RUB' => 5000, 'USD' => 50 })
+
+        expect(result).to eq(
+          '{{#equals account_currency "rub" }}5000&nbsp;&#8381;{{/equals}}' \
+          '{{#equals account_currency "usd" }}50&nbsp;&#36;{{/equals}}'
+        )
+      end
+
+      it 'formats decimal values with comma and uses currency code for unknown suffix' do
+        result = helper.dcopy_template_for_currency_amounts({ 'ABC' => '12.50' })
+
+        expect(result).to eq('{{#equals account_currency "abc" }}12,5&nbsp;abc{{/equals}}')
+      end
+    end
+
+    describe '#dcopy_fixed_bonus_reward_amounts' do
+      let(:bonus) { build(:bonus, currencies: %w[USD EUR]) }
+
+      it 'maps fixed amount to all bonus currencies when per-currency amounts are absent' do
+        reward = build(:bonus_reward, bonus: bonus, amount: 25, percentage: nil, currency_amounts: {})
+
+        expect(helper.dcopy_fixed_bonus_reward_amounts(reward, bonus: bonus)).to eq(
+          'USD' => 25,
+          'EUR' => 25
+        )
+      end
+
+      it 'returns empty hash for percentage rewards' do
+        reward = build(:bonus_reward, bonus: bonus, amount: nil, percentage: 50, currency_amounts: {})
+
+        expect(helper.dcopy_fixed_bonus_reward_amounts(reward, bonus: bonus)).to eq({})
+      end
+    end
+
+    describe '#dcopy_freespin_bet_amounts' do
+      let(:bonus) { build(:bonus, currencies: %w[USD EUR]) }
+
+      it 'returns per-currency freespin bet levels when present' do
+        reward = build(:freespin_reward, bonus: bonus, currency_freespin_bet_levels: { 'USD' => 0.5, 'EUR' => 0.4 }, bet_level: nil)
+
+        expect(helper.dcopy_freespin_bet_amounts(reward, bonus: bonus)).to eq(
+          'USD' => 0.5,
+          'EUR' => 0.4
+        )
+      end
+
+      it 'falls back to reward bet level for all bonus currencies' do
+        reward = build(:freespin_reward, bonus: bonus, currency_freespin_bet_levels: {}, bet_level: 2)
+
+        expect(helper.dcopy_freespin_bet_amounts(reward, bonus: bonus)).to eq(
+          'USD' => 2,
+          'EUR' => 2
+        )
+      end
+    end
+  end
+
   # Edge cases and error conditions
   describe 'edge cases' do
     context 'with unusual input' do

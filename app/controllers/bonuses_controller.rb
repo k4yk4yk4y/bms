@@ -15,8 +15,7 @@ class BonusesController < ApplicationController
 
   # GET /bonuses
   def index
-    @bonuses = Bonus.includes(:bonus_rewards, :freespin_rewards, :bonus_buy_rewards,
-                             :freechip_rewards, :bonus_code_rewards, :material_prize_rewards, :comp_point_rewards)
+    @bonuses = Bonus.all
 
     # Filter by event if specified
     @bonuses = @bonuses.by_event(params[:type] || params[:event]) if (params[:type] || params[:event]).present?
@@ -63,8 +62,8 @@ class BonusesController < ApplicationController
     if params[:project_id].present?
       @current_project = Project.find_by(id: params[:project_id])
       if @current_project
-        @permanent_bonuses = @current_project.permanent_bonuses.includes(:bonus).map(&:bonus).compact
-        @permanent_bonus_ids = @permanent_bonuses.map(&:id)
+        @permanent_bonus_ids = @current_project.permanent_bonuses.pluck(:bonus_id)
+        @permanent_bonuses = Bonus.where(id: @permanent_bonus_ids).order(id: :desc)
       else
         @permanent_bonuses = []
         @permanent_bonus_ids = []

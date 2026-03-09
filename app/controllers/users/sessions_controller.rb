@@ -36,13 +36,14 @@ class Users::SessionsController < Devise::SessionsController
     case resource.role
     when "marketing_manager"
       marketing_index_path
+    when "smm_manager"
+      smm_months_path
     when "retention_manager"
       retention_chains_path
-    when "admin", "promo_manager", "shift_leader", "support_agent"
+    when "admin", "promo_manager", "shift_leader", "support_agent", "delivery_manager"
       bonuses_path
     else
-      # Для неопределённых ролей перенаправляем на home
-      root_path
+      bonuses_path
     end
   end
 

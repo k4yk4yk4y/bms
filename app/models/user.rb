@@ -11,7 +11,8 @@ class User < ApplicationRecord
     support_agent: 3,
     marketing_manager: 4,
     retention_manager: 5,
-    smm_manager: 6
+    smm_manager: 6,
+    delivery_manager: 7
   }
 
   # Validations
@@ -29,6 +30,7 @@ class User < ApplicationRecord
   scope :marketing_managers, -> { where(role: :marketing_manager) }
   scope :retention_managers, -> { where(role: :retention_manager) }
   scope :smm_managers, -> { where(role: :smm_manager) }
+  scope :delivery_managers, -> { where(role: :delivery_manager) }
 
   has_many :heatmap_comments, dependent: :destroy
 
@@ -58,7 +60,7 @@ class User < ApplicationRecord
   end
 
   def can_view_retention?
-    admin? || retention_manager? || promo_manager? || shift_leader? || support_agent?
+    admin? || retention_manager? || promo_manager? || shift_leader? || support_agent? || delivery_manager?
   end
 
   def can_manage_retention?

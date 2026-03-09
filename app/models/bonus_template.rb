@@ -34,7 +34,7 @@ class BonusTemplate < ApplicationRecord
   scope :by_dsl_tag, ->(dsl_tag) { where(dsl_tag: dsl_tag) }
   scope :by_project, ->(project) { where(project: project) }
   scope :by_event, ->(event) { where(event: event) }
-  scope :by_currency, ->(currency) { where("currencies::jsonb @> ?", [ currency ].to_json) }
+  scope :by_currency, ->(currency) { where("COALESCE(currencies, '[]')::jsonb @> ?", [ currency ].to_json) }
   scope :for_all_projects, -> { where(project: "All") }
   scope :for_specific_project, ->(project) { where(project: project) }
 

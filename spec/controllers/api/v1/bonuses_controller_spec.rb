@@ -502,6 +502,15 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
       expect(json_response).to eq([])
     end
 
+    it 'supports pagination for by_type endpoint' do
+      create_list(:bonus, 25, :deposit_event)
+
+      get :by_type, params: { type: 'deposit', per_page: 10, page: 2 }
+      json_response = JSON.parse(response.body)
+
+      expect(json_response.size).to eq(10)
+    end
+
     context 'edge cases' do
       it 'handles SQL injection attempts' do
         get :by_type, params: { type: "'; DROP TABLE bonuses; --" }
@@ -550,6 +559,15 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
         expect(json_response.first).not_to have_key('currency')
       end
     end
+
+    it 'limits active response with pagination params' do
+      create_list(:bonus, 25, :active, :available_now)
+
+      get :active, params: { per_page: 10, page: 1 }
+      json_response = JSON.parse(response.body)
+
+      expect(json_response.size).to eq(10)
+    end
   end
 
   describe 'GET #expired' do
@@ -582,6 +600,15 @@ RSpec.describe Api::V1::BonusesController, type: :controller do
     it 'includes associations for expired bonuses' do
       get :expired
       expect(response).to have_http_status(:success)
+    end
+
+    it 'limits expired response with pagination params' do
+      create_list(:bonus, 25, :expired)
+
+      get :expired, params: { per_page: 10, page: 1 }
+      json_response = JSON.parse(response.body)
+
+      expect(json_response.size).to eq(10)
     end
   end
 

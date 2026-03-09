@@ -35,6 +35,7 @@ ActiveAdmin.register User do
         when "support_agent" then :default
         when "retention_manager" then :ok
         when "smm_manager" then :ok
+        when "delivery_manager" then :ok
         else :default
         end
         status_tag user.display_role, class: role_class

@@ -42,14 +42,14 @@ class MarketingController < ApplicationController
     @total_pages = (@total_requests.to_f / per_page).ceil
     @current_page = page
     @marketing_requests = @marketing_requests.limit(per_page).offset(offset)
+    @duplicate_stags = duplicate_stags_lookup(@marketing_requests)
 
-    # Count tabs based on user scope - optimize with single query
+    counts_by_type = base_scope.group(:request_type).count
     @tabs = MarketingRequest::REQUEST_TYPES.map do |type|
-      count = base_scope.by_request_type(type).count
       {
         key: type,
         label: MarketingRequest::REQUEST_TYPE_LABELS[type],
-        count: count
+        count: counts_by_type[type] || 0
       }
     end
   end
@@ -182,6 +182,19 @@ class MarketingController < ApplicationController
   end
 
   private
+
+  def duplicate_stags_lookup(scope)
+    stags = scope.pluck(:stag).compact.reject(&:blank?)
+    return {} if stags.empty?
+
+    MarketingRequest
+      .where(stag: stags)
+      .group(:stag)
+      .having("COUNT(*) > 1")
+      .count
+      .keys
+      .each_with_object({}) { |stag, memo| memo[stag] = true }
+  end
 
   def set_marketing_request
     @marketing_request = MarketingRequest.find(params[:id])

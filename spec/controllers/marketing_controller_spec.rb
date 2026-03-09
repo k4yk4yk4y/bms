@@ -40,6 +40,13 @@ RSpec.describe MarketingController, type: :controller do
         expect(tabs.first).to have_key(:label)
         expect(tabs.first).to have_key(:count)
       end
+
+      it 'assigns duplicate stag lookup hash' do
+        get :index
+        duplicates = assigns(:duplicate_stags)
+
+        expect(duplicates).to be_a(Hash)
+      end
     end
 
     context 'with tab parameter' do

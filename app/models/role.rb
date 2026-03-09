@@ -129,6 +129,13 @@ class Role < ApplicationRecord
       "smm" => "manage",
       "self_profile" => "write"
     },
+    "delivery_manager" => {
+      "dashboard" => "read",
+      "bonuses" => "read",
+      "users" => "read",
+      "retention" => "read",
+      "self_profile" => "read"
+    },
     "support_agent" => {
       "dashboard" => "read",
       "bonuses" => "read",

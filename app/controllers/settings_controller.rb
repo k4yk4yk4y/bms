@@ -4,7 +4,19 @@ class SettingsController < ApplicationController
 
   def templates
     authorize! :read, BonusTemplate
-    @bonus_templates = BonusTemplate.all.order(:project, :dsl_tag, :name)
+    scope = BonusTemplate.order(:project, :dsl_tag, :name)
+    scope = scope.where(project: params[:project]) if params[:project].present?
+    scope = scope.where(dsl_tag: params[:dsl_tag]) if params[:dsl_tag].present?
+    scope = scope.where(event: params[:event]) if params[:event].present?
+
+    page = [ (params[:page] || 1).to_i, 1 ].max
+    per_page = 50
+    offset = [ (page - 1) * per_page, 0 ].max
+
+    @total_templates = scope.count
+    @total_pages = (@total_templates.to_f / per_page).ceil
+    @current_page = page
+    @bonus_templates = scope.limit(per_page).offset(offset)
     @projects = Project.order(:name).pluck(:name)
     @dsl_tags = BonusTemplate.distinct.pluck(:dsl_tag).sort
   end
