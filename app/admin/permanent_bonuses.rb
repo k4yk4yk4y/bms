@@ -60,9 +60,9 @@ ActiveAdmin.register PermanentBonus do
 
       bonus_scope = if selected_project_name.present?
                       Bonus.where(project: selected_project_name)
-                    else
+      else
                       Bonus.none
-                    end
+      end
 
       bonus_options = bonus_scope.order(:name).limit(500).pluck(:id, :name, :project).map do |id, name, project|
         [ "#{project} - ##{id}: #{name}", id ]

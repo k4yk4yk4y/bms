@@ -1,12 +1,148 @@
 namespace :seed do
   desc "Create projects, bonuses, marketing requests, and retention data for deploy"
   task deploy_data: :environment do
+    require "bigdecimal"
     require "set"
+
+    seed_currency_minimum_deposits = {
+      "RUB" => 5000.0,
+      "EUR" => 50.0,
+      "USD" => 50.0,
+      "UAH" => 2500.0,
+      "KZT" => 25_000.0,
+      "NOK" => 250.0,
+      "PLN" => 250.0,
+      "TRY" => 2500.0,
+      "CAD" => 50.0,
+      "AUD" => 50.0,
+      "AZN" => 100.0,
+      "NZD" => 100.0,
+      "BRL" => 200.0,
+      "INR" => 5000.0,
+      "ARS" => 50_000.0,
+      "MXN" => 1000.0,
+      "PEN" => 250.0,
+      "NGN" => 100_000.0,
+      "ZAR" => 1000.0,
+      "CLP" => 25_000.0,
+      "DKK" => 500.0,
+      "SEK" => 500.0,
+      "RON" => 250.0,
+      "HUF" => 25_000.0,
+      "JPY" => 12_500.0,
+      # CurrencyManagement сейчас ограничивает значения 2 знаками после запятой.
+      "BTC" => 0.55,
+      "ETH" => 0.13,
+      "LTC" => 0.55,
+      "BCH" => 0.11,
+      "XRP" => 20.0,
+      "TRX" => 167.0,
+      "DOGE" => 269.0,
+      "USDT" => 50.0
+    }.freeze
+
+    default_project_currencies = seed_currency_minimum_deposits.keys.freeze
+
+    fixed_bonus_currency_amounts = seed_currency_minimum_deposits.transform_values do |amount|
+      scaled = (BigDecimal(amount.to_s) * BigDecimal("0.2")).round(2)
+      scaled = BigDecimal("0.1") if scaled.zero?
+      scaled.to_f
+    end.freeze
+
+    maximum_bonus_currency_amounts = fixed_bonus_currency_amounts.transform_values do |amount|
+      (BigDecimal(amount.to_s) * BigDecimal("2")).round(2).to_f
+    end.freeze
+
+    freespin_bet_levels = seed_currency_minimum_deposits.transform_values do |amount|
+      case amount
+      when 10_000.. then 10.0
+      when 1_000...10_000 then 5.0
+      when 100...1_000 then 1.0
+      else 0.2
+      end
+    end.freeze
+
+    bonus_buy_amounts = fixed_bonus_currency_amounts.transform_values do |amount|
+      scaled = (BigDecimal(amount.to_s) * BigDecimal("1.5")).round(2)
+      [ scaled.to_f, 0.1 ].max
+    end.freeze
+
+    reward_values_for_bonus = lambda do |bonus|
+      currencies = bonus.currencies.presence || default_project_currencies
+
+      {
+        minimum_deposits: seed_currency_minimum_deposits.slice(*currencies),
+        fixed_amounts: fixed_bonus_currency_amounts.slice(*currencies),
+        maximum_amounts: maximum_bonus_currency_amounts.slice(*currencies),
+        freespin_levels: freespin_bet_levels.slice(*currencies),
+        bonus_buy_amounts: bonus_buy_amounts.slice(*currencies)
+      }
+    end
+
+    ensure_deposit_seed_rewards = lambda do |bonus|
+      values = reward_values_for_bonus.call(bonus)
+
+      merged_deposits = values[:minimum_deposits].merge(bonus.currency_minimum_deposits.to_h)
+      if merged_deposits != bonus.currency_minimum_deposits.to_h
+        bonus.currency_minimum_deposits = merged_deposits
+        bonus.save!
+      end
+
+      fixed_code = "#{bonus.code}_FIXED"
+      fixed_reward = bonus.bonus_rewards.find_by(code: fixed_code) ||
+                     bonus.bonus_rewards.where(reward_type: "bonus", percentage: nil).first ||
+                     bonus.bonus_rewards.build(code: fixed_code)
+      fixed_reward.code = fixed_code
+      fixed_reward.reward_type = "bonus"
+      fixed_reward.amount = nil
+      fixed_reward.percentage = nil
+      fixed_reward.currency_amounts = values[:fixed_amounts]
+      fixed_reward.currency_maximum_amounts = {}
+      fixed_reward.user_can_have_duplicates = true
+      fixed_reward.save!
+
+      percent_code = "#{bonus.code}_PERCENT"
+      percentage_reward = bonus.bonus_rewards.find_by(code: percent_code) ||
+                          bonus.bonus_rewards.where.not(percentage: nil).first ||
+                          bonus.bonus_rewards.build(code: percent_code)
+      percentage_reward.code = percent_code
+      percentage_reward.reward_type = "bonus"
+      percentage_reward.amount = nil
+      percentage_reward.percentage = 100
+      percentage_reward.currency_amounts = {}
+      percentage_reward.currency_maximum_amounts = values[:maximum_amounts]
+      percentage_reward.user_can_have_duplicates = false
+      percentage_reward.save!
+
+      fs_code = "#{bonus.code}_FS"
+      freespin_reward = bonus.freespin_rewards.find_by(code: fs_code) ||
+                        bonus.freespin_rewards.first ||
+                        bonus.freespin_rewards.build(code: fs_code)
+      freespin_reward.code = fs_code
+      freespin_reward.spins_count = 50
+      freespin_reward.games = [ "book_of_dead", "starburst" ]
+      freespin_reward.currency_freespin_bet_levels = values[:freespin_levels]
+      freespin_reward.deposit_percentage = 100
+      freespin_reward.save!
+
+      buy_code = "#{bonus.code}_BUY"
+      bonus_buy_reward = bonus.bonus_buy_rewards.find_by(code: buy_code) ||
+                         bonus.bonus_buy_rewards.first ||
+                         bonus.bonus_buy_rewards.build(code: buy_code)
+      bonus_buy_reward.code = buy_code
+      bonus_buy_reward.multiplier = 1.5
+      bonus_buy_reward.games = [ "book_of_dead", "starburst" ]
+      bonus_buy_reward.currency_buy_amounts = values[:bonus_buy_amounts]
+      bonus_buy_reward.deposit_percentage = 100
+      bonus_buy_reward.save!
+    end
 
     User.roles.keys.each do |key|
       role = Role.find_or_initialize_by(key: key)
       role.name ||= key.tr("_", " ").split.map(&:capitalize).join(" ")
       role.permissions = Role.permissions_for(key)
+      role.admin_panel_access = true if key.to_s == "admin"
+      role.admin_panel_access = false if role.new_record? && key.to_s != "admin"
       role.save!
     end
 
@@ -28,7 +164,6 @@ namespace :seed do
     manager.role = :admin
     manager.save!
 
-    role_profiles = {}
     User.roles.keys.each do |role_key|
       email = "seed_#{role_key}@example.com"
       user = User.find_or_initialize_by(email: email)
@@ -40,19 +175,19 @@ namespace :seed do
       user.password_confirmation = "123123"
       user.role = role_key
       user.save!
-      role_profiles[role_key] = user
     end
 
     project_names = %w[VOLNA ROX FRESH SOL]
-    default_project_currencies = %w[RUB EUR USD UAH KZT BTC]
     projects = project_names.map do |name|
       project = Project.find_or_initialize_by(name: name)
-      project.currencies = default_project_currencies if project.currencies.blank?
-      project.save!
+
+      merged_currencies = (project.currencies.presence || []) | default_project_currencies
+      project.currencies = merged_currencies
+      project.save! if project.new_record? || project.changed?
       project
     end
 
-    event_types = Bonus::EVENT_TYPES.first(5)
+    event_types = Bonus::EVENT_TYPES
     bonuses_by_project = {}
 
     projects.each do |project|
@@ -83,9 +218,16 @@ namespace :seed do
           bonus.save!
           puts "Created bonus #{bonus.code} for #{project.name}"
         else
+          merged_bonus_currencies = (bonus.currencies.presence || []) | (project.currencies.presence || default_project_currencies)
+          if merged_bonus_currencies != bonus.currencies
+            bonus.currencies = merged_bonus_currencies
+            bonus.save!
+          end
+
           puts "Bonus #{bonus.code} already exists"
         end
 
+        ensure_deposit_seed_rewards.call(bonus) if bonus.event == "deposit"
         bonuses << bonus
       end
 
