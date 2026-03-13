@@ -156,3 +156,15 @@
   font-size: 0.7em;
   padding: 0.25em 0.5em;
 }
+
+.dropdown-scroll-area {
+  max-height: 300px;
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dropdown-scroll-area::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

@@ -64,7 +64,7 @@ ActiveAdmin.register PermanentBonus do
                       Bonus.none
       end
 
-      bonus_options = bonus_scope.order(:name).limit(500).pluck(:id, :name, :project).map do |id, name, project|
+      bonus_options = bonus_scope.order(id: :desc).limit(500).pluck(:id, :name, :project).map do |id, name, project|
         [ "#{project} - ##{id}: #{name}", id ]
       end
 
@@ -135,7 +135,7 @@ ActiveAdmin.register PermanentBonus do
   collection_action :bonuses_for_project, method: :get do
     project = Project.find_by(id: params[:project_id])
     bonuses = if project
-      Bonus.where(project: project.name).order(:name).limit(500).pluck(:id, :name, :project)
+      Bonus.where(project: project.name).order(id: :desc).limit(500).pluck(:id, :name, :project)
     else
       []
     end
