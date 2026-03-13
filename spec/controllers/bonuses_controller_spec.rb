@@ -586,30 +586,30 @@ RSpec.describe BonusesController, type: :controller do
     end
   end
 
-  describe 'GET #preview' do
+  describe 'GET #show as JSON' do
     it 'returns JSON response with bonus data' do
-      get :preview, params: { id: bonus.id }
+      get :show, params: { id: bonus.id }, format: :json
       expect(response).to have_http_status(:success)
       expect(response.content_type).to include('application/json')
     end
 
-    it 'includes bonus and preview_data in response' do
-      get :preview, params: { id: bonus.id }
+    it 'includes bonus fields in response' do
+      get :show, params: { id: bonus.id }, format: :json
       json_response = JSON.parse(response.body)
-      expect(json_response).to have_key('bonus')
-      expect(json_response).to have_key('preview_data')
+      expect(json_response['id']).to eq(bonus.id)
+      expect(json_response['name']).to eq(bonus.name)
     end
 
     it 'includes reward associations in bonus data' do
       bonus_with_rewards = create(:bonus, :with_bonus_rewards)
-      get :preview, params: { id: bonus_with_rewards.id }
+      get :show, params: { id: bonus_with_rewards.id }, format: :json
       json_response = JSON.parse(response.body)
-      expect(json_response['bonus']).to have_key('bonus_rewards')
+      expect(json_response).to have_key('bonus_rewards')
     end
 
     it 'raises error for non-existent bonus' do
       expect {
-        get :preview, params: { id: 999999 }
+        get :show, params: { id: 999999 }, format: :json
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
