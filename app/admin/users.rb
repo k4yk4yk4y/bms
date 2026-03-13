@@ -103,6 +103,8 @@ ActiveAdmin.register User do
 
   # Контроллер для дополнительной логики
   controller do
+    before_action :allow_update_without_password, only: :update
+
     def scoped_collection
       end_of_association_chain
     end
@@ -124,5 +126,15 @@ ActiveAdmin.register User do
     end
 
     private
+
+    # Devise treats empty password fields as a password update attempt.
+    # Remove them on edit when both are blank.
+    def allow_update_without_password
+      return unless params[:user]
+      return unless params[:user][:password].blank? && params[:user][:password_confirmation].blank?
+
+      params[:user].delete(:password)
+      params[:user].delete(:password_confirmation)
+    end
   end
 end
