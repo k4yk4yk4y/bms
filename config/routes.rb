@@ -49,7 +49,6 @@ Rails.application.routes.draw do
   # Bonus management routes
   resources :bonuses do
     member do
-      get :preview
       post :duplicate
     end
     collection do

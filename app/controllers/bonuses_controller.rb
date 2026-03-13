@@ -4,13 +4,12 @@
 # - CRUD operations for bonuses
 # - Bonus duplication (single and bulk)
 # - Template-based bonus creation
-# - Bonus preview functionality
 # - Bulk operations (duplicate, delete)
 # - Advanced filtering and search
 #
 class BonusesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :preview, :duplicate ]
+  before_action :set_bonus, only: [ :show, :edit, :update, :destroy, :duplicate ]
   before_action :authorize_bonus_access
 
   # GET /bonuses
@@ -281,17 +280,6 @@ class BonusesController < ApplicationController
       format.json { head :no_content }
     end
   end
-
-
-
-  # GET /bonuses/1/preview
-  def preview
-    render json: {
-      bonus: @bonus.as_json(include: bonus_includes, except: [ :currency ]),
-      preview_data: generate_preview_data
-    }
-  end
-
   # GET /bonuses/by_type
   def by_type
     event_param = params[:type] || params[:event]
@@ -523,7 +511,7 @@ class BonusesController < ApplicationController
     case action_name
     when "index", "by_type"
       authorize! :read, Bonus
-    when "show", "preview"
+    when "show"
       authorize! :read, @bonus
     when "new", "create"
       authorize! :create, Bonus
@@ -560,16 +548,6 @@ class BonusesController < ApplicationController
 
   def reward_section_submitted?(section_name)
     params.dig(:reward_sections, section_name).present?
-  end
-
-  def generate_preview_data
-    # This is a placeholder. In a real application, this method would
-    # generate preview data based on the bonus's settings.
-    {
-      title: @bonus.name,
-      description: @bonus.description,
-      rewards: @bonus.all_rewards.map { |r| { type: r.class.name, details: r.attributes } }
-    }
   end
 
   def set_bonus

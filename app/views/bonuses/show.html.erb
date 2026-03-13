@@ -269,9 +269,6 @@
             </div>
             <div class="card-body">
               <div class="d-grid gap-2">
-                <%= link_to "Preview", preview_bonus_path(@bonus), 
-                    class: "btn btn-outline-info", 
-                    data: { remote: true, toggle: "modal", target: "#previewModal" } %>
                 <% if can?(:duplicate, @bonus) %>
                   <%= button_to "Duplicate", duplicate_bonus_path(@bonus), 
                       method: :post, 
@@ -298,21 +295,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Bonus Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="previewContent">
-        <!-- Preview content will be loaded here -->
       </div>
     </div>
   </div>
