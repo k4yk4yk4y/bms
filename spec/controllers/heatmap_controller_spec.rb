@@ -416,6 +416,29 @@ RSpec.describe HeatmapController, type: :controller do
         expect(response).to have_http_status(:success)
       end
     end
+
+    context 'when bonus has active date range inside month' do
+      before do
+        Bonus.destroy_all
+        month_start = Date.current.beginning_of_month
+        create(:bonus, :deposit_event,
+               availability_start_date: month_start + 3.days,
+               availability_end_date: month_start + 7.days)
+      end
+
+      it 'counts bonus on each active day of the range' do
+        get :index, params: { year: Date.current.year, month: Date.current.month }
+
+        heatmap_data = assigns(:heatmap_data)
+        month_start = Date.current.beginning_of_month
+
+        expect(heatmap_data[(month_start + 2.days).strftime('%Y-%m-%d')][:count]).to eq(0)
+        expect(heatmap_data[(month_start + 3.days).strftime('%Y-%m-%d')][:count]).to eq(1)
+        expect(heatmap_data[(month_start + 5.days).strftime('%Y-%m-%d')][:count]).to eq(1)
+        expect(heatmap_data[(month_start + 7.days).strftime('%Y-%m-%d')][:count]).to eq(1)
+        expect(heatmap_data[(month_start + 8.days).strftime('%Y-%m-%d')][:count]).to eq(0)
+      end
+    end
   end
 
   # Edge cases and boundary testing

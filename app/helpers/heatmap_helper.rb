@@ -10,30 +10,20 @@ module HeatmapHelper
     intensity = [ intensity, 1.0 ].min
     intensity = (intensity * 1000).round / 1000.0
 
-    # Цветовая схема: белый → зеленый → красный
-    # intensity от 0 до 1, где 1 соответствует 10+ бонусам
-    case
-    when intensity == 0
-      "background-color: #ffffff;" # Белый для нулевых значений
-    when intensity > 0 && intensity < 0.01
-      # Белый для очень маленьких значений
-      "background-color: #ffffff;"
-    when intensity >= 0.01 && intensity <= 0.2
-      # Светло-зеленые оттенки (1-2 бонуса)
-      "background-color: #c6e48b;"
-    when intensity > 0.2 && intensity <= 0.4
-      # Средне-зеленые оттенки (3-4 бонуса)
-      "background-color: #7bc96f;"
-    when intensity > 0.4 && intensity <= 0.6
-      # Темно-зеленые оттенки (5-6 бонусов)
-      "background-color: #239a3b;"
-    when intensity > 0.6 && intensity <= 0.8
-      # Переходные зелено-красные оттенки (7-8 бонусов)
-      "background-color: #d73027;"
-    else
-      # Красные оттенки (9-10+ бонусов)
-      "background-color: #a50026;"
+    # Расширенная палитра: белый -> зеленый -> оранжевый -> красный
+    # intensity от 0 до 1, где 1 соответствует 20+ бонусам
+    color = case
+    when intensity <= 0.125 then "#eaf7df"
+    when intensity <= 0.25 then "#d1efbe"
+    when intensity <= 0.375 then "#a8df8e"
+    when intensity <= 0.5 then "#6fc35f"
+    when intensity <= 0.625 then "#2f9e44"
+    when intensity <= 0.75 then "#f4a261"
+    when intensity <= 0.875 then "#e76f51"
+    else "#b22222"
     end
+
+    "background-color: #{color};"
   end
 
   def format_month_year(date)

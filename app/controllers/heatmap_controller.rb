@@ -67,9 +67,15 @@ class HeatmapController < ApplicationController
   end
 
   def generate_heatmap_data
-    # Базовый запрос бонусов
+    # Покрываем все видимые ячейки календаря (включая дни соседних месяцев в сетке)
+    calendar_start = @start_date.beginning_of_week(:monday)
+    calendar_end = @end_date.end_of_week(:sunday)
+
+    # Берем бонусы, период действия которых пересекается с текущей календарной сеткой
     bonuses_query = Bonus.where(
-      availability_start_date: @start_date.beginning_of_day..@end_date.end_of_day
+      "availability_start_date <= ? AND availability_end_date >= ?",
+      calendar_end.end_of_day,
+      calendar_start.beginning_of_day
     )
 
     # Фильтруем по событию бонуса, если выбран
@@ -77,20 +83,28 @@ class HeatmapController < ApplicationController
       bonuses_query = bonuses_query.where(event: @bonus_event)
     end
 
-    # Группируем по дате начала и считаем количество
-    bonuses_by_date = bonuses_query
-      .group("DATE(availability_start_date)")
-      .count
+    # Считаем количество активных бонусов по каждому дню пересечения периода действия
+    bonuses_by_date = Hash.new(0)
+    bonuses_query.pluck(:availability_start_date, :availability_end_date).each do |start_at, end_at|
+      next if start_at.blank? || end_at.blank?
 
-    # Создаем хэш с данными для каждого дня месяца
+      active_start = [ start_at.to_date, calendar_start ].max
+      active_end = [ end_at.to_date, calendar_end ].min
+      next if active_end < active_start
+
+      (active_start..active_end).each do |date|
+        bonuses_by_date[date] += 1
+      end
+    end
+
+    # Создаем хэш с данными для каждого дня календарной сетки
     heatmap_data = {}
-    # Фиксированное максимальное значение для цветовой схемы
-    max_count_for_color = 10.0
+    # Расширенный диапазон: максимальная насыщенность с 20+ бонусов
+    max_count_for_color = 20.0
 
-    (@start_date..@end_date).each do |date|
+    (calendar_start..calendar_end).each do |date|
       date_key = date.strftime("%Y-%m-%d")
-      # DB adapters may return Date keys for DATE() groups, not strings.
-      count = bonuses_by_date[date] || bonuses_by_date[date_key] || 0
+      count = bonuses_by_date[date] || 0
 
       # Вычисляем интенсивность (от 0 до 1) на основе фиксированного максимума
       intensity = [ count.to_f / max_count_for_color, 1.0 ].min

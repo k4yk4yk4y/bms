@@ -18,60 +18,64 @@ RSpec.describe HeatmapHelper, type: :helper do
         expect(helper.heatmap_color(0.0)).to eq('background-color: #ffffff;')
       end
 
-      it 'returns light green for low intensity (0.01-0.2)' do
-        expect(helper.heatmap_color(0.01)).to eq('background-color: #c6e48b;')
-        expect(helper.heatmap_color(0.1)).to eq('background-color: #c6e48b;')
-        expect(helper.heatmap_color(0.2)).to eq('background-color: #c6e48b;')
+      it 'returns first palette color for low intensity (0-0.125]' do
+        expect(helper.heatmap_color(0.01)).to eq('background-color: #eaf7df;')
+        expect(helper.heatmap_color(0.1)).to eq('background-color: #eaf7df;')
+        expect(helper.heatmap_color(0.125)).to eq('background-color: #eaf7df;')
       end
 
-      it 'returns medium green for medium-low intensity (0.21-0.4)' do
-        expect(helper.heatmap_color(0.21)).to eq('background-color: #7bc96f;')
-        expect(helper.heatmap_color(0.3)).to eq('background-color: #7bc96f;')
-        expect(helper.heatmap_color(0.4)).to eq('background-color: #7bc96f;')
+      it 'returns second palette color for intensity (0.125-0.25]' do
+        expect(helper.heatmap_color(0.126)).to eq('background-color: #d1efbe;')
+        expect(helper.heatmap_color(0.2)).to eq('background-color: #d1efbe;')
+        expect(helper.heatmap_color(0.25)).to eq('background-color: #d1efbe;')
       end
 
-      it 'returns dark green for medium-high intensity (0.41-0.6)' do
-        expect(helper.heatmap_color(0.41)).to eq('background-color: #239a3b;')
-        expect(helper.heatmap_color(0.5)).to eq('background-color: #239a3b;')
-        expect(helper.heatmap_color(0.6)).to eq('background-color: #239a3b;')
+      it 'returns third palette color for intensity (0.25-0.375]' do
+        expect(helper.heatmap_color(0.251)).to eq('background-color: #a8df8e;')
+        expect(helper.heatmap_color(0.3)).to eq('background-color: #a8df8e;')
+        expect(helper.heatmap_color(0.375)).to eq('background-color: #a8df8e;')
       end
 
-      it 'returns red for high intensity (0.61-0.8)' do
-        expect(helper.heatmap_color(0.61)).to eq('background-color: #d73027;')
-        expect(helper.heatmap_color(0.7)).to eq('background-color: #d73027;')
-        expect(helper.heatmap_color(0.8)).to eq('background-color: #d73027;')
+      it 'returns middle green color for intensity (0.375-0.5]' do
+        expect(helper.heatmap_color(0.376)).to eq('background-color: #6fc35f;')
+        expect(helper.heatmap_color(0.45)).to eq('background-color: #6fc35f;')
+        expect(helper.heatmap_color(0.5)).to eq('background-color: #6fc35f;')
       end
 
-      it 'returns dark red for maximum intensity (0.81+)' do
-        expect(helper.heatmap_color(0.81)).to eq('background-color: #a50026;')
-        expect(helper.heatmap_color(0.9)).to eq('background-color: #a50026;')
-        expect(helper.heatmap_color(1.0)).to eq('background-color: #a50026;')
+      it 'returns dark green for intensity (0.5-0.625]' do
+        expect(helper.heatmap_color(0.501)).to eq('background-color: #2f9e44;')
+        expect(helper.heatmap_color(0.6)).to eq('background-color: #2f9e44;')
+        expect(helper.heatmap_color(0.625)).to eq('background-color: #2f9e44;')
+      end
+
+      it 'returns warm colors for high intensity' do
+        expect(helper.heatmap_color(0.7)).to eq('background-color: #f4a261;')
+        expect(helper.heatmap_color(0.8)).to eq('background-color: #e76f51;')
+        expect(helper.heatmap_color(0.9)).to eq('background-color: #b22222;')
       end
 
       it 'handles intensity above 1.0' do
-        expect(helper.heatmap_color(1.5)).to eq('background-color: #a50026;')
-        expect(helper.heatmap_color(10)).to eq('background-color: #a50026;')
+        expect(helper.heatmap_color(1.5)).to eq('background-color: #b22222;')
+        expect(helper.heatmap_color(10)).to eq('background-color: #b22222;')
       end
 
       context 'boundary testing' do
         it 'handles exact boundary values correctly' do
-          # Test exact boundary values
-          expect(helper.heatmap_color(0.2)).to eq('background-color: #c6e48b;')
-          expect(helper.heatmap_color(0.21)).to eq('background-color: #7bc96f;')
-
-          expect(helper.heatmap_color(0.4)).to eq('background-color: #7bc96f;')
-          expect(helper.heatmap_color(0.41)).to eq('background-color: #239a3b;')
-
-          expect(helper.heatmap_color(0.6)).to eq('background-color: #239a3b;')
-          expect(helper.heatmap_color(0.61)).to eq('background-color: #d73027;')
-
-          expect(helper.heatmap_color(0.8)).to eq('background-color: #d73027;')
-          expect(helper.heatmap_color(0.81)).to eq('background-color: #a50026;')
+          expect(helper.heatmap_color(0.125)).to eq('background-color: #eaf7df;')
+          expect(helper.heatmap_color(0.126)).to eq('background-color: #d1efbe;')
+          expect(helper.heatmap_color(0.25)).to eq('background-color: #d1efbe;')
+          expect(helper.heatmap_color(0.251)).to eq('background-color: #a8df8e;')
+          expect(helper.heatmap_color(0.5)).to eq('background-color: #6fc35f;')
+          expect(helper.heatmap_color(0.501)).to eq('background-color: #2f9e44;')
+          expect(helper.heatmap_color(0.75)).to eq('background-color: #f4a261;')
+          expect(helper.heatmap_color(0.751)).to eq('background-color: #e76f51;')
+          expect(helper.heatmap_color(0.875)).to eq('background-color: #e76f51;')
+          expect(helper.heatmap_color(0.876)).to eq('background-color: #b22222;')
         end
 
         it 'handles very small positive values' do
-          expect(helper.heatmap_color(0.001)).to eq('background-color: #ffffff;')
-          expect(helper.heatmap_color(0.009)).to eq('background-color: #ffffff;')
+          expect(helper.heatmap_color(0.001)).to eq('background-color: #eaf7df;')
+          expect(helper.heatmap_color(0.009)).to eq('background-color: #eaf7df;')
         end
       end
 
@@ -94,8 +98,8 @@ RSpec.describe HeatmapHelper, type: :helper do
 
         it 'handles float precision edge cases' do
           # Test with values that might have floating point precision issues
-          expect(helper.heatmap_color(0.200000001)).to eq('background-color: #c6e48b;')
-          expect(helper.heatmap_color(0.199999999)).to eq('background-color: #c6e48b;')
+          expect(helper.heatmap_color(0.125000001)).to eq('background-color: #eaf7df;')
+          expect(helper.heatmap_color(0.124999999)).to eq('background-color: #eaf7df;')
         end
       end
     end
