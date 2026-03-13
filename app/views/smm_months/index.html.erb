@@ -47,18 +47,22 @@
                           method: :delete,
                           data: { confirm: "Delete this month and all its projects?" },
                           class: "btn btn-outline-danger",
-                          form_class: "d-inline" %>
+                          form: { class: "d-inline", data: { turbo: false } } %>
           <% end %>
         </div>
       </div>
 
       <% if @current_month %>
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-          <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="dropdown" data-controller="smm-project-dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle"
+                    type="button"
+                    aria-expanded="false"
+                    data-smm-project-dropdown-target="button"
+                    data-action="click->smm-project-dropdown#toggle keydown->smm-project-dropdown#keydown">
               <%= @current_month_project&.display_name || "Select project" %>
             </button>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu" data-smm-project-dropdown-target="menu">
               <% @month_projects.each do |month_project| %>
                 <li>
                   <%= link_to month_project.display_name,
@@ -82,7 +86,7 @@
                           method: :delete,
                           data: { confirm: "Remove this project from the month?" },
                           class: "btn btn-outline-danger",
-                          form_class: "d-inline" %>
+                          form: { class: "d-inline", data: { turbo: false } } %>
           <% end %>
         </div>
 
@@ -113,6 +117,7 @@
                                     url: smm_month_smm_bonuses_path(@current_month),
                                     method: :post,
                                     local: true,
+                                    data: { turbo: false },
                                     html: { id: new_form_id, class: "d-none" } do |form| %>
                         <%= form.hidden_field :smm_month_project_id, value: @current_month_project.id %>
                       <% end %>
@@ -164,6 +169,7 @@
                                     url: smm_month_smm_bonus_path(@current_month, bonus),
                                     method: :patch,
                                     local: true,
+                                    data: { turbo: false },
                                     html: { id: row_form_id, class: "d-none" } do %>
                       <% end %>
                       <tr class="smm-row smm-row--<%= bonus.status %>">
@@ -218,10 +224,12 @@
                           <div class="d-flex justify-content-end gap-1">
                             <%= submit_tag "Save", class: "btn btn-sm btn-outline-primary", form: row_form_id %>
                             <% if can?(:destroy, bonus) %>
-                              <%= link_to "Delete",
-                                          smm_month_smm_bonus_path(@current_month, bonus),
-                                          data: { turbo_method: :delete, turbo_confirm: "Delete bonus row?" },
-                                          class: "btn btn-sm btn-outline-danger" %>
+                              <%= button_to "Delete",
+                                            smm_month_smm_bonus_path(@current_month, bonus),
+                                            method: :delete,
+                                            data: { confirm: "Delete bonus row?" },
+                                            class: "btn btn-sm btn-outline-danger",
+                                            form: { class: "d-inline", data: { turbo: false } } %>
                             <% end %>
                           </div>
                         </td>
@@ -256,7 +264,7 @@
           <h5 class="modal-title">Create New Month</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <%= form_with scope: :smm_month, url: smm_months_path, local: true do |form| %>
+        <%= form_with scope: :smm_month, url: smm_months_path, local: true, data: { turbo: false } do |form| %>
           <div class="modal-body">
             <div class="mb-3">
               <%= form.label :month, "Month", class: "form-label" %>
@@ -285,7 +293,7 @@
           <h5 class="modal-title">Copy Month</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <%= form_with scope: :smm_month, url: (@current_month ? copy_smm_month_path(@current_month) : "#"), local: true do |form| %>
+        <%= form_with scope: :smm_month, url: (@current_month ? copy_smm_month_path(@current_month) : "#"), local: true, data: { turbo: false } do |form| %>
           <div class="modal-body">
             <% if @current_month %>
               <div class="mb-3 text-muted">Copying from <strong><%= @current_month.display_name %></strong></div>
@@ -318,7 +326,7 @@
           <h5 class="modal-title">Add Project to Month</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <%= form_with url: smm_month_smm_month_projects_path(@current_month), local: true do |form| %>
+        <%= form_with url: smm_month_smm_month_projects_path(@current_month), local: true, data: { turbo: false } do |form| %>
           <div class="modal-body">
             <div class="mb-3">
               <%= form.label :project_id, "Project", class: "form-label" %>
@@ -350,7 +358,7 @@
         <%= form_with model: @new_preset,
                       url: smm_presets_path,
                       local: true,
-                      data: { controller: "smm-preset", "smm-preset-currencies-by-project-value": @currencies_by_project.to_json } do |form| %>
+                      data: { turbo: false, controller: "smm-preset", "smm-preset-currencies-by-project-value": @currencies_by_project.to_json } do |form| %>
           <%= hidden_field_tag :return_month_id, @current_month&.id %>
           <div class="modal-body">
             <div class="smm-preset-section">
@@ -459,7 +467,7 @@
         </div>
         <%= form_with url: batch_create_smm_month_smm_bonuses_path(@current_month),
                       local: true,
-                      data: { controller: "smm-batch" } do |form| %>
+                      data: { turbo: false, controller: "smm-batch" } do |form| %>
           <%= hidden_field_tag :smm_month_project_id, @current_month_project.id %>
           <div class="modal-body">
             <div class="row g-3 align-items-end mb-3">

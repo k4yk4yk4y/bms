@@ -245,7 +245,7 @@
         <% else %>
           <p class="text-muted">No rewards configured yet.</p>
           <% if bonus.persisted? %>
-            <a href="#" class="btn btn-primary btn-sm">Add Rewards</a>
+            <a href="/bonuses/<%= bonus.id %>/edit" class="btn btn-primary btn-sm">Add Rewards</a>
           <% end %>
         <% end %>
       </div>
