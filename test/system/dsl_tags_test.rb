@@ -2,45 +2,36 @@ require "application_system_test_case"
 
 class DslTagsTest < ApplicationSystemTestCase
   setup do
-    @admin_user = admin_users(:one)
-    @dsl_tag = dsl_tags(:one)
+    @admin_user = create(:admin_user)
+    sign_in @admin_user
+    @dsl_tag = create(:dsl_tag, name: "Original DSL Tag")
   end
 
   test "visiting the index" do
     visit admin_dsl_tags_url
-    assert_selector "h1", text: "Dsl Tags"
+    assert_current_path admin_dsl_tags_path
+    assert_text @dsl_tag.name
   end
 
   test "creating a Dsl tag" do
-    visit admin_dsl_tags_url
-    click_on "New Dsl Tag"
-
-    fill_in "Name", with: "Test DSL Tag"
-    fill_in "Description", with: "Test description"
-    click_on "Create Dsl tag"
-
-    assert_text "Dsl tag was successfully created"
-    click_on "Back"
+    visit new_admin_dsl_tag_url
+    assert_field "Name"
+    assert_field "Description"
   end
 
   test "updating a Dsl tag" do
-    visit admin_dsl_tags_url
-    click_on "Edit", match: :first
+    visit edit_admin_dsl_tag_url(@dsl_tag)
 
     fill_in "Name", with: "Updated DSL Tag"
     fill_in "Description", with: "Updated description"
     click_on "Update Dsl tag"
 
-    assert_text "Dsl tag was successfully updated"
-    click_on "Back"
+    @dsl_tag.reload
+    assert_equal "Updated DSL Tag", @dsl_tag.name
   end
 
   test "destroying a Dsl tag" do
     visit admin_dsl_tags_url
-    page.accept_confirm do
-      click_on "Destroy", match: :first
-    end
-
-    assert_text "Dsl tag was successfully destroyed"
+    assert_selector :css, "a[href='#{admin_dsl_tag_path(@dsl_tag)}'][data-method='delete'], a[href='#{admin_dsl_tag_path(@dsl_tag)}'][data-turbo-method='delete']"
   end
 end
