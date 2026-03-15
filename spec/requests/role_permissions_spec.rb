@@ -205,13 +205,67 @@ RSpec.describe "Role permissions", type: :request do
     end
   end
 
+  context "as marketing manager without permanent bonuses permission" do
+    let(:user) { create(:user, role: :marketing_manager) }
+
+    before do
+      login_as(user, scope: :user)
+    end
+
+    it "blocks access to /bonuses entirely" do
+      get bonuses_path
+      expect(response).to redirect_to(marketing_index_path)
+    end
+  end
+
+  context "as marketing manager with permanent-only bonuses access" do
+    let(:user) { create(:user, role: :marketing_manager) }
+    let(:permanent_project) { create(:project, name: "PERM_ONLY") }
+    let!(:permanent_bonus) { create(:bonus, project: permanent_project.name) }
+    let!(:regular_bonus) { create(:bonus, project: permanent_project.name) }
+    let!(:permanent_link) { create(:permanent_bonus, project: permanent_project, bonus: permanent_bonus) }
+
+    before do
+      role = Role.find_or_initialize_by(key: "marketing_manager")
+      role.name = role.name.presence || "Marketing Manager"
+      role.permissions = Role.default_permissions_for("marketing_manager").merge(
+        "bonuses" => "none",
+        "projects" => "read",
+        "permanent_bonuses" => "read"
+      )
+      role.save!
+
+      login_as(user, scope: :user)
+    end
+
+    it "shows only permanent bonuses and redirects on non-permanent bonus pages" do
+      get bonuses_path, params: { project_id: permanent_project.id }
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(permanent_bonus.name)
+      expect(response.body).not_to include(regular_bonus.name)
+
+      get bonus_path(permanent_bonus)
+      expect(response).to have_http_status(:success)
+
+      get bonus_path(regular_bonus), params: { project_id: permanent_project.id }
+      expect(response).to redirect_to(bonuses_path(project_id: permanent_project.id))
+
+      follow_redirect!
+      expect(response.body).to include("Недостаточно прав для вашей роли")
+    end
+  end
+
   context "when role permissions are customized" do
     let(:user) { create(:user, role: :support_agent) }
 
     before do
       role = Role.find_or_initialize_by(key: "support_agent")
       role.name = role.name.presence || "Support Agent"
-      role.permissions = { "bonuses" => "write" }
+      role.permissions = {
+        "bonuses" => "write",
+        "permanent_bonuses" => "read",
+        "projects" => "read"
+      }
       role.save!
       login_as(user, scope: :user)
     end

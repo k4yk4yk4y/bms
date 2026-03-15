@@ -140,7 +140,13 @@ namespace :seed do
     User.roles.keys.each do |key|
       role = Role.find_or_initialize_by(key: key)
       role.name ||= key.tr("_", " ").split.map(&:capitalize).join(" ")
-      role.permissions = Role.permissions_for(key)
+      # Keep role permissions up to date with the full catalog, including
+      # project separation and permanent bonuses visibility keys.
+      default_permissions = Role.default_permissions_for(key)
+      merged_permissions = Role.normalize_permissions_hash(default_permissions.merge(role.permissions.to_h))
+      merged_permissions["projects"] = default_permissions["projects"] if default_permissions["projects"].present?
+      merged_permissions["permanent_bonuses"] = default_permissions["permanent_bonuses"] if default_permissions["permanent_bonuses"].present?
+      role.permissions = merged_permissions
       role.admin_panel_access = true if key.to_s == "admin"
       role.admin_panel_access = false if role.new_record? && key.to_s != "admin"
       role.save!

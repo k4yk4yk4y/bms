@@ -35,7 +35,7 @@ class HeatmapController < ApplicationController
   private
 
   def authorize_heatmap_access!
-    authorize! :read, Bonus
+    authorize! :access, :bonuses_full
   end
 
   def heatmap_params

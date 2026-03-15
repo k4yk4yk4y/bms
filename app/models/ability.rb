@@ -72,7 +72,10 @@ class Ability
       when "dashboard"
         can :read, ActiveAdmin::Page, name: "Dashboard"
       when "bonuses"
+        can :access, :bonuses_full
         apply_level(level, bonuses_resources)
+      when "projects"
+        apply_frontend_projects_permissions(level)
       when "heatmap_comments"
         apply_level(level, [ HeatmapComment ])
       when "bonus_templates"
@@ -84,7 +87,7 @@ class Ability
       when "dsl_tags"
         apply_level(level, [ DslTag ])
       when "permanent_bonuses"
-        apply_level(level, [ PermanentBonus ])
+        apply_frontend_permanent_bonuses_permissions(level)
       when "users"
         apply_level(level, [ User ])
       when "retention"
@@ -122,6 +125,23 @@ class Ability
     else
       can actions, MarketingRequest
     end
+  end
+
+  def apply_frontend_projects_permissions(level)
+    return if level == "none"
+
+    can :access, :projects
+    can :read, Project
+  end
+
+  def apply_frontend_permanent_bonuses_permissions(level)
+    return if level == "none"
+
+    can :access, :bonuses_page
+    can :read, :permanent_bonuses
+
+    actions = level == "manage" ? :manage : :read
+    can actions, PermanentBonus
   end
 
   def apply_settings_permissions(level)

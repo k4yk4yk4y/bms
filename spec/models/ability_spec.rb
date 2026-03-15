@@ -32,6 +32,9 @@ RSpec.describe Ability do
       expect(ability.can?(:create, Bonus)).to be(true)
       expect(ability.can?(:update, Bonus)).to be(true)
       expect(ability.can?(:destroy, Bonus)).to be(false)
+      expect(ability.can?(:access, :bonuses_full)).to be(true)
+      expect(ability.can?(:access, :bonuses_page)).to be(false)
+      expect(ability.can?(:access, :projects)).to be(false)
     end
 
     it "grants delivery manager read-only access to bonuses, retention, and user profiles" do
@@ -45,6 +48,31 @@ RSpec.describe Ability do
       expect(ability.can?(:read, RetentionChain)).to be(true)
       expect(ability.can?(:read, other_user)).to be(true)
       expect(ability.can?(:update, user)).to be(false)
+    end
+
+    it "supports permanent-only bonuses mode without full bonuses access" do
+      Role.create!(
+        key: "marketing_manager",
+        name: "Marketing Manager",
+        permissions: {
+          "dashboard" => "read",
+          "bonuses" => "none",
+          "projects" => "read",
+          "permanent_bonuses" => "read",
+          "marketing_requests" => "manage",
+          "users" => "read",
+          "self_profile" => "write"
+        }
+      )
+
+      user = create(:user, role: :marketing_manager)
+      ability = described_class.new(user)
+
+      expect(ability.can?(:access, :bonuses_page)).to be(true)
+      expect(ability.can?(:access, :bonuses_full)).to be(false)
+      expect(ability.can?(:access, :projects)).to be(true)
+      expect(ability.can?(:read, :permanent_bonuses)).to be(true)
+      expect(ability.can?(:read, Bonus)).to be(false)
     end
   end
 

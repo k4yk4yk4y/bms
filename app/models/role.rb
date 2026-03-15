@@ -4,6 +4,8 @@ class Role < ApplicationRecord
 
   SECTION_DEFINITIONS = PermissionsCatalog::FRONTEND_SECTIONS
   SECTION_HINTS = {
+    "projects" => "Доступ к функционалу фильтрации/контекста проектов.",
+    "permanent_bonuses" => "Доступ к странице /bonuses и просмотру permanent бонусов.",
     "users" => "Доступ к профилям пользователей во фронте.",
     "self_profile" => "Доступ только к собственному профилю.",
     "settings" => "Доступ к разделу настроек во фронте.",
@@ -83,6 +85,7 @@ class Role < ApplicationRecord
     "admin" => {
       "dashboard" => "manage",
       "bonuses" => "manage",
+      "projects" => "manage",
       "heatmap_comments" => "manage",
       "bonus_templates" => "manage",
       "marketing_requests" => "manage",
@@ -97,6 +100,8 @@ class Role < ApplicationRecord
     "promo_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "users" => "read",
       "retention" => "read",
       "self_profile" => "write"
@@ -104,6 +109,8 @@ class Role < ApplicationRecord
     "shift_leader" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "marketing_requests" => "read",
       "users" => "read",
       "retention" => "read",
@@ -118,6 +125,8 @@ class Role < ApplicationRecord
     "retention_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "users" => "read",
       "retention" => "manage",
       "self_profile" => "write"
@@ -125,6 +134,8 @@ class Role < ApplicationRecord
     "smm_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "users" => "read",
       "smm" => "manage",
       "self_profile" => "write"
@@ -132,6 +143,8 @@ class Role < ApplicationRecord
     "delivery_manager" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "users" => "read",
       "retention" => "read",
       "self_profile" => "read"
@@ -139,6 +152,8 @@ class Role < ApplicationRecord
     "support_agent" => {
       "dashboard" => "read",
       "bonuses" => "read",
+      "projects" => "read",
+      "permanent_bonuses" => "read",
       "marketing_requests" => "read",
       "users" => "read",
       "retention" => "read",

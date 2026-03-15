@@ -54,15 +54,17 @@
                   value: params[:search], 
                   class: "form-control" %>
             </div>
-            <div class="col-md-2">
-              <%= form.select :project_id, 
-                  options_for_select(
-                    [['All Projects', '']] + Project.order(:name).map { |p| [p.name, p.id] },
-                    params[:project_id]
-                  ), 
-                  {}, 
-                  { class: "form-select" } %>
-            </div>
+            <% if can?(:access, :projects) %>
+              <div class="col-md-2">
+                <%= form.select :project_id,
+                    options_for_select(
+                      [['All Projects', '']] + Project.order(:name).map { |p| [p.name, p.id] },
+                      params[:project_id]
+                    ),
+                    {},
+                    { class: "form-select" } %>
+              </div>
+            <% end %>
             <div class="col-md-2">
               <%= form.text_field :dsl_tag, 
                   placeholder: "DSL tag", 
@@ -274,7 +276,7 @@ function submitBulkAction() {
               <div>
                 <% current_page = (params[:page] || 1).to_i %>
                 <% if current_page > 1 %>
-                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :project, :project_id, :dsl_tag).merge(page: current_page - 1)), 
+                  <%= link_to "Previous", bonuses_path(params.permit(:type, :status, :search, :project, :dsl_tag, *(can?(:access, :projects) ? [ :project_id ] : [])).merge(page: current_page - 1)),
                       class: "btn btn-outline-secondary me-2" %>
                 <% end %>
                 
@@ -283,7 +285,7 @@ function submitBulkAction() {
                 <span>
                 
                 <% if current_page < @total_pages %>
-                  <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :project, :project_id, :dsl_tag).merge(page: current_page + 1)), 
+                  <%= link_to "Next", bonuses_path(params.permit(:type, :status, :search, :project, :dsl_tag, *(can?(:access, :projects) ? [ :project_id ] : [])).merge(page: current_page + 1)),
                       class: "btn btn-outline-secondary" %>
                 <% end %>
               </div>

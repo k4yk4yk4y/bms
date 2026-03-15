@@ -38,14 +38,14 @@
       
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <% if can?(:read, Bonus) %>
+          <% if can?(:access, :bonuses_page) %>
             <li class="nav-item">
               <%= link_to bonuses_path, class: "nav-link #{'active' if controller_name == 'bonuses'}" do %>
                 <i class="fas fa-gift"></i> Bonuses
               <% end %>
             </li>
           <% end %>
-          <% if can?(:read, Bonus) %>
+          <% if can?(:access, :bonuses_full) %>
             <li class="nav-item">
               <%= link_to heatmap_path, class: "nav-link #{'active' if controller_name == 'heatmap'}" do %>
                 <i class="fas fa-fire"></i> Heatmap
@@ -73,7 +73,7 @@
               <% end %>
             </li>
           <% end %>
-          <% if can?(:read, Bonus) %>
+          <% if can?(:access, :bonuses_page) && can?(:access, :projects) %>
             <li class="nav-item dropdown" data-controller="projects-dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" aria-expanded="false" data-projects-dropdown-target="dropdown" data-action="click->projects-dropdown#handleDropdownClick keydown->projects-dropdown#handleKeydown">
                 <i class="fas fa-project-diagram"></i> Projects

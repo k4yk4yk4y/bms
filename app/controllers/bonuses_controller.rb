@@ -14,7 +14,7 @@ class BonusesController < ApplicationController
 
   # GET /bonuses
   def index
-    @bonuses = Bonus.all
+    @bonuses = bonuses_full_access? ? Bonus.all : permanent_bonuses_scope
 
     # Filter by event if specified
     @bonuses = @bonuses.by_event(params[:type] || params[:event]) if (params[:type] || params[:event]).present?
@@ -36,11 +36,19 @@ class BonusesController < ApplicationController
     @bonuses = @bonuses.by_country(params[:country]) if params[:country].present?
 
     # Filter by project if specified (support both old string and new project_id)
-    if params[:project_id].present?
-      project = Project.find_by(id: params[:project_id])
-      @bonuses = @bonuses.by_project_with_all(project.name) if project
-    elsif params[:project].present?
-      @bonuses = @bonuses.by_project_with_all(params[:project])
+    if projects_access?
+      if params[:project_id].present?
+        project = Project.find_by(id: params[:project_id])
+        if project
+          @bonuses = if bonuses_full_access?
+            @bonuses.by_project_with_all(project.name)
+          else
+            @bonuses.where(id: project.permanent_bonuses.select(:bonus_id))
+          end
+        end
+      elsif params[:project].present? && bonuses_full_access?
+        @bonuses = @bonuses.by_project_with_all(params[:project])
+      end
     end
 
     # Filter by dsl_tag if specified
@@ -58,7 +66,7 @@ class BonusesController < ApplicationController
     @bonuses = @bonuses.order(id: :desc)
 
     # Get permanent bonuses for the current project
-    if params[:project_id].present?
+    if projects_access? && params[:project_id].present?
       @current_project = Project.find_by(id: params[:project_id])
       if @current_project
         @permanent_bonus_ids = @current_project.permanent_bonuses.pluck(:bonus_id)
@@ -283,8 +291,8 @@ class BonusesController < ApplicationController
   # GET /bonuses/by_type
   def by_type
     event_param = params[:type] || params[:event]
-    @bonuses = Bonus.by_event(event_param) if event_param.present?
-    @bonuses ||= Bonus.none
+    scope = bonuses_full_access? ? Bonus.all : permanent_bonuses_scope
+    @bonuses = event_param.present? ? scope.by_event(event_param) : Bonus.none
 
     render json: @bonuses.as_json(except: [ :currency ])
   end
@@ -508,11 +516,17 @@ class BonusesController < ApplicationController
   private
 
   def authorize_bonus_access
+    authorize! :access, :bonuses_page
+
     case action_name
     when "index", "by_type"
-      authorize! :read, Bonus
+      if bonuses_full_access?
+        authorize! :read, Bonus
+      else
+        authorize! :read, :permanent_bonuses
+      end
     when "show"
-      authorize! :read, @bonus
+      authorize_show_access!
     when "new", "create"
       authorize! :create, Bonus
     when "edit", "update"
@@ -524,10 +538,14 @@ class BonusesController < ApplicationController
     when "bulk_update"
       authorize_bulk_update!
     else
-      authorize! :read, Bonus
+      if bonuses_full_access?
+        authorize! :read, Bonus
+      else
+        authorize! :read, :permanent_bonuses
+      end
     end
   rescue CanCan::AccessDenied
-    redirect_to marketing_index_path, alert: "You do not have access to the bonuses section."
+    redirect_to marketing_index_path, alert: "Недостаточно прав для доступа к разделу бонусов."
   end
 
   def authorize_bulk_update!
@@ -552,6 +570,42 @@ class BonusesController < ApplicationController
 
   def set_bonus
     @bonus = Bonus.find(params[:id])
+  end
+
+  def authorize_show_access!
+    if bonuses_full_access?
+      authorize! :read, @bonus
+      return
+    end
+
+    return if permanent_bonus?(@bonus)
+
+    redirect_to bonuses_path(redirect_project_params),
+                alert: "Недостаточно прав для вашей роли: доступен только просмотр Permanent бонусов."
+  end
+
+  def bonuses_full_access?
+    can?(:access, :bonuses_full)
+  end
+
+  def projects_access?
+    can?(:access, :projects)
+  end
+
+  def permanent_bonus?(bonus)
+    return false unless bonus
+
+    PermanentBonus.where(bonus_id: bonus.id).exists?
+  end
+
+  def permanent_bonuses_scope
+    Bonus.where(id: PermanentBonus.select(:bonus_id))
+  end
+
+  def redirect_project_params
+    return {} unless projects_access? && params[:project_id].present?
+
+    { project_id: params[:project_id] }
   end
 
   def bonus_params

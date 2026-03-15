@@ -316,16 +316,25 @@ Admin interface for:
    - Session management
 
 2. **User Roles** (enum on User model)
-   - Admin (0)
-   - Manager (1)
-   - Operator (2)
-   - Viewer (3)
+   - `admin`
+   - `promo_manager`
+   - `shift_leader`
+   - `support_agent`
+   - `marketing_manager`
+   - `retention_manager`
+   - `smm_manager`
+   - `delivery_manager`
 
 ### Authorization
 
 1. **CanCanCan** for ability management
    - `app/models/ability.rb` defines permissions
    - Role-based access control
+   - Frontend access split by sections:
+     - `bonuses` (full bonuses access)
+     - `projects` (projects dropdown/filter)
+     - `permanent_bonuses` (required to access `/bonuses`)
+   - Permanent-only mode is supported: user can view only permanent bonuses and is redirected on non-permanent bonus URLs.
 
 2. **ActiveAdmin** authorization
    - Integrated with CanCanCan

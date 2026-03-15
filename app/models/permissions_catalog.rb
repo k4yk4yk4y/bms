@@ -10,10 +10,11 @@ module PermissionsCatalog
   FRONTEND_SECTIONS = [
     { key: "dashboard", label: "Dashboard" },
     { key: "bonuses", label: "Bonuses" },
+    { key: "projects", label: "Projects" },
+    { key: "permanent_bonuses", label: "Permanent bonuses (view)" },
     { key: "heatmap_comments", label: "Heatmap comments" },
     { key: "bonus_templates", label: "Bonus templates" },
     { key: "marketing_requests", label: "Marketing requests" },
-    { key: "permanent_bonuses", label: "Permanent bonuses" },
     { key: "users", label: "Users" },
     { key: "retention", label: "Retention" },
     { key: "smm", label: "SMM" },
